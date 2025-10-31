@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Callouts Showcase</title>
+  <style>
+    /* Import CSS variables from base.scss */
+    :root {
+      /* Surfaces */
+      --md-surface-base: rgba(255, 255, 255, 0.03);
+      --md-surface-raised: rgba(255, 255, 255, 0.06);
+      --md-surface-elevated: rgba(255, 255, 255, 0.09);
+
+      /* Borders */
+      --md-border-subtle: rgba(255, 255, 255, 0.06);
+      --md-border-medium: rgba(255, 255, 255, 0.12);
+
+      /* Text */
+      --md-text-primary: rgba(255, 255, 255, 0.95);
+      --md-text-secondary: rgba(255, 255, 255, 0.7);
+      --md-text-accent: rgb(0, 122, 255);
+
+      /* Spacing */
+      --md-spacing-xs: 0.25rem;
+      --md-spacing-sm: 0.5rem;
+      --md-spacing-md: 1rem;
+      --md-spacing-lg: 1.5rem;
+      --md-spacing-xl: 2rem;
+
+      /* Typography */
+      --md-font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      --md-font-size-sm: 0.875rem;
+      --md-font-size-base: 1rem;
+      --md-font-size-lg: 1.125rem;
+
+      /* Border Radius */
+      --md-radius-sm: 6px;
+      --md-radius-md: 10px;
+      --md-radius-lg: 14px;
+
+      /* Transitions */
+      --md-duration-fast: 200ms;
+      --md-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+
+      /* Callout Colors */
+      --md-callout-blue-bg: rgba(0, 122, 255, 0.1);
+      --md-callout-blue-border: rgb(0, 122, 255);
+      --md-callout-blue-text: rgb(100, 181, 246);
+
+      --md-callout-green-bg: rgba(34, 197, 94, 0.1);
+      --md-callout-green-border: rgb(34, 197, 94);
+      --md-callout-green-text: rgb(129, 230, 175);
+
+      --md-callout-purple-bg: rgba(147, 51, 234, 0.1);
+      --md-callout-purple-border: rgb(147, 51, 234);
+      --md-callout-purple-text: rgb(186, 135, 255);
+
+      --md-callout-yellow-bg: rgba(251, 191, 36, 0.1);
+      --md-callout-yellow-border: rgb(251, 191, 36);
+      --md-callout-yellow-text: rgb(253, 224, 71);
+
+      --md-callout-red-bg: rgba(239, 68, 68, 0.1);
+      --md-callout-red-border: rgb(239, 68, 68);
+      --md-callout-red-text: rgb(252, 165, 165);
+
+      --md-callout-success-bg: rgba(34, 197, 94, 0.1);
+      --md-callout-success-border: rgb(34, 197, 94);
+      --md-callout-success-text: rgb(134, 239, 172);
+
+      --md-callout-danger-bg: rgba(220, 38, 38, 0.1);
+      --md-callout-danger-border: rgb(220, 38, 38);
+      --md-callout-danger-text: rgb(248, 113, 113);
+
+      --md-callout-info-bg: rgba(59, 130, 246, 0.1);
+      --md-callout-info-border: rgb(59, 130, 246);
+      --md-callout-info-text: rgb(147, 197, 253);
+
+      --md-callout-question-bg: rgba(168, 85, 247, 0.1);
+      --md-callout-question-border: rgb(168, 85, 247);
+      --md-callout-question-text: rgb(196, 181, 253);
+    }
+
+    body {
+      background: #1a1a1a;
+      color: var(--md-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--md-text-secondary);
+      margin-bottom: 3rem;
+      font-size: 1.125rem;
+    }
+
+    h2 {
+      color: #bd93f9;
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      border-bottom: 2px solid rgba(189, 147, 249, 0.3);
+      padding-bottom: 0.5rem;
+    }
+
+    /* Callout Styles */
+    .md-callout {
+      display: flex;
+      flex-direction: column;
+      gap: var(--md-spacing-sm);
+      padding: var(--md-spacing-lg);
+      border-radius: var(--md-radius-lg);
+      margin: var(--md-spacing-xl) 0;
+      border-left: 4px solid;
+      transition: transform var(--md-duration-fast) var(--md-ease-out);
+    }
+
+    .md-callout:hover {
+      transform: translateX(2px);
+    }
+
+    .md-callout__header {
+      display: flex;
+      align-items: center;
+      gap: var(--md-spacing-sm);
+      font-weight: 600;
+      font-size: var(--md-font-size-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .md-callout__icon {
+      display: inline-flex;
+      font-size: var(--md-font-size-lg);
+      line-height: 1;
+    }
+
+    .md-callout__content {
+      font-size: var(--md-font-size-base);
+    }
+
+    .md-callout__content p {
+      margin: var(--md-spacing-sm) 0;
+    }
+
+    .md-callout__content ul {
+      margin: var(--md-spacing-sm) 0;
+      padding-left: var(--md-spacing-lg);
+    }
+
+    .md-callout__content li {
+      margin: var(--md-spacing-xs) 0;
+    }
+
+    .md-callout__content code {
+      background: var(--md-surface-elevated);
+      padding: 0.125rem 0.375rem;
+      border-radius: var(--md-radius-sm);
+      font-size: 0.875em;
+      font-family: var(--md-font-mono);
+    }
+
+    /* Color variants */
+    .md-callout--blue {
+      background: var(--md-callout-blue-bg);
+      border-left-color: var(--md-callout-blue-border);
+    }
+    .md-callout--blue .md-callout__header {
+      color: var(--md-callout-blue-text);
+    }
+
+    .md-callout--green {
+      background: var(--md-callout-green-bg);
+      border-left-color: var(--md-callout-green-border);
+    }
+    .md-callout--green .md-callout__header {
+      color: var(--md-callout-green-text);
+    }
+
+    .md-callout--purple {
+      background: var(--md-callout-purple-bg);
+      border-left-color: var(--md-callout-purple-border);
+    }
+    .md-callout--purple .md-callout__header {
+      color: var(--md-callout-purple-text);
+    }
+
+    .md-callout--yellow {
+      background: var(--md-callout-yellow-bg);
+      border-left-color: var(--md-callout-yellow-border);
+    }
+    .md-callout--yellow .md-callout__header {
+      color: var(--md-callout-yellow-text);
+    }
+
+    .md-callout--red {
+      background: var(--md-callout-red-bg);
+      border-left-color: var(--md-callout-red-border);
+    }
+    .md-callout--red .md-callout__header {
+      color: var(--md-callout-red-text);
+    }
+
+    .md-callout--success {
+      background: var(--md-callout-success-bg);
+      border-left-color: var(--md-callout-success-border);
+    }
+    .md-callout--success .md-callout__header {
+      color: var(--md-callout-success-text);
+    }
+
+    .md-callout--danger {
+      background: var(--md-callout-danger-bg);
+      border-left-color: var(--md-callout-danger-border);
+    }
+    .md-callout--danger .md-callout__header {
+      color: var(--md-callout-danger-text);
+    }
+
+    .md-callout--info {
+      background: var(--md-callout-info-bg);
+      border-left-color: var(--md-callout-info-border);
+    }
+    .md-callout--info .md-callout__header {
+      color: var(--md-callout-info-text);
+    }
+
+    .md-callout--question {
+      background: var(--md-callout-question-bg);
+      border-left-color: var(--md-callout-question-border);
+    }
+    .md-callout--question .md-callout__header {
+      color: var(--md-callout-question-text);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .feature-badge {
+      background: rgba(189, 147, 249, 0.15);
+      color: #bd93f9;
+      padding: 0.5rem 1rem;
+      border-radius: var(--md-radius-md);
+      border: 1px solid rgba(189, 147, 249, 0.3);
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Enhanced Callouts Showcase</h1>
+  <p class="subtitle">All 9 callout types with custom titles and rich markdown support</p>
+
+  <h2>All Callout Types</h2>
+
+  <!-- NOTE -->
+  <div class="md-callout md-callout--blue" role="note" aria-label="Note">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">ℹ️</span>
+      <span class="md-callout__label">Note</span>
+    </div>
+    <div class="md-callout__content">
+      <p>This is a standard note callout with the default title. Notes provide helpful information.</p>
+    </div>
+  </div>
+
+  <!-- TIP -->
+  <div class="md-callout md-callout--green" role="note" aria-label="Tip">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">💡</span>
+      <span class="md-callout__label">Tip</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Here's a helpful tip to improve your workflow and productivity.</p>
+    </div>
+  </div>
+
+  <!-- IMPORTANT -->
+  <div class="md-callout md-callout--purple" role="note" aria-label="Important">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">❗</span>
+      <span class="md-callout__label">Important</span>
+    </div>
+    <div class="md-callout__content">
+      <p>This is critical information that users must understand.</p>
+      <ul>
+        <li>First important point</li>
+        <li>Second important point</li>
+        <li>Third important point</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- WARNING -->
+  <div class="md-callout md-callout--yellow" role="note" aria-label="Warning">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">⚠️</span>
+      <span class="md-callout__label">Warning</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Be careful when performing this operation! It may have unintended consequences.</p>
+    </div>
+  </div>
+
+  <!-- CAUTION -->
+  <div class="md-callout md-callout--red" role="note" aria-label="Caution">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">🔥</span>
+      <span class="md-callout__label">Caution</span>
+    </div>
+    <div class="md-callout__content">
+      <p>This is a high-severity warning that requires immediate attention.</p>
+    </div>
+  </div>
+
+  <h2>New Callout Types</h2>
+
+  <!-- SUCCESS -->
+  <div class="md-callout md-callout--success" role="note" aria-label="Success">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">✅</span>
+      <span class="md-callout__label">Success</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Operation completed successfully! All tests passed and the deployment is live.</p>
+    </div>
+  </div>
+
+  <!-- DANGER -->
+  <div class="md-callout md-callout--danger" role="note" aria-label="Danger">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">🚨</span>
+      <span class="md-callout__label">Danger</span>
+    </div>
+    <div class="md-callout__content">
+      <p>This action cannot be undone and will permanently delete all data. Make sure you have a backup!</p>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="md-callout md-callout--info" role="note" aria-label="Info">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">💬</span>
+      <span class="md-callout__label">Info</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Additional context and background information that may be helpful to understand.</p>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="md-callout md-callout--question" role="note" aria-label="Question">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">❓</span>
+      <span class="md-callout__label">Question</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Why does this happen? Sometimes posing questions helps readers think critically.</p>
+    </div>
+  </div>
+
+  <h2>Custom Titles</h2>
+
+  <div class="md-callout md-callout--blue" role="note" aria-label="Getting Started">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">ℹ️</span>
+      <span class="md-callout__label">Getting Started</span>
+    </div>
+    <div class="md-callout__content">
+      <p>This note has a custom title instead of the default "Note" label.</p>
+    </div>
+  </div>
+
+  <div class="md-callout md-callout--green" role="note" aria-label="Pro Tip: Performance">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">💡</span>
+      <span class="md-callout__label">Pro Tip: Performance</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Custom titles make your callouts more specific and actionable.</p>
+    </div>
+  </div>
+
+  <div class="md-callout md-callout--success" role="note" aria-label="Deployment Complete">
+    <div class="md-callout__header">
+      <span class="md-callout__icon" aria-hidden="true">✅</span>
+      <span class="md-callout__label">Deployment Complete</span>
+    </div>
+    <div class="md-callout__content">
+      <p>Your application has been successfully deployed to production!</p>
+    </div>
+  </div>
+
+  <h2>Feature Summary</h2>
+
+  <div class="features-grid">
+    <div class="feature-badge">9 Callout Types</div>
+    <div class="feature-badge">Custom Titles</div>
+    <div class="feature-badge">Nested Lists</div>
+    <div class="feature-badge">Code Blocks</div>
+    <div class="feature-badge">Inline Code</div>
+    <div class="feature-badge">Links & Images</div>
+    <div class="feature-badge">Strikethrough</div>
+    <div class="feature-badge">Blockquotes</div>
+    <div class="feature-badge">Headings</div>
+  </div>
+
+</body>
+</html>

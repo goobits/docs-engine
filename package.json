@@ -1,0 +1,76 @@
+{
+  "name": "@goobits/docs-engine",
+  "version": "1.0.0",
+  "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts"
+    },
+    "./plugins": {
+      "import": "./dist/plugins/index.js",
+      "types": "./dist/plugins/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
+    },
+    "./components/*": "./dist/components/*.svelte",
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
+    },
+    "./styles": "./src/lib/styles/index.scss",
+    "./styles/*": "./src/lib/styles/*"
+  },
+  "files": [
+    "dist",
+    "src/lib/styles"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "marked": "^11.2.0",
+    "sharp": "^0.34.4",
+    "shiki": "^3.14.0",
+    "unist-util-visit": "^5.0.0",
+    "yaml": "^2.4.0"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^2.0.0",
+    "svelte": "^5.0.0",
+    "@lucide/svelte": "^0.546.0",
+    "mermaid": "^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
+  },
+  "optionalDependencies": {
+    "playwright": "^1.56.0"
+  },
+  "keywords": ["sveltekit", "documentation", "markdown", "mdsvex", "docs", "screenshots", "search"],
+  "license": "MIT",
+  "author": "GooBits",
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "unified": "^11.0.5"
+  }
+}

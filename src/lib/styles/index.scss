@@ -1,0 +1,13 @@
+/**
+ * Markdown Docs Styles
+ *
+ * Main stylesheet entry point for @goobits/markdown-docs
+ * Import this in your SvelteKit app to get all documentation styles
+ *
+ * Usage:
+ * ```typescript
+ * import '@goobits/markdown-docs/styles';
+ * ```
+ */
+
+@import './base.scss';
