@@ -7,3 +7,5 @@ export type { CodeHighlightOptions } from './code-highlight';
 export { remarkTableOfContents } from './toc';
 export { linksPlugin } from './links';
 export type { LinksPluginOptions } from './links';
+export { screenshotPlugin } from './screenshot';
+export type { ScreenshotPluginOptions } from './screenshot';

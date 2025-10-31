@@ -4,9 +4,10 @@ Battery-included documentation system for SvelteKit projects.
 
 ## Features
 - 📝 Markdown rendering with Shiki syntax highlighting
+- 📸 Automated screenshot generation (web + CLI)
 - 📑 Table of contents generation with `## TOC` syntax
 - 🎨 Customizable theming with CSS variables
-- 🧩 MDsveX plugins (callouts, mermaid, tabs, filetree, TOC, links)
+- 🧩 MDsveX plugins (callouts, mermaid, tabs, filetree, TOC, links, screenshots)
 - 📊 Frontmatter parsing for metadata
 - 🗺️ Navigation builder utility for auto-generating doc structure
 - 📱 Responsive design with mobile navigation
@@ -30,8 +31,9 @@ import {
   mermaidPlugin,
   tabsPlugin,
   codeHighlightPlugin,
-  tocPlugin,
+  remarkTableOfContents,
   linksPlugin,
+  screenshotPlugin,
 } from '@goobits/docs-engine/plugins';
 
 export default {
@@ -43,8 +45,9 @@ export default {
         calloutsPlugin(),
         mermaidPlugin(),
         tabsPlugin(),
-        tocPlugin(),
+        remarkTableOfContents(),
         linksPlugin(),
+        screenshotPlugin(),
         codeHighlightPlugin({ theme: 'dracula' }),
       ],
     }),
@@ -62,12 +65,14 @@ In your layout component:
     CodeTabsHydrator,
     FileTreeHydrator,
     MermaidHydrator,
+    ScreenshotHydrator,
   } from '@goobits/docs-engine/components';
 </script>
 
 <CodeTabsHydrator theme="dracula" />
 <FileTreeHydrator allowCopy={true} />
 <MermaidHydrator />
+<ScreenshotHydrator />
 
 <slot />
 ```
@@ -82,6 +87,7 @@ In your layout component:
 
 ### Plugins
 
+- **[Screenshots](./docs/SCREENSHOTS.md)** - Automated web and CLI screenshot generation
 - **[Table of Contents](./docs/TOC.md)** - Auto-generate TOC with `## TOC` or `## TOC:3` syntax
 - **[Frontmatter Parser](./docs/FRONTMATTER.md)** - Parse YAML frontmatter metadata
 - **[Navigation Builder](./NAVIGATION.md)** - Auto-generate navigation from markdown files
