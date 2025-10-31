@@ -39,7 +39,7 @@ export default defineConfig({
 	format: ['esm'],
 
 	// Generate TypeScript declaration files
-	dts: false, // TODO: Fix plugin type signatures
+	dts: false, // TODO: Fix plugin type signatures (multiple errors in mermaid.ts, etc.)
 
 	// Enable code splitting for better tree-shaking
 	splitting: true,
@@ -58,7 +58,6 @@ export default defineConfig({
 		'@lucide/svelte',
 		'playwright',
 		// Also externalize our own runtime dependencies
-		'marked',
 		'shiki',
 		'unist-util-visit',
 		'yaml',

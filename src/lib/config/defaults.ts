@@ -6,7 +6,7 @@ export interface MarkdownDocsConfig {
     basePath: string;
     version?: string;
     cli?: {
-      allowedCommands: string[];
+      allowedCommands?: string[];
       timeout?: number;
       maxOutputLength?: number;
     };
