@@ -4,10 +4,11 @@ Battery-included documentation system for SvelteKit projects.
 
 ## Features
 - 📝 Markdown rendering with Shiki syntax highlighting
-- 📸 Automated screenshot generation with version-based caching
-- 🔍 Built-in search functionality
+- 📑 Table of contents generation with `## TOC` syntax
 - 🎨 Customizable theming with CSS variables
-- 🧩 MDsveX plugins (screenshots, callouts, mermaid, tabs, filetree)
+- 🧩 MDsveX plugins (callouts, mermaid, tabs, filetree, TOC, links)
+- 📊 Frontmatter parsing for metadata
+- 🗺️ Navigation builder utility for auto-generating doc structure
 - 📱 Responsive design with mobile navigation
 
 ## Installation
@@ -29,6 +30,8 @@ import {
   mermaidPlugin,
   tabsPlugin,
   codeHighlightPlugin,
+  tocPlugin,
+  linksPlugin,
 } from '@goobits/docs-engine/plugins';
 
 export default {
@@ -40,6 +43,8 @@ export default {
         calloutsPlugin(),
         mermaidPlugin(),
         tabsPlugin(),
+        tocPlugin(),
+        linksPlugin(),
         codeHighlightPlugin({ theme: 'dracula' }),
       ],
     }),
@@ -56,13 +61,13 @@ In your layout component:
   import {
     CodeTabsHydrator,
     FileTreeHydrator,
-    ScreenshotHydrator,
+    MermaidHydrator,
   } from '@goobits/docs-engine/components';
 </script>
 
 <CodeTabsHydrator theme="dracula" />
 <FileTreeHydrator allowCopy={true} />
-<ScreenshotHydrator />
+<MermaidHydrator />
 
 <slot />
 ```
@@ -75,9 +80,32 @@ In your layout component:
 
 ## Documentation
 
-- [Navigation Builder](./NAVIGATION.md) - Auto-generate navigation from markdown with frontmatter
-- [File Tree Plugin](./FILETREE.md) - Display interactive file trees
-- Full documentation coming soon...
+### Plugins
+
+- **[Table of Contents](./docs/TOC.md)** - Auto-generate TOC with `## TOC` or `## TOC:3` syntax
+- **[Frontmatter Parser](./docs/FRONTMATTER.md)** - Parse YAML frontmatter metadata
+- **[Navigation Builder](./NAVIGATION.md)** - Auto-generate navigation from markdown files
+- **[File Tree](./FILETREE.md)** - Display interactive file trees
+- **[Links Plugin](./docs/LINKS.md)** - Convert top-level file links to absolute paths
+- **Callouts** - Styled note/warning/info boxes
+- **Mermaid** - Diagram rendering with mermaid.js
+- **Code Tabs** - Tabbed code examples
+- **Code Highlighting** - Syntax highlighting with Shiki
+
+### Utilities
+
+```javascript
+import { parseFrontmatter, extractTitle } from '@goobits/docs-engine/utils';
+import { buildNavigation } from '@goobits/docs-engine/utils';
+
+// Parse frontmatter from markdown
+const { frontmatter, content } = parseFrontmatter(markdown);
+
+// Build navigation from markdown files
+const navigation = buildNavigation(files);
+```
+
+See individual documentation files for detailed usage examples.
 
 ## License
 
