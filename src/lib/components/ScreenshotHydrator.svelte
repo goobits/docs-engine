@@ -15,7 +15,8 @@
 		// Use requestAnimationFrame to ensure DOM is fully rendered
 		requestAnimationFrame(() => {
 			try {
-				const elements = document.querySelectorAll('.md-screenshot');
+				// Select only divs with required attributes to avoid wrapper elements
+				const elements = document.querySelectorAll('.md-screenshot[data-name][data-path][data-version]');
 
 				for (const element of elements) {
 					// Skip if already hydrated
@@ -30,11 +31,7 @@
 					const configAttr = element.getAttribute('data-config');
 
 					if (!name || !path || !version) {
-						console.warn('[ScreenshotHydrator] Element missing required attributes', {
-							name,
-							path,
-							version
-						});
+						// This shouldn't happen with the selector above, but keep as safety
 						continue;
 					}
 
@@ -87,8 +84,8 @@
 					for (const node of mutation.addedNodes) {
 						if (node instanceof Element) {
 							if (
-								node.classList.contains('md-screenshot') ||
-								node.querySelector('.md-screenshot')
+								node.matches('.md-screenshot[data-name][data-path][data-version]') ||
+								node.querySelector('.md-screenshot[data-name][data-path][data-version]')
 							) {
 								shouldHydrate = true;
 								break;

@@ -119,11 +119,11 @@
 	.md-filetree__row {
 		display: flex;
 		align-items: center;
-		gap: var(--md-spacing-xs);
-		padding: var(--md-spacing-xs) var(--md-spacing-sm);
-		padding-left: calc(var(--md-spacing-sm) + var(--depth, 0) * var(--md-spacing-lg));
-		border-radius: var(--md-radius-sm);
-		transition: background var(--md-duration-fast) var(--md-ease-out);
+		gap: var(--md-spacing-xs, 0.25rem);
+		padding: var(--md-spacing-xs, 0.25rem) var(--md-spacing-sm, 0.5rem);
+		padding-left: calc(var(--md-spacing-sm, 0.5rem) + var(--depth, 0) * var(--md-spacing-lg, 1.5rem));
+		border-radius: var(--md-radius-sm, 6px);
+		transition: background var(--md-duration-fast, 200ms) var(--md-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
 		position: relative;
 
 		&:hover {

@@ -10,6 +10,10 @@ export type { SearchResult, SearchOptions } from './search';
 export * from './tree-parser';
 export type { TreeNode, FileTypeConfig } from './tree-parser';
 
+// Frontmatter utilities
+export * from './frontmatter';
+export type { Frontmatter, ParsedContent } from './frontmatter';
+
 // Base64 utilities
 export * from './base64';
 
