@@ -75,7 +75,8 @@ In your layout component:
 
 ## Documentation
 
-- [File Tree Plugin](./FILETREE.md)
+- [Navigation Builder](./NAVIGATION.md) - Auto-generate navigation from markdown with frontmatter
+- [File Tree Plugin](./FILETREE.md) - Display interactive file trees
 - Full documentation coming soon...
 
 ## License

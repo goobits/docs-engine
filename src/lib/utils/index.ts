@@ -2,6 +2,15 @@
 export * from './navigation';
 export type { DocsLink, DocsSection } from './navigation';
 
+// Navigation builder utilities
+export * from './navigation-builder';
+export type {
+	DocFrontmatter,
+	DocFile,
+	IconMap,
+	NavigationBuilderOptions,
+} from './navigation-builder';
+
 // Search utilities
 export * from './search';
 export type { SearchResult, SearchOptions } from './search';
