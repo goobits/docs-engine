@@ -126,7 +126,8 @@ async function generateCliScreenshot(options: {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
-    deviceScaleFactor: 2 // Capture at 2x resolution for retina displays
+    deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
+    ignoreHTTPSErrors: true // Allow self-signed certificates in development
   });
   const page = await context.newPage();
 
@@ -242,7 +243,8 @@ async function generateWebScreenshot(options: {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
-    deviceScaleFactor: 2 // Capture at 2x resolution for retina displays
+    deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
+    ignoreHTTPSErrors: true // Allow self-signed certificates in development
   });
   const page = await context.newPage();
 
