@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 
 /**
@@ -16,7 +16,7 @@ import type { Root } from 'mdast';
  *
  * Which is then rendered client-side by mermaid.js
  */
-export function mermaidPlugin(): Plugin {
+export function mermaidPlugin() {
 	return (tree: Root) => {
 		visit(tree, 'code', (node: any) => {
 			if (node.lang !== 'mermaid') return;

@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 
 /**
@@ -34,7 +34,7 @@ interface Tab {
  *
  * Which is then hydrated client-side into an interactive tabs component
  */
-export function tabsPlugin(): Plugin {
+export function tabsPlugin() {
 	return (tree: Root) => {
 		visit(tree, 'code', (node: any) => {
 			// Check if this is a tabs code block

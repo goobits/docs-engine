@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 
 export interface ScreenshotPluginOptions {
@@ -33,7 +33,7 @@ export interface ScreenshotPluginOptions {
  * @param options - Optional configuration (basePath, version)
  * @returns A unified plugin
  */
-export function screenshotPlugin(options: ScreenshotPluginOptions = {}): Plugin {
+export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
 	const basePath = options.basePath || '/screenshots';
 	const version = options.version || '1.0.0';
 

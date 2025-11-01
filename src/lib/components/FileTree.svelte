@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { TreeNode } from '../utils/tree-parser.js';
-	import { getFileType, FILE_TYPES } from '../utils/tree-parser.js';
+	import type { TreeNode } from '@goobits/docs-engine/utils';
+	import { getFileType, FILE_TYPES } from '@goobits/docs-engine/utils';
 	import FileTreeItem from './FileTreeItem.svelte';
 
 	interface Props {

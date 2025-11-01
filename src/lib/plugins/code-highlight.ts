@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { createHighlighter } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
@@ -21,7 +21,7 @@ let highlighterPromise: Promise<any> | null = null;
  * @param options - Configuration for code highlighting
  * @returns A unified plugin
  */
-export function codeHighlightPlugin(options: CodeHighlightOptions = {}): Plugin {
+export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 	const { theme = 'dracula', defaultLanguage = 'plaintext' } = options;
 
 	return async (tree: Root) => {

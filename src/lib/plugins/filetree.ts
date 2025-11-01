@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { parseTree, getFileType } from '../utils/tree-parser.js';
 import type { TreeNode } from '../utils/tree-parser.js';
@@ -20,7 +20,7 @@ import type { TreeNode } from '../utils/tree-parser.js';
  *
  * Which is then rendered client-side by the FileTree component
  */
-export function filetreePlugin(): Plugin {
+export function filetreePlugin() {
 	return (tree: Root) => {
 		visit(tree, 'code', (node: any) => {
 			if (node.lang !== 'filetree') return;

@@ -9,7 +9,7 @@
 	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import FileTree from './FileTree.svelte';
-	import type { TreeNode } from '../utils/tree-parser.js';
+	import type { TreeNode } from '@goobits/docs-engine/utils';
 
 	interface Props {
 		githubUrl?: string;

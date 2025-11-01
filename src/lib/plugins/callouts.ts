@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import type { Root, BlockContent, Paragraph, Text } from 'mdast';
 
 /**
@@ -41,7 +41,7 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  *
  * Into styled HTML callouts with icons and enhanced markdown rendering
  */
-export function calloutsPlugin(): Plugin {
+export function calloutsPlugin() {
 	return (tree: Root) => {
 		visit(tree, 'blockquote', (node: any, index, parent) => {
 			const firstChild = node.children?.[0];

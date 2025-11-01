@@ -39,7 +39,17 @@ export default defineConfig({
 	format: ['esm'],
 
 	// Generate TypeScript declaration files
-	dts: false, // TODO: Fix plugin type signatures (multiple errors in mermaid.ts, etc.)
+	// Note: components/index.ts is excluded from DTS generation as it exports
+	// Svelte components (.svelte files) which are handled separately by SvelteKit
+	dts: {
+		entry: [
+			'src/lib/index.ts',
+			'src/lib/server/index.ts',
+			'src/lib/plugins/index.ts',
+			'src/lib/utils/index.ts',
+			'src/lib/config/index.ts',
+		],
+	},
 
 	// Enable code splitting for better tree-shaking
 	splitting: true,
