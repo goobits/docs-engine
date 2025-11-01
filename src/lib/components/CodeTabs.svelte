@@ -20,7 +20,7 @@
 
 	let { tabs: encodedTabs, tabsId, theme = 'dracula' }: Props = $props();
 
-	let tabs: Tab[] = [];
+	let tabs = $state<Tab[]>([]);
 	let activeIndex = $state(0);
 	let highlightedCode = $state<string[]>([]);
 	let loaded = $state(false);
