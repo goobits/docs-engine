@@ -2,6 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Root } from 'mdast';
 import { createHighlighter } from 'shiki';
+import agentflowGrammar from '../utils/agentflow-grammar.json';
 
 export interface CodeHighlightOptions {
 	theme?: string;
@@ -37,30 +38,40 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}): Plugin 
 			return;
 		}
 
-		// Get or create highlighter
+		// Get or create highlighter with AgentFlow support
 		if (!highlighterPromise) {
-			highlighterPromise = createHighlighter({
-				themes: [theme],
-				langs: [
-					'typescript',
-					'javascript',
-					'python',
-					'rust',
-					'bash',
-					'sql',
-					'json',
-					'html',
-					'css',
-					'svelte',
-					'tsx',
-					'jsx',
-					'yaml',
-					'toml',
-					'markdown',
-					'shell',
-					'sh'
-				]
-			});
+			highlighterPromise = (async () => {
+				const h = await createHighlighter({
+					themes: [theme],
+					langs: [
+						'typescript',
+						'javascript',
+						'python',
+						'rust',
+						'bash',
+						'sql',
+						'json',
+						'html',
+						'css',
+						'svelte',
+						'tsx',
+						'jsx',
+						'yaml',
+						'toml',
+						'markdown',
+						'shell',
+						'sh'
+					]
+				});
+
+				// Register AgentFlow grammar with aliases
+				await h.loadLanguage({
+					...(agentflowGrammar as any),
+					aliases: ['dsl', 'agentflow']
+				});
+
+				return h;
+			})();
 		}
 
 		const highlighter = await highlighterPromise;
