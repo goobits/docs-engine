@@ -6,6 +6,7 @@
  */
 
 // Components
+export { default as DocsLayout } from './DocsLayout.svelte';
 export { default as DocsSidebar } from './DocsSidebar.svelte';
 export { default as Screenshot } from './Screenshot.svelte';
 export { default as ScreenshotImage } from './ScreenshotImage.svelte';
