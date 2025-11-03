@@ -14,7 +14,7 @@ Battery-included documentation system for SvelteKit projects.
 
 ## Installation
 ```bash
-bun add @goobits/docs-engine
+pnpm add @goobits/docs-engine
 ```
 
 ## Quick Start

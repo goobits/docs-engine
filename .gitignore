@@ -63,3 +63,4 @@ lerna-debug.log*
 # Misc
 *.bak
 *.orig
+package-lock.json

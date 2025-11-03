@@ -17,8 +17,8 @@ Automated screenshot generation for documentation with version-based caching and
 ### 1. Install Dependencies
 
 ```bash
-bun add @goobits/docs-engine playwright
-bunx playwright install chromium
+pnpm add @goobits/docs-engine playwright
+pnpm exec playwright install chromium
 ```
 
 ### 2. Add Screenshot Plugin
@@ -193,7 +193,7 @@ createScreenshotEndpoint({
     version: process.env.VERSION || '1.0.0',
     cli: {
       allowedCommands: [
-        'npm', 'bun', 'pnpm',  // Package managers
+        'npm', 'pnpm',          // Package managers
         'git',                  // Version control
         'ls', 'cat', 'pwd',    // Basic shell
         'spacebase'             // Custom CLI
@@ -372,7 +372,7 @@ promptText: spacebase>
 
 ### Screenshots not generating
 
-1. Check Playwright is installed: `bunx playwright install chromium`
+1. Check Playwright is installed: `pnpm exec playwright install chromium`
 2. Verify endpoint is configured at `/api/screenshots/+server.ts`
 3. Check browser console for errors
 4. Verify command is whitelisted (for CLI screenshots)
@@ -380,8 +380,8 @@ promptText: spacebase>
 ### "Playwright not installed" error
 
 ```bash
-bun add -D playwright
-bunx playwright install chromium
+pnpm add -D playwright
+pnpm exec playwright install chromium
 ```
 
 ### CLI command blocked
