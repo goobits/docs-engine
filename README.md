@@ -1,16 +1,18 @@
 # @goobits/docs-engine
 
-Battery-included documentation system for SvelteKit projects.
+Battery-included documentation system for SvelteKit with markdown rendering, screenshots, search, and symbol references.
 
 ## Features
-- 📝 Markdown rendering with Shiki syntax highlighting
-- 📸 Automated screenshot generation (web + CLI)
-- 📑 Table of contents generation with `## TOC` syntax
-- 🎨 Customizable theming with CSS variables
-- 🧩 MDsveX plugins (callouts, mermaid, tabs, filetree, TOC, links, screenshots)
-- 📊 Frontmatter parsing for metadata
-- 🗺️ Navigation builder utility for auto-generating doc structure
-- 📱 Responsive design with mobile navigation
+
+- **Markdown rendering** with Shiki syntax highlighting
+- **Symbol references** - Link to TypeScript types/functions with `{@Symbol}` syntax
+- **Automated screenshot generation** (web + CLI)
+- **Table of contents** generation with `## TOC` syntax
+- **MDsveX plugins** - Callouts, mermaid, tabs, filetree, TOC, links, screenshots, references
+- **Frontmatter parsing** for metadata
+- **Navigation builder** utility for auto-generating doc structure
+- **Responsive design** with mobile navigation
+- **Customizable theming** with CSS variables
 
 ## Installation
 ```bash
@@ -47,6 +49,7 @@ export default {
         tabsPlugin(),
         remarkTableOfContents(),
         linksPlugin(),
+        referencePlugin(),      // Symbol references
         screenshotPlugin(),
         codeHighlightPlugin({ theme: 'dracula' }),
       ],
@@ -85,8 +88,15 @@ In your layout component:
 
 ## Documentation
 
-### Plugins
+### Core Guides
 
+- **[Architecture](./docs/ARCHITECTURE.md)** - Package/consumer split, integration guide, design decisions
+- **[Examples](./docs/EXAMPLES.md)** - Code examples, recipes, and common patterns
+- **[Diagrams](./docs/DIAGRAMS.md)** - Visual architecture diagrams and flowcharts
+
+### Plugin Documentation
+
+- **[Symbol References](./docs/SYMBOL-REFERENCES.md)** - Link to TypeScript symbols with `{@Symbol}` syntax
 - **[Screenshots](./docs/SCREENSHOTS.md)** - Automated web and CLI screenshot generation
 - **[Table of Contents](./docs/TOC.md)** - Auto-generate TOC with `## TOC` or `## TOC:3` syntax
 - **[Frontmatter Parser](./docs/FRONTMATTER.md)** - Parse YAML frontmatter metadata
@@ -103,15 +113,68 @@ In your layout component:
 ```javascript
 import { parseFrontmatter, extractTitle } from '@goobits/docs-engine/utils';
 import { buildNavigation } from '@goobits/docs-engine/utils';
+import { loadSymbolMap, resolveSymbol } from '@goobits/docs-engine/utils';
 
 // Parse frontmatter from markdown
 const { frontmatter, content } = parseFrontmatter(markdown);
 
 // Build navigation from markdown files
 const navigation = buildNavigation(files);
+
+// Resolve symbol references
+const symbolMap = loadSymbolMap();
+const symbol = resolveSymbol('RequestState', symbolMap);
 ```
 
 See individual documentation files for detailed usage examples.
+
+## Architecture
+
+The docs-engine symbol reference system is split between reusable package functionality and consumer-specific implementation:
+
+**Package (this package):**
+- Remark/rehype plugins for transforming `{@Symbol}` syntax
+- Symbol resolution and rendering logic
+- Type definitions and utilities
+
+**Consumer (your project):**
+- Symbol generation scripts (scan TypeScript files)
+- Build pipeline integration
+- Pre-commit hooks and CI validation
+- Directory/file patterns to scan
+
+See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for complete details on:
+- What belongs where
+- Integration guide
+- Configuration options
+- Extension points
+- Design decisions
+
+## Quick Example: Symbol References
+
+**1. Generate symbol map (in your project):**
+
+```bash
+# Create scripts/docs/generate-symbol-map.ts
+pnpm docs:symbols
+```
+
+**2. Use in markdown:**
+
+```markdown
+# API Documentation
+
+The {@RequestState} type tracks request context.
+
+:::reference RequestState
+:::
+```
+
+**3. Rendered output:**
+
+Links to GitHub source with hover tooltips showing type signatures.
+
+See **[docs/EXAMPLES.md](./docs/EXAMPLES.md)** for complete examples.
 
 ## License
 

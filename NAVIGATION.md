@@ -7,10 +7,10 @@ Auto-generate navigation structure from markdown files with frontmatter.
 The navigation builder utility parses markdown files with YAML frontmatter and generates a structured navigation tree suitable for `DocsSidebar`.
 
 **Architecture:**
-- ✅ Utility lives in `@goobits/docs-engine`
-- ✅ Your app reads the filesystem
-- ✅ Your app calls the utility with file content
-- ✅ Utility returns `DocsSection[]` for `DocsSidebar`
+- Utility lives in `@goobits/docs-engine`
+- Your app reads the filesystem
+- Your app calls the utility with file content
+- Utility returns `DocsSection[]` for `DocsSidebar`
 
 ## Frontmatter Schema
 
@@ -59,67 +59,29 @@ Your content here...
 
 ### 2. Build Navigation in Your App
 
-Create a layout server load function:
-
 ```typescript
-// web/src/routes/docs/+layout.server.ts
-import { readdirSync, readFileSync, statSync } from 'fs';
+// src/routes/docs/+layout.server.ts
+import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { buildNavigation, createDocFile } from '@goobits/docs-engine/utils';
-import { BookOpen, Code, Zap, FileText } from 'lucide-svelte';
-import type { LayoutServerLoad } from './$types';
 
-const DOCS_ROOT = '/workspace/docs';
-const BASE_PATH = '/docs';
+export const load = async () => {
+  // Read markdown files
+  const files = readdirSync('docs')
+    .filter(f => f.endsWith('.md'))
+    .map(path => {
+      const content = readFileSync(join('docs', path), 'utf-8');
+      return createDocFile({ path, content, basePath: '/docs' });
+    });
 
-// Icon mapping for sections
-const SECTION_ICONS = {
-  'Getting Started': BookOpen,
-  'DSL Language': Code,
-  'Orchestration': Zap,
-  'Reference': FileText,
-};
-
-/**
- * Recursively scan directory for markdown files
- */
-function scanDocsDirectory(dir: string, relativePath = ''): string[] {
-  const files: string[] = [];
-  const items = readdirSync(dir);
-
-  for (const item of items) {
-    const fullPath = join(dir, item);
-    const relPath = relativePath ? `${relativePath}/${item}` : item;
-
-    if (statSync(fullPath).isDirectory()) {
-      files.push(...scanDocsDirectory(fullPath, relPath));
-    } else if (item.endsWith('.md')) {
-      files.push(relPath);
-    }
-  }
-
-  return files;
-}
-
-export const load: LayoutServerLoad = async () => {
-  // Scan docs directory
-  const mdFiles = scanDocsDirectory(DOCS_ROOT);
-
-  // Create DocFile objects with content
-  const docFiles = mdFiles.map((path) => {
-    const content = readFileSync(join(DOCS_ROOT, path), 'utf-8');
-    return createDocFile({ path, content, basePath: BASE_PATH });
-  });
-
-  // Build navigation tree
-  const navigation = buildNavigation(docFiles, {
-    icons: SECTION_ICONS,
-    defaultSection: 'Documentation',
-  });
+  // Build navigation
+  const navigation = buildNavigation(files);
 
   return { navigation };
 };
 ```
+
+**For nested directories and custom icons**, see the complete example in the API Reference section below.
 
 ### 3. Use Navigation in Layout
 
@@ -167,32 +129,90 @@ export const load: LayoutServerLoad = async () => {
 Builds navigation structure from document files.
 
 **Parameters:**
-- `files: DocFile[]` - Array of document files with path, content, and href
-- `options: NavigationBuilderOptions` - Configuration options
+- `files` (DocFile[]) - Array of document files with path, content, and href
+- `options` (NavigationBuilderOptions, optional) - Configuration options
+  - `icons` (Record<string, Component>) - Icon components for sections
+  - `defaultSection` (string) - Default section name (default: "Documentation")
 
-**Returns:** `DocsSection[]`
+**Returns:** DocsSection[]
 
 ### `createDocFile(params)`
 
 Helper to create DocFile objects.
 
 **Parameters:**
-- `path: string` - Relative path from docs root
-- `content: string` - Markdown content with frontmatter
-- `basePath?: string` - Base URL path (default: "/docs")
+- `path` (string) - Relative path from docs root
+- `content` (string) - Markdown content with frontmatter
+- `basePath` (string, default: "/docs") - Base URL path
 
-**Returns:** `DocFile`
+**Returns:** DocFile
 
 ### `extractFrontmatter(content)`
 
 Parse YAML frontmatter from markdown.
 
 **Parameters:**
-- `content: string` - Markdown content with frontmatter
+- `content` (string) - Markdown content with frontmatter
 
-**Returns:** `{ frontmatter: DocFrontmatter, body: string }`
+**Returns:** { frontmatter: DocFrontmatter, body: string }
 
-## Advanced: Custom Sorting
+## Complete Example
+
+Full implementation with recursive directory scanning and custom icons:
+
+```typescript
+// src/routes/docs/+layout.server.ts
+import { readdirSync, readFileSync, statSync } from 'fs';
+import { join } from 'path';
+import { buildNavigation, createDocFile } from '@goobits/docs-engine/utils';
+import { BookOpen, Code, Zap, FileText } from 'lucide-svelte';
+
+const DOCS_ROOT = '/workspace/docs';
+const BASE_PATH = '/docs';
+
+const SECTION_ICONS = {
+  'Getting Started': BookOpen,
+  'DSL Language': Code,
+  'Orchestration': Zap,
+  'Reference': FileText,
+};
+
+function scanDocsDirectory(dir: string, relativePath = ''): string[] {
+  const files: string[] = [];
+  const items = readdirSync(dir);
+
+  for (const item of items) {
+    const fullPath = join(dir, item);
+    const relPath = relativePath ? `${relativePath}/${item}` : item;
+
+    if (statSync(fullPath).isDirectory()) {
+      files.push(...scanDocsDirectory(fullPath, relPath));
+    } else if (item.endsWith('.md')) {
+      files.push(relPath);
+    }
+  }
+
+  return files;
+}
+
+export const load = async () => {
+  const mdFiles = scanDocsDirectory(DOCS_ROOT);
+
+  const docFiles = mdFiles.map((path) => {
+    const content = readFileSync(join(DOCS_ROOT, path), 'utf-8');
+    return createDocFile({ path, content, basePath: BASE_PATH });
+  });
+
+  const navigation = buildNavigation(docFiles, {
+    icons: SECTION_ICONS,
+    defaultSection: 'Documentation',
+  });
+
+  return { navigation };
+};
+```
+
+## Custom Sorting
 
 The navigation builder sorts sections and links automatically:
 

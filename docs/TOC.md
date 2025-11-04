@@ -2,13 +2,9 @@
 
 Auto-generate a table of contents from markdown headings.
 
-## Installation
-
-The TOC plugin is included in `@goobits/docs-engine/plugins`.
-
 ## Usage
 
-### 1. Add to MDSveX Config
+### Add to MDSveX Config
 
 ```javascript
 import { tocPlugin } from '@goobits/docs-engine/plugins';
@@ -25,9 +21,7 @@ export default {
 };
 ```
 
-### 2. Use in Markdown
-
-Add a `## TOC` heading where you want the table of contents to appear:
+### Use in Markdown
 
 ```markdown
 # My Document

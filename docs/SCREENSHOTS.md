@@ -4,13 +4,13 @@ Automated screenshot generation for documentation with version-based caching and
 
 ## Features
 
-- 📸 **Web screenshots** - Capture any URL with Playwright
-- 🖥️ **CLI screenshots** - Execute commands and render terminal output
-- 🎨 **Syntax highlighting** - Terminal output with theme support
-- 📦 **Multiple formats** - PNG, WebP, and retina (@2x) versions
-- 🔄 **Version caching** - Screenshots organized by version number
-- ✨ **Simple markdown syntax** - Easy code block syntax
-- ⚡ **Lazy generation** - Only creates screenshots when requested
+- Web screenshots - Capture any URL with Playwright
+- CLI screenshots - Execute commands and render terminal output
+- Syntax highlighting - Terminal output with theme support
+- Multiple formats - PNG, WebP, and retina (@2x) versions
+- Version caching - Screenshots organized by version number
+- Simple markdown syntax - Easy code block syntax
+- Lazy generation - Only creates screenshots when requested
 
 ## Quick Start
 
@@ -150,24 +150,20 @@ screenshotPlugin({
 
 ### Web Screenshot Options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `url` | string | **Required.** URL to screenshot |
-| `viewport` | string | Viewport size (e.g., `1280x720`) |
-| `selector` | string | CSS selector to screenshot (instead of full page) |
-| `fullPage` | boolean | Capture full scrollable page |
-| `waitFor` | string | CSS selector to wait for before screenshot |
+- `url` (string, required) - URL to screenshot
+- `viewport` (string) - Viewport size (e.g., `1280x720`)
+- `selector` (string) - CSS selector to screenshot (instead of full page)
+- `fullPage` (boolean) - Capture full scrollable page
+- `waitFor` (string) - CSS selector to wait for before screenshot
 
 ### CLI Screenshot Options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `type` | string | Must be `cli` |
-| `command` | string | **Required.** Command to execute |
-| `theme` | string | Terminal theme: `dracula`, `monokai`, `solarized`, `nord` |
-| `viewport` | string | Terminal size (e.g., `800x400`) |
-| `showPrompt` | boolean | Show command prompt (default: true) |
-| `promptText` | string | Prompt text (default: `$`) |
+- `type` (string, required) - Must be `cli`
+- `command` (string, required) - Command to execute
+- `theme` (string) - Terminal theme: `dracula`, `monokai`, `solarized`, `nord`
+- `viewport` (string) - Terminal size (e.g., `800x400`)
+- `showPrompt` (boolean, default: `true`) - Show command prompt
+- `promptText` (string, default: `$`) - Prompt text
 
 ### Endpoint Configuration
 
@@ -370,39 +366,11 @@ promptText: spacebase>
 
 ## Troubleshooting
 
-### Screenshots not generating
+**Screenshots not generating?** Check Playwright is installed (`pnpm exec playwright install chromium`), verify endpoint is configured at `/api/screenshots/+server.ts`, and check browser console.
 
-1. Check Playwright is installed: `pnpm exec playwright install chromium`
-2. Verify endpoint is configured at `/api/screenshots/+server.ts`
-3. Check browser console for errors
-4. Verify command is whitelisted (for CLI screenshots)
+**CLI command blocked?** Add command to whitelist: `cli: { allowedCommands: ['your-command'] }`
 
-### "Playwright not installed" error
-
-```bash
-pnpm add -D playwright
-pnpm exec playwright install chromium
-```
-
-### CLI command blocked
-
-Add command to whitelist:
-
-```javascript
-cli: {
-  allowedCommands: ['your-command']
-}
-```
-
-### Screenshot is stale
-
-Bump the version number to force regeneration:
-
-```javascript
-screenshotPlugin({
-  version: '1.0.1'  // Was 1.0.0
-})
-```
+**Screenshot is stale?** Bump the version number to force regeneration.
 
 ## Best Practices
 
@@ -413,7 +381,7 @@ screenshotPlugin({
 5. **Test locally first** - Generate screenshots in dev before deploying
 6. **Consider file size** - Screenshots in `static/` increase bundle size
 
-## Advanced: Custom Terminal Renderer
+## Custom Terminal Renderer
 
 Need custom terminal styling? Create your own renderer:
 

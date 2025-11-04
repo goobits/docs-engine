@@ -1,18 +1,10 @@
 # File Tree Plugin
 
-Transform ASCII file trees into beautiful, interactive visualizations in your markdown documentation.
+Display interactive file trees in your markdown documentation.
 
 ## Quick Start
 
-### 1. Installation
-
-The file tree plugin is included in `@goobits/docs-engine`.
-
-```bash
-npm install @goobits/docs-engine
-```
-
-### 2. Configure MDSveX
+### Configure MDSveX
 
 Add the plugin to your `svelte.config.js`:
 
@@ -29,7 +21,7 @@ export default {
 };
 ```
 
-### 3. Add Hydrator to Layout
+### Add Hydrator to Layout
 
 In your layout component (e.g., `+layout.svelte`):
 
@@ -43,7 +35,7 @@ In your layout component (e.g., `+layout.svelte`):
 <slot />
 ```
 
-### 4. Import Styles
+### Import Styles
 
 In your main CSS/SCSS file:
 
@@ -160,12 +152,9 @@ Configure the FileTree component via the hydrator:
 />
 ```
 
-**Props**:
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `allowCopy` | `boolean` | `true` | Enable click-to-copy paths |
-| `githubUrl` | `string?` | `undefined` | Base GitHub URL for "Open in GitHub" |
+**Props:**
+- `allowCopy` (boolean, default: `true`) - Enable click-to-copy paths
+- `githubUrl` (string, optional) - Base GitHub URL for "Open in GitHub" button
 
 ### GitHub Integration
 
@@ -183,58 +172,33 @@ This enables an "Open in GitHub" button on hover for each file/folder.
 
 ### File Type Detection
 
-The plugin automatically detects 25+ file types and shows appropriate icons:
+The plugin automatically detects 25+ file types with appropriate icons and colors:
 
-**Languages**:
-- 🔷 TypeScript (`.ts`, `.tsx`)
-- 📜 JavaScript (`.js`, `.jsx`, `.mjs`, `.cjs`)
-- ⚡ Svelte (`.svelte`)
+**Languages**: TypeScript (`.ts`, `.tsx`), JavaScript (`.js`, `.jsx`, `.mjs`, `.cjs`), Svelte (`.svelte`)
 
-**Styles**:
-- 🎨 CSS (`.css`)
-- 💅 SCSS/SASS (`.scss`, `.sass`)
+**Styles**: CSS (`.css`), SCSS/SASS (`.scss`, `.sass`)
 
-**Markup**:
-- 🌐 HTML (`.html`)
-- 🖼️ SVG (`.svg`)
+**Markup**: HTML (`.html`), SVG (`.svg`)
 
-**Documentation**:
-- 📝 Markdown (`.md`, `.mdx`)
+**Documentation**: Markdown (`.md`, `.mdx`)
 
-**Config**:
-- ⚙️ JSON/YAML (`.json`, `.yaml`, `.yml`)
-- 🔐 Environment (`.env`)
+**Config**: JSON/YAML (`.json`, `.yaml`, `.yml`), Environment (`.env`)
 
-**Build**:
-- 📦 Package files (`package.json`, `tsconfig.json`)
-- 🔒 Lock files (`.lock`)
+**Build**: Package files (`package.json`, `tsconfig.json`), Lock files (`.lock`)
 
-**Git**:
-- 🚫 Git files (`.gitignore`)
+**Git**: Git files (`.gitignore`)
 
-**Shell**:
-- 🐚 Shell scripts (`.sh`, `.bash`, `.zsh`)
+**Shell**: Shell scripts (`.sh`, `.bash`, `.zsh`)
 
-**Folders**:
-- 📁 All folders (cyan color)
+**Folders**: All folders (cyan color)
 
 ### Interactions
 
-**Expand/Collapse**:
-- Click the arrow (▶) next to folder names
-- Arrow rotates 90° when expanded
-- All folders expanded by default
+**Expand/Collapse**: Click arrows to expand/collapse folders (all expanded by default)
 
-**Copy Path**:
-- Click any file or folder name
-- Path copied to clipboard
-- Shows "✓ Copied" confirmation
-- Brief color change to indicate success
+**Copy Path**: Click file or folder names to copy paths to clipboard
 
-**Hover Effects**:
-- Rows highlight on hover
-- GitHub button appears (if configured)
-- Smooth color transitions
+**Hover Effects**: Row highlighting, GitHub button (if configured)
 
 ### Accessibility
 
@@ -310,11 +274,7 @@ Override component styles:
 }
 ```
 
-## Advanced Usage
-
-### Programmatic Usage
-
-Use the FileTree component directly:
+## Programmatic Usage
 
 ```svelte
 <script>
@@ -338,7 +298,7 @@ src/
 />
 ```
 
-### Custom File Types
+## Custom File Types
 
 Extend the file type configuration:
 
@@ -360,41 +320,11 @@ FILE_TYPES['.ts'] = {
 
 ## Troubleshooting
 
-### Tree Not Rendering
+**Tree not rendering?** Verify plugin is added to MDSveX config, hydrator is imported in layout, and styles are imported.
 
-**Check**:
-1. Is the plugin added to MDSveX config?
-2. Is the hydrator component imported in layout?
-3. Are the styles imported?
+**Indentation issues?** Use 4 spaces per level. Don't mix tabs and spaces.
 
-### Indentation Issues
-
-**Requirements**:
-- Use 4 spaces per indentation level
-- Don't mix tabs and spaces
-- Keep consistent spacing
-
-**Example**:
-```
-src/
-├── lib/     <- 0 spaces (root level)
-│   └── a.ts <- 4 spaces (1 level deep)
-└── main.ts  <- 0 spaces (root level)
-```
-
-### Copy Not Working
-
-**Possible causes**:
-- `allowCopy={false}` in hydrator
-- Browser clipboard API blocked (HTTPS required)
-- User hasn't granted clipboard permission
-
-### Colors Not Showing
-
-**Check**:
-- File extensions are lowercase
-- Extensions include the dot (`.ts` not `ts`)
-- CSS variables are defined
+**Copy not working?** Check `allowCopy={true}` in hydrator and ensure HTTPS (clipboard API requirement).
 
 ## Performance
 

@@ -2,13 +2,7 @@
 
 Converts top-level file links (e.g., `./file.md`, `../other.md`) to absolute paths while preserving anchor links and external URLs.
 
-## Installation
-
-The links plugin is included in `@goobits/docs-engine/plugins`.
-
 ## Usage
-
-### Add to MDSveX Config
 
 ```javascript
 import { linksPlugin } from '@goobits/docs-engine/plugins';
@@ -47,68 +41,27 @@ The plugin normalizes markdown links to work correctly in SvelteKit:
 [External](https://example.com)
 ```
 
-## Features
+## What It Does
 
-- ✅ **Converts relative file paths** to absolute paths
-- ✅ **Preserves anchor links** (`#section`)
-- ✅ **Preserves external URLs** (http://, https://)
-- ✅ **Removes `.md` extensions** for cleaner URLs
-- ✅ **Handles nested paths** (`../../docs/file.md` → `/docs/file`)
+Converts relative file paths to absolute paths, preserves anchor links and external URLs, removes `.md` extensions, and handles nested paths (`../../docs/file.md` → `/docs/file`).
 
-## Examples
-
-### Relative Links
+## Example
 
 ```markdown
 <!-- Input -->
 [Next Page](./next.md)
 [Previous](../prev.md)
+[Jump to Section](#section)
+[GitHub](https://github.com)
+[Nested Doc](../../guides/advanced/config.md)
 
 <!-- Output -->
 [Next Page](/next)
 [Previous](/prev)
-```
-
-### Anchor Links
-
-```markdown
-<!-- Input -->
 [Jump to Section](#section)
-
-<!-- Output (unchanged) -->
-[Jump to Section](#section)
-```
-
-### External URLs
-
-```markdown
-<!-- Input -->
 [GitHub](https://github.com)
-[Docs](http://docs.example.com)
-
-<!-- Output (unchanged) -->
-[GitHub](https://github.com)
-[Docs](http://docs.example.com)
-```
-
-### Complex Paths
-
-```markdown
-<!-- Input -->
-[Nested Doc](../../guides/advanced/config.md)
-
-<!-- Output -->
 [Nested Doc](/guides/advanced/config)
 ```
-
-## Why Use This?
-
-In SvelteKit, links to markdown files need to be converted to route paths:
-
-- **Markdown files**: `./getting-started.md`
-- **SvelteKit routes**: `/getting-started`
-
-This plugin automates the conversion, allowing you to write natural markdown links that work correctly when rendered.
 
 ## Integration
 

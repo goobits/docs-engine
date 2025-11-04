@@ -2,10 +2,6 @@
 
 Parse YAML frontmatter from markdown files to extract metadata.
 
-## Installation
-
-The frontmatter utilities are included in `@goobits/docs-engine/utils`.
-
 ## Usage
 
 ```javascript
@@ -44,21 +40,26 @@ const title = extractTitle(frontmatter, content, 'Untitled');
 
 ## API
 
-### `parseFrontmatter(markdown: string): ParsedContent`
+### `parseFrontmatter(markdown)`
 
 Extracts and parses YAML frontmatter from markdown.
 
+**Parameters:**
+- `markdown` (string) - Markdown content with frontmatter
+
 **Returns:**
+- `frontmatter` (object) - Parsed YAML object
+- `content` (string) - Markdown without frontmatter
+- `raw` (string) - Original markdown
+
+**Type Definition:**
 ```typescript
 interface ParsedContent {
-  frontmatter: Frontmatter;  // Parsed YAML object
-  content: string;            // Markdown without frontmatter
-  raw: string;                // Original markdown
+  frontmatter: Frontmatter;
+  content: string;
+  raw: string;
 }
-```
 
-**Frontmatter format:**
-```typescript
 interface Frontmatter {
   title?: string;
   description?: string;
@@ -68,30 +69,32 @@ interface Frontmatter {
   categories?: string[];
   draft?: boolean;
   order?: number;
-  [key: string]: any;  // Custom fields allowed
+  [key: string]: any;
 }
 ```
 
-### `extractTitle(frontmatter, content, fallback): string`
+### `extractTitle(frontmatter, content, fallback)`
 
-Extracts a title using priority order:
+Extracts a title using priority order: frontmatter.title → first heading → fallback string.
 
-1. `frontmatter.title` (if present)
-2. First `# Heading` in content
-3. Fallback string
+**Parameters:**
+- `frontmatter` (object) - Parsed frontmatter
+- `content` (string) - Markdown content
+- `fallback` (string) - Default title if none found
+
+**Returns:** string
 
 **Example:**
-
 ```javascript
-// Has frontmatter title
+// Uses frontmatter title
 extractTitle({ title: 'Custom' }, '# Heading', 'Fallback');
 // → "Custom"
 
-// No frontmatter, uses heading
+// Uses first heading
 extractTitle({}, '# My Page\n\nContent...', 'Fallback');
 // → "My Page"
 
-// No title found
+// Uses fallback
 extractTitle({}, 'Content without heading', 'Fallback');
 // → "Fallback"
 ```
