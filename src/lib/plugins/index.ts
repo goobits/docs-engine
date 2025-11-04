@@ -9,3 +9,4 @@ export { linksPlugin } from './links';
 export type { LinksPluginOptions } from './links';
 export { screenshotPlugin } from './screenshot';
 export type { ScreenshotPluginOptions } from './screenshot';
+export { collapsePlugin } from './collapse';

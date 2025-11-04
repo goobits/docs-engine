@@ -17,6 +17,11 @@ export { default as FileTreeHydrator } from './FileTreeHydrator.svelte';
 export { default as CodeTabs } from './CodeTabs.svelte';
 export { default as CodeTabsHydrator } from './CodeTabsHydrator.svelte';
 export { default as ScreenshotHydrator } from './ScreenshotHydrator.svelte';
+export { default as CodeCopyButton } from './CodeCopyButton.svelte';
+export { default as CodeCopyHydrator } from './CodeCopyHydrator.svelte';
+export { default as OpenAPIDoc } from './OpenAPIDoc.svelte';
+export { default as OpenAPIHydrator } from './OpenAPIHydrator.svelte';
+export { default as CollapseHydrator } from './CollapseHydrator.svelte';
 
 // Types
 export type * from './types';

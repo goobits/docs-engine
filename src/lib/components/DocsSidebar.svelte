@@ -6,7 +6,7 @@
    * Extracted from Spacebase for @goobits/markdown-docs
    */
 
-  import { Search, ChevronDown, X } from "@lucide/svelte";
+  import { Search, ChevronDown, X, Filter } from "@lucide/svelte";
   import type { DocsSection, DocsLink } from './types.js';
 
   interface Props {
@@ -15,6 +15,47 @@
   }
 
   let { navigation, currentPath = "" }: Props = $props();
+
+  // Debug: Log navigation to see audience data
+  $effect(() => {
+    console.log('[DocsSidebar] Navigation data:', navigation);
+    console.log('[DocsSidebar] Sample link with audience:', navigation[0]?.links[0]);
+  });
+
+  // Audience filter state
+  const AUDIENCE_TYPES = ['new-users', 'developers', 'operators', 'integrators', 'contributors'] as const;
+  type AudienceType = typeof AUDIENCE_TYPES[number];
+
+  const AUDIENCE_LABELS: Record<AudienceType, string> = {
+    'new-users': 'New Users',
+    'developers': 'Developers',
+    'operators': 'Operators',
+    'integrators': 'Integrators',
+    'contributors': 'Contributors'
+  };
+
+  // Load from localStorage on mount
+  let selectedAudiences = $state<Set<AudienceType>>(new Set());
+
+  // Initialize from localStorage
+  $effect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem('docs-audience-filter');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        selectedAudiences = new Set(parsed);
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  });
+
+  // Save to localStorage when changed
+  $effect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('docs-audience-filter', JSON.stringify(Array.from(selectedAudiences)));
+  });
 
   // Search state
   let searchQuery = $state("");
@@ -40,7 +81,21 @@
     }))
   ));
 
-  // Search functionality
+  // Filter navigation by selected audiences
+  const filteredNavigation = $derived.by(() => {
+    if (selectedAudiences.size === 0) {
+      return navigation; // Show all if no filters selected
+    }
+
+    return navigation.map(section => ({
+      ...section,
+      links: section.links.filter(link =>
+        !link.audience || selectedAudiences.has(link.audience as AudienceType)
+      )
+    })).filter(section => section.links.length > 0); // Remove empty sections
+  });
+
+  // Search functionality (searches within filtered results)
   $effect(() => {
     if (searchQuery.trim() === "") {
       searchResults = [];
@@ -48,7 +103,14 @@
     }
 
     const query = searchQuery.toLowerCase();
-    searchResults = allLinks.filter(
+    const linksToSearch = filteredNavigation.flatMap((section) =>
+      section.links.map((link) => ({
+        ...link,
+        section: section.title,
+      }))
+    );
+
+    searchResults = linksToSearch.filter(
       (link) =>
         link.title.toLowerCase().includes(query) ||
         link.description.toLowerCase().includes(query) ||
@@ -62,6 +124,22 @@
 
   function clearSearch() {
     searchQuery = "";
+  }
+
+  function toggleAudience(audience: AudienceType) {
+    const newSet = new Set(selectedAudiences);
+    if (newSet.has(audience)) {
+      newSet.delete(audience);
+    } else {
+      newSet.add(audience);
+    }
+    selectedAudiences = newSet;
+    console.log('[DocsSidebar] Selected audiences:', Array.from(selectedAudiences));
+    console.log('[DocsSidebar] Filtered navigation:', filteredNavigation);
+  }
+
+  function clearFilters() {
+    selectedAudiences = new Set();
   }
 
   // Check if link is active
@@ -112,10 +190,44 @@
     {/if}
   </div>
 
+  <!-- Audience Filter -->
+  {#if !searchQuery}
+    <div class="v2-docs-sidebar__filter">
+      <div class="v2-docs-sidebar__filter-header">
+        <div class="v2-docs-sidebar__filter-title">
+          <Filter size={14} />
+          <span>Filter by Audience</span>
+        </div>
+        {#if selectedAudiences.size > 0}
+          <button
+            onclick={clearFilters}
+            class="v2-docs-sidebar__filter-clear"
+            type="button"
+            aria-label="Clear filters"
+          >
+            Clear
+          </button>
+        {/if}
+      </div>
+      <div class="v2-docs-sidebar__filter-chips">
+        {#each AUDIENCE_TYPES as audience (audience)}
+          <button
+            onclick={() => toggleAudience(audience)}
+            class="v2-docs-sidebar__filter-chip {selectedAudiences.has(audience) ? 'active' : ''}"
+            type="button"
+            aria-pressed={selectedAudiences.has(audience)}
+          >
+            {AUDIENCE_LABELS[audience]}
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
   <!-- Navigation (hidden when searching) -->
   {#if !searchQuery}
     <nav class="v2-docs-sidebar__nav">
-      {#each navigation as section (section.title)}
+      {#each filteredNavigation as section (section.title)}
         <div class="v2-docs-sidebar__section">
           <button
             class="v2-docs-sidebar__section-header"
@@ -293,6 +405,87 @@
       font-size: var(--v2-font-size-sm, 0.875rem);
       color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
       margin: 0;
+    }
+  }
+
+  /* Audience Filter */
+  .v2-docs-sidebar__filter {
+    padding: var(--v2-spacing-md, 1rem) var(--v2-spacing-lg, 1.5rem);
+    border-bottom: 1px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
+  }
+
+  .v2-docs-sidebar__filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--v2-spacing-sm, 0.5rem);
+  }
+
+  .v2-docs-sidebar__filter-title {
+    display: flex;
+    align-items: center;
+    gap: var(--v2-spacing-xs, 0.25rem);
+    font-size: var(--v2-font-size-xs, 0.75rem);
+    font-weight: 600;
+    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .v2-docs-sidebar__filter-clear {
+    padding: var(--v2-spacing-xs, 0.25rem) var(--v2-spacing-sm, 0.5rem);
+    background: transparent;
+    border: none;
+    color: var(--v2-text-accent, rgb(0, 122, 255));
+    font-size: var(--v2-font-size-xs, 0.75rem);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--v2-radius-sm, 6px);
+    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
+    outline: none;
+
+    &:hover {
+      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+    }
+  }
+
+  .v2-docs-sidebar__filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v2-spacing-xs, 0.25rem);
+  }
+
+  .v2-docs-sidebar__filter-chip {
+    padding: var(--v2-spacing-xs, 0.25rem) var(--v2-spacing-sm, 0.5rem);
+    background: var(--v2-surface-interactive, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--v2-border-medium, rgba(255, 255, 255, 0.12));
+    border-radius: var(--v2-radius-full, 9999px);
+    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: var(--v2-font-size-xs, 0.75rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
+    outline: none;
+
+    &:hover {
+      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
+      border-color: var(--v2-text-accent, rgb(0, 122, 255));
+      color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+    }
+
+    &.active {
+      background: var(--v2-text-accent, rgb(0, 122, 255));
+      border-color: var(--v2-text-accent, rgb(0, 122, 255));
+      color: white;
+      font-weight: 600;
     }
   }
 

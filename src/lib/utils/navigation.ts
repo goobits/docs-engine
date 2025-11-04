@@ -7,6 +7,7 @@ export interface DocsLink {
 	title: string;
 	href: string;
 	description: string;
+	audience?: string;
 }
 
 /**

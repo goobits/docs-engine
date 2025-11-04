@@ -13,9 +13,12 @@
 	import { Menu, X } from '@lucide/svelte';
 	import DocsSidebar from './DocsSidebar.svelte';
 	import CodeTabsHydrator from './CodeTabsHydrator.svelte';
+	import CodeCopyHydrator from './CodeCopyHydrator.svelte';
 	import FileTreeHydrator from './FileTreeHydrator.svelte';
 	import MermaidHydrator from './MermaidHydrator.svelte';
 	import ScreenshotHydrator from './ScreenshotHydrator.svelte';
+	import OpenAPIHydrator from './OpenAPIHydrator.svelte';
+	import CollapseHydrator from './CollapseHydrator.svelte';
 	import type { DocsSection } from './types';
 
 	interface BreadcrumbItem {
@@ -34,9 +37,12 @@
 
 	interface HydratorsConfig {
 		codeTabs?: boolean;
+		codeCopy?: boolean;
 		fileTree?: boolean;
 		mermaid?: boolean;
 		screenshot?: boolean;
+		openapi?: boolean;
+		collapse?: boolean;
 	}
 
 	interface Props {
@@ -70,9 +76,12 @@
 
 	// Hydrator defaults
 	const enableCodeTabs = $derived(hydrators.codeTabs !== false);
+	const enableCodeCopy = $derived(hydrators.codeCopy !== false);
 	const enableFileTree = $derived(hydrators.fileTree !== false);
 	const enableMermaid = $derived(hydrators.mermaid !== false);
 	const enableScreenshot = $derived(hydrators.screenshot !== false);
+	const enableOpenAPI = $derived(hydrators.openapi !== false);
+	const enableCollapse = $derived(hydrators.collapse !== false);
 
 	// Mobile sidebar state
 	let mobileMenuOpen = $state(false);
@@ -144,6 +153,9 @@
 		{#if enableCodeTabs}
 			<CodeTabsHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
 		{/if}
+		{#if enableCodeCopy}
+			<CodeCopyHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
+		{/if}
 		{#if enableFileTree}
 			<FileTreeHydrator allowCopy={true} />
 		{/if}
@@ -152,6 +164,12 @@
 		{/if}
 		{#if enableScreenshot}
 			<ScreenshotHydrator />
+		{/if}
+		{#if enableOpenAPI}
+			<OpenAPIHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
+		{/if}
+		{#if enableCollapse}
+			<CollapseHydrator />
 		{/if}
 
 		<!-- Footer -->

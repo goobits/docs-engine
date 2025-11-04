@@ -12,6 +12,7 @@ export interface DocFrontmatter {
 	section?: string;
 	icon?: string;
 	hidden?: boolean;
+	audience?: string;
 }
 
 /**
@@ -168,6 +169,7 @@ export function buildNavigation(
 				frontmatter.description || extractDescriptionFromBody(body);
 			const section = frontmatter.section || defaultSection;
 			const order = frontmatter.order ?? 999; // Default to end if no order
+			const audience = frontmatter.audience;
 
 			return {
 				title,
@@ -175,6 +177,7 @@ export function buildNavigation(
 				section,
 				order,
 				href: file.href,
+				audience,
 			};
 		})
 		.filter((doc): doc is NonNullable<typeof doc> => doc !== null);
@@ -191,6 +194,7 @@ export function buildNavigation(
 			title: doc.title,
 			description: doc.description,
 			href: doc.href,
+			audience: doc.audience,
 		});
 	}
 

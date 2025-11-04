@@ -28,3 +28,7 @@ export * from './base64';
 
 // Highlighter utilities
 export * from './highlighter';
+
+// OpenAPI formatter utilities
+export * from './openapi-formatter';
+export type { OpenAPIEndpoint } from './openapi-formatter';

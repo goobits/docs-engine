@@ -69,39 +69,111 @@ export function remarkTableOfContents() {
 				]
 			};
 
-			// Create TOC list
-			const tocList: List = {
-				type: 'list',
-				ordered: false,
-				children: headings
-					.filter((h) => h.depth <= tocDepth)
-					.map(
-						(heading): ListItem => ({
-							type: 'listItem',
-							children: [
-								{
-									type: 'paragraph',
-									children: [
-										{
-											type: 'link',
-											url: `#${heading.id}`,
-											children: [
-												{
-													type: 'text',
-													value: heading.text
-												}
-											]
-										}
-									]
-								}
-							]
-						})
-					)
-			};
+			// Filter headings by depth
+			const filteredHeadings = headings.filter((h) => h.depth <= tocDepth);
+
+			// Create nested TOC list with proper hierarchy
+			const tocList: List = buildNestedTocList(filteredHeadings);
 
 			// Replace TOC marker with heading and list
 			tree.children.splice(tocIndex, 1, tocHeading, tocList);
 		}
+	};
+}
+
+/**
+ * Builds a nested TOC list from flat headings array
+ * @param {Array<{depth: number, text: string, id: string}>} headings - Flat array of headings
+ * @returns {List} Nested list structure with proper hierarchy
+ * @private
+ */
+function buildNestedTocList(
+	headings: Array<{ depth: number; text: string; id: string }>
+): List {
+	if (headings.length === 0) {
+		return {
+			type: 'list',
+			ordered: false,
+			children: []
+		};
+	}
+
+	// Find the minimum depth (root level)
+	const minDepth = Math.min(...headings.map((h) => h.depth));
+
+	// Build nested structure
+	const buildLevel = (
+		items: Array<{ depth: number; text: string; id: string }>,
+		currentDepth: number
+	): ListItem[] => {
+		const result: ListItem[] = [];
+		let i = 0;
+
+		while (i < items.length) {
+			const heading = items[i];
+
+			// Skip if depth is less than current level (shouldn't happen)
+			if (heading.depth < currentDepth) {
+				i++;
+				continue;
+			}
+
+			// Skip if depth is greater than current level (will be handled recursively)
+			if (heading.depth > currentDepth) {
+				break;
+			}
+
+			// Create list item for current heading
+			const listItem: ListItem = {
+				type: 'listItem',
+				children: [
+					{
+						type: 'paragraph',
+						children: [
+							{
+								type: 'link',
+								url: `#${heading.id}`,
+								children: [
+									{
+										type: 'text',
+										value: heading.text
+									}
+								]
+							}
+						]
+					}
+				]
+			};
+
+			// Look ahead for child headings (deeper depth)
+			i++;
+			const childHeadings: Array<{ depth: number; text: string; id: string }> = [];
+			while (i < items.length && items[i].depth > currentDepth) {
+				childHeadings.push(items[i]);
+				i++;
+			}
+
+			// If there are child headings, create nested list
+			if (childHeadings.length > 0) {
+				const childDepth = Math.min(...childHeadings.map((h) => h.depth));
+				const nestedList: List = {
+					type: 'list',
+					ordered: false,
+					children: buildLevel(childHeadings, childDepth)
+				};
+				listItem.children.push(nestedList);
+			}
+
+			result.push(listItem);
+		}
+
+		return result;
+	};
+
+	return {
+		type: 'list',
+		ordered: false,
+		children: buildLevel(headings, minDepth)
 	};
 }
 
