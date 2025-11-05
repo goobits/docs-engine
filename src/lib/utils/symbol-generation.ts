@@ -18,6 +18,9 @@ import * as ts from 'typescript';
 import crypto from 'crypto';
 import { glob } from 'glob';
 import { FileIOError, ProcessingError, retryWithBackoff } from './errors.js';
+import { createLogger } from './logger.js';
+
+const logger = createLogger('symbol-generation');
 
 /**
  * Configuration for symbol map generation
@@ -105,7 +108,7 @@ export class SymbolMapGenerator {
 	 * Generate symbol map from TypeScript source files
 	 */
 	async generate(): Promise<SymbolMap> {
-		console.log('🔍 Scanning TypeScript files...');
+		logger.info('Scanning TypeScript files');
 
 		// Load cache
 		const cache = await this.loadCache();
@@ -119,7 +122,7 @@ export class SymbolMapGenerator {
 
 		// Find all TypeScript files matching patterns
 		const allFiles = await this.findSourceFiles();
-		console.log(`   Found ${allFiles.length} TypeScript files`);
+		logger.info({ fileCount: allFiles.length }, 'Found TypeScript files');
 
 		for (const relativeFile of allFiles) {
 			const filePath = path.resolve(this.config.baseDir, relativeFile);
@@ -138,7 +141,7 @@ export class SymbolMapGenerator {
 			if (!fileChanged && cachedEntry) {
 				// Use cached symbols
 				cacheHits++;
-				console.log(`   💾 Using cached ${relativeFile}`);
+				logger.debug({ file: relativeFile }, 'Using cached symbols');
 
 				// Add cached symbols to the symbol map
 				for (const symbol of cachedEntry.symbols) {
@@ -156,7 +159,7 @@ export class SymbolMapGenerator {
 
 			// File changed or not in cache, process it
 			cacheMisses++;
-			console.log(`   📄 Processing ${relativeFile}`);
+			logger.info({ file: relativeFile }, 'Processing file');
 
 			const fileSymbols = await this.extractSymbolsFromFile(filePath, relativeFile);
 
@@ -167,7 +170,7 @@ export class SymbolMapGenerator {
 				}
 				symbolMap[symbol.name].push(symbol);
 				symbolCount++;
-				console.log(`      ✓ ${symbol.kind} ${symbol.name}`);
+				logger.debug({ kind: symbol.kind, name: symbol.name }, 'Extracted symbol');
 			}
 
 			// Update cache for this file
@@ -528,7 +531,7 @@ export class SymbolMapGenerator {
 
 			// Invalidate cache if version mismatch
 			if (cache.version !== this.config.cacheVersion) {
-				console.log('   ⚠️  Cache version mismatch, invalidating cache');
+				logger.warn({ expected: this.config.cacheVersion, found: cache.version }, 'Cache version mismatch, invalidating cache');
 				return { version: this.config.cacheVersion, files: {} };
 			}
 
@@ -536,9 +539,10 @@ export class SymbolMapGenerator {
 		} catch (error: any) {
 			// ENOENT means file doesn't exist, which is fine
 			if (error?.code === 'ENOENT') {
+				logger.debug('No cache file found, starting fresh');
 				return { version: this.config.cacheVersion, files: {} };
 			}
-			console.log('   ⚠️  Failed to load cache, starting fresh');
+			logger.warn({ error: error.message }, 'Failed to load cache, starting fresh');
 			return { version: this.config.cacheVersion, files: {} };
 		}
 	}
@@ -622,31 +626,28 @@ export class SymbolMapGenerator {
 		cacheMisses: number
 	): void {
 		const symbolCount = Object.values(symbolMap).flat().length;
+		const uniqueNames = Object.keys(symbolMap).length;
+		const cacheHitRate = ((cacheHits / totalFiles) * 100).toFixed(1);
+		const cacheMissRate = ((cacheMisses / totalFiles) * 100).toFixed(1);
 
-		console.log(`\n✅ Generated symbol map: ${symbolCount} symbols`);
-		console.log(`   Unique names: ${Object.keys(symbolMap).length}`);
-		console.log(`   Output: ${this.config.outputPath}`);
-
-		// Cache statistics
-		console.log(`\n📊 Cache statistics:`);
-		console.log(
-			`   Cache hits:   ${cacheHits} files (${((cacheHits / totalFiles) * 100).toFixed(1)}%)`
-		);
-		console.log(
-			`   Cache misses: ${cacheMisses} files (${((cacheMisses / totalFiles) * 100).toFixed(1)}%)`
-		);
-		console.log(`   Cache file:   ${this.cacheFile}`);
+		logger.info({
+			symbolCount,
+			uniqueNames,
+			totalFiles,
+			cacheHits,
+			cacheMisses,
+			cacheHitRate: `${cacheHitRate}%`,
+			outputPath: this.config.outputPath
+		}, 'Generated symbol map');
 
 		// Disambiguation stats
 		const ambiguous = Object.entries(symbolMap).filter(([_, defs]) => defs.length > 1);
 		if (ambiguous.length > 0) {
-			console.log(`\n   ⚠️  ${ambiguous.length} symbols require disambiguation:`);
-			ambiguous.slice(0, 5).forEach(([name, defs]) => {
-				console.log(`      - ${name} (${defs.length} definitions)`);
-			});
-			if (ambiguous.length > 5) {
-				console.log(`      ... and ${ambiguous.length - 5} more`);
-			}
+			const samples = ambiguous.slice(0, 5).map(([name, defs]) => ({ name, count: defs.length }));
+			logger.warn({
+				ambiguousCount: ambiguous.length,
+				samples
+			}, 'Symbols requiring disambiguation');
 		}
 	}
 
@@ -681,7 +682,7 @@ export class SymbolMapGenerator {
 
 		const regenerate = async () => {
 			if (isRegenerating) {
-				console.log('   ⏳ Regeneration already in progress, queuing...');
+				logger.debug('Regeneration already in progress, queuing');
 				return;
 			}
 
@@ -690,32 +691,28 @@ export class SymbolMapGenerator {
 			const fileList = Array.from(pendingFiles);
 			pendingFiles.clear();
 
-			console.log('\n⚙️  Regenerating symbol map...');
-			if (fileList.length <= 3) {
-				fileList.forEach((file) => console.log(`   📝 ${file}`));
-			} else {
-				fileList.slice(0, 3).forEach((file) => console.log(`   📝 ${file}`));
-				console.log(`   📝 ... and ${fileList.length - 3} more files`);
-			}
+			logger.info({ files: fileList }, 'Regenerating symbol map');
 
 			try {
 				const symbolMap = await this.generate();
 				const duration = Date.now() - startTime;
 				const symbolCount = Object.values(symbolMap).flat().length;
 
-				console.log(`✅ Symbol map updated (${(duration / 1000).toFixed(1)}s, ${symbolCount} symbols)`);
+				logger.info({
+					duration,
+					symbolCount,
+					filesChanged: fileList.length
+				}, 'Symbol map updated');
 
 				if (onChange) {
 					onChange({ symbolCount, duration, files: fileList });
 				}
 			} catch (error) {
-				console.error('❌ Error regenerating symbol map:', error);
-				console.log('   Continuing to watch for changes...');
+				logger.error({ error }, 'Error regenerating symbol map');
+				logger.info('Continuing to watch for changes');
 			} finally {
 				isRegenerating = false;
 			}
-
-			console.log('\n👀 Watching TypeScript files for changes...');
 		};
 
 		const handleFileChange = (filePath: string) => {
@@ -731,7 +728,7 @@ export class SymbolMapGenerator {
 			const relativePath = path.relative(this.config.baseDir, filePath);
 			pendingFiles.add(relativePath);
 
-			console.log(`📝 File changed: ${relativePath}`);
+			logger.debug({ file: relativePath }, 'File changed');
 
 			// Clear existing timer
 			if (debounceTimer) {
@@ -751,9 +748,7 @@ export class SymbolMapGenerator {
 			return path.resolve(this.config.baseDir, dir);
 		});
 
-		console.log('🚀 Starting TypeScript file watcher...');
-		console.log('\nWatching directories:');
-		watchDirs.forEach((dir) => console.log(`   - ${path.relative(this.config.baseDir, dir)}`));
+		logger.info({ directories: watchDirs.map(dir => path.relative(this.config.baseDir, dir)) }, 'Starting TypeScript file watcher');
 
 		const watcher = chokidar.watch(watchDirs, {
 			ignored: this.config.excludePatterns,
@@ -771,8 +766,7 @@ export class SymbolMapGenerator {
 
 		watcher
 			.on('ready', () => {
-				console.log('\n👀 Watching TypeScript files for changes...');
-				console.log('   Press Ctrl+C to stop\n');
+				logger.info('Watching TypeScript files for changes (Press Ctrl+C to stop)');
 			})
 			.on('change', handleFileChange)
 			.on('add', handleFileChange)
@@ -786,7 +780,7 @@ export class SymbolMapGenerator {
 				}
 
 				const relativePath = path.relative(this.config.baseDir, filePath);
-				console.log(`🗑️  File deleted: ${relativePath}`);
+				logger.debug({ file: relativePath }, 'File deleted');
 				pendingFiles.add(relativePath);
 
 				if (debounceTimer) {
@@ -798,14 +792,14 @@ export class SymbolMapGenerator {
 				}, debounce);
 			})
 			.on('error', (error) => {
-				console.error(`❌ Watcher error: ${error}`);
+				logger.error({ error }, 'Watcher error');
 			});
 
 		return {
 			close: async () => {
-				console.log('\n\n👋 Stopping file watcher...');
+				logger.info('Stopping file watcher');
 				await watcher.close();
-				console.log('✅ File watcher stopped');
+				logger.info('File watcher stopped');
 			},
 		};
 	}
@@ -828,11 +822,10 @@ export class SymbolMapGenerator {
 		improvement: number;
 		cacheSize: number;
 	}> {
-		console.log('🔬 Symbol Map Generation Benchmark\n');
-		console.log('='.repeat(50));
+		logger.info('Starting symbol map generation benchmark');
 
 		// Test 1: Cold run (no cache)
-		console.log('\n📊 Cold run (no cache)');
+		logger.info('Running cold benchmark (no cache)');
 		try {
 			await fsp.unlink(this.cacheFile);
 		} catch {
@@ -841,17 +834,17 @@ export class SymbolMapGenerator {
 		const coldStart = Date.now();
 		await this.generate();
 		const coldTime = Date.now() - coldStart;
-		console.log(`   ⏱️  Duration: ${coldTime}ms (${(coldTime / 1000).toFixed(2)}s)`);
+		logger.info({ duration: coldTime }, 'Cold run completed');
 
 		// Test 2: Warm run (with cache, no changes)
-		console.log('\n📊 Warm run (cache, no changes)');
+		logger.info('Running warm benchmark (cache, no changes)');
 		const warmStart = Date.now();
 		await this.generate();
 		const warmTime = Date.now() - warmStart;
-		console.log(`   ⏱️  Duration: ${warmTime}ms (${(warmTime / 1000).toFixed(2)}s)`);
+		logger.info({ duration: warmTime }, 'Warm run completed');
 
 		// Test 3: Warm run (with cache, 1 file changed)
-		console.log('\n📊 Warm run (cache, 1 file changed)');
+		logger.info('Running warm benchmark (cache, 1 file changed)');
 		const files = await this.findSourceFiles();
 		if (files.length > 0) {
 			const testFile = path.resolve(this.config.baseDir, files[0]);
@@ -865,28 +858,30 @@ export class SymbolMapGenerator {
 		const modifiedStart = Date.now();
 		await this.generate();
 		const modifiedTime = Date.now() - modifiedStart;
-		console.log(`   ⏱️  Duration: ${modifiedTime}ms (${(modifiedTime / 1000).toFixed(2)}s)`);
+		logger.info({ duration: modifiedTime }, 'Warm run (with change) completed');
 
-		// Summary
-		console.log('\n' + '='.repeat(50));
-		console.log('📈 Summary:\n');
-		console.log(`Cold run:            ${coldTime}ms (${(coldTime / 1000).toFixed(2)}s)`);
-		console.log(`Warm run (no change): ${warmTime}ms (${(warmTime / 1000).toFixed(2)}s)`);
-		console.log(`Warm run (1 change):  ${modifiedTime}ms (${(modifiedTime / 1000).toFixed(2)}s)`);
-
+		// Calculate improvement
 		const improvement = ((1 - warmTime / coldTime) * 100).toFixed(1);
-		console.log(`\nImprovement:         ${improvement}% faster`);
-		console.log(`Target achieved:     ${warmTime < 1000 ? '✅ Yes' : '❌ No'} (target: <1000ms)`);
+		const targetAchieved = warmTime < 1000;
 
 		// Check cache file size
 		let cacheSize = 0;
 		try {
 			const stats = await fsp.stat(this.cacheFile);
 			cacheSize = stats.size;
-			console.log(`\n💾 Cache file size:   ${(cacheSize / 1024).toFixed(2)} KB`);
 		} catch {
 			// Cache file doesn't exist
 		}
+
+		// Log summary
+		logger.info({
+			coldTime,
+			warmTime,
+			warmWithChangeTime: modifiedTime,
+			improvement: `${improvement}%`,
+			targetAchieved,
+			cacheSizeKB: (cacheSize / 1024).toFixed(2)
+		}, 'Benchmark summary');
 
 		return {
 			cold: coldTime,

@@ -3,6 +3,9 @@ import { createHash } from 'crypto';
 import fsp from 'fs/promises';
 import { dirname, join, extname, basename } from 'path';
 import { FileIOError, ImageProcessingError, retryWithBackoff } from '../utils/errors.js';
+import { createLogger } from '../utils/logger.js';
+
+const logger = createLogger('image-processor');
 
 /**
  * Image processing configuration
@@ -309,7 +312,7 @@ export async function batchProcessImages(
 				results.push(result.value);
 			} else {
 				const config = batch[index];
-				console.error(`Failed to process image ${config.inputPath}:`, result.reason);
+				logger.error({ inputPath: config.inputPath, error: result.reason }, 'Failed to process image');
 				errors.push({ config, error: result.reason });
 
 				if (throwOnError) {
@@ -320,7 +323,11 @@ export async function batchProcessImages(
 	}
 
 	if (errors.length > 0) {
-		console.warn(`⚠️  Batch processing completed with ${errors.length} error(s)`);
+		logger.warn({
+			errorCount: errors.length,
+			totalImages: configs.length,
+			successCount: results.length
+		}, 'Batch processing completed with errors');
 	}
 
 	return results;
