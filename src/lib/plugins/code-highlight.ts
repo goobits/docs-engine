@@ -44,7 +44,14 @@ export interface CodeBlockMetadata {
 	raw: string;
 }
 
-// Cache the highlighter instance
+// ============================================================================
+// Module-Private Helpers (True Privacy via ESM)
+// ============================================================================
+
+/**
+ * Cache the highlighter instance at module level
+ * This is private to the module - not accessible from outside
+ */
 let highlighterPromise: Promise<any> | null = null;
 
 /**
@@ -57,26 +64,9 @@ let highlighterPromise: Promise<any> | null = null;
  * - Line numbers: `showLineNumbers`
  * - Diff mode: `diff` language
  *
- * @param infoString - Code fence info string (e.g., "typescript title=\"app.ts\" {1-3}")
- * @returns Parsed metadata object
- *
- * @example
- * ```typescript
- * const meta = parseCodeMetadata('typescript title="app.ts" {1,3-5} showLineNumbers');
- * // Returns:
- * // {
- * //   language: 'typescript',
- * //   title: 'app.ts',
- * //   highlightLines: [1, 3, 4, 5],
- * //   showLineNumbers: true,
- * //   isDiff: false,
- * //   raw: 'typescript title="app.ts" {1,3-5} showLineNumbers'
- * // }
- * ```
- *
- * @internal
+ * Module-private helper - not exported
  */
-export function parseCodeMetadata(infoString: string): CodeBlockMetadata {
+function parseCodeMetadata(infoString: string): CodeBlockMetadata {
 	const metadata: CodeBlockMetadata = {
 		language: 'plaintext',
 		raw: infoString
@@ -103,8 +93,10 @@ export function parseCodeMetadata(infoString: string): CodeBlockMetadata {
 		metadata.highlightLines = parseLineRange(highlightMatch[1]);
 	}
 
-	// Check for line numbers flag
-	metadata.showLineNumbers = infoString.includes('showLineNumbers');
+	// Check for line numbers flag (only set if explicitly specified)
+	if (infoString.includes('showLineNumbers')) {
+		metadata.showLineNumbers = true;
+	}
 
 	return metadata;
 }
@@ -117,18 +109,9 @@ export function parseCodeMetadata(infoString: string): CodeBlockMetadata {
  * - Ranges: `1-5` → [1, 2, 3, 4, 5]
  * - Mixed: `1,3-5,10` → [1, 3, 4, 5, 10]
  *
- * @param rangeString - Line range specification (e.g., "1,3-5,10")
- * @returns Array of line numbers
- *
- * @example
- * ```typescript
- * parseLineRange('1,3-5,10');
- * // Returns: [1, 3, 4, 5, 10]
- * ```
- *
- * @internal
+ * Module-private helper - not exported
  */
-export function parseLineRange(rangeString: string): number[] {
+function parseLineRange(rangeString: string): number[] {
 	const lines = new Set<number>();
 
 	rangeString.split(',').forEach((part) => {
@@ -155,13 +138,9 @@ export function parseLineRange(rangeString: string): number[] {
  * - Lines starting with `-` are deletions (red)
  * - Other lines are context (default)
  *
- * @param code - Raw code with diff syntax
- * @param highlightedHtml - Highlighted HTML from Shiki
- * @returns HTML with diff classes applied
- *
- * @internal
+ * Module-private helper - not exported
  */
-export function applyDiffStyling(code: string, highlightedHtml: string): string {
+function applyDiffStyling(code: string, highlightedHtml: string): string {
 	const lines = code.split('\n');
 	const htmlLines = highlightedHtml.split('\n');
 
@@ -183,14 +162,9 @@ export function applyDiffStyling(code: string, highlightedHtml: string): string 
 /**
  * Wrap code block with metadata (title, line numbers, copy button)
  *
- * @param highlightedHtml - Syntax highlighted HTML from Shiki
- * @param metadata - Code block metadata
- * @param code - Original code content
- * @returns HTML with metadata wrapper
- *
- * @internal
+ * Module-private helper - not exported
  */
-export function wrapWithMetadata(
+function wrapWithMetadata(
 	highlightedHtml: string,
 	metadata: CodeBlockMetadata,
 	code: string
@@ -237,13 +211,9 @@ export function wrapWithMetadata(
 /**
  * Apply line highlighting classes to highlighted HTML
  *
- * @param highlightedHtml - Highlighted HTML from Shiki
- * @param highlightLines - Array of line numbers to highlight
- * @returns HTML with highlight classes applied
- *
- * @internal
+ * Module-private helper - not exported
  */
-export function applyLineHighlighting(highlightedHtml: string, highlightLines: number[]): string {
+function applyLineHighlighting(highlightedHtml: string, highlightLines: number[]): string {
 	if (!highlightLines || highlightLines.length === 0) {
 		return highlightedHtml;
 	}
@@ -259,6 +229,26 @@ export function applyLineHighlighting(highlightedHtml: string, highlightLines: n
 
 	return processedLines.join('\n');
 }
+
+/**
+ * Escape HTML special characters
+ *
+ * Module-private helper - not exported
+ */
+function escapeHtml(text: string): string {
+	const htmlEscapes: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;'
+	};
+	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
+}
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Remark plugin for advanced code block highlighting with Shiki
@@ -278,7 +268,7 @@ export function applyLineHighlighting(highlightedHtml: string, highlightLines: n
  * ```typescript
  * import { unified } from 'unified';
  * import remarkParse from 'remark-parse';
- * import { codeHighlightPlugin } from './code-highlight';
+ * import { codeHighlightPlugin } from '@goobits/docs-engine/plugins';
  *
  * const processor = unified()
  *   .use(remarkParse)
@@ -413,18 +403,4 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 			})
 		);
 	};
-}
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }
