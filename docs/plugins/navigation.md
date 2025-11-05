@@ -1,3 +1,11 @@
+---
+title: Navigation Builder
+description: Auto-generate navigation structure from markdown files with frontmatter
+section: Plugins
+difficulty: beginner
+tags: [plugin, navigation, frontmatter, sidebar]
+---
+
 # Navigation Builder
 
 Auto-generate navigation structure from markdown files with frontmatter.
@@ -17,7 +25,7 @@ The navigation builder utility parses markdown files with YAML frontmatter and g
 ```yaml
 ---
 title: Quick Start          # Page title (optional, derived from filename if missing)
-description: Get started    # Short description (optional, extracted from first paragraph if missing)
+description: Get started    # Short description (optional)
 section: Getting Started    # Section to group under (optional, defaults to "Documentation")
 order: 1                    # Sort order within section (optional, defaults to 999)
 icon: rocket                # Icon name for section (optional)
@@ -30,29 +38,15 @@ hidden: false               # Hide from navigation (optional)
 ### 1. Create Docs with Frontmatter
 
 ```markdown
-<!-- /workspace/docs/quick-start.md -->
+<!-- /docs/quick-start.md -->
 ---
 title: Quick Start
-description: Get up and running with AgentFlow in 5 minutes
+description: Get up and running in 5 minutes
 section: Getting Started
 order: 1
 ---
 
 # Quick Start
-
-Your content here...
-```
-
-```markdown
-<!-- /workspace/docs/dsl/fundamentals.md -->
----
-title: DSL Fundamentals
-description: Learn the core concepts of AgentFlow DSL
-section: DSL Language
-order: 1
----
-
-# DSL Fundamentals
 
 Your content here...
 ```
@@ -81,12 +75,9 @@ export const load = async () => {
 };
 ```
 
-**For nested directories and custom icons**, see the complete example in the API Reference section below.
-
 ### 3. Use Navigation in Layout
 
 ```svelte
-<!-- web/src/routes/docs/+layout.svelte -->
 <script lang="ts">
   import { page } from '$app/stores';
   import { DocsSidebar } from '@goobits/docs-engine/components';
@@ -105,22 +96,9 @@ export const load = async () => {
     <slot />
   </main>
 </div>
-
-<style>
-  .docs-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .docs-content {
-    min-width: 0; /* Prevent overflow */
-  }
-</style>
 ```
+
+---
 
 ## API Reference
 
@@ -147,70 +125,7 @@ Helper to create DocFile objects.
 
 **Returns:** DocFile
 
-### `extractFrontmatter(content)`
-
-Parse YAML frontmatter from markdown.
-
-**Parameters:**
-- `content` (string) - Markdown content with frontmatter
-
-**Returns:** { frontmatter: DocFrontmatter, body: string }
-
-## Complete Example
-
-Full implementation with recursive directory scanning and custom icons:
-
-```typescript
-// src/routes/docs/+layout.server.ts
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { join } from 'path';
-import { buildNavigation, createDocFile } from '@goobits/docs-engine/utils';
-import { BookOpen, Code, Zap, FileText } from 'lucide-svelte';
-
-const DOCS_ROOT = '/workspace/docs';
-const BASE_PATH = '/docs';
-
-const SECTION_ICONS = {
-  'Getting Started': BookOpen,
-  'DSL Language': Code,
-  'Orchestration': Zap,
-  'Reference': FileText,
-};
-
-function scanDocsDirectory(dir: string, relativePath = ''): string[] {
-  const files: string[] = [];
-  const items = readdirSync(dir);
-
-  for (const item of items) {
-    const fullPath = join(dir, item);
-    const relPath = relativePath ? `${relativePath}/${item}` : item;
-
-    if (statSync(fullPath).isDirectory()) {
-      files.push(...scanDocsDirectory(fullPath, relPath));
-    } else if (item.endsWith('.md')) {
-      files.push(relPath);
-    }
-  }
-
-  return files;
-}
-
-export const load = async () => {
-  const mdFiles = scanDocsDirectory(DOCS_ROOT);
-
-  const docFiles = mdFiles.map((path) => {
-    const content = readFileSync(join(DOCS_ROOT, path), 'utf-8');
-    return createDocFile({ path, content, basePath: BASE_PATH });
-  });
-
-  const navigation = buildNavigation(docFiles, {
-    icons: SECTION_ICONS,
-    defaultSection: 'Documentation',
-  });
-
-  return { navigation };
-};
-```
+---
 
 ## Custom Sorting
 
@@ -230,14 +145,6 @@ order: 1
 ```
 
 ```yaml
-# docs/installation.md
----
-section: Getting Started
-order: 2
----
-```
-
-```yaml
 # docs/dsl/fundamentals.md
 ---
 section: DSL Language
@@ -247,6 +154,8 @@ order: 10
 
 This produces sections in order: "Getting Started" (min order: 1), then "DSL Language" (min order: 10).
 
+---
+
 ## Fallback Behavior
 
 If frontmatter is missing:
@@ -255,6 +164,8 @@ If frontmatter is missing:
 - **Description:** Extracted from first paragraph of content
 - **Section:** Uses `defaultSection` option (default: `"Documentation"`)
 - **Order:** Defaults to `999` (appears at end)
+
+---
 
 ## Hidden Pages
 
@@ -268,3 +179,15 @@ hidden: true
 ```
 
 This is useful for work-in-progress docs that exist in the repo but shouldn't be shown yet.
+
+---
+
+## Related Documentation
+
+**Prerequisites:** Basic YAML knowledge, SvelteKit understanding
+
+**Next Steps:**
+- [Frontmatter Parser](./frontmatter.md) - Parse YAML frontmatter
+
+**Related:**
+- [Getting Started](../getting-started.md) - Quick start guide

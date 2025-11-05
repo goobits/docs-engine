@@ -1,3 +1,11 @@
+---
+title: Frontmatter Parser
+description: Parse YAML frontmatter from markdown files to extract metadata
+section: Plugins
+difficulty: beginner
+tags: [plugin, markdown, frontmatter, metadata]
+---
+
 # Frontmatter Parser
 
 Parse YAML frontmatter from markdown files to extract metadata.
@@ -53,6 +61,7 @@ Extracts and parses YAML frontmatter from markdown.
 - `raw` (string) - Original markdown
 
 **Type Definition:**
+
 ```typescript
 interface ParsedContent {
   frontmatter: Frontmatter;
@@ -85,6 +94,7 @@ Extracts a title using priority order: frontmatter.title → first heading → f
 **Returns:** string
 
 **Example:**
+
 ```javascript
 // Uses frontmatter title
 extractTitle({ title: 'Custom' }, '# Heading', 'Fallback');
@@ -154,7 +164,7 @@ const navigation = buildNavigation(files);
 // Uses frontmatter.title, frontmatter.section, frontmatter.order
 ```
 
-See [NAVIGATION.md](../NAVIGATION.md) for details.
+See [Navigation Builder](./navigation.md) for details.
 
 ## Error Handling
 
@@ -170,3 +180,16 @@ Content`);
 // content = original markdown (including malformed frontmatter)
 // Error logged to console
 ```
+
+---
+
+## Related Documentation
+
+**Prerequisites:** Basic YAML knowledge, markdown familiarity
+
+**Next Steps:**
+- [Navigation Builder](./navigation.md) - Auto-generate navigation from frontmatter
+- [Table of Contents](./toc.md) - Generate TOC from headings
+
+**Related:**
+- [Getting Started](../getting-started.md) - Quick start guide
