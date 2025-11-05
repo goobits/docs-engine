@@ -54,3 +54,12 @@ export type { RenderOptions } from './symbol-renderer';
 
 // NOTE: Version utilities moved to server/index.ts (requires Node.js fs)
 // Import from '@goobits/docs-engine/server' instead
+
+// Internationalization (i18n) utilities (Proposal 14)
+export * from './i18n';
+export * from './i18n-seo';
+export type { LocalizedContent } from './i18n-loader';
+export type { HreflangLink } from './i18n-seo';
+
+// NOTE: i18n-loader and i18n-docs-loader moved to server/index.ts (require Node.js fs)
+// Import from '@goobits/docs-engine/server' instead

@@ -39,3 +39,8 @@ export type {
 	ApiParserConfig
 } from '../generators/api-parser';
 export type { MarkdownGeneratorConfig } from '../generators/api-docs';
+
+// Internationalization (i18n) server utilities (Proposal 14) - Server-side only (require Node.js fs)
+export * from '../utils/i18n-loader';
+export * from '../utils/i18n-docs-loader';
+export type { LocalizedContent } from '../utils/i18n-loader';

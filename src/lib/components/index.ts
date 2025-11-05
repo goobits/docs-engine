@@ -36,5 +36,8 @@ export { default as VersionBanner } from './VersionBanner.svelte';
 export { default as OptimizedImage } from './OptimizedImage.svelte';
 export { default as OptimizedImageHydrator } from './OptimizedImageHydrator.svelte';
 
+// Internationalization (i18n) (Proposal 14)
+export { default as LanguageSwitcher } from './LanguageSwitcher.svelte';
+
 // Types
 export type * from './types';

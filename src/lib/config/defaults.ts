@@ -1,3 +1,29 @@
+/**
+ * Locale configuration for internationalization
+ *
+ * @public
+ */
+export interface LocaleConfig {
+  /** Locale code (e.g., 'en', 'es', 'zh', 'ar') */
+  code: string;
+  /** Display label (e.g., 'English', 'Español', '中文') */
+  label: string;
+  /** Text direction (auto-detected for RTL languages if not specified) */
+  dir?: 'ltr' | 'rtl';
+}
+
+/**
+ * Internationalization configuration
+ *
+ * @public
+ */
+export interface I18nConfig {
+  /** Default locale (used as fallback) */
+  defaultLocale: string;
+  /** Available locales */
+  locales: LocaleConfig[];
+}
+
 export interface MarkdownDocsConfig {
   docsRoot: string;
   routePrefix: string;
@@ -54,6 +80,11 @@ export interface MarkdownDocsConfig {
     /** Generate robots.txt (default: true) */
     generateRobots?: boolean;
   };
+  /**
+   * Internationalization configuration
+   * Enable multi-language support with locale-based routing
+   */
+  i18n?: I18nConfig;
 }
 
 export const defaultConfig: MarkdownDocsConfig = {

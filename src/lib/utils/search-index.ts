@@ -22,6 +22,8 @@ export interface SearchDocument {
 	href: string;
 	section: string;
 	headings: string[];
+	/** Locale code for multi-language support (e.g., 'en', 'es', 'zh') */
+	locale?: string;
 }
 
 /**
@@ -313,4 +315,82 @@ export function highlightMatches(text: string, query: string): string {
  */
 function escapeRegex(str: string): string {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Create locale-specific search index
+ *
+ * Similar to createSearchIndex but adds locale field to documents.
+ * Useful for building separate indexes per language.
+ *
+ * @param navigation - Array of documentation sections
+ * @param contentMap - Map of href to full markdown content
+ * @param locale - Locale code (e.g., 'en', 'es', 'zh')
+ * @param config - Optional search configuration
+ * @returns Serializable search index with locale info
+ *
+ * @public
+ */
+export function createLocalizedSearchIndex(
+	navigation: DocsSection[],
+	contentMap: Map<string, string>,
+	locale: string,
+	config: SearchIndexConfig = {}
+): string {
+	const mergedConfig = { ...defaultConfig, ...config };
+	const miniSearch = new MiniSearch({
+		fields: mergedConfig.fields,
+		storeFields: ['title', 'description', 'href', 'section', 'locale'],
+		searchOptions: {
+			boost: mergedConfig.fieldWeights,
+			fuzzy: mergedConfig.fuzzyThreshold,
+		},
+	});
+
+	// Build documents with locale field
+	const documents: SearchDocument[] = [];
+
+	navigation.forEach((section) => {
+		section.links.forEach((link) => {
+			const content = contentMap.get(link.href) || '';
+			const headings = extractHeadings(content);
+			const cleanContent = stripMarkdown(content);
+
+			documents.push({
+				id: link.href,
+				title: link.title,
+				description: link.description,
+				content: cleanContent,
+				href: link.href,
+				section: section.title,
+				headings,
+				locale, // Add locale field
+			});
+		});
+	});
+
+	// Add documents and serialize
+	miniSearch.addAll(documents);
+	return JSON.stringify(miniSearch.toJSON());
+}
+
+/**
+ * Filter search results by locale
+ *
+ * @param results - Search results
+ * @param locale - Locale to filter by
+ * @returns Filtered results
+ *
+ * @public
+ */
+export function filterResultsByLocale(
+	results: SearchResult[],
+	locale: string
+): SearchResult[] {
+	return results.filter((result) => {
+		// If locale is not set on result, include it (backward compatibility)
+		// Otherwise, only include results matching the locale
+		return !(result as unknown as SearchDocument).locale ||
+			(result as unknown as SearchDocument).locale === locale;
+	});
 }
