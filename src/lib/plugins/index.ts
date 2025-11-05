@@ -10,3 +10,5 @@ export type { LinksPluginOptions } from './links';
 export { screenshotPlugin } from './screenshot';
 export type { ScreenshotPluginOptions } from './screenshot';
 export { collapsePlugin } from './collapse';
+export { referencePlugin } from './reference';
+export type { ReferencePluginOptions } from './reference';

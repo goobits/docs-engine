@@ -43,3 +43,9 @@ export type { GitConfig, Contributor, GitProvider } from './git';
 // Search index utilities (Proposal 03)
 export * from './search-index';
 export type { SearchDocument, SearchResult as SearchIndexResult, SearchIndexConfig } from './search-index';
+
+// Symbol reference utilities
+export * from './symbol-resolver';
+export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
+export * from './symbol-renderer';
+export type { RenderOptions } from './symbol-renderer';

@@ -330,14 +330,15 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 				}
 
 				try {
-					// Build decorations for highlighted lines (cleaner Shiki decorations API from main)
-					const decorations = metadata.highlightLines && metadata.highlightLines.length > 0
-						? metadata.highlightLines.map((line) => ({
-								start: { line: line - 1, character: 0 },
-								end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
-								properties: { class: 'highlighted' }
-						  }))
-						: [];
+					// Build decorations for highlighted lines (Shiki decorations API)
+					const decorations =
+						metadata.highlightLines && metadata.highlightLines.length > 0
+							? metadata.highlightLines.map((line) => ({
+									start: { line: line - 1, character: 0 },
+									end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
+									properties: { class: 'highlighted' }
+							  }))
+							: [];
 
 					// Highlight the code with Shiki
 					let highlighted = highlighter.codeToHtml(code, {

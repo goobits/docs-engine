@@ -3,99 +3,124 @@
    * V2 Docs Sidebar
    *
    * Integrated sidebar matching v2 design system
-   * Extracted from Spacebase for @goobits/markdown-docs
    */
 
-  import { Search, ChevronDown, X, Filter } from "@lucide/svelte";
-  import type { DocsSection, DocsLink } from './types.js';
+  import { page } from "$app/stores";
+  import { Search, ChevronDown, X } from "@lucide/svelte";
+  import { docsNavigation, getAllDocsLinks, type DocsLink } from "$lib/config/docs-navigation";
+  import { SvelteSet } from "svelte/reactivity";
 
   interface Props {
-    navigation: DocsSection[];
     currentPath?: string;
   }
 
-  let { navigation, currentPath = "" }: Props = $props();
-
-  // Debug: Log navigation to see audience data
-  $effect(() => {
-    console.log('[DocsSidebar] Navigation data:', navigation);
-    console.log('[DocsSidebar] Sample link with audience:', navigation[0]?.links[0]);
-  });
+  let { currentPath = "" }: Props = $props();
 
   // Audience filter state
-  const AUDIENCE_TYPES = ['new-users', 'developers', 'operators', 'integrators', 'contributors'] as const;
-  type AudienceType = typeof AUDIENCE_TYPES[number];
+  const AUDIENCE_TYPES = [
+    "new-users",
+    "developers",
+    "operators",
+    "integrators",
+    "contributors",
+  ] as const;
+  type AudienceType = (typeof AUDIENCE_TYPES)[number];
 
   const AUDIENCE_LABELS: Record<AudienceType, string> = {
-    'new-users': 'New Users',
-    'developers': 'Developers',
-    'operators': 'Operators',
-    'integrators': 'Integrators',
-    'contributors': 'Contributors'
+    "new-users": "New Users",
+    developers: "Developers",
+    operators: "Operators",
+    integrators: "Integrators",
+    contributors: "Contributors",
   };
 
-  // Load from localStorage on mount
-  let selectedAudiences = $state<Set<AudienceType>>(new Set());
-
-  // Initialize from localStorage
-  $effect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = localStorage.getItem('docs-audience-filter');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        selectedAudiences = new Set(parsed);
-      } catch {
-        // Ignore parse errors
-      }
-    }
-  });
-
-  // Save to localStorage when changed
-  $effect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('docs-audience-filter', JSON.stringify(Array.from(selectedAudiences)));
-  });
+  let selectedAudiences = $state(new SvelteSet<AudienceType>());
 
   // Search state
   let searchQuery = $state("");
   let searchResults = $state<Array<DocsLink & { section: string }>>([]);
 
-  // Expanded sections state
+  // Expanded sections state - dynamically initialized from navigation
   let expandedSections = $state<Record<string, boolean>>({});
 
-  // Initialize all sections as expanded
+  // All links for search
+  const allLinks = getAllDocsLinks();
+
+  // Initialize audience filter from localStorage or default to new-users and developers
   $effect(() => {
-    const sections: Record<string, boolean> = {};
-    navigation.forEach(section => {
-      sections[section.title] = true;
-    });
-    expandedSections = sections;
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem("docs-audience-filter");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        selectedAudiences = new SvelteSet(parsed);
+      } catch {
+        // Parse error - use defaults
+        selectedAudiences = new SvelteSet(["new-users", "developers"]);
+      }
+    } else {
+      // First visit - default to new-users and developers
+      selectedAudiences = new SvelteSet(["new-users", "developers"]);
+    }
   });
 
-  // Flatten navigation for search
-  const allLinks = $derived(navigation.flatMap((section) =>
-    section.links.map((link) => ({
-      ...link,
-      section: section.title,
-    }))
-  ));
+  // Save audience filter to localStorage when changed
+  $effect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("docs-audience-filter", JSON.stringify(Array.from(selectedAudiences)));
+  });
+
+  // Initialize expanded sections from localStorage or default to all open
+  $effect(() => {
+    if (typeof window === "undefined") return;
+
+    const stored = localStorage.getItem("docs-expanded-sections");
+    if (stored) {
+      try {
+        expandedSections = JSON.parse(stored);
+      } catch {
+        // If parse fails, default to all sections open
+        const allOpen: Record<string, boolean> = {};
+        for (const section of docsNavigation) {
+          allOpen[section.title] = true;
+        }
+        expandedSections = allOpen;
+      }
+    } else {
+      // First visit - default to all sections open
+      const allOpen: Record<string, boolean> = {};
+      for (const section of docsNavigation) {
+        allOpen[section.title] = true;
+      }
+      expandedSections = allOpen;
+    }
+  });
+
+  // Save expanded sections to localStorage when changed
+  $effect(() => {
+    if (typeof window === "undefined") return;
+    if (Object.keys(expandedSections).length > 0) {
+      localStorage.setItem("docs-expanded-sections", JSON.stringify(expandedSections));
+    }
+  });
 
   // Filter navigation by selected audiences
   const filteredNavigation = $derived.by(() => {
     if (selectedAudiences.size === 0) {
-      return navigation; // Show all if no filters selected
+      return docsNavigation; // Show all if no filters selected
     }
 
-    return navigation.map(section => ({
-      ...section,
-      links: section.links.filter(link =>
-        !link.audience || selectedAudiences.has(link.audience as AudienceType)
-      )
-    })).filter(section => section.links.length > 0); // Remove empty sections
+    return docsNavigation
+      .map((section) => ({
+        ...section,
+        links: section.links.filter(
+          (link) => !link.audience || selectedAudiences.has(link.audience as AudienceType)
+        ),
+      }))
+      .filter((section) => section.links.length > 0); // Remove empty sections
   });
 
-  // Search functionality (searches within filtered results)
+  // Search functionality
   $effect(() => {
     if (searchQuery.trim() === "") {
       searchResults = [];
@@ -103,14 +128,7 @@
     }
 
     const query = searchQuery.toLowerCase();
-    const linksToSearch = filteredNavigation.flatMap((section) =>
-      section.links.map((link) => ({
-        ...link,
-        section: section.title,
-      }))
-    );
-
-    searchResults = linksToSearch.filter(
+    searchResults = allLinks.filter(
       (link) =>
         link.title.toLowerCase().includes(query) ||
         link.description.toLowerCase().includes(query) ||
@@ -127,25 +145,22 @@
   }
 
   function toggleAudience(audience: AudienceType) {
-    const newSet = new Set(selectedAudiences);
+    const newSet = new SvelteSet(selectedAudiences);
     if (newSet.has(audience)) {
       newSet.delete(audience);
     } else {
       newSet.add(audience);
     }
     selectedAudiences = newSet;
-    console.log('[DocsSidebar] Selected audiences:', Array.from(selectedAudiences));
-    console.log('[DocsSidebar] Filtered navigation:', filteredNavigation);
   }
 
   function clearFilters() {
-    selectedAudiences = new Set();
+    selectedAudiences = new SvelteSet();
   }
 
   // Check if link is active
   function isActive(href: string): boolean {
-    if (typeof window === 'undefined') return false;
-    return currentPath === href || window.location.pathname === href;
+    return currentPath === href || $page.url.pathname === href;
   }
 </script>
 
@@ -190,40 +205,6 @@
     {/if}
   </div>
 
-  <!-- Audience Filter -->
-  {#if !searchQuery}
-    <div class="v2-docs-sidebar__filter">
-      <div class="v2-docs-sidebar__filter-header">
-        <div class="v2-docs-sidebar__filter-title">
-          <Filter size={14} />
-          <span>Filter by Audience</span>
-        </div>
-        {#if selectedAudiences.size > 0}
-          <button
-            onclick={clearFilters}
-            class="v2-docs-sidebar__filter-clear"
-            type="button"
-            aria-label="Clear filters"
-          >
-            Clear
-          </button>
-        {/if}
-      </div>
-      <div class="v2-docs-sidebar__filter-chips">
-        {#each AUDIENCE_TYPES as audience (audience)}
-          <button
-            onclick={() => toggleAudience(audience)}
-            class="v2-docs-sidebar__filter-chip {selectedAudiences.has(audience) ? 'active' : ''}"
-            type="button"
-            aria-pressed={selectedAudiences.has(audience)}
-          >
-            {AUDIENCE_LABELS[audience]}
-          </button>
-        {/each}
-      </div>
-    </div>
-  {/if}
-
   <!-- Navigation (hidden when searching) -->
   {#if !searchQuery}
     <nav class="v2-docs-sidebar__nav">
@@ -262,15 +243,39 @@
       {/each}
     </nav>
   {/if}
+
+  <!-- Audience Filter at bottom (hidden when searching) -->
+  {#if !searchQuery}
+    <div class="v2-docs-sidebar__filter">
+      {#each AUDIENCE_TYPES as audience (audience)}
+        <button
+          onclick={() => toggleAudience(audience)}
+          class="v2-docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"
+          type="button"
+          aria-pressed={selectedAudiences.has(audience)}
+          title={AUDIENCE_LABELS[audience]}
+        >
+          {AUDIENCE_LABELS[audience]}
+        </button>
+      {/each}
+      {#if selectedAudiences.size > 0}
+        <button onclick={clearFilters} class="v2-docs-sidebar__filter-reset" type="button">
+          clear
+        </button>
+      {/if}
+    </div>
+  {/if}
 </aside>
 
 <style lang="scss">
+  @use "$lib/styles/v2-tokens.scss" as *;
+
   .v2-docs-sidebar {
     width: 280px;
     height: 100%;
-    background: var(--v2-surface-base, rgba(255, 255, 255, 0.03));
-    border-right: 1px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
-    border-radius: var(--v2-radius-lg, 14px);
+    background: var(--v2-surface-base);
+    border-right: 1px solid var(--v2-border-subtle);
+    border-radius: var(--v2-radius-lg);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -278,8 +283,8 @@
 
   /* Search */
   .v2-docs-sidebar__search {
-    padding: var(--v2-spacing-lg, 1.5rem);
-    border-bottom: 1px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
+    padding: var(--v2-spacing-lg);
+    border-bottom: 1px solid var(--v2-border-subtle);
   }
 
   .v2-docs-sidebar__search-wrapper {
@@ -290,254 +295,164 @@
 
   .v2-docs-sidebar__search-wrapper :global(.v2-docs-sidebar__search-icon) {
     position: absolute;
-    left: var(--v2-spacing-sm, 0.5rem);
-    color: var(--v2-text-tertiary, rgba(255, 255, 255, 0.5));
+    left: var(--v2-spacing-sm);
+    color: var(--v2-text-tertiary);
     pointer-events: none;
   }
 
   .v2-docs-sidebar__search-input {
+    @include v2-focus-ring;
+
     width: 100%;
-    padding: var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-2xl, 3rem);
-    background: var(--v2-surface-interactive, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--v2-border-medium, rgba(255, 255, 255, 0.12));
-    border-radius: var(--v2-radius-md, 10px);
-    color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
-    font-family: var(--v2-font-mono, monospace);
-    font-size: var(--v2-font-size-sm, 0.875rem);
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
+    padding: var(--v2-spacing-sm) var(--v2-spacing-sm) var(--v2-spacing-sm) var(--v2-spacing-2xl);
+    background: var(--v2-surface-interactive);
+    border: 1px solid var(--v2-border-medium);
+    border-radius: var(--v2-radius-md);
+    color: var(--v2-text-primary);
+    font-family: var(--v2-font-mono);
+    font-size: var(--v2-font-size-sm);
+    transition: all var(--v2-duration-fast) var(--v2-ease-out);
 
     &:focus {
-      border-color: var(--v2-text-accent, rgb(0, 122, 255));
-      background: var(--v2-surface-raised, rgba(255, 255, 255, 0.06));
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+      border-color: var(--v2-text-accent);
+      background: var(--v2-surface-raised);
     }
 
     &::placeholder {
-      color: var(--v2-text-tertiary, rgba(255, 255, 255, 0.5));
+      color: var(--v2-text-tertiary);
     }
   }
 
   .v2-docs-sidebar__search-clear {
+    @include v2-focus-ring;
+
     position: absolute;
-    right: var(--v2-spacing-xs, 0.25rem);
-    padding: var(--v2-spacing-xs, 0.25rem);
+    right: var(--v2-spacing-xs);
+    padding: var(--v2-spacing-xs);
     background: transparent;
     border: none;
-    color: var(--v2-text-tertiary, rgba(255, 255, 255, 0.5));
+    color: var(--v2-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--v2-radius-sm, 6px);
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
+    border-radius: var(--v2-radius-sm);
+    transition: all var(--v2-duration-fast) var(--v2-ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-      color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+      background: var(--v2-surface-interactive-hover);
+      color: var(--v2-text-primary);
     }
   }
 
   /* Search Results */
   .v2-docs-sidebar__search-results {
-    margin-top: var(--v2-spacing-md, 1rem);
+    margin-top: var(--v2-spacing-md);
     display: flex;
     flex-direction: column;
-    gap: var(--v2-spacing-sm, 0.5rem);
+    gap: var(--v2-spacing-sm);
     max-height: 400px;
     overflow-y: auto;
   }
 
   .v2-docs-sidebar__search-item {
-    padding: var(--v2-spacing-md, 1rem);
-    background: var(--v2-surface-interactive, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
-    border-radius: var(--v2-radius-md, 10px);
+    @include v2-focus-ring;
+
+    padding: var(--v2-spacing-md);
+    background: var(--v2-surface-interactive);
+    border: 1px solid var(--v2-border-subtle);
+    border-radius: var(--v2-radius-md);
     text-decoration: none;
     display: flex;
     flex-direction: column;
-    gap: var(--v2-spacing-xs, 0.25rem);
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
+    gap: var(--v2-spacing-xs);
+    transition: all var(--v2-duration-fast) var(--v2-ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-      border-color: var(--v2-text-accent, rgb(0, 122, 255));
-      transform: translateX(var(--v2-spacing-xs, 0.25rem));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+      background: var(--v2-surface-interactive-hover);
+      border-color: var(--v2-text-accent);
+      transform: translateX(var(--v2-spacing-xs));
     }
   }
 
   .v2-docs-sidebar__search-section {
-    font-size: var(--v2-font-size-xs, 0.75rem);
-    color: var(--v2-text-accent, rgb(0, 122, 255));
-    font-weight: 500;
+    font-size: var(--v2-font-size-xs);
+    color: var(--v2-text-accent);
+    font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .v2-docs-sidebar__search-title {
-    font-size: var(--v2-font-size-sm, 0.875rem);
-    color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
-    font-weight: 600;
+    font-size: var(--v2-font-size-sm);
+    color: var(--v2-text-primary);
+    font-weight: var(--font-weight-semibold);
   }
 
   .v2-docs-sidebar__search-description {
-    font-size: var(--v2-font-size-xs, 0.75rem);
-    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: var(--v2-font-size-xs);
+    color: var(--v2-text-secondary);
     line-height: 1.5;
   }
 
   .v2-docs-sidebar__search-empty {
-    margin-top: var(--v2-spacing-md, 1rem);
-    padding: var(--v2-spacing-md, 1rem);
+    margin-top: var(--v2-spacing-md);
+    padding: var(--v2-spacing-md);
     text-align: center;
 
     p {
-      font-size: var(--v2-font-size-sm, 0.875rem);
-      color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
+      font-size: var(--v2-font-size-sm);
+      color: var(--v2-text-secondary);
       margin: 0;
-    }
-  }
-
-  /* Audience Filter */
-  .v2-docs-sidebar__filter {
-    padding: var(--v2-spacing-md, 1rem) var(--v2-spacing-lg, 1.5rem);
-    border-bottom: 1px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
-  }
-
-  .v2-docs-sidebar__filter-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--v2-spacing-sm, 0.5rem);
-  }
-
-  .v2-docs-sidebar__filter-title {
-    display: flex;
-    align-items: center;
-    gap: var(--v2-spacing-xs, 0.25rem);
-    font-size: var(--v2-font-size-xs, 0.75rem);
-    font-weight: 600;
-    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .v2-docs-sidebar__filter-clear {
-    padding: var(--v2-spacing-xs, 0.25rem) var(--v2-spacing-sm, 0.5rem);
-    background: transparent;
-    border: none;
-    color: var(--v2-text-accent, rgb(0, 122, 255));
-    font-size: var(--v2-font-size-xs, 0.75rem);
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: var(--v2-radius-sm, 6px);
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
-
-    &:hover {
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
-    }
-  }
-
-  .v2-docs-sidebar__filter-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--v2-spacing-xs, 0.25rem);
-  }
-
-  .v2-docs-sidebar__filter-chip {
-    padding: var(--v2-spacing-xs, 0.25rem) var(--v2-spacing-sm, 0.5rem);
-    background: var(--v2-surface-interactive, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--v2-border-medium, rgba(255, 255, 255, 0.12));
-    border-radius: var(--v2-radius-full, 9999px);
-    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
-    font-size: var(--v2-font-size-xs, 0.75rem);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
-
-    &:hover {
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-      border-color: var(--v2-text-accent, rgb(0, 122, 255));
-      color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
-    }
-
-    &.active {
-      background: var(--v2-text-accent, rgb(0, 122, 255));
-      border-color: var(--v2-text-accent, rgb(0, 122, 255));
-      color: white;
-      font-weight: 600;
     }
   }
 
   /* Navigation */
   .v2-docs-sidebar__nav {
     flex: 1;
-    padding: var(--v2-spacing-md, 1rem) 0;
+    padding: var(--v2-spacing-md) 0;
     overflow-y: auto;
   }
 
   .v2-docs-sidebar__section {
-    margin-bottom: var(--v2-spacing-sm, 0.5rem);
+    margin-bottom: var(--v2-spacing-sm);
   }
 
   .v2-docs-sidebar__section-header {
+    @include v2-focus-ring;
+
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-lg, 1.5rem);
+    padding: var(--v2-spacing-sm) var(--v2-spacing-md) var(--v2-spacing-sm) var(--v2-spacing-sm);
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
-    outline: none;
+    transition: all var(--v2-duration-fast) var(--v2-ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+      background: var(--v2-surface-interactive-hover);
     }
   }
 
   .v2-docs-sidebar__section-title {
     display: flex;
     align-items: center;
-    gap: var(--v2-spacing-sm, 0.5rem);
-    font-size: var(--v2-font-size-sm, 0.875rem);
-    font-weight: 600;
-    color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
+    gap: var(--v2-spacing-sm);
+    font-size: var(--v2-font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--v2-text-primary);
 
     :global(svg) {
-      color: var(--v2-text-accent, rgb(0, 122, 255));
+      color: var(--v2-text-accent);
     }
   }
 
   :global(.v2-docs-sidebar__section-chevron) {
     color: white !important;
     opacity: 0.5;
-    transition: transform var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
+    transition: transform var(--v2-duration-fast) var(--v2-ease-out);
 
     &.expanded {
       transform: rotate(180deg);
@@ -547,34 +462,31 @@
   .v2-docs-sidebar__links {
     display: flex;
     flex-direction: column;
-    padding-left: var(--v2-spacing-lg, 1.5rem);
   }
 
   .v2-docs-sidebar__link {
-    padding: var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-lg, 1.5rem);
+    @include v2-focus-ring;
+
+    /* Align with section title text: section padding + icon (16px) + gap */
+    padding: var(--v2-spacing-sm) var(--v2-spacing-md) var(--v2-spacing-sm)
+      calc(var(--v2-spacing-sm) + 16px + var(--v2-spacing-sm));
     text-decoration: none;
-    color: var(--v2-text-secondary, rgba(255, 255, 255, 0.7));
-    font-size: var(--v2-font-size-sm, 0.875rem);
-    transition: all var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
+    color: var(--v2-text-secondary);
+    font-size: var(--v2-font-size-sm);
+    transition: all var(--v2-duration-fast) var(--v2-ease-out);
     border-left: 2px solid transparent;
-    margin-left: var(--v2-spacing-md, 1rem);
-    outline: none;
 
     &:hover {
-      color: var(--v2-text-primary, rgba(255, 255, 255, 0.95));
-      background: var(--v2-surface-interactive-hover, rgba(255, 255, 255, 0.08));
-      border-left-color: var(--v2-text-accent, rgb(0, 122, 255));
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--v2-border-focus, rgba(0, 122, 255, 0.5));
+      color: var(--v2-text-primary);
+      background: var(--v2-surface-interactive-hover);
+      border-left-color: var(--v2-text-accent);
     }
 
     &.active {
-      color: var(--v2-text-accent, rgb(0, 122, 255));
-      background: var(--v2-surface-interactive, rgba(255, 255, 255, 0.05));
-      border-left-color: var(--v2-text-accent, rgb(0, 122, 255));
-      font-weight: 600;
+      color: var(--v2-text-accent);
+      background: var(--v2-surface-interactive);
+      border-left-color: var(--v2-text-accent);
+      font-weight: var(--font-weight-semibold);
     }
   }
 
@@ -583,7 +495,7 @@
   .v2-docs-sidebar__search-results,
   .v2-docs-sidebar__nav {
     scrollbar-width: thin;
-    scrollbar-color: var(--v2-border-medium, rgba(255, 255, 255, 0.12)) transparent;
+    scrollbar-color: var(--v2-border-medium) transparent;
   }
 
   .v2-docs-sidebar::-webkit-scrollbar,
@@ -601,13 +513,68 @@
   .v2-docs-sidebar::-webkit-scrollbar-thumb,
   .v2-docs-sidebar__search-results::-webkit-scrollbar-thumb,
   .v2-docs-sidebar__nav::-webkit-scrollbar-thumb {
-    background: var(--v2-border-medium, rgba(255, 255, 255, 0.12));
+    background: var(--v2-border-medium);
     border-radius: 3px;
   }
 
   .v2-docs-sidebar::-webkit-scrollbar-thumb:hover,
   .v2-docs-sidebar__search-results::-webkit-scrollbar-thumb:hover,
   .v2-docs-sidebar__nav::-webkit-scrollbar-thumb:hover {
-    background: var(--v2-border-strong, rgba(255, 255, 255, 0.24));
+    background: var(--v2-border-strong);
+  }
+
+  /* Audience Filter - Minimal Apple aesthetic */
+  .v2-docs-sidebar__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .v2-docs-sidebar__filter-pill {
+    @include v2-focus-ring;
+
+    padding: 4px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 600;
+    }
+  }
+
+  .v2-docs-sidebar__filter-reset {
+    @include v2-focus-ring;
+
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-left: auto;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.03);
+    }
   }
 </style>
