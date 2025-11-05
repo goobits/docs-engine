@@ -3,63 +3,68 @@
  * Server-side only (uses Node.js fs APIs)
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import fsp from 'fs/promises';
 import { dirname } from 'path';
+import { FileIOError, retryWithBackoff } from './errors.js';
 
 /**
- * Read a file and return its contents
+ * Read a file and return its contents (async)
  *
  * @param filePath - Path to file
  * @returns File contents as string
- * @throws Error if file cannot be read
+ * @throws FileIOError if file cannot be read
  *
  * @example
  * ```typescript
- * const content = readFile('./docs/readme.md');
+ * const content = await readFile('./docs/readme.md');
  * ```
  */
-export function readFile(filePath: string): string {
+export async function readFile(filePath: string): Promise<string> {
 	try {
-		return readFileSync(filePath, 'utf-8');
+		return await retryWithBackoff(
+			() => fsp.readFile(filePath, 'utf-8'),
+			{ maxRetries: 2 }
+		);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to read file ${filePath}: ${message}`);
+		throw FileIOError.read(filePath, error);
 	}
 }
 
 /**
- * Write content to a file, creating directories if needed
+ * Write content to a file, creating directories if needed (async)
  *
  * @param filePath - Path to file
  * @param content - Content to write
- * @throws Error if file cannot be written
+ * @throws FileIOError if file cannot be written
  *
  * @example
  * ```typescript
- * writeFile('./docs/generated/api.md', '# API Documentation\n...');
+ * await writeFile('./docs/generated/api.md', '# API Documentation\n...');
  * // Creates ./docs/generated/ directory if it doesn't exist
  * ```
  */
-export function writeFile(filePath: string, content: string): void {
+export async function writeFile(filePath: string, content: string): Promise<void> {
 	try {
 		// Ensure directory exists
 		const dir = dirname(filePath);
-		mkdirSync(dir, { recursive: true });
+		await fsp.mkdir(dir, { recursive: true });
 
-		// Write file
-		writeFileSync(filePath, content, 'utf-8');
+		// Write file with retry logic
+		await retryWithBackoff(
+			() => fsp.writeFile(filePath, content, 'utf-8'),
+			{ maxRetries: 2 }
+		);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to write file ${filePath}: ${message}`);
+		throw FileIOError.write(filePath, error);
 	}
 }
 
 /**
- * Parse JSON file
+ * Parse JSON file (async)
  *
  * @param filePath - Path to JSON file
  * @returns Parsed JSON object
- * @throws Error if file cannot be read or parsed
+ * @throws FileIOError if file cannot be read or parsed
  *
  * @example
  * ```typescript
@@ -67,36 +72,38 @@ export function writeFile(filePath: string, content: string): void {
  *   name: string;
  *   version: string;
  * }
- * const pkg = readJSON<PackageJson>('./package.json');
+ * const pkg = await readJSON<PackageJson>('./package.json');
  * console.log(pkg.name);
  * ```
  */
-export function readJSON<T = any>(filePath: string): T {
+export async function readJSON<T = any>(filePath: string): Promise<T> {
 	try {
-		const content = readFile(filePath);
+		const content = await readFile(filePath);
 		return JSON.parse(content) as T;
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to parse JSON file ${filePath}: ${message}`);
+		if (error instanceof FileIOError) {
+			throw error;
+		}
+		throw FileIOError.read(filePath, new Error(`Failed to parse JSON: ${error}`));
 	}
 }
 
 /**
- * Write JSON to a file with formatting
+ * Write JSON to a file with formatting (async)
  *
  * @param filePath - Path to JSON file
  * @param data - Data to serialize
  * @param indent - Indentation (default: 2 spaces)
- * @throws Error if file cannot be written
+ * @throws FileIOError if file cannot be written
  *
  * @example
  * ```typescript
- * writeJSON('./data.json', { foo: 'bar' }, 2);
+ * await writeJSON('./data.json', { foo: 'bar' }, 2);
  * ```
  */
-export function writeJSON<T = any>(filePath: string, data: T, indent: number = 2): void {
+export async function writeJSON<T = any>(filePath: string, data: T, indent: number = 2): Promise<void> {
 	const content = JSON.stringify(data, null, indent);
-	writeFile(filePath, content);
+	await writeFile(filePath, content);
 }
 
 /**

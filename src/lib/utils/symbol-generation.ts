@@ -12,10 +12,12 @@
  */
 
 import fs from 'fs';
+import fsp from 'fs/promises';
 import path from 'path';
 import * as ts from 'typescript';
 import crypto from 'crypto';
 import { glob } from 'glob';
+import { FileIOError, ProcessingError, retryWithBackoff } from './errors.js';
 
 /**
  * Configuration for symbol map generation
@@ -106,7 +108,7 @@ export class SymbolMapGenerator {
 		console.log('🔍 Scanning TypeScript files...');
 
 		// Load cache
-		const cache = this.loadCache();
+		const cache = await this.loadCache();
 		const newCache: SymbolCache = { version: this.config.cacheVersion, files: {} };
 
 		// Use Object.create(null) to avoid prototype pollution issues
@@ -122,13 +124,16 @@ export class SymbolMapGenerator {
 		for (const relativeFile of allFiles) {
 			const filePath = path.resolve(this.config.baseDir, relativeFile);
 
-			if (!fs.existsSync(filePath)) {
-				continue;
+			// Check if file exists
+			try {
+				await fsp.access(filePath);
+			} catch {
+				continue; // File doesn't exist, skip it
 			}
 
 			// Check cache
 			const cachedEntry = cache.files[relativeFile];
-			const fileChanged = this.hasFileChanged(filePath, cachedEntry);
+			const fileChanged = await this.hasFileChanged(filePath, cachedEntry);
 
 			if (!fileChanged && cachedEntry) {
 				// Use cached symbols
@@ -153,7 +158,7 @@ export class SymbolMapGenerator {
 			cacheMisses++;
 			console.log(`   📄 Processing ${relativeFile}`);
 
-			const fileSymbols = this.extractSymbolsFromFile(filePath, relativeFile);
+			const fileSymbols = await this.extractSymbolsFromFile(filePath, relativeFile);
 
 			// Add to symbol map
 			for (const symbol of fileSymbols) {
@@ -166,20 +171,20 @@ export class SymbolMapGenerator {
 			}
 
 			// Update cache for this file
-			const stats = fs.statSync(filePath);
+			const stats = await fsp.stat(filePath);
 			newCache.files[relativeFile] = {
 				mtime: stats.mtimeMs,
 				size: stats.size,
-				hash: this.hashFile(filePath),
+				hash: await this.hashFile(filePath),
 				symbols: fileSymbols,
 			};
 		}
 
 		// Save cache
-		this.saveCache(newCache);
+		await this.saveCache(newCache);
 
 		// Write symbol map
-		this.writeSymbolMap(symbolMap);
+		await this.writeSymbolMap(symbolMap);
 
 		// Print statistics
 		this.printStatistics(symbolMap, allFiles.length, cacheHits, cacheMisses);
@@ -217,14 +222,18 @@ export class SymbolMapGenerator {
 	/**
 	 * Extract symbols from a TypeScript file
 	 */
-	private extractSymbolsFromFile(filePath: string, relativeFile: string): SymbolDefinition[] {
-		const sourceCode = fs.readFileSync(filePath, 'utf-8');
-		const sourceFile = ts.createSourceFile(
-			filePath,
-			sourceCode,
-			ts.ScriptTarget.Latest,
-			true
-		);
+	private async extractSymbolsFromFile(filePath: string, relativeFile: string): Promise<SymbolDefinition[]> {
+		try {
+			const sourceCode = await retryWithBackoff(
+				() => fsp.readFile(filePath, 'utf-8'),
+				{ maxRetries: 2 }
+			);
+			const sourceFile = ts.createSourceFile(
+				filePath,
+				sourceCode,
+				ts.ScriptTarget.Latest,
+				true
+			);
 
 		const symbols: SymbolDefinition[] = [];
 
@@ -391,8 +400,11 @@ export class SymbolMapGenerator {
 			ts.forEachChild(node, visit);
 		};
 
-		visit(sourceFile);
-		return symbols;
+			visit(sourceFile);
+			return symbols;
+		} catch (error) {
+			throw ProcessingError.parse(filePath, error);
+		}
 	}
 
 	/**
@@ -509,13 +521,9 @@ export class SymbolMapGenerator {
 	/**
 	 * Load cache from disk
 	 */
-	private loadCache(): SymbolCache {
-		if (!fs.existsSync(this.cacheFile)) {
-			return { version: this.config.cacheVersion, files: {} };
-		}
-
+	private async loadCache(): Promise<SymbolCache> {
 		try {
-			const cacheData = fs.readFileSync(this.cacheFile, 'utf-8');
+			const cacheData = await fsp.readFile(this.cacheFile, 'utf-8');
 			const cache = JSON.parse(cacheData) as SymbolCache;
 
 			// Invalidate cache if version mismatch
@@ -525,7 +533,11 @@ export class SymbolMapGenerator {
 			}
 
 			return cache;
-		} catch (error) {
+		} catch (error: any) {
+			// ENOENT means file doesn't exist, which is fine
+			if (error?.code === 'ENOENT') {
+				return { version: this.config.cacheVersion, files: {} };
+			}
 			console.log('   ⚠️  Failed to load cache, starting fresh');
 			return { version: this.config.cacheVersion, files: {} };
 		}
@@ -534,48 +546,70 @@ export class SymbolMapGenerator {
 	/**
 	 * Save cache to disk
 	 */
-	private saveCache(cache: SymbolCache): void {
-		fs.mkdirSync(this.config.cacheDir, { recursive: true });
-		fs.writeFileSync(this.cacheFile, JSON.stringify(cache, null, 2), 'utf-8');
+	private async saveCache(cache: SymbolCache): Promise<void> {
+		try {
+			await fsp.mkdir(this.config.cacheDir, { recursive: true });
+			await retryWithBackoff(
+				() => fsp.writeFile(this.cacheFile, JSON.stringify(cache, null, 2), 'utf-8'),
+				{ maxRetries: 2 }
+			);
+		} catch (error) {
+			throw FileIOError.write(this.cacheFile, error);
+		}
 	}
 
 	/**
 	 * Compute hash of file contents
 	 */
-	private hashFile(filePath: string): string {
-		const content = fs.readFileSync(filePath, 'utf-8');
-		return crypto.createHash('md5').update(content).digest('hex');
+	private async hashFile(filePath: string): Promise<string> {
+		try {
+			const content = await fsp.readFile(filePath, 'utf-8');
+			return crypto.createHash('md5').update(content).digest('hex');
+		} catch (error) {
+			throw FileIOError.read(filePath, error);
+		}
 	}
 
 	/**
 	 * Check if a file has changed since it was cached
 	 */
-	private hasFileChanged(filePath: string, cachedEntry: CachedFileEntry | undefined): boolean {
+	private async hasFileChanged(filePath: string, cachedEntry: CachedFileEntry | undefined): Promise<boolean> {
 		if (!cachedEntry) return true;
 
-		const stats = fs.statSync(filePath);
+		try {
+			const stats = await fsp.stat(filePath);
 
-		// Quick check: mtime and size
-		if (stats.mtimeMs !== cachedEntry.mtime || stats.size !== cachedEntry.size) {
-			return true;
+			// Quick check: mtime and size
+			if (stats.mtimeMs !== cachedEntry.mtime || stats.size !== cachedEntry.size) {
+				return true;
+			}
+
+			// Slower check: content hash
+			const currentHash = await this.hashFile(filePath);
+			return currentHash !== cachedEntry.hash;
+		} catch (error) {
+			throw FileIOError.stat(filePath, error);
 		}
-
-		// Slower check: content hash
-		const currentHash = this.hashFile(filePath);
-		return currentHash !== cachedEntry.hash;
 	}
 
 	/**
 	 * Write symbol map to disk
 	 */
-	private writeSymbolMap(symbolMap: SymbolMap): void {
-		const outputDir = path.dirname(this.config.outputPath);
-		fs.mkdirSync(outputDir, { recursive: true });
-		fs.writeFileSync(
-			this.config.outputPath,
-			JSON.stringify(symbolMap, null, 2),
-			'utf-8'
-		);
+	private async writeSymbolMap(symbolMap: SymbolMap): Promise<void> {
+		try {
+			const outputDir = path.dirname(this.config.outputPath);
+			await fsp.mkdir(outputDir, { recursive: true });
+			await retryWithBackoff(
+				() => fsp.writeFile(
+					this.config.outputPath,
+					JSON.stringify(symbolMap, null, 2),
+					'utf-8'
+				),
+				{ maxRetries: 2 }
+			);
+		} catch (error) {
+			throw FileIOError.write(this.config.outputPath, error);
+		}
 	}
 
 	/**
@@ -799,8 +833,10 @@ export class SymbolMapGenerator {
 
 		// Test 1: Cold run (no cache)
 		console.log('\n📊 Cold run (no cache)');
-		if (fs.existsSync(this.cacheFile)) {
-			fs.unlinkSync(this.cacheFile);
+		try {
+			await fsp.unlink(this.cacheFile);
+		} catch {
+			// File doesn't exist, that's fine
 		}
 		const coldStart = Date.now();
 		await this.generate();
@@ -819,9 +855,11 @@ export class SymbolMapGenerator {
 		const files = await this.findSourceFiles();
 		if (files.length > 0) {
 			const testFile = path.resolve(this.config.baseDir, files[0]);
-			if (fs.existsSync(testFile)) {
+			try {
 				const now = new Date();
-				fs.utimesSync(testFile, now, now);
+				await fsp.utimes(testFile, now, now);
+			} catch {
+				// File doesn't exist or can't be modified, skip
 			}
 		}
 		const modifiedStart = Date.now();
@@ -842,10 +880,12 @@ export class SymbolMapGenerator {
 
 		// Check cache file size
 		let cacheSize = 0;
-		if (fs.existsSync(this.cacheFile)) {
-			const stats = fs.statSync(this.cacheFile);
+		try {
+			const stats = await fsp.stat(this.cacheFile);
 			cacheSize = stats.size;
 			console.log(`\n💾 Cache file size:   ${(cacheSize / 1024).toFixed(2)} KB`);
+		} catch {
+			// Cache file doesn't exist
 		}
 
 		return {
