@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import type { MarkdownDocsConfig } from '../config/index.js';
 import type { ScreenshotRequest, ScreenshotResponse } from './types.js';
 import { CliExecutor } from './cli-executor.js';
+import { getVersion } from '../utils/version.js';
 
 /**
  * Creates a screenshot endpoint handler for generating screenshots
@@ -31,7 +32,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
         } as ScreenshotResponse, { status: 400 });
       }
 
-      const version = requestVersion || config.screenshots.version || '1.0.0';
+      const version = requestVersion || config.screenshots.version || getVersion();
 
       // Determine screenshot type
       const type = screenshotConfig?.type || 'web';

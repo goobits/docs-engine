@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
+import { getVersion } from '../utils/version.js';
 
 export interface ScreenshotPluginOptions {
 	basePath?: string;
@@ -35,7 +36,7 @@ export interface ScreenshotPluginOptions {
  */
 export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
 	const basePath = options.basePath || '/screenshots';
-	const version = options.version || '1.0.0';
+	const version = options.version || getVersion();
 
 	return (tree: Root) => {
 		visit(tree, 'code', (node: any) => {
