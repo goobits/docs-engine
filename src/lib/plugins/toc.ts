@@ -85,7 +85,8 @@ export function remarkTableOfContents() {
  * Builds a nested TOC list from flat headings array
  * @param {Array<{depth: number, text: string, id: string}>} headings - Flat array of headings
  * @returns {List} Nested list structure with proper hierarchy
- * @private
+ *
+ * Module-private helper - not exported
  */
 function buildNestedTocList(
 	headings: Array<{ depth: number; text: string; id: string }>
@@ -181,7 +182,8 @@ function buildNestedTocList(
  * Converts text to a URL-friendly ID
  * @param {string} text - The text to convert
  * @returns {string} The converted text as a lowercase, hyphen-separated string
- * @private
+ *
+ * Module-private helper - not exported
  */
 function toId(text: string): string {
 	return text
