@@ -7,7 +7,5 @@ export default defineConfig({
 	clean: true,
 	sourcemap: true,
 	shims: true,
-	banner: {
-		js: '#!/usr/bin/env node'
-	}
+	external: ['@goobits/docs-engine']
 });

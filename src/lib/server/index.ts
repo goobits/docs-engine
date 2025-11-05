@@ -19,3 +19,23 @@ export type { GitConfig, Contributor, GitProvider } from '../utils/git';
 
 // Version utilities - Server-side only (requires Node.js fs)
 export * from '../utils/version';
+
+// API documentation generator (Proposal 09) - Server-side only (requires ts-morph)
+export * from '../generators/api-parser';
+export * from '../generators/api-docs';
+export type {
+	ApiItem,
+	ApiFunction,
+	ApiClass,
+	ApiInterface,
+	ApiTypeAlias,
+	ApiEnum,
+	ApiParameter,
+	ApiProperty,
+	ApiMethod,
+	ApiMetadata,
+	ApiExample,
+	ParsedApiFile,
+	ApiParserConfig
+} from '../generators/api-parser';
+export type { MarkdownGeneratorConfig } from '../generators/api-docs';

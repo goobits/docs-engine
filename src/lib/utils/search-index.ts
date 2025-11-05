@@ -11,6 +11,8 @@ import type { DocsSection } from './navigation.js';
 
 /**
  * Document for search indexing
+ *
+ * @public
  */
 export interface SearchDocument {
 	id: string;
@@ -24,6 +26,8 @@ export interface SearchDocument {
 
 /**
  * Search result with highlighted excerpts
+ *
+ * @public
  */
 export interface SearchResult {
 	id: string;
@@ -40,6 +44,8 @@ export interface SearchResult {
 
 /**
  * Search index configuration
+ *
+ * @public
  */
 export interface SearchIndexConfig {
 	/** Fields to index for search */
