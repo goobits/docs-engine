@@ -6,9 +6,9 @@
 	 * Shows content freshness and recognizes contributors.
 	 */
 
-	import { Clock, Users } from 'lucide-svelte';
+	import { Clock, Users } from '@lucide/svelte';
 	import type { Contributor } from '../utils/git.js';
-	import { formatRelativeDate } from '../utils/git.js';
+	import { formatRelativeDate } from '../utils/date.js';
 
 	interface Props {
 		/** Last updated date from Git history */

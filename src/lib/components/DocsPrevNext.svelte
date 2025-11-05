@@ -6,7 +6,7 @@
 	 * Shows page titles and descriptions in clickable card-style buttons.
 	 */
 
-	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { DocsLink } from '../utils/navigation.js';
 
 	interface Props {

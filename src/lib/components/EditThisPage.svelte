@@ -6,7 +6,7 @@
 	 * Helps encourage open-source contributions.
 	 */
 
-	import { ExternalLink, Pencil } from 'lucide-svelte';
+	import { ExternalLink, Pencil } from '@lucide/svelte';
 
 	interface Props {
 		/** URL to the edit page on the Git provider */

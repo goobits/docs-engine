@@ -20,6 +20,11 @@ import { escapeHtml } from '../utils/html.js';
 export function collapsePlugin() {
 	return (tree: Root) => {
 		try {
+			// Validate tree before visiting
+			if (!tree || !tree.children) {
+				return;
+			}
+
 			visit(tree, 'containerDirective', (node: any) => {
 				// Extra defensive checks
 				if (!node) return;

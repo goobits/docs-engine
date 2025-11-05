@@ -6,7 +6,7 @@
 	 * Links to the latest version of the current page.
 	 */
 
-	import { X, AlertTriangle, Info } from 'lucide-svelte';
+	import { X, AlertTriangle, Info } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	interface Props {

@@ -7,7 +7,7 @@
 	 */
 
 	import { onMount, onDestroy } from 'svelte';
-	import { Search, Command, ArrowUp, ArrowDown, CornerDownLeft, X } from 'lucide-svelte';
+	import { Search, Command, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
 	import type MiniSearch from 'minisearch';
 	import { loadSearchIndex, performSearch, highlightMatches } from '../utils/search-index.js';
 	import type { SearchResult } from '../utils/search-index.js';

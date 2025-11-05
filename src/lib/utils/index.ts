@@ -26,6 +26,9 @@ export type { Frontmatter, ParsedContent } from './frontmatter';
 // Base64 utilities
 export * from './base64';
 
+// Date utilities (browser-safe)
+export * from './date';
+
 // Highlighter utilities
 export * from './highlighter';
 
@@ -36,9 +39,8 @@ export type { OpenAPIEndpoint } from './openapi-formatter';
 // HTML utilities
 export * from './html';
 
-// Git utilities (Proposal 02)
-export * from './git';
-export type { GitConfig, Contributor, GitProvider } from './git';
+// NOTE: Git utilities moved to server/index.ts (requires Node.js child_process)
+// Import from '@goobits/docs-engine/server' instead
 
 // Search index utilities (Proposal 03)
 export * from './search-index';
@@ -50,5 +52,5 @@ export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
 export * from './symbol-renderer';
 export type { RenderOptions } from './symbol-renderer';
 
-// Version utilities
-export * from './version';
+// NOTE: Version utilities moved to server/index.ts (requires Node.js fs)
+// Import from '@goobits/docs-engine/server' instead

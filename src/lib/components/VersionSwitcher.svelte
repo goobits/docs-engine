@@ -6,7 +6,7 @@
 	 * Navigates to the same page in the selected version, or home if page doesn't exist.
 	 */
 
-	import { ChevronDown } from 'lucide-svelte';
+	import { ChevronDown } from '@lucide/svelte';
 
 	export interface Version {
 		version: string;

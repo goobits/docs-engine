@@ -12,3 +12,10 @@ export type {
 	ImageProcessorResult,
 	ImageVariant
 } from './image-processor';
+
+// Git utilities (Proposal 02) - Server-side only
+export * from '../utils/git';
+export type { GitConfig, Contributor, GitProvider } from '../utils/git';
+
+// Version utilities - Server-side only (requires Node.js fs)
+export * from '../utils/version';
