@@ -1,6 +1,8 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
+import { escapeHtml } from '../utils/html.js';
+import { encodeJsonBase64 } from '../utils/base64.js';
 
 /**
  * Tab definition
@@ -50,7 +52,7 @@ export function tabsPlugin() {
 			if (tabs.length === 0) return;
 
 			// Encode tabs data for client-side hydration
-			const encoded = Buffer.from(JSON.stringify(tabs)).toString('base64');
+			const encoded = encodeJsonBase64(tabs);
 
 			// Transform to HTML div that will be hydrated client-side
 			node.type = 'html';
@@ -129,18 +131,4 @@ function parseTabs(content: string): Tab[] {
 	}
 
 	return tabs;
-}
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }

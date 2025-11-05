@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin, Transformer } from 'unified';
 import type { Root, BlockContent, Paragraph, Text } from 'mdast';
+import { escapeHtml } from '../utils/html.js';
 
 /**
  * Callout configuration
@@ -183,16 +184,3 @@ function renderInlineContent(children: any[]): string {
 		.join('');
 }
 
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
-}

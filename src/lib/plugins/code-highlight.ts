@@ -2,6 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
 import { createHighlighter } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
+import { escapeHtml } from '../utils/html.js';
 
 /**
  * Configuration options for code block highlighting

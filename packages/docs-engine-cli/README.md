@@ -8,6 +8,7 @@ Command-line tools for managing and validating documentation built with @goobits
 - 🔍 **Anchor checking** - Validate anchor links (#section)
 - 📁 **File existence** - Ensure linked files exist
 - 🌐 **External validation** - HTTP requests to validate external URLs
+- 📦 **Version management** - Manage multiple documentation versions
 - ⚡ **Performance** - Concurrent checking with configurable limits
 - 🎨 **Beautiful output** - Color-coded results with chalk
 - ⚙️ **Configurable** - Support for config files
@@ -17,99 +18,126 @@ Command-line tools for managing and validating documentation built with @goobits
 
 ```bash
 pnpm add -D @goobits/docs-engine-cli
+# or
+npm install --save-dev @goobits/docs-engine-cli
 ```
 
-## Usage
+## Commands
 
-### Basic Link Checking
+### Link Checker
 
-Check all markdown files in the current directory:
+Check all links in your markdown documentation for broken internal references and optionally validate external URLs.
 
 ```bash
-pnpm docs-engine check-links
+# Basic usage - check internal links
+docs-engine check-links
+
+# Check with external link validation
+docs-engine check-links --external
+
+# Custom base directory
+docs-engine check-links --base-dir ./documentation
+
+# Quiet mode (only show errors)
+docs-engine check-links --quiet
+
+# JSON output for CI integration
+docs-engine check-links --json
 ```
 
-### Check External Links
+**Options:**
 
-Validate external URLs (slower):
+- `-b, --base-dir <path>` - Base directory for documentation (default: current directory)
+- `-p, --pattern <glob>` - Glob pattern for files to check (default: `**/*.{md,mdx}`)
+- `-e, --external` - Validate external links (slower, default: `false`)
+- `-t, --timeout <ms>` - External link timeout in milliseconds (default: `5000`)
+- `-c, --concurrency <number>` - Max concurrent external requests (default: `10`)
+- `-q, --quiet` - Only show errors, hide valid links
+- `--json` - Output results as JSON
+- `--config <path>` - Path to config file
+
+**Exit Codes:**
+- `0` - All links valid
+- `1` - Broken links found or error occurred
+
+### Version Management
+
+Manage multiple versions of your documentation (similar to Docusaurus versioning).
+
+#### Create Version
+
+Create a new documentation version from current docs:
 
 ```bash
-pnpm docs-engine check-links --external
+# Create version 2.0
+docs-engine version create 2.0
+
+# Create with custom docs directory
+docs-engine version create 2.0 --docs-dir ./documentation
 ```
 
-### Custom Base Directory
+This will:
+1. Copy current docs to `docs/versioned_docs/version-2.0/`
+2. Update `docs/versions.json` with the new version
+3. Mark the new version as "latest"
 
-Specify a custom base directory:
+#### List Versions
+
+List all available documentation versions:
 
 ```bash
-pnpm docs-engine check-links --base-dir ./docs
+docs-engine version list
+
+# Output:
+#   2.0 [latest]
+#   1.5 [stable]
+#   1.0 [legacy]
 ```
 
-### Quiet Mode (Errors Only)
+#### Delete Version
 
-Only show errors:
+Delete a documentation version:
 
 ```bash
-pnpm docs-engine check-links --quiet
+docs-engine version delete 1.0
+
+# Skip confirmation
+docs-engine version delete 1.0 --force
 ```
 
-### Verbose Mode
+## Configuration
 
-Show all links including valid ones:
+### Config File
 
-```bash
-pnpm docs-engine check-links --verbose
-```
-
-### JSON Output
-
-Output results as JSON for programmatic use:
-
-```bash
-pnpm docs-engine check-links --json > results.json
-```
-
-## CLI Options
-
-```
-check-links [options]
-
-Options:
-  -b, --base-dir <path>      Base directory for docs (default: current directory)
-  -p, --pattern <glob>       Glob pattern for markdown files (default: **/*.md)
-  -e, --external             Validate external links (slower)
-  -t, --timeout <ms>         Timeout for external requests in ms (default: 5000)
-  -c, --concurrency <num>    Max concurrent external requests (default: 10)
-  -q, --quiet                Only show errors
-  -v, --verbose              Show all links including valid ones
-  --json                     Output results as JSON
-  --config <path>            Path to config file
-  -h, --help                 Display help
-```
-
-## Configuration File
-
-Create a `.linkcheckerrc.json` file in your project root:
+Create `.docs-engine.json` in your project root:
 
 ```json
 {
-  "baseDir": "./docs",
-  "include": ["**/*.md", "**/*.mdx"],
-  "exclude": ["**/node_modules/**", "**/dist/**"],
+  "baseDir": ".",
+  "pattern": "docs/**/*.{md,mdx}",
   "checkExternal": false,
   "timeout": 5000,
   "concurrency": 10,
-  "skipDomains": ["localhost", "127.0.0.1", "example.com"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.git/**"
+  ],
+  "skipDomains": [
+    "localhost",
+    "127.0.0.1",
+    "example.com"
+  ],
   "validExtensions": [".md", ".mdx"]
 }
 ```
 
-### Configuration Options
+**Configuration Options:**
 
-- **`baseDir`** (string): Base directory for resolving relative links
-- **`include`** (string[]): Glob patterns for files to check
-- **`exclude`** (string[]): Glob patterns for files to ignore
+- **`baseDir`** (string): Base directory for documentation
+- **`pattern`** (string): Glob pattern for files to check
 - **`checkExternal`** (boolean): Whether to validate external links
+- **`exclude`** (string[]): Patterns to exclude from checking
 - **`timeout`** (number): Timeout for external requests in milliseconds
 - **`concurrency`** (number): Maximum concurrent external requests
 - **`skipDomains`** (string[]): Domains to skip validation
@@ -137,93 +165,140 @@ jobs:
 
       - run: pnpm install
       - run: pnpm docs-engine check-links
-        # Fails CI if broken links found
+
+      # Optional: Check external links on schedule
+      - name: Check external links
+        if: github.event_name == 'schedule'
+        run: pnpm docs-engine check-links --external
 ```
 
-### GitLab CI
-
-```yaml
-link-check:
-  image: node:20
-  before_script:
-    - npm install -g pnpm
-    - pnpm install
-  script:
-    - pnpm docs-engine check-links
-  only:
-    - merge_requests
-    - main
-```
-
-## Examples
-
-### Check Only Internal Links
+### Pre-commit Hook
 
 ```bash
-pnpm docs-engine check-links
+#!/bin/sh
+docs-engine check-links --quiet || exit 1
 ```
 
-Output:
+## Versioning Workflow
+
+### 1. Initial Setup
+
+Start with your documentation in `docs/`:
+
 ```
-✓ Found 25 markdown file(s)
-✓ Extracted 147 link(s)
-✓ Validation complete
-
-🔍 Link Validation Results
-
-❌ Files Not Found (2):
-
-  docs/guide.md:42 guide/installation.md
-    File not found: /project/docs/guide/installation.md
-
-  docs/api.md:15 ../reference/api.md
-    File not found: /project/reference/api.md
-
-📊 Summary:
-
-  Total links:     147
-  Valid:           145
-  Broken:          2
-  Internal:        147
-  External:        0
-
-💔 Found 2 broken link(s)
+docs/
+  getting-started.md
+  api-reference.md
+  guides/
+    ...
 ```
 
-### Check External Links
+### 2. Create First Version
+
+When releasing v1.0:
 
 ```bash
-pnpm docs-engine check-links --external
+docs-engine version create 1.0
 ```
 
-Output:
+This creates:
+
 ```
-❌ External Link Errors (1):
-
-  docs/resources.md:23 https://example.com/old-page
-    HTTP 404 - Not Found
-
-📊 Summary:
-
-  Total links:     147
-  Valid:           146
-  Broken:          1
-  Internal:        120
-  External:        27
+docs/
+  current/              # Development version
+  versioned_docs/
+    version-1.0/        # v1.0 release
+  versions.json         # Version metadata
 ```
 
-### JSON Output for Parsing
+### 3. Continue Development
+
+Keep editing files in `docs/current/` for the next release.
+
+### 4. Release Next Version
+
+When releasing v2.0:
 
 ```bash
-pnpm docs-engine check-links --json | jq '.[] | select(.isValid == false)'
+docs-engine version create 2.0
 ```
 
-## Exit Codes
+Users can now view:
+- `/docs/` - Latest (v2.0)
+- `/docs/v2.0/` - v2.0 documentation
+- `/docs/v1.0/` - v1.0 documentation
 
-- **0**: All links are valid
-- **1**: Broken links found or execution error
+## Link Validation Details
 
-This makes it perfect for CI/CD pipelines - the build will fail if broken links are detected.
+### Internal Links
+
+The link checker validates:
+
+- **Relative links**: `./page.md`, `../other.md`
+- **Absolute links**: `/docs/page.md`
+- **Anchor links**: `#section`, `page.md#section`
+- **Markdown links**: `[text](url)`
+- **HTML links**: `<a href="url">`
+- **Image links**: `![alt](image.png)`
+
+### External Links
+
+When `--external` is enabled:
+
+- ✅ HTTP/HTTPS URLs validated with HEAD/GET requests
+- ✅ Follow redirects (up to 5 hops)
+- ✅ Configurable timeout and concurrency
+- ✅ Result caching to avoid duplicate requests
+- ✅ Domain skipping for local/test URLs
+- ✅ Rate limiting to avoid overwhelming servers
+
+### Error Types
+
+- **File not found** - Internal link points to non-existent file
+- **Anchor not found** - Section anchor doesn't exist in target file
+- **External error** - HTTP error (404, 500, etc.)
+- **Timeout** - External URL didn't respond in time
+- **Network error** - Connection refused or DNS failure
+
+## Output Examples
+
+### Success Output
+
+```
+✔ Link checker initialized
+
+📊 Checked 127 links across 45 files
+
+✓ Valid: 125
+⚠ Warnings: 2
+
+All critical links are valid!
+```
+
+### Error Output
+
+```
+✖ Link checker found errors
+
+📊 Checked 127 links across 45 files
+
+✓ Valid: 123
+✗ Broken: 4
+
+Broken Links:
+
+src/content/docs/api.md:45
+  → /docs/missing-page.md
+  ✗ File not found
+
+src/content/docs/guide.md:12
+  → ./tutorial.md#non-existent
+  ✗ Anchor #non-existent not found
+
+src/content/docs/external.md:8
+  → https://example.com/broken
+  ✗ 404 Not Found
+```
 
 ## Development
 
@@ -234,8 +309,11 @@ pnpm install
 # Build the CLI
 pnpm build
 
-# Link for local testing
-pnpm link --global
+# Test locally
+node dist/index.js check-links
+
+# Watch mode during development
+pnpm dev
 
 # Test the CLI
 docs-engine check-links

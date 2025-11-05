@@ -26,6 +26,34 @@ export interface MarkdownDocsConfig {
     branch: string;
     docsPath: string;
   };
+  git?: {
+    /** Repository URL (e.g., "https://github.com/user/repo") */
+    repoUrl: string;
+    /** Branch name (default: "main") */
+    branch?: string;
+    /** Path to docs directory within repo (default: "docs") */
+    docsPath?: string;
+    /** Text for edit link (default: "Edit this page") */
+    editLinkText?: string;
+    /** Show last updated timestamp (default: true) */
+    showLastUpdated?: boolean;
+    /** Show contributors list (default: true) */
+    showContributors?: boolean;
+  };
+  seo?: {
+    /** Site URL for canonical links and sitemap (e.g., "https://docs.example.com") */
+    siteUrl: string;
+    /** Site name for Open Graph tags */
+    siteName?: string;
+    /** Default Open Graph image */
+    defaultOgImage?: string;
+    /** Twitter handle (e.g., "@username") */
+    twitterHandle?: string;
+    /** Generate sitemap.xml (default: true) */
+    generateSitemap?: boolean;
+    /** Generate robots.txt (default: true) */
+    generateRobots?: boolean;
+  };
 }
 
 export const defaultConfig: MarkdownDocsConfig = {

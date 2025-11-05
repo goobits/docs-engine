@@ -3,18 +3,21 @@
 import { Command } from 'commander';
 import { glob } from 'glob';
 import ora from 'ora';
+import chalk from 'chalk';
+import path from 'path';
 import { extractLinksFromFiles } from './link-extractor.js';
 import { validateLinks } from './link-validator.js';
 import { printResults } from './reporter.js';
 import { loadConfig, mergeConfig } from './config.js';
 import type { LinkCheckerConfig } from './config.js';
+import { createVersion, listVersions, deleteVersion } from './versioning.js';
 
 /**
  * Main CLI program
  *
  * Provides commands for:
- * - Link checking
- * - Link validation
+ * - Link checking and validation
+ * - Documentation versioning
  * - Documentation maintenance
  *
  * @public
@@ -23,7 +26,7 @@ const program = new Command();
 
 program
 	.name('docs-engine')
-	.description('CLI tools for docs-engine - link checking, validation, and maintenance')
+	.description('CLI tools for docs-engine - link checking, versioning, and validation')
 	.version('1.0.0');
 
 /**
@@ -132,14 +135,76 @@ program
 	});
 
 /**
- * Version command
+ * Version management commands
  */
-program
-	.command('version')
-	.description('Show version information')
-	.action(() => {
-		console.log('docs-engine CLI v1.0.0');
-		console.log('Part of @goobits/docs-engine');
+const versionCmd = program.command('version').description('Manage documentation versions');
+
+versionCmd
+	.command('create <version>')
+	.description('Create new documentation version from current docs')
+	.option('-d, --docs-dir <path>', 'Documentation directory', 'docs')
+	.action(async (version: string, options) => {
+		const spinner = ora(`Creating version ${version}...`).start();
+
+		try {
+			const docsDir = path.resolve(process.cwd(), options.docsDir);
+			await createVersion(version, docsDir);
+			spinner.succeed(`Version ${version} created successfully!`);
+
+			console.log(chalk.cyan('\nNext steps:'));
+			console.log(chalk.gray(`  - Version created in ${path.join(docsDir, 'versioned_docs', `version-${version}`)}`));
+			console.log(chalk.gray(`  - Updated versions.json`));
+			console.log(chalk.gray(`  - Deploy your updated documentation`));
+		} catch (error) {
+			spinner.fail('Failed to create version');
+			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			process.exit(1);
+		}
+	});
+
+versionCmd
+	.command('list')
+	.description('List all documentation versions')
+	.option('-d, --docs-dir <path>', 'Documentation directory', 'docs')
+	.action(async (options) => {
+		try {
+			const docsDir = path.resolve(process.cwd(), options.docsDir);
+			const versions = await listVersions(docsDir);
+
+			if (versions.length === 0) {
+				console.log(chalk.yellow('No versions found'));
+				return;
+			}
+
+			console.log(chalk.bold('\nDocumentation Versions:'));
+			versions.forEach(version => {
+				const label = version.label ? chalk.cyan(` [${version.label}]`) : '';
+				console.log(`  ${version.version}${label}`);
+			});
+			console.log();
+		} catch (error) {
+			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			process.exit(1);
+		}
+	});
+
+versionCmd
+	.command('delete <version>')
+	.description('Delete a documentation version')
+	.option('-d, --docs-dir <path>', 'Documentation directory', 'docs')
+	.option('-f, --force', 'Skip confirmation', false)
+	.action(async (version: string, options) => {
+		const spinner = ora(`Deleting version ${version}...`).start();
+
+		try {
+			const docsDir = path.resolve(process.cwd(), options.docsDir);
+			await deleteVersion(version, docsDir);
+			spinner.succeed(`Version ${version} deleted successfully!`);
+		} catch (error) {
+			spinner.fail('Failed to delete version');
+			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			process.exit(1);
+		}
 	});
 
 // Parse CLI arguments

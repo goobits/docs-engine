@@ -23,5 +23,14 @@ export { default as OpenAPIDoc } from './OpenAPIDoc.svelte';
 export { default as OpenAPIHydrator } from './OpenAPIHydrator.svelte';
 export { default as CollapseHydrator } from './CollapseHydrator.svelte';
 
+// New Components (Proposals 01-08)
+export { default as DocsPrevNext } from './DocsPrevNext.svelte';
+export { default as EditThisPage } from './EditThisPage.svelte';
+export { default as PageMetadata } from './PageMetadata.svelte';
+export { default as SearchModal } from './SearchModal.svelte';
+export { default as MetaTags } from './MetaTags.svelte';
+export { default as VersionSwitcher } from './VersionSwitcher.svelte';
+export { default as VersionBanner } from './VersionBanner.svelte';
+
 // Types
 export type * from './types';

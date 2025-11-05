@@ -1,6 +1,7 @@
 import { visit, SKIP } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Root, BlockContent, Paragraph } from 'mdast';
+import { escapeHtml } from '../utils/html.js';
 
 /**
  * Remark plugin to transform :::collapse directives to HTML <details> elements
@@ -153,18 +154,4 @@ function renderInlineContent(children: any[]): string {
 			return '';
 		})
 		.join('');
-}
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }

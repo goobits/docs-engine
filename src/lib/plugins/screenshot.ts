@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
+import { encodeJsonBase64 } from '../utils/base64.js';
 
 export interface ScreenshotPluginOptions {
 	basePath?: string;
@@ -89,8 +90,7 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
 			const url = config.url || '';
 
 			// Encode config as base64 for HTML attribute
-			const configJson = JSON.stringify(config);
-			const configEncoded = Buffer.from(configJson).toString('base64');
+			const configEncoded = encodeJsonBase64(config);
 
 			// Replace with HTML div for client-side hydration
 			node.type = 'html';

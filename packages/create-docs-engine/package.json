@@ -1,0 +1,39 @@
+{
+  "name": "create-docs-engine",
+  "version": "1.0.0",
+  "description": "CLI tool to scaffold a new docs-engine documentation site",
+  "type": "module",
+  "bin": {
+    "create-docs-engine": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "template"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --watch"
+  },
+  "keywords": [
+    "documentation",
+    "sveltekit",
+    "markdown",
+    "docs",
+    "cli",
+    "generator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "prompts": "^2.4.2",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/prompts": "^2.4.9",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}
