@@ -268,3 +268,154 @@ hidden: true
 ```
 
 This is useful for work-in-progress docs that exist in the repo but shouldn't be shown yet.
+
+## Previous/Next Navigation
+
+Enhance reading flow with automatic sequential navigation links at the bottom of each documentation page.
+
+### Overview
+
+The `DocsPrevNext` component displays clickable cards linking to the previous and next pages based on sidebar navigation order. This encourages users to explore content sequentially without returning to the sidebar.
+
+### Features
+
+- **Automatic Ordering** - Uses navigation structure to determine sequence
+- **Section-Aware** - Shows which section each link belongs to
+- **Responsive Design** - Stacks vertically on mobile devices
+- **Keyboard Accessible** - Full keyboard navigation support
+- **Elegant Styling** - Hover effects and smooth transitions
+
+### Usage
+
+#### 1. Add to Your Layout
+
+```svelte
+<!-- src/routes/docs/[...path]/+page.svelte -->
+<script lang="ts">
+  import { DocsPrevNext } from '@goobits/docs-engine/components';
+  import { getAdjacentLinks } from '@goobits/docs-engine/utils';
+
+  export let data;
+
+  const { previous, next } = getAdjacentLinks(
+    data.navigation,
+    $page.url.pathname
+  );
+</script>
+
+<article>
+  {@html data.content}
+</article>
+
+<DocsPrevNext {previous} {next} />
+```
+
+#### 2. Using DocsLayout Component
+
+The `DocsLayout` component includes `DocsPrevNext` automatically:
+
+```svelte
+<script lang="ts">
+  import { DocsLayout } from '@goobits/docs-engine/components';
+
+  export let data;
+</script>
+
+<DocsLayout
+  navigation={data.navigation}
+  content={data.content}
+  frontmatter={data.frontmatter}
+  currentPath={$page.url.pathname}
+/>
+```
+
+### API
+
+#### `getAdjacentLinks(navigation, currentHref)`
+
+Utility function to find previous and next links for a given page.
+
+**Parameters:**
+- `navigation` (DocsSection[]) - Navigation structure from `buildNavigation()`
+- `currentHref` (string) - Current page path (e.g., `/docs/quick-start`)
+
+**Returns:**
+```typescript
+{
+  previous?: DocsLink & { section: string };
+  next?: DocsLink & { section: string };
+}
+```
+
+**Example:**
+```typescript
+import { getAdjacentLinks } from '@goobits/docs-engine/utils';
+
+const { previous, next } = getAdjacentLinks(navigation, '/docs/quick-start');
+
+// previous = { title: 'Installation', href: '/docs/installation', section: 'Getting Started' }
+// next = { title: 'Configuration', href: '/docs/configuration', section: 'Getting Started' }
+```
+
+### Customization
+
+#### Disable for Specific Pages
+
+Use frontmatter to disable prev/next navigation:
+
+```yaml
+---
+title: Standalone Page
+showPrevNext: false
+---
+```
+
+Then check in your layout:
+
+```svelte
+{#if data.frontmatter.showPrevNext !== false}
+  <DocsPrevNext {previous} {next} />
+{/if}
+```
+
+#### Styling
+
+Customize with CSS variables:
+
+```css
+:root {
+  --docs-prev-next-bg: rgba(255, 255, 255, 0.03);
+  --docs-prev-next-border: rgba(255, 255, 255, 0.06);
+  --docs-prev-next-hover-bg: rgba(255, 255, 255, 0.08);
+  --docs-accent: #bd93f9;
+}
+```
+
+### Example Output
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ← Previous                          Next →                   │
+│ Installation                        Configuration            │
+│ Install docs-engine                 Configure your project   │
+│ Getting Started                     Getting Started          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Best Practices
+
+**Do:**
+- Keep page titles concise (< 40 characters)
+- Use descriptive page descriptions
+- Maintain logical ordering with `order` frontmatter
+
+**Don't:**
+- Mix unrelated sections in sequential navigation
+- Rely solely on prev/next for navigation (keep sidebar)
+- Use overly technical titles (keep them user-friendly)
+
+### Related
+
+- [DocsSidebar Component](#) - Primary navigation
+- [DocsLayout Component](#) - Complete layout with sidebar and prev/next
+- [Navigation Utilities](./docs/EXAMPLES.md) - Additional navigation helpers

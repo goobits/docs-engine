@@ -2,6 +2,8 @@ import type { ComponentType } from 'svelte';
 
 /**
  * Documentation link definition
+ *
+ * @public
  */
 export interface DocsLink {
 	title: string;
@@ -12,6 +14,8 @@ export interface DocsLink {
 
 /**
  * Documentation section with grouped links
+ *
+ * @public
  */
 export interface DocsSection {
 	title: string;
@@ -22,8 +26,10 @@ export interface DocsSection {
 
 /**
  * Get all links from navigation structure flattened with section info
+ *
  * @param navigation - Array of documentation sections
  * @returns Flattened array of links with their section titles
+ * @public
  */
 export function getAllLinks(navigation: DocsSection[]): Array<DocsLink & { section: string }> {
 	return navigation.flatMap((section) =>
@@ -36,9 +42,11 @@ export function getAllLinks(navigation: DocsSection[]): Array<DocsLink & { secti
 
 /**
  * Find a link by its href path
+ *
  * @param navigation - Array of documentation sections
  * @param href - The href to search for
  * @returns The matching link with section info, or undefined
+ * @public
  */
 export function findLinkByHref(
 	navigation: DocsSection[],
@@ -49,9 +57,11 @@ export function findLinkByHref(
 
 /**
  * Get a section by its title
+ *
  * @param navigation - Array of documentation sections
  * @param title - The section title to search for
  * @returns The matching section, or undefined
+ * @public
  */
 export function getSectionByTitle(
 	navigation: DocsSection[],
@@ -62,9 +72,11 @@ export function getSectionByTitle(
 
 /**
  * Get next and previous links for a given href (for pagination)
+ *
  * @param navigation - Array of documentation sections
  * @param currentHref - The current page's href
  * @returns Object with next and previous links
+ * @public
  */
 export function getAdjacentLinks(
 	navigation: DocsSection[],
