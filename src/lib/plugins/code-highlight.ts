@@ -79,8 +79,11 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 		// Process each code node asynchronously
 		await Promise.all(
 			codeNodes.map(async ({ node, index, parent }) => {
-				const language = node.lang || defaultLanguage;
+				const infoString = node.lang || defaultLanguage;
 				const code = node.value;
+
+				// Parse language and line highlighting from info string
+				const { language, lines } = parseLineHighlighting(infoString);
 
 				// Skip if this is a custom language handled by other plugins
 				const customLanguages = ['filetree', 'mermaid', 'callout', 'screenshot'];
@@ -94,10 +97,20 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 				}
 
 				try {
+					// Build decorations for highlighted lines
+					const decorations = lines.length > 0
+						? lines.map((line) => ({
+								start: { line: line - 1, character: 0 },
+								end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
+								properties: { class: 'highlighted' }
+						  }))
+						: [];
+
 					// Highlight the code with Shiki
 					const highlighted = highlighter.codeToHtml(code, {
 						lang: language,
-						theme: theme
+						theme: theme,
+						decorations
 					});
 
 					// Transform the node to HTML
@@ -114,6 +127,42 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 			})
 		);
 	};
+}
+
+/**
+ * Parse line highlighting ranges from info string
+ * Supports: {1}, {1,3,5}, {1-5}, {1,3-5,7}
+ * @param infoString - The code fence info string (e.g., "typescript{1,3-5}")
+ * @returns { language: string, lines: number[] }
+ */
+function parseLineHighlighting(infoString: string): { language: string; lines: number[] } {
+	const match = infoString.match(/^(\w+)\{([0-9,\-]+)\}$/);
+
+	if (!match) {
+		return { language: infoString, lines: [] };
+	}
+
+	const language = match[1];
+	const rangeString = match[2];
+
+	// Parse comma-separated ranges: "1,3-5,7"
+	const lines: number[] = [];
+	const parts = rangeString.split(',');
+
+	for (const part of parts) {
+		if (part.includes('-')) {
+			// Range: "3-5"
+			const [start, end] = part.split('-').map(Number);
+			for (let i = start; i <= end; i++) {
+				lines.push(i);
+			}
+		} else {
+			// Single line: "1"
+			lines.push(Number(part));
+		}
+	}
+
+	return { language, lines: [...new Set(lines)].sort((a, b) => a - b) };
 }
 
 /**

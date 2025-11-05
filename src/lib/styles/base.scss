@@ -240,6 +240,19 @@
       background: none;
       padding: 0;
     }
+
+    // Line highlighting support
+    .line {
+      display: inline-block;
+      width: 100%;
+
+      &.highlighted {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-left: 3px solid var(--md-text-accent);
+        padding-left: calc(var(--md-spacing-sm) - 3px);
+        margin-left: calc(var(--md-spacing-sm) * -1);
+      }
+    }
   }
 
   a {
