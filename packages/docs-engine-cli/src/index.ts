@@ -12,6 +12,8 @@ import { loadConfig, mergeConfig } from './config.js';
 import type { LinkCheckerConfig } from './config.js';
 import { createVersion, listVersions, deleteVersion } from './versioning.js';
 import { generateApiDocs } from './api-generator.js';
+import { watchSymbols } from './symbol-watcher.js';
+import { benchmarkSymbols, printBenchmarkResults } from './symbol-benchmarker.js';
 
 /**
  * Main CLI program
@@ -19,6 +21,7 @@ import { generateApiDocs } from './api-generator.js';
  * Provides commands for:
  * - Link checking and validation
  * - Documentation versioning
+ * - Symbol map generation and watching
  * - Documentation maintenance
  *
  * @public
@@ -255,6 +258,106 @@ program
 			spinner.fail('API documentation generation failed');
 			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
 			if (error instanceof Error && error.stack) {
+				console.error(chalk.gray(error.stack));
+			}
+			process.exit(1);
+		}
+	});
+
+/**
+ * Symbol map generation command
+ */
+program
+	.command('symbols')
+	.description('Generate, watch, or benchmark symbol map from TypeScript sources')
+	.option('-s, --source <patterns...>', 'Source patterns to scan', ['src/**/*.ts'])
+	.option('-o, --output <path>', 'Output path for symbol map', 'docs/symbol-map.json')
+	.option('-e, --exclude <patterns...>', 'Patterns to exclude')
+	.option('--cache-dir <path>', 'Cache directory', '.cache')
+	.option('--cache-version <version>', 'Cache version', '1.0')
+	.option('-w, --watch', 'Watch files and regenerate on changes')
+	.option('-b, --benchmark', 'Run performance benchmark')
+	.option('--debounce <ms>', 'Debounce delay for watch mode in ms', '500')
+	.option('-v, --verbose', 'Show verbose output')
+	.action(async (options) => {
+		try {
+			const config = {
+				sourcePatterns: options.source,
+				excludePatterns: options.exclude || [
+					'**/*.test.ts',
+					'**/*.spec.ts',
+					'**/node_modules/**',
+					'**/dist/**'
+				],
+				outputPath: path.resolve(process.cwd(), options.output),
+				cacheDir: options.cacheDir,
+				cacheVersion: options.cacheVersion,
+				baseDir: process.cwd()
+			};
+
+			// Benchmark mode
+			if (options.benchmark) {
+				const spinner = ora('Running benchmark...').start();
+				spinner.text = '🔬 Symbol Map Generation Benchmark';
+				spinner.stop();
+
+				console.log('='.repeat(50));
+				console.log('Running performance tests...\n');
+
+				const results = await benchmarkSymbols(config);
+				printBenchmarkResults(results);
+				return;
+			}
+
+			// Watch mode
+			if (options.watch) {
+				console.log('🚀 Starting TypeScript file watcher...');
+				console.log(`   Source: ${options.source.join(', ')}`);
+				console.log(`   Output: ${options.output}\n`);
+
+				const watcher = await watchSymbols(config, {
+					debounce: parseInt(options.debounce, 10),
+					verbose: options.verbose,
+					onChange: (stats) => {
+						console.log(
+							`✅ Symbol map updated (${(stats.duration / 1000).toFixed(1)}s, ${stats.symbolCount} symbols)`
+						);
+						console.log('\n👀 Watching TypeScript files for changes...');
+					}
+				});
+
+				console.log('👀 Watching TypeScript files for changes...');
+				console.log('   Press Ctrl+C to stop\n');
+
+				// Handle graceful shutdown
+				const shutdown = async () => {
+					console.log('\n\n👋 Stopping file watcher...');
+					await watcher.close();
+					console.log('✅ File watcher stopped');
+					process.exit(0);
+				};
+
+				process.on('SIGINT', shutdown);
+				process.on('SIGTERM', shutdown);
+				return;
+			}
+
+			// Normal generation mode
+			const spinner = ora('Generating symbol map...').start();
+			const { createSymbolMapGenerator } = await import('@goobits/docs-engine/server');
+
+			const generator = createSymbolMapGenerator(config);
+			const stats = await generator.generate();
+
+			spinner.succeed('Symbol map generated successfully!');
+			console.log(chalk.cyan('\nGenerated:'));
+			console.log(chalk.gray(`  Output: ${options.output}`));
+			console.log(chalk.gray(`  Symbols: ${stats.symbolCount}`));
+			console.log(chalk.gray(`  Duration: ${(stats.duration / 1000).toFixed(2)}s`));
+		} catch (error) {
+			console.error(chalk.red('Symbol generation failed'));
+			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			if (error instanceof Error && error.stack && options.verbose) {
 				console.error(chalk.gray(error.stack));
 			}
 			process.exit(1);
