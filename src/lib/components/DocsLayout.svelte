@@ -12,6 +12,10 @@
 
 	import { Menu, X } from '@lucide/svelte';
 	import DocsSidebar from './DocsSidebar.svelte';
+	import DocsPrevNext from './DocsPrevNext.svelte';
+	import EditThisPage from './EditThisPage.svelte';
+	import PageMetadata from './PageMetadata.svelte';
+	import SearchModal from './SearchModal.svelte';
 	import CodeTabsHydrator from './CodeTabsHydrator.svelte';
 	import CodeCopyHydrator from './CodeCopyHydrator.svelte';
 	import FileTreeHydrator from './FileTreeHydrator.svelte';
@@ -20,6 +24,8 @@
 	import OpenAPIHydrator from './OpenAPIHydrator.svelte';
 	import CollapseHydrator from './CollapseHydrator.svelte';
 	import type { DocsSection } from './types';
+	import { getAdjacentLinks } from '../utils/navigation.js';
+	import type { Contributor } from '../utils/git.js';
 
 	interface BreadcrumbItem {
 		label: string;
@@ -61,6 +67,20 @@
 
 		// Hydrators - all enabled by default
 		hydrators?: HydratorsConfig;
+
+		// Git Integration
+		editLink?: {
+			href: string;
+			text?: string;
+		};
+		gitMetadata?: {
+			lastUpdated?: Date | null;
+			contributors?: Contributor[];
+			showContributors?: boolean;
+		};
+
+		// Search
+		searchIndex?: string;
 	}
 
 	let {
@@ -71,7 +91,10 @@
 		breadcrumbs = [],
 		footer,
 		theme = 'dracula',
-		hydrators = {}
+		hydrators = {},
+		editLink,
+		gitMetadata,
+		searchIndex
 	}: Props = $props();
 
 	// Hydrator defaults
@@ -85,6 +108,13 @@
 
 	// Mobile sidebar state
 	let mobileMenuOpen = $state(false);
+
+	// Previous/Next navigation links
+	const adjacentLinks = $derived(
+		navigation.length > 0 && currentPath
+			? getAdjacentLinks(navigation, currentPath)
+			: { previous: undefined, next: undefined }
+	);
 
 	function toggleMobileMenu() {
 		mobileMenuOpen = !mobileMenuOpen;
@@ -123,6 +153,11 @@
 		></button>
 	{/if}
 
+	<!-- Search Modal -->
+	{#if searchIndex}
+		<SearchModal {searchIndex} />
+	{/if}
+
 	<!-- Main Content Area -->
 	<div class="docs-main">
 		<!-- Breadcrumbs -->
@@ -147,6 +182,22 @@
 			<article class="docs-prose">
 				{@html content}
 			</article>
+
+			<!-- Git Metadata -->
+			{#if gitMetadata}
+				<PageMetadata
+					lastUpdated={gitMetadata.lastUpdated}
+					contributors={gitMetadata.contributors}
+					showContributors={gitMetadata.showContributors}
+				/>
+			{/if}
+
+			<!-- Edit Link -->
+			{#if editLink}
+				<div class="docs-edit-link-container">
+					<EditThisPage href={editLink.href} text={editLink.text} />
+				</div>
+			{/if}
 		</div>
 
 		<!-- Hydrate markdown components -->
@@ -171,6 +222,9 @@
 		{#if enableCollapse}
 			<CollapseHydrator />
 		{/if}
+
+		<!-- Previous/Next Navigation -->
+		<DocsPrevNext previous={adjacentLinks.previous} next={adjacentLinks.next} />
 
 		<!-- Footer -->
 		{#if footer}
@@ -342,6 +396,12 @@
 	/* Content */
 	.docs-content {
 		flex: 1;
+	}
+
+	.docs-edit-link-container {
+		margin-top: var(--docs-spacing-xl);
+		display: flex;
+		justify-content: flex-end;
 	}
 
 	/* Footer */

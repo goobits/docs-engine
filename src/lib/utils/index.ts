@@ -35,3 +35,11 @@ export type { OpenAPIEndpoint } from './openapi-formatter';
 
 // HTML utilities
 export * from './html';
+
+// Git utilities (Proposal 02)
+export * from './git';
+export type { GitConfig, Contributor, GitProvider } from './git';
+
+// Search index utilities (Proposal 03)
+export * from './search-index';
+export type { SearchDocument, SearchResult as SearchIndexResult, SearchIndexConfig } from './search-index';
