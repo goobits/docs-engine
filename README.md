@@ -41,10 +41,11 @@ import {
   mermaidPlugin,
   tabsPlugin,
   codeHighlightPlugin,
-  katexPlugin,
   remarkTableOfContents,
   linksPlugin,
   screenshotPlugin,
+  referencePlugin,
+  katexPlugin,
 } from '@goobits/docs-engine/plugins';
 
 export default {
