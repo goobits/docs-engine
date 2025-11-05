@@ -78,6 +78,7 @@
   "devDependencies": {
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.9.2",
+    "@types/unist": "^3.0.3",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "unified": "^11.0.5"

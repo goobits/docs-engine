@@ -32,3 +32,9 @@ export * from './highlighter';
 // OpenAPI formatter utilities
 export * from './openapi-formatter';
 export type { OpenAPIEndpoint } from './openapi-formatter';
+
+// Symbol reference utilities
+export * from './symbol-resolver';
+export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
+export * from './symbol-renderer';
+export type { RenderOptions } from './symbol-renderer';

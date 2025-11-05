@@ -98,13 +98,14 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 
 				try {
 					// Build decorations for highlighted lines
-					const decorations = lines.length > 0
-						? lines.map((line) => ({
-								start: { line: line - 1, character: 0 },
-								end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
-								properties: { class: 'highlighted' }
-						  }))
-						: [];
+					const decorations =
+						lines.length > 0
+							? lines.map((line) => ({
+									start: { line: line - 1, character: 0 },
+									end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
+									properties: { class: 'highlighted' }
+							  }))
+							: [];
 
 					// Highlight the code with Shiki
 					const highlighted = highlighter.codeToHtml(code, {

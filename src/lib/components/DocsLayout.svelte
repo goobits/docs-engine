@@ -33,6 +33,7 @@
 			text: string;
 			url: string;
 		};
+		lastModified?: string | null;
 	}
 
 	interface HydratorsConfig {
@@ -188,6 +189,9 @@
 						{footer.editLink.text}
 					</a>
 				{/if}
+				{#if footer.lastModified}
+					<p class="docs-footer-last-modified">Last modified: {footer.lastModified}</p>
+				{/if}
 			</footer>
 		{/if}
 	</div>
@@ -196,7 +200,9 @@
 <style>
 	/* === Base Layout === */
 	.docs-layout {
-		min-height: 100vh;
+		/* Full viewport minus header - parent layout handles padding removal */
+		height: calc(100vh - var(--header-height, 70px));
+		overflow: hidden;
 		display: grid;
 		grid-template-columns: auto 1fr;
 		position: relative;
@@ -281,10 +287,9 @@
 
 	/* Sidebar Container */
 	.docs-sidebar-container {
-		position: sticky;
-		top: 0;
-		height: 100vh;
+		height: calc(100vh - var(--header-height, 70px));
 		overflow-y: auto;
+		padding: var(--docs-spacing-md) 0;
 	}
 
 	/* Mobile Overlay */
@@ -306,7 +311,8 @@
 		gap: var(--docs-spacing-xl);
 		padding: var(--docs-spacing-2xl);
 		max-width: 900px;
-		min-height: 100vh;
+		height: calc(100vh - var(--header-height, 70px));
+		overflow-y: auto;
 	}
 
 	/* Breadcrumbs */
@@ -370,6 +376,13 @@
 
 	.docs-footer-link:hover {
 		text-decoration: underline;
+	}
+
+	.docs-footer-last-modified {
+		color: var(--docs-text-tertiary);
+		font-size: 0.75rem;
+		margin: 0;
+		font-style: italic;
 	}
 
 	/* === Prose Styles === */
