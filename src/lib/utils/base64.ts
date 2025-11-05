@@ -3,15 +3,22 @@
  * Works in both Node.js and browser environments
  */
 
+import { ValidationError } from './errors.js';
+
 /**
  * Decode base64 string to UTF-8 text
  * @param encoded - Base64 encoded string
  * @returns Decoded UTF-8 string
+ * @throws ValidationError if decoding fails
  */
 export function decodeBase64(encoded: string): string {
 	if (typeof Buffer !== 'undefined') {
 		// Node.js environment
-		return Buffer.from(encoded, 'base64').toString('utf-8');
+		try {
+			return Buffer.from(encoded, 'base64').toString('utf-8');
+		} catch (error) {
+			throw ValidationError.invalidValue('encoded', encoded, 'Invalid base64 string');
+		}
 	} else if (typeof atob !== 'undefined') {
 		// Browser environment
 		try {
@@ -23,9 +30,8 @@ export function decodeBase64(encoded: string): string {
 				bytes[i] = binaryString.charCodeAt(i);
 			}
 			return new TextDecoder('utf-8').decode(bytes);
-		} catch (err) {
-			console.error('Failed to decode base64:', err);
-			return '';
+		} catch (error) {
+			throw ValidationError.invalidValue('encoded', encoded, 'Invalid base64 string');
 		}
 	} else {
 		throw new Error('No base64 decoding available in this environment');
@@ -36,20 +42,29 @@ export function decodeBase64(encoded: string): string {
  * Encode UTF-8 text to base64
  * @param text - UTF-8 string to encode
  * @returns Base64 encoded string
+ * @throws ValidationError if encoding fails
  */
 export function encodeBase64(text: string): string {
 	if (typeof Buffer !== 'undefined') {
 		// Node.js environment
-		return Buffer.from(text, 'utf-8').toString('base64');
+		try {
+			return Buffer.from(text, 'utf-8').toString('base64');
+		} catch (error) {
+			throw ValidationError.invalidValue('text', text, 'Failed to encode as base64');
+		}
 	} else if (typeof btoa !== 'undefined') {
 		// Browser environment
-		// Encode UTF-8 to binary string
-		const bytes = new TextEncoder().encode(text);
-		let binaryString = '';
-		for (let i = 0; i < bytes.length; i++) {
-			binaryString += String.fromCharCode(bytes[i]);
+		try {
+			// Encode UTF-8 to binary string
+			const bytes = new TextEncoder().encode(text);
+			let binaryString = '';
+			for (let i = 0; i < bytes.length; i++) {
+				binaryString += String.fromCharCode(bytes[i]);
+			}
+			return btoa(binaryString);
+		} catch (error) {
+			throw ValidationError.invalidValue('text', text, 'Failed to encode as base64');
 		}
-		return btoa(binaryString);
 	} else {
 		throw new Error('No base64 encoding available in this environment');
 	}
@@ -63,6 +78,7 @@ export function encodeBase64(text: string): string {
  *
  * @param data - Any JSON-serializable object
  * @returns Base64-encoded JSON string
+ * @throws ValidationError if data cannot be serialized
  *
  * @example
  * ```typescript
@@ -72,7 +88,15 @@ export function encodeBase64(text: string): string {
  * ```
  */
 export function encodeJsonBase64<T>(data: T): string {
-	return encodeBase64(JSON.stringify(data));
+	try {
+		return encodeBase64(JSON.stringify(data));
+	} catch (error) {
+		throw ValidationError.invalidValue(
+			'data',
+			data,
+			`Failed to encode object as JSON+Base64: ${error instanceof Error ? error.message : String(error)}`
+		);
+	}
 }
 
 /**
@@ -82,6 +106,7 @@ export function encodeJsonBase64<T>(data: T): string {
  *
  * @param encoded - Base64-encoded JSON string
  * @returns Decoded object
+ * @throws ValidationError if encoded string is invalid base64 or invalid JSON
  *
  * @example
  * ```typescript
@@ -90,5 +115,19 @@ export function encodeJsonBase64<T>(data: T): string {
  * ```
  */
 export function decodeJsonBase64<T>(encoded: string): T {
-	return JSON.parse(decodeBase64(encoded));
+	try {
+		const decoded = decodeBase64(encoded);
+		return JSON.parse(decoded) as T;
+	} catch (error) {
+		// Re-throw ValidationError from decodeBase64
+		if (error instanceof ValidationError) {
+			throw error;
+		}
+		// JSON.parse error
+		throw ValidationError.invalidValue(
+			'encoded',
+			encoded,
+			`Failed to parse decoded JSON: ${error instanceof Error ? error.message : String(error)}`
+		);
+	}
 }
