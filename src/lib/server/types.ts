@@ -1,5 +1,7 @@
 /**
  * Represents a documentation page loaded from a markdown file
+ *
+ * @public
  */
 export interface DocPage {
   markdown: string;
@@ -9,6 +11,8 @@ export interface DocPage {
 
 /**
  * Document loader interface for loading markdown files
+ *
+ * @public
  */
 export interface DocsLoader {
   load(slug: string): Promise<DocPage>;
@@ -16,6 +20,8 @@ export interface DocsLoader {
 
 /**
  * Markdown renderer interface for converting markdown to HTML
+ *
+ * @public
  */
 export interface MarkdownRenderer {
   render(markdown: string): Promise<string>;
@@ -23,6 +29,8 @@ export interface MarkdownRenderer {
 
 /**
  * Screenshot generation request payload
+ *
+ * @public
  */
 export interface ScreenshotRequest {
   name: string;
@@ -45,6 +53,8 @@ export interface ScreenshotRequest {
 
 /**
  * Screenshot generation response
+ *
+ * @public
  */
 export interface ScreenshotResponse {
   success: boolean;

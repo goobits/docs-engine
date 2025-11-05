@@ -3,6 +3,11 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
+/**
+ * Result from executing a CLI command
+ *
+ * @public
+ */
 export interface CommandExecutionResult {
   stdout: string;
   stderr: string;
@@ -10,6 +15,11 @@ export interface CommandExecutionResult {
   duration: number;
 }
 
+/**
+ * Configuration for the CLI executor
+ *
+ * @public
+ */
 export interface CliExecutorConfig {
   allowedCommands: string[];
   timeout?: number;
@@ -19,6 +29,8 @@ export interface CliExecutorConfig {
 
 /**
  * Secure CLI command executor with allowlist validation
+ *
+ * @public
  */
 export class CliExecutor {
   private config: Required<CliExecutorConfig>;

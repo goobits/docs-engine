@@ -12,6 +12,8 @@ import { getVersion } from '../utils/version.js';
  * Creates a screenshot endpoint handler for generating screenshots
  * @param config - Configuration options for screenshot generation
  * @returns A SvelteKit RequestHandler
+ *
+ * @public
  */
 export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHandler {
   // Initialize CLI executor with allowed commands
