@@ -209,28 +209,6 @@ function wrapWithMetadata(
 	return wrappedHtml;
 }
 
-/**
- * Apply line highlighting classes to highlighted HTML
- *
- * Module-private helper - not exported
- */
-function applyLineHighlighting(highlightedHtml: string, highlightLines: number[]): string {
-	if (!highlightLines || highlightLines.length === 0) {
-		return highlightedHtml;
-	}
-
-	const lines = highlightedHtml.split('\n');
-	const processedLines = lines.map((line, index) => {
-		const lineNumber = index + 1;
-		if (highlightLines.includes(lineNumber)) {
-			return line.replace('<span class="line">', '<span class="line highlight">');
-		}
-		return line;
-	});
-
-	return processedLines.join('\n');
-}
-
 // ============================================================================
 // Public API
 // ============================================================================
@@ -352,16 +330,21 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 				}
 
 				try {
+					// Build decorations for highlighted lines (cleaner Shiki decorations API from main)
+					const decorations = metadata.highlightLines && metadata.highlightLines.length > 0
+						? metadata.highlightLines.map((line) => ({
+								start: { line: line - 1, character: 0 },
+								end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
+								properties: { class: 'highlighted' }
+						  }))
+						: [];
+
 					// Highlight the code with Shiki
 					let highlighted = highlighter.codeToHtml(code, {
 						lang: metadata.isDiff ? 'diff' : metadata.language,
-						theme: theme
+						theme: theme,
+						decorations
 					});
-
-					// Apply line highlighting
-					if (metadata.highlightLines && metadata.highlightLines.length > 0) {
-						highlighted = applyLineHighlighting(highlighted, metadata.highlightLines);
-					}
 
 					// Apply diff styling
 					if (metadata.isDiff) {
