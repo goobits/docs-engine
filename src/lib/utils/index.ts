@@ -49,3 +49,6 @@ export * from './symbol-resolver';
 export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
 export * from './symbol-renderer';
 export type { RenderOptions } from './symbol-renderer';
+
+// Version utilities
+export * from './version';

@@ -212,11 +212,13 @@ createScreenshotEndpoint({
    <div class="md-screenshot"
         data-name="homepage"
         data-url="https://example.com"
-        data-path="/screenshots/v1.0.0/homepage.png"
-        data-version="1.0.0"
+        data-path="/screenshots/v{version}/homepage.png"
+        data-version="{version}"
         data-config="eyJ1cmwiOi...">
    </div>
    ```
+
+   Note: `{version}` is automatically read from package.json at build time.
 
 ### Runtime (Client-Side)
 
