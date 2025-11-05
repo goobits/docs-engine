@@ -40,6 +40,18 @@ export type {
 } from '../generators/api-parser';
 export type { MarkdownGeneratorConfig } from '../generators/api-docs';
 
+// Generic documentation generators - Server-side only (requires Node.js fs, child_process)
+export * from '../generators/generic-generator';
+export type {
+	GeneratorConfig,
+	GeneratorResult,
+	GeneratorStats,
+	CategoryRule,
+	EnrichmentRule,
+	MarkdownTemplate,
+	ParserConfig
+} from '../generators/types';
+
 // Navigation scanner utilities - Server-side only (requires Node.js fs/promises)
 export * from '../utils/navigation-scanner';
 export type {
