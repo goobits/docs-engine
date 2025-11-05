@@ -45,6 +45,7 @@ import {
   linksPlugin,
   screenshotPlugin,
   referencePlugin,
+  imageOptimizationPlugin,
   katexPlugin,
 } from '@goobits/docs-engine/plugins';
 
@@ -59,11 +60,12 @@ export default {
         tabsPlugin(),
         remarkTableOfContents(),
         linksPlugin(),
-        referencePlugin(),      // Symbol references
-        screenshotPlugin(),
-        remarkMath,             // Parse math syntax
-        katexPlugin(),          // Render math with KaTeX
-        codeHighlightPlugin({   // Enhanced code blocks
+        referencePlugin(),           // Symbol references
+        screenshotPlugin(),          // Automated screenshots
+        imageOptimizationPlugin(),   // Image optimization (WebP/AVIF)
+        remarkMath,                  // Parse math syntax
+        katexPlugin(),               // Render math with KaTeX
+        codeHighlightPlugin({        // Enhanced code blocks
           theme: 'dracula',
           showLineNumbers: false
         }),
@@ -84,6 +86,7 @@ In your layout component:
     FileTreeHydrator,
     MermaidHydrator,
     ScreenshotHydrator,
+    OptimizedImageHydrator,
   } from '@goobits/docs-engine/components';
 </script>
 
@@ -91,6 +94,7 @@ In your layout component:
 <FileTreeHydrator allowCopy={true} />
 <MermaidHydrator />
 <ScreenshotHydrator />
+<OptimizedImageHydrator />
 
 <slot />
 ```
