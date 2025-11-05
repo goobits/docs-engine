@@ -7,7 +7,7 @@
 	 */
 
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
-	import type { DocsLink } from '../utils/navigation.js';
+	import type { DocsLink } from '../utils/navigation';
 
 	interface Props {
 		previous?: (DocsLink & { section: string }) | null;

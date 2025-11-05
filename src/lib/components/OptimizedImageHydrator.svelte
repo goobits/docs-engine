@@ -14,7 +14,7 @@
 	import { onMount } from 'svelte';
 	import { mount, unmount } from 'svelte';
 	import OptimizedImage from './OptimizedImage.svelte';
-	import { decodeJsonBase64 } from '../utils/base64.js';
+	import { decodeJsonBase64 } from '../utils/base64';
 
 	interface ImageConfig {
 		src: string;
