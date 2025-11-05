@@ -83,19 +83,50 @@ export function resolveSymbol(
     throw new AmbiguousSymbolError(symbolName, candidates);
   }
 
-  const filtered = candidates.filter(c => c.path.includes(pathHint));
+  // Check if path hint includes a kind suffix (e.g., "types/enums/type" or "types/enums/const")
+  const kindSuffixes = ['type', 'interface', 'class', 'function', 'enum', 'const'];
+  let kindFilter: string | null = null;
+  let pathOnly = pathHint;
+
+  for (const kind of kindSuffixes) {
+    if (pathHint.endsWith(`/${kind}`)) {
+      kindFilter = kind;
+      pathOnly = pathHint.slice(0, -(kind.length + 1));
+      break;
+    }
+  }
+
+  // Filter by path (and optionally by kind)
+  const filtered = candidates.filter(c => {
+    const matchesPath = c.path.includes(pathOnly);
+    const matchesKind = !kindFilter || c.kind === kindFilter;
+    return matchesPath && matchesKind;
+  });
 
   if (filtered.length === 1) {
     return filtered[0];
   }
 
   if (filtered.length === 0) {
-    throw new AmbiguousSymbolError(
-      symbolName,
-      candidates,
-      pathHint,
-      `Path hint "${pathHint}" didn't match any of the ${candidates.length} definitions.`
-    );
+    const msg = kindFilter
+      ? `Path hint "${pathHint}" with kind "${kindFilter}" didn't match any of the ${candidates.length} definitions.`
+      : `Path hint "${pathHint}" didn't match any of the ${candidates.length} definitions.`;
+    throw new AmbiguousSymbolError(symbolName, candidates, pathHint, msg);
+  }
+
+  // Still ambiguous - suggest using kind suffix if multiple kinds exist
+  if (!kindFilter && filtered.length > 1) {
+    const kinds = [...new Set(filtered.map(c => c.kind))];
+    if (kinds.length > 1) {
+      const suggestions = filtered.map(d => `{@${pathOnly}/${d.kind}#${symbolName}}  // ${d.kind} at line ${d.line}`).join('\n  - ');
+      throw new AmbiguousSymbolError(
+        symbolName,
+        filtered,
+        pathHint,
+        `Symbol "${symbolName}" with hint "${pathHint}" is still ambiguous (${filtered.length} matches with different kinds).\n\n` +
+        `Add a kind suffix to disambiguate:\n  - ${suggestions}`
+      );
+    }
   }
 
   throw new AmbiguousSymbolError(symbolName, filtered, pathHint);
