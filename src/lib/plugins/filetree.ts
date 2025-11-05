@@ -21,6 +21,8 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  * <div class="md-filetree" data-tree="...encoded..."></div>
  *
  * Which is then rendered client-side by the FileTree component
+ *
+ * @public
  */
 export function filetreePlugin() {
 	return (tree: Root) => {

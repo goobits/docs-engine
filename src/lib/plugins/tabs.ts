@@ -35,6 +35,8 @@ interface Tab {
  * <div class="md-code-tabs" data-tabs-id="api-example" data-tabs="...encoded..."></div>
  *
  * Which is then hydrated client-side into an interactive tabs component
+ *
+ * @public
  */
 export function tabsPlugin() {
 	return (tree: Root) => {

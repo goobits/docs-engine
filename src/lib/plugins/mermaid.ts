@@ -16,6 +16,8 @@ import { encodeBase64 } from '../utils/base64.js';
  * <div class="md-mermaid" data-diagram="...encoded..."></div>
  *
  * Which is then rendered client-side by mermaid.js
+ *
+ * @public
  */
 export function mermaidPlugin() {
 	return (tree: Root) => {

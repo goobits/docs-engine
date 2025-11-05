@@ -41,6 +41,8 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  * Supports: NOTE, TIP, IMPORTANT, WARNING, CAUTION, SUCCESS, DANGER, INFO, QUESTION
  *
  * Into styled HTML callouts with icons and enhanced markdown rendering
+ *
+ * @public
  */
 export function calloutsPlugin() {
 	return (tree: Root) => {
