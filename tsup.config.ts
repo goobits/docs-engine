@@ -71,6 +71,10 @@ export default defineConfig({
 		'shiki',
 		'unist-util-visit',
 		'yaml',
+		// Server-only dependencies (should not be bundled)
+		'ts-morph',
+		'glob',
+		'chokidar',
 	],
 
 	// esbuild options

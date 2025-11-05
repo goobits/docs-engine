@@ -11,12 +11,8 @@ export type {
 	NavigationBuilderOptions,
 } from './navigation-builder';
 
-// Navigation scanner utilities
-export * from './navigation-scanner';
-export type {
-	ScanOptions,
-	EnhancedNavigationOptions,
-} from './navigation-scanner';
+// NOTE: Navigation scanner moved to server/index.ts (requires Node.js fs/promises)
+// Import from '@goobits/docs-engine/server' instead
 
 // Search utilities
 export * from './search';
@@ -59,19 +55,8 @@ export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
 export * from './symbol-renderer';
 export type { RenderOptions } from './symbol-renderer';
 
-// Markdown generation utilities
-export * from './markdown';
-
-// File I/O utilities (server-side only)
-export * from './file-io';
-
-// Symbol generation utilities (server-side only)
-export * from './symbol-generation';
-export type {
-	SymbolGeneratorConfig,
-	SymbolDefinition as SymbolGenDefinition,
-	SymbolMap as SymbolGenMap,
-} from './symbol-generation';
-
+// NOTE: Markdown generation utilities moved to server/index.ts (requires Node.js)
+// NOTE: File I/O utilities moved to server/index.ts (requires Node.js fs)
+// NOTE: Symbol generation utilities moved to server/index.ts (requires Node.js fs, glob, typescript)
 // NOTE: Version utilities moved to server/index.ts (requires Node.js fs)
 // Import from '@goobits/docs-engine/server' instead

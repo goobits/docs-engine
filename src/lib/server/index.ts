@@ -39,3 +39,24 @@ export type {
 	ApiParserConfig
 } from '../generators/api-parser';
 export type { MarkdownGeneratorConfig } from '../generators/api-docs';
+
+// Navigation scanner utilities - Server-side only (requires Node.js fs/promises)
+export * from '../utils/navigation-scanner';
+export type {
+	ScanOptions,
+	EnhancedNavigationOptions,
+} from '../utils/navigation-scanner';
+
+// Markdown generation utilities - Server-side only
+export * from '../utils/markdown';
+
+// File I/O utilities - Server-side only (requires Node.js fs)
+export * from '../utils/file-io';
+
+// Symbol generation utilities - Server-side only (requires Node.js fs, glob, typescript)
+export * from '../utils/symbol-generation';
+export type {
+	SymbolGeneratorConfig,
+	SymbolDefinition as SymbolGenDefinition,
+	SymbolMap as SymbolGenMap,
+} from '../utils/symbol-generation';
