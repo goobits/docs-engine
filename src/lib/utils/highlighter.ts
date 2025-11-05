@@ -4,6 +4,7 @@
  */
 
 import { createHighlighter, type Highlighter } from 'shiki';
+import { escapeHtml } from './html.js';
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 
@@ -72,15 +73,4 @@ export async function highlightCode(
 		// Fallback to plain code block
 		return `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
 	}
-}
-
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }

@@ -1,0 +1,217 @@
+{
+  "files": {
+    "src/lib/components/index.ts": {
+      "imports": [],
+      "size": 28
+    },
+    "src/lib/components/types.ts": {
+      "imports": [],
+      "size": 44
+    },
+    "src/lib/config/defaults.ts": {
+      "imports": [],
+      "size": 71
+    },
+    "src/lib/config/index.ts": {
+      "imports": [],
+      "size": 3
+    },
+    "src/lib/index.ts": {
+      "imports": [],
+      "size": 7
+    },
+    "src/lib/plugins/callouts.ts": {
+      "imports": [
+        "src/lib/utils/html.ts"
+      ],
+      "size": 187
+    },
+    "src/lib/plugins/code-highlight.ts": {
+      "imports": [
+        "src/lib/utils/agentflow-grammar.json",
+        "src/lib/utils/html.ts"
+      ],
+      "size": 119
+    },
+    "src/lib/plugins/collapse.ts": {
+      "imports": [
+        "src/lib/utils/html.ts"
+      ],
+      "size": 158
+    },
+    "src/lib/plugins/filetree.ts": {
+      "imports": [
+        "src/lib/utils/tree-parser.ts",
+        "src/lib/utils/html.ts",
+        "src/lib/utils/base64.ts"
+      ],
+      "size": 62
+    },
+    "src/lib/plugins/index.ts": {
+      "imports": [],
+      "size": 13
+    },
+    "src/lib/plugins/links.ts": {
+      "imports": [],
+      "size": 159
+    },
+    "src/lib/plugins/mermaid.ts": {
+      "imports": [
+        "src/lib/utils/base64.ts"
+      ],
+      "size": 36
+    },
+    "src/lib/plugins/screenshot.ts": {
+      "imports": [
+        "src/lib/utils/base64.ts"
+      ],
+      "size": 101
+    },
+    "src/lib/plugins/tabs.ts": {
+      "imports": [
+        "src/lib/utils/html.ts",
+        "src/lib/utils/base64.ts"
+      ],
+      "size": 135
+    },
+    "src/lib/plugins/toc.ts": {
+      "imports": [],
+      "size": 192
+    },
+    "src/lib/server/cli-executor.ts": {
+      "imports": [],
+      "size": 88
+    },
+    "src/lib/server/index.ts": {
+      "imports": [],
+      "size": 3
+    },
+    "src/lib/server/screenshot-service.ts": {
+      "imports": [
+        "src/lib/server/cli-executor.ts"
+      ],
+      "size": 330
+    },
+    "src/lib/server/types.ts": {
+      "imports": [],
+      "size": 54
+    },
+    "src/lib/utils/base64.ts": {
+      "imports": [],
+      "size": 95
+    },
+    "src/lib/utils/frontmatter.ts": {
+      "imports": [],
+      "size": 106
+    },
+    "src/lib/utils/highlighter.ts": {
+      "imports": [
+        "src/lib/utils/html.ts"
+      ],
+      "size": 77
+    },
+    "src/lib/utils/html.ts": {
+      "imports": [],
+      "size": 80
+    },
+    "src/lib/utils/index.ts": {
+      "imports": [],
+      "size": 38
+    },
+    "src/lib/utils/navigation-builder.ts": {
+      "imports": [],
+      "size": 272
+    },
+    "src/lib/utils/navigation.ts": {
+      "imports": [],
+      "size": 88
+    },
+    "src/lib/utils/openapi-formatter.ts": {
+      "imports": [],
+      "size": 345
+    },
+    "src/lib/utils/search.ts": {
+      "imports": [],
+      "size": 181
+    },
+    "src/lib/utils/tree-parser.ts": {
+      "imports": [],
+      "size": 211
+    }
+  },
+  "cycles": [],
+  "duplicateCode": [
+    {
+      "name": "Highlighter Creation",
+      "regex": {},
+      "files": [
+        "src/lib/plugins/code-highlight.ts",
+        "src/lib/utils/highlighter.ts"
+      ]
+    }
+  ],
+  "scatteredConcepts": {
+    "Base64 Encoding": [
+      "src/lib/plugins/filetree.ts",
+      "src/lib/plugins/mermaid.ts",
+      "src/lib/plugins/screenshot.ts",
+      "src/lib/plugins/tabs.ts",
+      "src/lib/utils/base64.ts",
+      "src/lib/utils/index.ts"
+    ],
+    "HTML Escaping": [
+      "src/lib/plugins/callouts.ts",
+      "src/lib/plugins/code-highlight.ts",
+      "src/lib/plugins/collapse.ts",
+      "src/lib/plugins/filetree.ts",
+      "src/lib/plugins/tabs.ts",
+      "src/lib/utils/highlighter.ts",
+      "src/lib/utils/html.ts"
+    ],
+    "Syntax Highlighting": [
+      "src/lib/plugins/code-highlight.ts",
+      "src/lib/plugins/index.ts",
+      "src/lib/utils/highlighter.ts",
+      "src/lib/utils/index.ts",
+      "src/lib/utils/search.ts"
+    ],
+    "Tree Parsing": [
+      "src/lib/plugins/filetree.ts",
+      "src/lib/utils/base64.ts",
+      "src/lib/utils/index.ts",
+      "src/lib/utils/tree-parser.ts"
+    ],
+    "Navigation": [
+      "src/lib/components/index.ts",
+      "src/lib/components/types.ts",
+      "src/lib/plugins/collapse.ts",
+      "src/lib/utils/index.ts",
+      "src/lib/utils/navigation-builder.ts",
+      "src/lib/utils/navigation.ts",
+      "src/lib/utils/search.ts"
+    ],
+    "Frontmatter": [
+      "src/lib/utils/frontmatter.ts",
+      "src/lib/utils/index.ts",
+      "src/lib/utils/navigation-builder.ts"
+    ],
+    "Screenshot": [
+      "src/lib/components/index.ts",
+      "src/lib/components/types.ts",
+      "src/lib/config/defaults.ts",
+      "src/lib/plugins/code-highlight.ts",
+      "src/lib/plugins/index.ts",
+      "src/lib/plugins/screenshot.ts",
+      "src/lib/server/index.ts",
+      "src/lib/server/screenshot-service.ts",
+      "src/lib/server/types.ts"
+    ]
+  },
+  "longChains": [],
+  "stats": {
+    "totalFiles": 29,
+    "totalDependencies": 13,
+    "avgDependenciesPerFile": "0.45",
+    "filesWithNoDeps": 20
+  }
+}

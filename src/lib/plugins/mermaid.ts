@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
+import { encodeBase64 } from '../utils/base64.js';
 
 /**
  * MDsveX/Remark plugin to transform Mermaid code blocks into renderable diagrams
@@ -24,7 +25,7 @@ export function mermaidPlugin() {
 			const diagram = node.value;
 
 			// Base64 encode the diagram to avoid HTML escaping issues
-			const encoded = Buffer.from(diagram).toString('base64');
+			const encoded = encodeBase64(diagram);
 
 			// Transform to HTML div that will be hydrated client-side
 			node.type = 'html';

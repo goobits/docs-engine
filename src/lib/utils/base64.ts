@@ -54,3 +54,41 @@ export function encodeBase64(text: string): string {
 		throw new Error('No base64 encoding available in this environment');
 	}
 }
+
+/**
+ * Encode object as JSON then Base64 (common pattern in plugins)
+ *
+ * This is a convenience method used extensively in the plugin system
+ * to safely embed structured data in HTML attributes.
+ *
+ * @param data - Any JSON-serializable object
+ * @returns Base64-encoded JSON string
+ *
+ * @example
+ * ```typescript
+ * const treeData = { name: 'src', children: [...] };
+ * const encoded = encodeJsonBase64(treeData);
+ * // Use in HTML: <div data-tree="${encoded}"></div>
+ * ```
+ */
+export function encodeJsonBase64<T>(data: T): string {
+	return encodeBase64(JSON.stringify(data));
+}
+
+/**
+ * Decode Base64 JSON back to object
+ *
+ * Counterpart to encodeJsonBase64() for client-side hydration.
+ *
+ * @param encoded - Base64-encoded JSON string
+ * @returns Decoded object
+ *
+ * @example
+ * ```typescript
+ * const encoded = element.getAttribute('data-tree');
+ * const treeData = decodeJsonBase64<TreeNode[]>(encoded);
+ * ```
+ */
+export function decodeJsonBase64<T>(encoded: string): T {
+	return JSON.parse(decodeBase64(encoded));
+}

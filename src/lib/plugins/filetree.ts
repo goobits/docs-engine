@@ -3,6 +3,8 @@ import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { parseTree, getFileType } from '../utils/tree-parser.js';
 import type { TreeNode } from '../utils/tree-parser.js';
+import { escapeHtml } from '../utils/html.js';
+import { encodeJsonBase64 } from '../utils/base64.js';
 
 /**
  * Remark plugin to transform filetree code blocks into interactive file trees
@@ -32,7 +34,7 @@ export function filetreePlugin() {
 				const treeData = parseTree(treeString);
 
 				// Base64 encode the tree data to avoid HTML escaping issues
-				const encoded = Buffer.from(JSON.stringify(treeData)).toString('base64');
+				const encoded = encodeJsonBase64(treeData);
 
 				// Transform to HTML div that will be hydrated client-side
 				node.type = 'html';
@@ -56,18 +58,4 @@ export function filetreePlugin() {
 			}
 		});
 	};
-}
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }

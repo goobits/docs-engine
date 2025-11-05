@@ -3,6 +3,7 @@ import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { createHighlighter } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
+import { escapeHtml } from '../utils/html.js';
 
 export interface CodeHighlightOptions {
 	theme?: string;
@@ -114,18 +115,4 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 			})
 		);
 	};
-}
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-	const htmlEscapes: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
 }
