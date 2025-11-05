@@ -44,3 +44,7 @@ export type { MarkdownGeneratorConfig } from '../generators/api-docs';
 export * from '../utils/i18n-loader';
 export * from '../utils/i18n-docs-loader';
 export type { LocalizedContent } from '../utils/i18n-loader';
+
+// Advanced search utilities (Proposal 15) - Server-side only (uses navigation data)
+export * from '../utils/meilisearch-indexer';
+export type { MeilisearchDocument } from '../utils/meilisearch-indexer';

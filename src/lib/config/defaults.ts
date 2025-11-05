@@ -24,6 +24,50 @@ export interface I18nConfig {
   locales: LocaleConfig[];
 }
 
+/**
+ * Algolia DocSearch configuration
+ * See: https://docsearch.algolia.com/
+ *
+ * @public
+ */
+export interface AlgoliaConfig {
+  /** Algolia Application ID */
+  appId: string;
+  /** Algolia Search API Key (public, search-only key) */
+  apiKey: string;
+  /** Index name */
+  indexName: string;
+}
+
+/**
+ * Meilisearch configuration
+ * See: https://www.meilisearch.com/
+ *
+ * @public
+ */
+export interface MeilisearchConfig {
+  /** Meilisearch host URL (e.g., "http://localhost:7700") */
+  host: string;
+  /** Search API key (public key) */
+  apiKey: string;
+  /** Index name */
+  indexName: string;
+}
+
+/**
+ * Advanced search provider configuration
+ *
+ * @public
+ */
+export interface AdvancedSearchConfig {
+  /** Search provider type */
+  provider: 'algolia' | 'meilisearch';
+  /** Algolia configuration (if provider is 'algolia') */
+  algolia?: AlgoliaConfig;
+  /** Meilisearch configuration (if provider is 'meilisearch') */
+  meilisearch?: MeilisearchConfig;
+}
+
 export interface MarkdownDocsConfig {
   docsRoot: string;
   routePrefix: string;
@@ -85,6 +129,11 @@ export interface MarkdownDocsConfig {
    * Enable multi-language support with locale-based routing
    */
   i18n?: I18nConfig;
+  /**
+   * Advanced search configuration
+   * Use Algolia DocSearch or Meilisearch instead of built-in search
+   */
+  advancedSearch?: AdvancedSearchConfig;
 }
 
 export const defaultConfig: MarkdownDocsConfig = {

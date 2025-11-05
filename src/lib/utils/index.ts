@@ -63,3 +63,7 @@ export type { HreflangLink } from './i18n-seo';
 
 // NOTE: i18n-loader and i18n-docs-loader moved to server/index.ts (require Node.js fs)
 // Import from '@goobits/docs-engine/server' instead
+
+// Advanced search utilities (Proposal 15) - Meilisearch indexing
+// NOTE: Meilisearch indexer moved to server/index.ts (uses navigation data)
+// Algolia integration is config-only (use @docsearch/react component directly)
