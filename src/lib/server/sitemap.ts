@@ -9,6 +9,8 @@ import type { DocsSection } from '../utils/navigation.js';
 
 /**
  * Sitemap URL entry
+ *
+ * @public
  */
 export interface SitemapUrl {
 	loc: string;
@@ -19,6 +21,8 @@ export interface SitemapUrl {
 
 /**
  * Sitemap configuration
+ *
+ * @public
  */
 export interface SitemapConfig {
 	/** Base URL for the site (e.g., "https://example.com") */

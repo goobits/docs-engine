@@ -9,6 +9,8 @@ import { execSync } from 'child_process';
 
 /**
  * Git configuration for repository integration
+ *
+ * @public
  */
 export interface GitConfig {
 	/** Repository URL (e.g., "https://github.com/user/repo") */
@@ -23,6 +25,8 @@ export interface GitConfig {
 
 /**
  * Contributor information from Git history
+ *
+ * @public
  */
 export interface Contributor {
 	name: string;
@@ -33,6 +37,8 @@ export interface Contributor {
 
 /**
  * Git provider type
+ *
+ * @public
  */
 export type GitProvider = 'github' | 'gitlab' | 'gitea' | 'unknown';
 
