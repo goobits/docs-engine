@@ -127,6 +127,23 @@ interface User {       // highlighted
 ```
 ````
 
+Here's a real example highlighting important configuration options:
+
+```typescript {3,6-8}
+export default {
+  preprocess: [
+    mdsvex({                    // This is highlighted
+      remarkPlugins: [
+        calloutsPlugin(),
+        tocPlugin(),            // These three
+        linksPlugin(),          // are also
+        codeHighlightPlugin(),  // highlighted
+      ],
+    }),
+  ],
+};
+```
+
 ### Diff Syntax
 
 Show additions and deletions:
@@ -188,14 +205,16 @@ function calculateTotal(items) {
 
 ### Diff Example
 
-````markdown
+> **Note:** This documentation uses diff highlighting to show the change from string concatenation to template literals:
+
 ```diff
   function greet(name) {
 -   console.log('Hello ' + name);
 +   console.log(`Hello ${name}`);
   }
 ```
-````
+
+See how the `-` line is highlighted in red and `+` line in green? That's our diff syntax in action!
 
 ---
 

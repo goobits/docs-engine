@@ -28,9 +28,11 @@ pnpm add @goobits/docs-engine
 
 ## Step 2: Configure MDSveX
 
+> **Note:** The highlighted lines below show the essential plugins for getting started.
+
 Add plugins to your `svelte.config.js`:
 
-```javascript
+```javascript {14-17}
 import { mdsvex } from 'mdsvex';
 import {
   linksPlugin,
@@ -44,7 +46,7 @@ export default {
   preprocess: [
     mdsvex({
       remarkPlugins: [
-        calloutsPlugin(),
+        calloutsPlugin(),     // ← Start with these 4 plugins
         tocPlugin(),
         linksPlugin(),
         codeHighlightPlugin({
