@@ -31,6 +31,8 @@ export interface VersionsConfig {
  * Create a new documentation version
  *
  * Copies current docs to versioned_docs/version-X and updates versions.json
+ *
+ * @public
  */
 export async function createVersion(version: string, docsDir: string): Promise<void> {
 	const versionedDocsDir = path.join(docsDir, 'versioned_docs');
@@ -82,6 +84,8 @@ export async function createVersion(version: string, docsDir: string): Promise<v
 
 /**
  * List all documentation versions
+ *
+ * @public
  */
 export async function listVersions(docsDir: string): Promise<VersionMetadata[]> {
 	const versionsFile = path.join(docsDir, 'versions.json');
@@ -97,6 +101,8 @@ export async function listVersions(docsDir: string): Promise<VersionMetadata[]> 
 
 /**
  * Delete a documentation version
+ *
+ * @public
  */
 export async function deleteVersion(version: string, docsDir: string): Promise<void> {
 	const versionedDocsDir = path.join(docsDir, 'versioned_docs');
@@ -142,6 +148,8 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
 
 /**
  * Get version configuration
+ *
+ * @public
  */
 export async function getVersionConfig(docsDir: string): Promise<VersionsConfig | null> {
 	const versionsFile = path.join(docsDir, 'versions.json');

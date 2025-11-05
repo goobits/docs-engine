@@ -45,6 +45,8 @@ export interface SitemapConfig {
  *   defaultPriority: 0.8
  * });
  * ```
+ *
+ * @public
  */
 export function generateSitemap(
 	navigation: DocsSection[],
@@ -126,6 +128,8 @@ function escapeXml(str: string): string {
  *   disallow: ['/api/*', '/internal/*']
  * });
  * ```
+ *
+ * @public
  */
 export function generateRobotsTxt(config: {
 	siteUrl: string;

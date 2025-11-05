@@ -57,6 +57,8 @@ export interface LinkCheckerConfig {
 
 /**
  * Extract all links from markdown files
+ *
+ * @public
  */
 export async function extractLinks(config: LinkCheckerConfig): Promise<DocumentLink[]> {
 	const { docsDir, ignorePatterns = [] } = config;
@@ -110,6 +112,8 @@ async function extractLinksFromFile(
 
 /**
  * Check all links
+ *
+ * @public
  */
 export async function checkLinks(
 	links: DocumentLink[],
@@ -316,6 +320,8 @@ async function checkExternalLink(
 
 /**
  * Generate summary report
+ *
+ * @public
  */
 export function generateReport(results: LinkCheckResult[]): {
 	total: number;

@@ -85,6 +85,8 @@ const defaultConfig: Required<SearchIndexConfig> = {
  *
  * const index = createSearchIndex(navigation, contentMap);
  * ```
+ *
+ * @public
  */
 export function createSearchIndex(
 	navigation: DocsSection[],
@@ -137,6 +139,8 @@ export function createSearchIndex(
  * @param indexJson - Serialized search index
  * @param config - Optional search configuration
  * @returns MiniSearch instance ready for searching
+ *
+ * @public
  */
 export function loadSearchIndex(
 	indexJson: string,
@@ -164,6 +168,8 @@ export function loadSearchIndex(
  * @param query - Search query string
  * @param config - Optional search configuration
  * @returns Array of search results with excerpts
+ *
+ * @public
  */
 export function performSearch(
 	miniSearch: MiniSearch,
@@ -275,6 +281,8 @@ function generateExcerpt(result: unknown): string {
  * @param text - Text to highlight
  * @param query - Search query
  * @returns Text with <mark> tags around matches
+ *
+ * @public
  */
 export function highlightMatches(text: string, query: string): string {
 	if (!query.trim()) return text;

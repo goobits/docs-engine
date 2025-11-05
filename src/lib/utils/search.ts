@@ -122,21 +122,8 @@ export function searchDocs(
 }
 
 /**
- * Highlight matching text in search results
- * @param text - Text to highlight matches in
- * @param query - Search query to highlight
- * @returns Text with HTML mark tags around matches
- */
-export function highlightMatches(text: string, query: string): string {
-	if (!query.trim()) return text;
-
-	const normalizedQuery = query.trim();
-	const regex = new RegExp(`(${escapeRegex(normalizedQuery)})`, 'gi');
-	return text.replace(regex, '<mark>$1</mark>');
-}
-
-/**
  * Escape special regex characters
+ * Module-private helper
  */
 function escapeRegex(str: string): string {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

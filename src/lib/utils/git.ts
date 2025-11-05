@@ -83,6 +83,8 @@ function execGitCommand(command: string, cacheKey: string, ttl = 60000): string 
  * const lastUpdated = getLastUpdated('docs/getting-started.md');
  * // Returns: Date object or null
  * ```
+ *
+ * @public
  */
 export function getLastUpdated(filePath: string): Date | null {
 	const cacheKey = `lastUpdated:${filePath}`;
@@ -109,6 +111,8 @@ export function getLastUpdated(filePath: string): Date | null {
  * const contributors = getContributors('docs/getting-started.md', 5);
  * // Returns: [{ name: 'John Doe', email: 'john@example.com', commits: 15 }, ...]
  * ```
+ *
+ * @public
  */
 export function getContributors(filePath: string, limit = 10): Contributor[] {
 	const cacheKey = `contributors:${filePath}:${limit}`;
@@ -188,6 +192,8 @@ function detectGitProvider(repoUrl: string): GitProvider {
  * });
  * // Returns: "https://github.com/user/repo/edit/main/docs/getting-started.md"
  * ```
+ *
+ * @public
  */
 export function generateEditLink(filePath: string, config: GitConfig): string {
 	const { repoUrl, branch = 'main', docsPath = 'docs' } = config;
@@ -241,6 +247,8 @@ function simpleHash(str: string): string {
 
 /**
  * Check if the current directory is a Git repository
+ *
+ * @public
  */
 export function isGitRepository(): boolean {
 	try {
@@ -255,6 +263,8 @@ export function isGitRepository(): boolean {
 
 /**
  * Format a date relative to now (e.g., "2 days ago")
+ *
+ * @public
  */
 export function formatRelativeDate(date: Date): string {
 	const now = new Date();
@@ -271,6 +281,8 @@ export function formatRelativeDate(date: Date): string {
 
 /**
  * Clear the Git cache (useful for testing)
+ *
+ * @public
  */
 export function clearGitCache(): void {
 	gitCache.clear();
