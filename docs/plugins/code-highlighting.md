@@ -36,12 +36,25 @@ export default {
 
 ## Configuration
 
+> **Note:** You can configure code highlighting in multiple ways depending on your setup.
+
+:::tabs
 ```typescript
+// TypeScript configuration
 interface CodeHighlightOptions {
   theme?: string;           // Default: 'dracula'
   showLineNumbers?: boolean; // Default: false
 }
 ```
+
+```javascript
+// JavaScript configuration
+codeHighlightPlugin({
+  theme: 'dracula',
+  showLineNumbers: false
+})
+```
+:::
 
 ### Available Themes
 

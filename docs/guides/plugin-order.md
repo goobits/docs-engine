@@ -10,6 +10,28 @@ tags: [plugins, configuration, order]
 
 Remark plugins execute in the order they're listed. **Order matters!**
 
+> **Warning:** Incorrect plugin order is the #1 cause of broken documentation rendering. This guide shows you the correct order and explains why.
+
+## TOC
+
+## Visual Overview
+
+```mermaid
+flowchart TD
+    MD[Markdown Input] --> Structural[Structural Plugins]
+    Structural --> TOC[Table of Contents]
+    TOC --> Links[Links Plugin]
+    Links --> Refs[Symbol References]
+    Refs --> Screenshots[Screenshots]
+    Screenshots --> Code[Code Highlighting]
+    Code --> HTML[HTML Output]
+
+    style MD fill:#e3f2fd
+    style HTML fill:#d4edda
+    style Links fill:#fff3cd
+    style Refs fill:#ffebee
+```
+
 ## Correct Order
 
 ```javascript
@@ -62,6 +84,8 @@ export default {
 
 ## Why This Order?
 
+> **Note:** Each section below explains why plugins must run in this specific order.
+
 ### 1. Structural Plugins First
 
 Plugins that create new markdown structures should run first:
@@ -78,22 +102,35 @@ These don't depend on other plugins.
 
 ### 3. Links Before References
 
+> **Warning:** This is CRITICAL! Getting this wrong breaks symbol references.
+
 **Critical:** `linksPlugin()` must run **before** `referencePlugin()`.
 
 **Why?**
-- `referencePlugin()` generates links (e.g., `[@Symbol](url)`)
+
+```mermaid
+flowchart LR
+    subgraph "✅ Correct"
+        A1[Links Plugin] --> A2[Transforms .md links]
+        A2 --> A3[References Plugin]
+        A3 --> A4[Generates new links]
+        A4 --> A5[✓ Works!]
+    end
+
+    subgraph "❌ Wrong"
+        B1[References Plugin] --> B2[Generates links]
+        B2 --> B3[Links Plugin]
+        B3 --> B4[Breaks generated links]
+        B4 --> B5[✗ Broken!]
+    end
+
+    style A5 fill:#d4edda
+    style B5 fill:#ffebee
+```
+
+- `referencePlugin()` generates links (e.g., `{@Symbol}` → `[Symbol](url)`)
 - If `linksPlugin()` runs after, it will try to transform these generated links
 - This breaks the symbol links
-
-**Correct:**
-```
-linksPlugin() → referencePlugin() → HTML
-```
-
-**Wrong:**
-```
-referencePlugin() → linksPlugin() → broken HTML
-```
 
 ### 4. Screenshots Before Code Highlighting
 

@@ -7,6 +7,34 @@ description: Complete documentation for @goobits/docs-engine
 
 Battery-included documentation system for SvelteKit with markdown rendering, screenshots, search, and symbol references.
 
+## Documentation Structure
+
+```filetree
+docs/
+├── index.md
+├── getting-started.md
+├── guides/
+│   ├── architecture.md
+│   ├── examples.md
+│   ├── diagrams.md
+│   └── plugin-order.md
+├── plugins/
+│   ├── callouts.md
+│   ├── code-highlighting.md
+│   ├── code-tabs.md
+│   ├── filetree.md
+│   ├── frontmatter.md
+│   ├── image-optimization.md
+│   ├── links.md
+│   ├── mermaid.md
+│   ├── navigation.md
+│   ├── screenshots.md
+│   ├── symbol-references.md
+│   └── toc.md
+└── reference/
+    └── (future API docs)
+```
+
 ## Quick Start
 
 New to docs-engine? Start here:
@@ -57,6 +85,8 @@ Learn the fundamentals:
 - **[API Generation](./reference/api-generation.md)** - Auto-generate API docs from TypeScript
 
 ## Learning Paths
+
+> **Tip:** Choose the path that matches your experience level. Each path builds on the previous one.
 
 ### Beginner Path
 

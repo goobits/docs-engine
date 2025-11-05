@@ -10,6 +10,10 @@ tags: [quickstart, setup, installation]
 
 Get docs-engine running in your SvelteKit project in 5 minutes.
 
+## TOC
+
+> **Tip:** This guide takes about 5 minutes. By the end, you'll have a fully working documentation system.
+
 ## Prerequisites
 
 - Node.js 18+
@@ -54,6 +58,8 @@ export default {
 ```
 
 ## Step 3: Create Your First Doc
+
+> **Note:** We're using our own plugins here! Notice the `## TOC` marker and callouts.
 
 Create `src/routes/docs/hello.md`:
 
@@ -132,6 +138,8 @@ Add more plugins:
 
 ### MDSveX not processing markdown
 
+> **Warning:** This is the most common setup issue!
+
 Ensure `.md` is in your `extensions` array:
 
 ```javascript
@@ -156,6 +164,8 @@ Check plugin order in your `svelte.config.js`. Some plugins depend on others run
 ## Common Patterns
 
 ### Documentation Layout
+
+> **Tip:** Use a consistent layout for all your documentation pages.
 
 Create a docs layout at `src/routes/docs/+layout.svelte`:
 
@@ -210,6 +220,24 @@ Create a docs layout at `src/routes/docs/+layout.svelte`:
     min-width: 0;
   }
 </style>
+```
+
+### Project Structure
+
+Here's what your docs structure should look like:
+
+```filetree
+src/
+├── routes/
+│   ├── docs/
+│   │   ├── +layout.svelte
+│   │   ├── +page.md
+│   │   ├── getting-started.md
+│   │   └── plugins/
+│   │       ├── callouts.md
+│   │       └── links.md
+│   └── +layout.svelte
+└── app.css
 ```
 
 ### Frontmatter Template
