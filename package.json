@@ -47,6 +47,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "glob": "^11.0.0",
     "katex": "^0.16.25",
     "minisearch": "^7.2.0",
     "rehype-katex": "^7.0.1",
@@ -54,6 +55,7 @@
     "remark-math": "^6.0.0",
     "sharp": "^0.34.4",
     "shiki": "^3.14.0",
+    "typescript": "^5.9.3",
     "unist-util-visit": "^5.0.0",
     "yaml": "^2.8.1"
   },
@@ -69,6 +71,7 @@
     }
   },
   "optionalDependencies": {
+    "chokidar": "^4.0.3",
     "playwright": "^1.56.1"
   },
   "keywords": [
@@ -90,7 +93,6 @@
     "@vitest/ui": "^4.0.7",
     "happy-dom": "^20.0.10",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vitest": "^4.0.7"
   }
