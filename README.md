@@ -7,6 +7,7 @@ Battery-included documentation system for SvelteKit with markdown rendering, scr
 - **Markdown rendering** with Shiki syntax highlighting
 - **Enhanced code blocks** - Line highlighting, line numbers, file titles, diff syntax
 - **Math rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
+- **Link validation** - CLI tool to check internal and external links
 - **Symbol references** - Link to TypeScript types/functions with `{@Symbol}` syntax
 - **Automated screenshot generation** (web + CLI)
 - **Table of contents** generation with `## TOC` syntax
@@ -94,6 +95,44 @@ In your layout component:
 ```scss
 @import '@goobits/docs-engine/styles';
 ```
+
+## CLI Tools
+
+The `@goobits/docs-engine-cli` package provides command-line tools for maintaining your documentation.
+
+### Installation
+
+```bash
+pnpm add -D @goobits/docs-engine-cli
+```
+
+### Link Checking
+
+Validate all links in your documentation:
+
+```bash
+# Check internal links only
+pnpm docs-engine check-links
+
+# Check external links too
+pnpm docs-engine check-links --external
+
+# Quiet mode (errors only)
+pnpm docs-engine check-links --quiet
+
+# JSON output for CI
+pnpm docs-engine check-links --json
+```
+
+Features:
+- ✅ Internal link validation (files and anchors)
+- 🌐 External link validation with HTTP requests
+- 🎨 Beautiful color-coded output
+- ⚡ Concurrent checking with configurable limits
+- 🔄 CI-friendly (non-zero exit codes on failure)
+- ⚙️ Configurable via `.linkcheckerrc.json`
+
+See [CLI documentation](./packages/docs-engine-cli/README.md) for more details.
 
 ## Documentation
 
