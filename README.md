@@ -140,25 +140,33 @@ See [CLI documentation](./packages/docs-engine-cli/README.md) for more details.
 
 ## Documentation
 
+**[📚 Complete Documentation Index](./docs/index.md)** - Full documentation with learning paths
+
+### Quick Links
+
+- **[Getting Started](./docs/getting-started.md)** - 5-minute setup guide
+- **[Plugin Order Guide](./docs/guides/plugin-order.md)** - Understanding plugin execution order
+
 ### Core Guides
 
 - **[Architecture](./docs/ARCHITECTURE.md)** - Package/consumer split, integration guide, design decisions
-- **[Examples](./docs/EXAMPLES.md)** - Code examples, recipes, and common patterns
-- **[Diagrams](./docs/DIAGRAMS.md)** - Visual architecture diagrams and flowcharts
+- **[Examples](./docs/guides/examples.md)** - Code examples, recipes, and common patterns
+- **[Diagrams](./docs/guides/diagrams.md)** - Visual architecture diagrams and flowcharts
 
 ### Plugin Documentation
 
-- **[Symbol References](./docs/SYMBOL-REFERENCES.md)** - Link to TypeScript symbols with `{@Symbol}` syntax
-- **[Screenshots](./docs/SCREENSHOTS.md)** - Automated web and CLI screenshot generation
-- **[Table of Contents](./docs/TOC.md)** - Auto-generate TOC with `## TOC` or `## TOC:3` syntax
-- **[Frontmatter Parser](./docs/FRONTMATTER.md)** - Parse YAML frontmatter metadata
-- **[Navigation Builder](./NAVIGATION.md)** - Auto-generate navigation from markdown files
-- **[File Tree](./FILETREE.md)** - Display interactive file trees
-- **[Links Plugin](./docs/LINKS.md)** - Convert top-level file links to absolute paths
-- **Callouts** - Styled note/warning/info boxes
-- **Mermaid** - Diagram rendering with mermaid.js
-- **Code Tabs** - Tabbed code examples
-- **Code Highlighting** - Syntax highlighting with Shiki
+- **[Symbol References](./docs/plugins/symbol-references.md)** - Link to TypeScript symbols with `{@Symbol}` syntax
+- **[Screenshots](./docs/plugins/screenshots.md)** - Automated web and CLI screenshot generation
+- **[Image Optimization](./docs/plugins/image-optimization.md)** - Auto WebP/AVIF generation
+- **[Table of Contents](./docs/plugins/toc.md)** - Auto-generate TOC with `## TOC` syntax
+- **[Frontmatter Parser](./docs/plugins/frontmatter.md)** - Parse YAML frontmatter metadata
+- **[Navigation Builder](./docs/plugins/navigation.md)** - Auto-generate navigation from markdown files
+- **[File Tree](./docs/plugins/filetree.md)** - Display interactive file trees
+- **[Links Plugin](./docs/plugins/links.md)** - Convert relative links to absolute paths
+- **[Callouts](./docs/plugins/callouts.md)** - Styled note/warning/info boxes
+- **[Mermaid](./docs/plugins/mermaid.md)** - Diagram rendering with mermaid.js
+- **[Code Tabs](./docs/plugins/code-tabs.md)** - Tabbed code examples
+- **[Code Highlighting](./docs/plugins/code-highlighting.md)** - Syntax highlighting with Shiki
 
 ### Utilities
 
@@ -226,7 +234,7 @@ The {@RequestState} type tracks request context.
 
 Links to GitHub source with hover tooltips showing type signatures.
 
-See **[docs/EXAMPLES.md](./docs/EXAMPLES.md)** for complete examples.
+See **[docs/guides/examples.md](./docs/guides/examples.md)** for complete examples.
 
 ## License
 

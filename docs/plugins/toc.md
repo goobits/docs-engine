@@ -1,3 +1,11 @@
+---
+title: Table of Contents Plugin
+description: Auto-generate a table of contents from markdown headings
+section: Plugins
+difficulty: beginner
+tags: [plugin, markdown, toc, navigation]
+---
+
 # Table of Contents Plugin
 
 Auto-generate a table of contents from markdown headings.
@@ -38,7 +46,7 @@ More content...
 Subsection...
 ```
 
-This will generate:
+This generates:
 
 ```markdown
 ## Table of Contents
@@ -48,9 +56,7 @@ This will generate:
   - [Step 1](#step-1)
 ```
 
-## Options
-
-### Control Depth
+## Control Depth
 
 Specify how many heading levels to include:
 
@@ -64,11 +70,11 @@ Specify how many heading levels to include:
 
 ## Features
 
-- **Auto-generates IDs**: Headings automatically get kebab-case IDs
-- **Clickable links**: TOC items link to their sections
-- **Nested structure**: Respects heading hierarchy
-- **Customizable depth**: Control how deep the TOC goes
-- **One TOC per document**: Only the first `## TOC` marker is processed
+- **Auto-generates IDs** - Headings automatically get kebab-case IDs
+- **Clickable links** - TOC items link to their sections
+- **Nested structure** - Respects heading hierarchy
+- **Customizable depth** - Control how deep the TOC goes
+- **One TOC per document** - Only the first `## TOC` marker is processed
 
 ## Example
 
@@ -107,3 +113,16 @@ A rendered table of contents with links to:
 - Endpoints
   - GET /users
     - Query Parameters
+
+---
+
+## Related Documentation
+
+**Prerequisites:** Basic markdown knowledge
+
+**Next Steps:**
+- [Links Plugin](./links.md) - Convert relative links to absolute paths
+- [Frontmatter Parser](./frontmatter.md) - Parse metadata from markdown
+
+**Related:**
+- [Navigation Builder](./navigation.md) - Auto-generate navigation from files

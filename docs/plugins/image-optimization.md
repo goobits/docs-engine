@@ -1,51 +1,64 @@
+---
+title: Image Optimization
+description: Automatic image optimization with modern formats, responsive images, and lazy loading
+section: Plugins
+difficulty: intermediate
+tags: [plugin, images, optimization, webp, avif]
+---
+
 # Image Optimization
 
 Automatic image optimization with modern formats, responsive images, lazy loading, and click-to-zoom.
 
 ## Features
 
-- ✅ **Multiple Formats** - Auto-generate WebP and AVIF with fallbacks
-- ✅ **Responsive Images** - Generate multiple sizes with srcset
-- ✅ **Lazy Loading** - IntersectionObserver-based lazy loading
-- ✅ **Blur Placeholder** - LQIP (Low Quality Image Placeholder) for smooth loading
-- ✅ **Click-to-Zoom** - Full-size lightbox modal
-- ✅ **Automatic Optimization** - Works at build time, zero configuration
+- **Multiple Formats** - Auto-generate WebP and AVIF with fallbacks
+- **Responsive Images** - Generate multiple sizes with srcset
+- **Lazy Loading** - IntersectionObserver-based lazy loading
+- **Blur Placeholder** - LQIP (Low Quality Image Placeholder) for smooth loading
+- **Click-to-Zoom** - Full-size lightbox modal
+- **Automatic Optimization** - Works at build time, zero configuration
 
-## Quick Start
-
-### 1. Install Package
+## Minimal Config (Get Started in 30 Seconds)
 
 ```bash
 pnpm add @goobits/docs-engine
 ```
 
-### 2. Add Plugin to Your Config
-
-```typescript
-// svelte.config.js or mdsvex.config.js
+```javascript
+// svelte.config.js
 import { imageOptimizationPlugin } from '@goobits/docs-engine/plugins';
 
 export default {
   preprocess: [
     mdsvex({
-      remarkPlugins: [
-        imageOptimizationPlugin({
-          formats: ['webp', 'avif', 'original'],
-          sizes: [640, 960, 1280, 1920],
-          lazy: true,
-          zoom: true,
-          placeholder: 'blur'
-        })
-      ]
+      remarkPlugins: [imageOptimizationPlugin()]
     })
   ]
 };
 ```
 
-### 3. Add Hydrator to Your Layout
+Use in markdown:
+
+```markdown
+![Dashboard screenshot](./dashboard.png)
+```
+
+## Basic Config (Most Common Use Cases)
+
+```javascript
+imageOptimizationPlugin({
+  formats: ['webp', 'avif', 'original'],
+  sizes: [640, 960, 1280, 1920],
+  lazy: true,
+  zoom: true,
+  placeholder: 'blur'
+})
+```
+
+Add hydrator to your layout:
 
 ```svelte
-<!-- +layout.svelte -->
 <script>
   import { OptimizedImageHydrator } from '@goobits/docs-engine/components';
 </script>
@@ -54,22 +67,7 @@ export default {
 <OptimizedImageHydrator />
 ```
 
-### 4. Use in Markdown
-
-```markdown
-<!-- Simple -->
-![Dashboard screenshot](./dashboard.png)
-
-<!-- With dimensions -->
-![Logo](./logo.svg?width=200&height=100)
-
-<!-- With title/caption -->
-![Chart](./chart.png "Monthly sales trends")
-```
-
-## Configuration
-
-### Plugin Options
+## Advanced Config (All Options)
 
 ```typescript
 interface ImageOptimizationOptions {
@@ -119,9 +117,11 @@ const defaults = {
 };
 ```
 
+---
+
 ## Build-Time Image Processing
 
-To optimize images at build time, use the image processor service:
+Use when you need programmatic control over image processing:
 
 ```typescript
 // scripts/optimize-images.ts
@@ -146,10 +146,8 @@ console.log('Placeholder:', result.placeholder);
 import { batchProcessImages } from '@goobits/docs-engine/server';
 import { glob } from 'glob';
 
-// Find all images in docs
 const images = await glob('docs/**/*.{png,jpg,jpeg}');
 
-// Process all images
 const results = await batchProcessImages(
   images.map((img) => ({
     inputPath: img,
@@ -164,57 +162,7 @@ const results = await batchProcessImages(
 console.log(`Optimized ${results.length} images`);
 ```
 
-## Advanced Usage
-
-### Custom Formats
-
-Generate only WebP and original:
-
-```typescript
-imageOptimizationPlugin({
-  formats: ['webp', 'original']
-})
-```
-
-### Mobile-First Sizes
-
-```typescript
-imageOptimizationPlugin({
-  sizes: [375, 768, 1024, 1440] // iPhone, iPad, desktop
-})
-```
-
-### Disable Lazy Loading
-
-```typescript
-imageOptimizationPlugin({
-  lazy: false, // Load all images immediately
-  placeholder: 'none'
-})
-```
-
-### High-Quality Images
-
-```typescript
-imageOptimizationPlugin({
-  quality: {
-    webp: 95,
-    avif: 90,
-    jpg: 95,
-    png: 100
-  }
-})
-```
-
-### Process External URLs
-
-By default, external images (http://, https://) are skipped:
-
-```typescript
-imageOptimizationPlugin({
-  skipExternal: false // Optimize external images too
-})
-```
+---
 
 ## Image Syntax
 
@@ -245,6 +193,8 @@ Dimensions are extracted from the URL and the clean URL is used for optimization
 ```
 
 External images are passed through unless `skipExternal: false`.
+
+---
 
 ## Generated HTML
 
@@ -283,6 +233,8 @@ The plugin transforms markdown images into optimized `<picture>` elements:
 </figure>
 ```
 
+---
+
 ## Features Explained
 
 ### 1. Multiple Formats
@@ -309,7 +261,7 @@ srcset="/img-640w.webp 640w,
 - Tablet (768-960px): Loads 960px version
 - Desktop (1024+): Loads 1280px version
 
-Saves bandwidth on mobile devices!
+Saves bandwidth on mobile devices.
 
 ### 3. Lazy Loading
 
@@ -336,6 +288,8 @@ Click any image to view full-size in a lightbox:
 - Shows image caption
 - Smooth animations
 
+---
+
 ## Performance Benefits
 
 ### Before
@@ -349,7 +303,7 @@ Lighthouse: 65
 ### After
 
 ```
-AVIF 1280px: 180 KB (92% reduction!)
+AVIF 1280px: 180 KB (92% reduction)
 Load time: 0.4s on 3G (8x faster)
 Lighthouse: 95
 ```
@@ -361,17 +315,21 @@ Lighthouse: 95
 - **WebP → AVIF**: 20-30% smaller
 - **Lazy loading**: 40-60% faster initial load
 
+---
+
 ## Lighthouse Impact
 
 Image optimization directly improves Core Web Vitals:
 
-- ✅ **LCP** (Largest Contentful Paint) - Faster image loading
-- ✅ **CLS** (Cumulative Layout Shift) - Dimensions prevent layout shift
-- ✅ **FCP** (First Contentful Paint) - Smaller images load faster
+- **LCP** (Largest Contentful Paint) - Faster image loading
+- **CLS** (Cumulative Layout Shift) - Dimensions prevent layout shift
+- **FCP** (First Contentful Paint) - Smaller images load faster
 
 Expected Lighthouse improvements:
 - Performance: +15-30 points
 - Best Practices: +5-10 points
+
+---
 
 ## Browser Support
 
@@ -383,48 +341,7 @@ Expected Lighthouse improvements:
 
 The `<picture>` element ensures all users get optimized images.
 
-## CSS Customization
-
-Customize the look in your global CSS:
-
-```css
-/* Image container */
-.optimized-image-container {
-  margin: 2rem auto;
-  max-width: 100%;
-}
-
-/* Image styling */
-.optimized-image {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Loading state */
-.optimized-image:not(.loaded) {
-  filter: blur(20px);
-}
-
-/* Loaded state */
-.optimized-image.loaded {
-  filter: none;
-  transition: filter 0.3s ease;
-}
-
-/* Caption */
-.image-caption {
-  font-size: 0.875rem;
-  color: #666;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
-/* Lightbox */
-.image-lightbox {
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-}
-```
+---
 
 ## Troubleshooting
 
@@ -444,7 +361,7 @@ Set `generatePlaceholder: true` in build-time processing:
 await processImage({
   inputPath: './image.png',
   outputDir: './static/images',
-  generatePlaceholder: true // ← Enable LQIP
+  generatePlaceholder: true
 });
 ```
 
@@ -465,6 +382,8 @@ Ensure hydrator is present and JavaScript is enabled:
 ```svelte
 <OptimizedImageHydrator />
 ```
+
+---
 
 ## Best Practices
 
@@ -497,8 +416,11 @@ Balance size vs. quality:
 Always provide descriptive alt text:
 
 ```markdown
-✅ ![Dashboard showing monthly sales trends](./dashboard.png)
-❌ ![Screenshot](./screenshot.png)
+<!-- Good -->
+![Dashboard showing monthly sales trends](./dashboard.png)
+
+<!-- Bad -->
+![Screenshot](./screenshot.png)
 ```
 
 ### 5. File Organization
@@ -516,55 +438,15 @@ static/
     optimized/  ← Generated files go here
 ```
 
-## API Reference
+---
 
-### Plugin
+## Related Documentation
 
-```typescript
-import { imageOptimizationPlugin } from '@goobits/docs-engine/plugins';
-```
+**Prerequisites:** Basic markdown knowledge, understanding of web image formats
 
-### Components
+**Next Steps:**
+- [Screenshots Plugin](./screenshots.md) - Automated screenshot generation
+- [Performance Guide](../guides/performance.md) - Optimization strategies
 
-```typescript
-import {
-  OptimizedImage,
-  OptimizedImageHydrator
-} from '@goobits/docs-engine/components';
-```
-
-### Server Functions
-
-```typescript
-import {
-  processImage,
-  batchProcessImages
-} from '@goobits/docs-engine/server';
-```
-
-### Types
-
-```typescript
-import type {
-  ImageOptimizationOptions,
-  ImageMetadata,
-  ImageProcessorConfig,
-  ImageProcessorResult,
-  ImageVariant
-} from '@goobits/docs-engine';
-```
-
-## Examples
-
-See the [examples directory](../examples) for complete examples:
-
-- Basic setup
-- Custom configuration
-- Build-time processing
-- Advanced usage
-
-## Related
-
-- [Proposal #10 - Image Optimization](../proposals/10_image_optimization.proposal.md)
-- [Screenshot Plugin](./SCREENSHOTS.md)
-- [Sharp Documentation](https://sharp.pixelplumbing.com/)
+**Related:**
+- [Sharp Documentation](https://sharp.pixelplumbing.com/) - Image processing library
