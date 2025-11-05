@@ -11,3 +11,9 @@
  */
 
 @import './base.scss';
+
+/**
+ * KaTeX Math Rendering
+ * Import KaTeX CSS for mathematical equation rendering
+ */
+@import 'katex/dist/katex.min.css';

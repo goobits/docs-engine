@@ -575,6 +575,147 @@ mark {
 }
 
 // ============================================================================
+// Enhanced Code Block Styles (Proposal 00)
+// ============================================================================
+
+/**
+ * Code Block Container
+ * Wraps code blocks with metadata (title, line numbers)
+ */
+.code-block-container {
+  margin: var(--md-spacing-xl) 0;
+  background: var(--md-surface-base);
+  border: 1px solid var(--md-border-medium);
+  border-radius: var(--md-radius-lg);
+  overflow: hidden;
+
+  // Remove margins from nested pre tags
+  pre {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+}
+
+/**
+ * Code Block Title Bar
+ * Displays filename above code block
+ */
+.code-block-title {
+  padding: var(--md-spacing-sm) var(--md-spacing-lg);
+  background: var(--md-surface-raised);
+  border-bottom: 1px solid var(--md-border-subtle);
+  color: var(--md-text-secondary);
+  font-family: var(--md-font-mono);
+  font-size: var(--md-font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+
+  // File icon (optional enhancement)
+  &::before {
+    content: '📄';
+    font-size: var(--md-font-size-base);
+  }
+}
+
+/**
+ * Code Block with Line Numbers
+ * Container for line numbers + code
+ */
+.code-block-with-lines {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background: #282a36; // Dracula theme bg
+}
+
+/**
+ * Line Numbers Column
+ */
+.code-block-line-numbers {
+  display: flex;
+  flex-direction: column;
+  padding: var(--md-spacing-lg) var(--md-spacing-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--md-border-subtle);
+  user-select: none;
+  text-align: right;
+  min-width: 3ch;
+}
+
+.line-number {
+  display: block;
+  height: 1.5rem; // Match line height
+  color: var(--md-text-tertiary);
+  font-family: var(--md-font-mono);
+  font-size: var(--md-font-size-sm);
+  line-height: 1.5rem;
+
+  &.highlight {
+    color: var(--md-text-accent);
+    font-weight: 700;
+  }
+}
+
+/**
+ * Line Highlighting
+ * Highlight specific lines in code blocks
+ */
+.shiki .line.highlight {
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--md-text-accent, #bd93f9);
+  padding-left: calc(var(--md-spacing-md) - 3px);
+  margin-left: -var(--md-spacing-md);
+  display: inline-block;
+  width: calc(100% + var(--md-spacing-md));
+}
+
+/**
+ * Diff Syntax Support
+ * Style added (+) and removed (-) lines
+ */
+.shiki .line.diff-add {
+  background: rgba(34, 197, 94, 0.15); // Green
+  border-left: 3px solid rgb(34, 197, 94);
+  padding-left: calc(var(--md-spacing-md) - 3px);
+  margin-left: -var(--md-spacing-md);
+  display: inline-block;
+  width: calc(100% + var(--md-spacing-md));
+
+  // Dim the + symbol itself
+  &::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    color: rgb(34, 197, 94);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+}
+
+.shiki .line.diff-remove {
+  background: rgba(239, 68, 68, 0.15); // Red
+  border-left: 3px solid rgb(239, 68, 68);
+  padding-left: calc(var(--md-spacing-md) - 3px);
+  margin-left: -var(--md-spacing-md);
+  display: inline-block;
+  width: calc(100% + var(--md-spacing-md));
+  text-decoration: line-through;
+  opacity: 0.8;
+
+  // Dim the - symbol itself
+  &::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: rgb(239, 68, 68);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+}
+
+// ============================================================================
 // Responsive Utilities
 // ============================================================================
 
@@ -600,5 +741,114 @@ mark {
   .md-filetree__children {
     margin-left: var(--md-spacing-md);
     padding-left: var(--md-spacing-sm);
+  }
+}
+
+// ============================================================================
+// KaTeX Math Rendering (Proposal 06)
+// ============================================================================
+
+/**
+ * KaTeX Math Equations
+ * Styles for inline and display math rendered by KaTeX
+ */
+
+// Inline math - flows with text
+.math-inline {
+  display: inline;
+  vertical-align: baseline;
+}
+
+// Display math - centered block
+.math-display {
+  display: block;
+  margin: var(--md-spacing-lg) 0;
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  // Add padding for mobile scrolling
+  padding: var(--md-spacing-sm) 0;
+}
+
+// Error styling
+.katex-error {
+  padding: var(--md-spacing-sm) var(--md-spacing-md);
+  background: rgba(204, 0, 0, 0.05);
+  border-left: 3px solid #cc0000;
+  border-radius: var(--md-radius-sm);
+  font-family: var(--md-font-mono);
+  font-size: var(--md-font-size-xs);
+
+  strong {
+    font-weight: 600;
+  }
+
+  code {
+    display: block;
+    margin-top: var(--md-spacing-xs);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+/**
+ * Dark Mode Support for KaTeX
+ * Override KaTeX default colors for dark theme
+ */
+@media (prefers-color-scheme: dark) {
+  // Update KaTeX text color for dark mode
+  .katex {
+    color: var(--md-text-primary, #e5e7eb);
+  }
+
+  // Ensure math symbols are visible
+  .katex .mord,
+  .katex .mop,
+  .katex .mbin,
+  .katex .mrel,
+  .katex .mopen,
+  .katex .mclose,
+  .katex .mpunct {
+    color: var(--md-text-primary, #e5e7eb);
+  }
+
+  // Update fraction lines and other rules
+  .katex .frac-line,
+  .katex .overline-line,
+  .katex .underline-line,
+  .katex .hline,
+  .katex .rule {
+    border-color: var(--md-border-medium, #4b5563);
+    background-color: var(--md-border-medium, #4b5563);
+  }
+
+  // Update radical (square root) lines
+  .katex .sqrt > .root {
+    border-color: var(--md-text-primary, #e5e7eb);
+  }
+
+  // Error styling for dark mode
+  .katex-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left-color: #ef4444;
+    color: #fca5a5;
+  }
+}
+
+/**
+ * Responsive Math Equations
+ * Handle long equations on small screens
+ */
+@media (max-width: 768px) {
+  .math-display {
+    // Ensure equations can scroll on mobile
+    max-width: 100%;
+    font-size: 0.9em;
+  }
+
+  // Reduce inline math size slightly on mobile
+  .math-inline {
+    font-size: 0.95em;
   }
 }

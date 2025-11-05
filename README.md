@@ -5,6 +5,8 @@ Battery-included documentation system for SvelteKit with markdown rendering, scr
 ## Features
 
 - **Markdown rendering** with Shiki syntax highlighting
+- **Enhanced code blocks** - Line highlighting, line numbers, file titles, diff syntax
+- **Math rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
 - **Symbol references** - Link to TypeScript types/functions with `{@Symbol}` syntax
 - **Automated screenshot generation** (web + CLI)
 - **Table of contents** generation with `## TOC` syntax
@@ -27,12 +29,14 @@ Add plugins to your `svelte.config.js`:
 
 ```javascript
 import { mdsvex } from 'mdsvex';
+import remarkMath from 'remark-math';
 import {
   filetreePlugin,
   calloutsPlugin,
   mermaidPlugin,
   tabsPlugin,
   codeHighlightPlugin,
+  katexPlugin,
   remarkTableOfContents,
   linksPlugin,
   screenshotPlugin,
@@ -51,7 +55,12 @@ export default {
         linksPlugin(),
         referencePlugin(),      // Symbol references
         screenshotPlugin(),
-        codeHighlightPlugin({ theme: 'dracula' }),
+        remarkMath,             // Parse math syntax
+        katexPlugin(),          // Render math with KaTeX
+        codeHighlightPlugin({   // Enhanced code blocks
+          theme: 'dracula',
+          showLineNumbers: false
+        }),
       ],
     }),
   ],

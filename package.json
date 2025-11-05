@@ -41,10 +41,15 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "test": "vitest",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "katex": "^0.16.25",
+    "minisearch": "^7.2.0",
+    "rehype-katex": "^7.0.1",
     "remark-directive": "^3.0.0",
+    "remark-math": "^6.0.0",
     "sharp": "^0.34.4",
     "shiki": "^3.14.0",
     "unist-util-visit": "^5.0.0",
@@ -78,8 +83,11 @@
   "devDependencies": {
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.9.2",
+    "@vitest/ui": "^4.0.7",
+    "happy-dom": "^20.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "vitest": "^4.0.7"
   }
 }
