@@ -41,6 +41,9 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
@@ -77,10 +80,14 @@
   "license": "MIT",
   "author": "GooBits",
   "devDependencies": {
+    "@testing-library/svelte": "^5.2.8",
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.9.2",
+    "@vitest/ui": "^4.0.7",
+    "happy-dom": "^20.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "vitest": "^4.0.7"
   }
 }
