@@ -32,5 +32,9 @@ export { default as MetaTags } from './MetaTags.svelte';
 export { default as VersionSwitcher } from './VersionSwitcher.svelte';
 export { default as VersionBanner } from './VersionBanner.svelte';
 
+// Image Optimization (Proposal 10)
+export { default as OptimizedImage } from './OptimizedImage.svelte';
+export { default as OptimizedImageHydrator } from './OptimizedImageHydrator.svelte';
+
 // Types
 export type * from './types';

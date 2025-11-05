@@ -12,3 +12,5 @@ export type { ScreenshotPluginOptions } from './screenshot';
 export { collapsePlugin } from './collapse';
 export { referencePlugin } from './reference';
 export type { ReferencePluginOptions } from './reference';
+export { imageOptimizationPlugin } from './image-optimization';
+export type { ImageOptimizationOptions, ImageMetadata } from './image-optimization';
