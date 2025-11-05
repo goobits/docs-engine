@@ -19,6 +19,8 @@ import type {
 
 /**
  * Configuration for markdown generation
+ *
+ * @public
  */
 export interface MarkdownGeneratorConfig {
 	/**
@@ -429,6 +431,8 @@ function generateEnumDocs(enumItem: ApiEnum, config: MarkdownGeneratorConfig): s
 
 /**
  * Generate markdown documentation for an API item
+ *
+ * @public
  */
 export function generateMarkdown(item: ApiItem, config: MarkdownGeneratorConfig = {}): string {
 	switch (item.kind) {
@@ -449,6 +453,8 @@ export function generateMarkdown(item: ApiItem, config: MarkdownGeneratorConfig 
 
 /**
  * Group API items by category
+ *
+ * @public
  */
 export function groupByCategory(items: ApiItem[]): Map<string, ApiItem[]> {
 	const groups = new Map<string, ApiItem[]>();
@@ -471,6 +477,8 @@ export function groupByCategory(items: ApiItem[]): Map<string, ApiItem[]> {
 
 /**
  * Generate a complete API documentation file
+ *
+ * @public
  */
 export function generateApiDocFile(
 	parsedFile: ParsedApiFile,
@@ -518,6 +526,8 @@ export function generateApiDocFile(
 
 /**
  * Generate index file for multiple API documentation files
+ *
+ * @public
  */
 export function generateIndexFile(files: Array<{ fileName: string; items: ApiItem[] }>): string {
 	let content = '# API Reference\n\n';

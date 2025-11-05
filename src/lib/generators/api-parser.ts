@@ -7,6 +7,7 @@ import { Project, type SourceFile, SyntaxKind, Node } from 'ts-morph';
 
 /**
  * Represents a parsed parameter from a function or method
+ * @public
  */
 export interface ApiParameter {
 	name: string;
@@ -18,6 +19,7 @@ export interface ApiParameter {
 
 /**
  * Represents a parsed JSDoc example
+ * @public
  */
 export interface ApiExample {
 	code: string;
@@ -26,6 +28,7 @@ export interface ApiExample {
 
 /**
  * Represents metadata extracted from JSDoc tags
+ * @public
  */
 export interface ApiMetadata {
 	deprecated?: string;
@@ -37,6 +40,7 @@ export interface ApiMetadata {
 
 /**
  * Base interface for all API items
+ * @public
  */
 export interface ApiItemBase {
 	name: string;
@@ -51,6 +55,7 @@ export interface ApiItemBase {
 
 /**
  * Represents a parsed function
+ * @public
  */
 export interface ApiFunction extends ApiItemBase {
 	kind: 'function';
@@ -63,6 +68,8 @@ export interface ApiFunction extends ApiItemBase {
 
 /**
  * Represents a property or method parameter
+ *
+ * @public
  */
 export interface ApiProperty {
 	name: string;
@@ -74,6 +81,8 @@ export interface ApiProperty {
 
 /**
  * Represents a method in a class or interface
+ *
+ * @public
  */
 export interface ApiMethod {
 	name: string;
@@ -87,6 +96,8 @@ export interface ApiMethod {
 
 /**
  * Represents a parsed class
+ *
+ * @public
  */
 export interface ApiClass extends ApiItemBase {
 	kind: 'class';
@@ -104,6 +115,8 @@ export interface ApiClass extends ApiItemBase {
 
 /**
  * Represents a parsed interface
+ *
+ * @public
  */
 export interface ApiInterface extends ApiItemBase {
 	kind: 'interface';
@@ -116,6 +129,8 @@ export interface ApiInterface extends ApiItemBase {
 
 /**
  * Represents a parsed type alias
+ *
+ * @public
  */
 export interface ApiTypeAlias extends ApiItemBase {
 	kind: 'type';
@@ -126,6 +141,8 @@ export interface ApiTypeAlias extends ApiItemBase {
 
 /**
  * Represents a parsed enum
+ *
+ * @public
  */
 export interface ApiEnum extends ApiItemBase {
 	kind: 'enum';
@@ -138,11 +155,15 @@ export interface ApiEnum extends ApiItemBase {
 
 /**
  * Union type for all API items
+ *
+ * @public
  */
 export type ApiItem = ApiFunction | ApiClass | ApiInterface | ApiTypeAlias | ApiEnum;
 
 /**
  * Result of parsing a TypeScript file
+ *
+ * @public
  */
 export interface ParsedApiFile {
 	file: string;
@@ -151,6 +172,8 @@ export interface ParsedApiFile {
 
 /**
  * Configuration for the API parser
+ *
+ * @public
  */
 export interface ApiParserConfig {
 	entryPoints: string[];
@@ -523,6 +546,8 @@ function parseSourceFile(sourceFile: SourceFile): ApiItem[] {
 
 /**
  * Parse TypeScript files and extract API documentation
+ *
+ * @public
  */
 export function parseApi(config: ApiParserConfig): ParsedApiFile[] {
 	const project = new Project({
