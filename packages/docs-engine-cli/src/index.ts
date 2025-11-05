@@ -11,6 +11,7 @@ import { printResults } from './reporter.js';
 import { loadConfig, mergeConfig } from './config.js';
 import type { LinkCheckerConfig } from './config.js';
 import { createVersion, listVersions, deleteVersion } from './versioning.js';
+import { generateApiDocs } from './api-generator.js';
 
 /**
  * Main CLI program
@@ -203,6 +204,59 @@ versionCmd
 		} catch (error) {
 			spinner.fail('Failed to delete version');
 			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			process.exit(1);
+		}
+	});
+
+/**
+ * API documentation generation command
+ */
+program
+	.command('generate-api')
+	.description('Generate API documentation from TypeScript source files')
+	.option('-e, --entry-points <paths...>', 'TypeScript files or glob patterns to parse', ['src/**/*.ts'])
+	.option('-o, --output-dir <path>', 'Output directory for generated markdown', 'docs/api')
+	.option('-t, --tsconfig <path>', 'Path to tsconfig.json')
+	.option('--exclude <patterns...>', 'Patterns to exclude from parsing')
+	.option('--base-url <url>', 'Base URL for type links (e.g., /api)')
+	.option('--repo-url <url>', 'Repository URL for source links')
+	.option('--repo-branch <branch>', 'Repository branch for source links', 'main')
+	.option('--no-index', 'Skip generating index file')
+	.option('--source-links', 'Include links to source code')
+	.action(async (options) => {
+		const spinner = ora('Generating API documentation...').start();
+
+		try {
+			await generateApiDocs({
+				entryPoints: options.entryPoints,
+				outputDir: path.resolve(process.cwd(), options.outputDir),
+				tsConfigPath: options.tsconfig ? path.resolve(process.cwd(), options.tsconfig) : undefined,
+				exclude: options.exclude,
+				generateIndex: options.index,
+				markdownConfig: {
+					baseUrl: options.baseUrl,
+					repoUrl: options.repoUrl,
+					repoBranch: options.repoBranch,
+					includeSourceLinks: options.sourceLinks
+				}
+			});
+
+			const filesCount = options.entryPoints.length;
+			spinner.succeed(`API documentation generated successfully!`);
+
+			console.log(chalk.cyan('\nGenerated files:'));
+			console.log(chalk.gray(`  Output directory: ${options.outputDir}`));
+			console.log(chalk.gray(`  Entry points: ${filesCount} pattern(s)`));
+
+			if (options.index) {
+				console.log(chalk.gray(`  Index file: ${path.join(options.outputDir, 'index.md')}`));
+			}
+		} catch (error) {
+			spinner.fail('API documentation generation failed');
+			console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+			if (error instanceof Error && error.stack) {
+				console.error(chalk.gray(error.stack));
+			}
 			process.exit(1);
 		}
 	});

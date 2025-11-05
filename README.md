@@ -7,15 +7,19 @@ Battery-included documentation system for SvelteKit with markdown rendering, scr
 - **Markdown rendering** with Shiki syntax highlighting
 - **Enhanced code blocks** - Line highlighting, line numbers, file titles, diff syntax
 - **Math rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
+- **API documentation generator** - Auto-generate API docs from TypeScript with JSDoc
 - **Link validation** - CLI tool to check internal and external links
 - **Symbol references** - Link to TypeScript types/functions with `{@Symbol}` syntax
 - **Automated screenshot generation** (web + CLI)
+- **Image optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox
 - **Table of contents** generation with `## TOC` syntax
 - **MDsveX plugins** - Callouts, mermaid, tabs, filetree, TOC, links, screenshots, references
 - **Frontmatter parsing** for metadata
 - **Navigation builder** utility for auto-generating doc structure
 - **Responsive design** with mobile navigation
 - **Customizable theming** with CSS variables
+- **SEO automation** - Sitemap generation, meta tags
+- **Versioning system** - Multi-version documentation support
 
 ## Installation
 ```bash

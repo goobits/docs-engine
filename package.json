@@ -89,6 +89,7 @@
     "@types/unist": "^3.0.3",
     "@vitest/ui": "^4.0.7",
     "happy-dom": "^20.0.10",
+    "ts-morph": "^27.0.2",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
