@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#272822" rx="6"/>
+  <g font-family="Monaco, Menlo, monospace" font-size="14" text-anchor="start">
+    <text x="20" y="40" fill="#a6e22e" font-weight="bold">$ </text><text x="50" y="40" fill="#66d9ef">git log --oneline -5</text><text x="20" y="70" fill="#f8f8f2">cb6e2c6 docs: add 10 CLI screenshot examples and complete type references</text><text x="20" y="90" fill="#f8f8f2">75693e8 feat: generate symbol map and add type references to docs</text><text x="20" y="110" fill="#f8f8f2">313cd1b docs: expand tabs dogfooding and update index (Phases 3-4)</text><text x="20" y="130" fill="#f8f8f2">0656efd fix: critical syntax bugs in callouts, tabs plugins + export katex</text><text x="20" y="150" fill="#f8f8f2">6d907ab docs: enhance plugin dogfooding across documentation</text>
+  </g>
+</svg>
