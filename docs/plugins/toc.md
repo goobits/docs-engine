@@ -14,20 +14,43 @@ Auto-generate a table of contents from markdown headings.
 
 ### Add to MDSveX Config
 
+:::tabs
 ```javascript
-import { tocPlugin } from '@goobits/docs-engine/plugins';
+// JavaScript
+import { remarkTableOfContents } from '@goobits/docs-engine/plugins';
 
 export default {
   preprocess: [
     mdsvex({
       remarkPlugins: [
-        tocPlugin(),
+        remarkTableOfContents(),
         // ... other plugins
       ],
     }),
   ],
 };
 ```
+
+```typescript
+// TypeScript
+import { mdsvex } from 'mdsvex';
+import { remarkTableOfContents } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        remarkTableOfContents(),
+        // ... other plugins
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+:::
 
 ### Use in Markdown
 

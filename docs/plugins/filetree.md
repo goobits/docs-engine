@@ -180,11 +180,72 @@ The plugin automatically detects 25+ file types with appropriate icons and color
 
 ## Troubleshooting
 
-**Tree not rendering?** Verify plugin is added to MDSveX config, hydrator is imported in layout, and styles are imported.
+:::collapse{title="Tree not rendering?"}
 
-**Indentation issues?** Use 4 spaces per level. Don't mix tabs and spaces.
+**Check these common issues:**
 
-**Copy not working?** Check `allowCopy={true}` in hydrator and ensure HTTPS (clipboard API requirement).
+1. **Plugin configuration** - Verify plugin is added to MDSveX config:
+   ```javascript
+   remarkPlugins: [filetreePlugin()]
+   ```
+
+2. **Hydrator component** - Ensure hydrator is imported in your layout:
+   ```svelte
+   import { FileTreeHydrator } from '@goobits/docs-engine/components';
+   ```
+
+3. **Styles** - Import base styles:
+   ```scss
+   @import '@goobits/docs-engine/styles/base.scss';
+   ```
+
+:::
+
+:::collapse{title="Indentation issues?"}
+
+**Rules for proper indentation:**
+
+- Use **4 spaces per level** (not tabs)
+- Don't mix tabs and spaces
+- Ensure tree characters align properly
+
+**Example of correct indentation:**
+```
+root/
+├── level1/
+│   └── level2/
+│       └── file.txt
+└── another.txt
+```
+
+:::
+
+:::collapse{title="Copy not working?"}
+
+**Common causes:**
+
+1. **Clipboard API requires HTTPS** - Check your URL starts with `https://`
+2. **Props not configured** - Ensure `allowCopy={true}` in hydrator:
+   ```svelte
+   <FileTreeHydrator allowCopy={true} />
+   ```
+3. **Browser permissions** - Some browsers block clipboard access
+
+:::
+
+:::collapse{title="GitHub button not showing?" open=false}
+
+The GitHub button appears on hover when you provide a `githubUrl`:
+
+```svelte
+<FileTreeHydrator
+  githubUrl="https://github.com/user/repo/tree/main"
+/>
+```
+
+Make sure the URL matches your repository structure.
+
+:::
 
 ---
 

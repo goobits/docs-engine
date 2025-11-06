@@ -22,9 +22,11 @@ docs/
 │   ├── callouts.md
 │   ├── code-highlighting.md
 │   ├── code-tabs.md
+│   ├── collapse.md
 │   ├── filetree.md
 │   ├── frontmatter.md
 │   ├── image-optimization.md
+│   ├── katex.md
 │   ├── links.md
 │   ├── mermaid.md
 │   ├── navigation.md
@@ -58,6 +60,8 @@ Learn the fundamentals:
 ### Markdown Enhancement
 
 - **[Callouts](./plugins/callouts.md)** - Styled note/warning/info boxes
+- **[Collapse](./plugins/collapse.md)** - Collapsible sections with details/summary
+- **[KaTeX](./plugins/katex.md)** - Mathematical equations with LaTeX
 - **[Mermaid](./plugins/mermaid.md)** - Diagram rendering
 - **[Code Tabs](./plugins/code-tabs.md)** - Tabbed code examples
 - **[Code Highlighting](./plugins/code-highlighting.md)** - Syntax highlighting with Shiki
@@ -117,6 +121,7 @@ Learn the fundamentals:
 
 ### Visual & Interactive
 - **Callouts** - All the colored `> **Note/Warning/Tip**` boxes you see
+- **Collapse Sections** - Collapsible content in [Collapse Plugin](./plugins/collapse.md) *(dogfooding!)*
 - **Mermaid Diagrams** - Flowcharts in [Plugin Order Guide](./guides/plugin-order.md)
 - **File Trees** - Directory structures like the one at the top of this page
 - **Table of Contents** - Auto-generated `## TOC` sections in guides
@@ -132,11 +137,13 @@ Learn the fundamentals:
 - **Links** - All relative markdown links work correctly
 - **Navigation** - Organized structure with sections
 
+### Mathematical Content
+- **Math Rendering** - LaTeX equations with KaTeX in [KaTeX Plugin](./plugins/katex.md) *(now dogfooding!)*
+
 **Not Yet Shown** *(could be added with actual implementation)*:
 - Symbol References - `{@Symbol}` syntax *(needs symbol map)*
 - Screenshots - Automated captures *(needs Playwright setup)*
 - Image Optimization - WebP/AVIF *(needs images)*
-- Math Rendering - LaTeX equations *(could add examples)*
 
 ---
 

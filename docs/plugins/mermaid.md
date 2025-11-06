@@ -14,7 +14,9 @@ Render diagrams and flowcharts with mermaid.js syntax.
 
 ### Add to MDSveX Config
 
+:::tabs
 ```javascript
+// JavaScript
 import { mermaidPlugin } from '@goobits/docs-engine/plugins';
 
 export default {
@@ -28,6 +30,26 @@ export default {
   ],
 };
 ```
+
+```typescript
+// TypeScript
+import { mdsvex } from 'mdsvex';
+import { mermaidPlugin } from '@goobits/docs-engine/plugins';
+
+const config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        mermaidPlugin(),
+        // ... other plugins
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+:::
 
 ### Add Hydrator to Layout
 
