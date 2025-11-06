@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join, extname, basename } from 'path';
+import { dirname, join, extname, basename, resolve } from 'path';
 import pLimit from 'p-limit';
 import os from 'os';
 
