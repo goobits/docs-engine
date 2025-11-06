@@ -9,6 +9,76 @@ import { CliExecutor } from './cli-executor.js';
 import { getVersion } from '../utils/version.js';
 
 /**
+ * Parse viewport dimensions from string format "WxH" or return defaults
+ */
+function parseViewport(viewportString: string | undefined, defaults: [number, number]): [number, number] {
+  if (!viewportString) return defaults;
+  const dimensions = viewportString.split('x').map(Number);
+  return [dimensions[0], dimensions[1]];
+}
+
+/**
+ * Generate multiple formats and resolutions from a 2x screenshot
+ */
+async function generateImageFormats(
+  screenshot2xPath: string,
+  outputDir: string,
+  name: string,
+  basePath: string
+): Promise<{ publicPath: string; webpPath: string; webp2xPath?: string; width?: number; height?: number }> {
+  const sharpImage = sharp(screenshot2xPath);
+  const metadata = await sharpImage.metadata();
+
+  // Generate 2x WebP (from high-res source)
+  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
+  await sharpImage.clone().webp({ quality: 85 }).toFile(webp2xPath);
+
+  // Downscale to 1x using bicubic interpolation for better quality
+  const webpPath = path.join(outputDir, `${name}.webp`);
+  const screenshotPath = path.join(outputDir, `${name}.png`);
+
+  if (metadata.width && metadata.width >= 400) {
+    const targetWidth = Math.floor(metadata.width / 2);
+
+    // Generate 1x WebP
+    await sharp(screenshot2xPath)
+      .resize({
+        width: targetWidth,
+        kernel: 'cubic' // Bicubic interpolation for sharp downscaling
+      })
+      .webp({ quality: 85 })
+      .toFile(webpPath);
+
+    // Generate 1x PNG
+    await sharp(screenshot2xPath)
+      .resize({
+        width: targetWidth,
+        kernel: 'cubic'
+      })
+      .png()
+      .toFile(screenshotPath);
+  } else {
+    // If too small, just use the 2x as-is
+    await sharpImage.clone().webp({ quality: 85 }).toFile(webpPath);
+    await sharpImage.clone().png().toFile(screenshotPath);
+  }
+
+  const publicPath = `${basePath}/${name}.png`;
+
+  // Return 1x dimensions for the img element
+  const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
+  const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+
+  return {
+    publicPath,
+    webpPath: `${basePath}/${name}.webp`,
+    webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
+    width: displayWidth,
+    height: displayHeight
+  };
+}
+
+/**
  * Creates a screenshot endpoint handler for generating screenshots
  * @param config - Configuration options for screenshot generation
  * @returns A SvelteKit RequestHandler
@@ -117,11 +187,7 @@ async function generateCliScreenshot(options: {
   const terminalHtml = await renderResponse.text();
 
   // Parse viewport
-  const viewportDimensions = screenshotConfig.viewport
-    ? screenshotConfig.viewport.split('x').map(Number)
-    : [800, 400];
-
-  const [width, height] = viewportDimensions;
+  const [width, height] = parseViewport(screenshotConfig.viewport, [800, 400]);
 
   // Launch browser and screenshot the terminal HTML
   const browser = await chromium.launch();
@@ -156,53 +222,15 @@ async function generateCliScreenshot(options: {
 
   // Generate multiple formats and resolutions
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
-  const sharpImage = sharp(screenshot2xPath);
-  const metadata = await sharpImage.metadata();
-
-  // Generate 2x WebP (from high-res source)
-  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: 85 }).toFile(webp2xPath);
-
-  // Downscale to 1x using bicubic interpolation for better quality
-  const webpPath = path.join(outputDir, `${name}.webp`);
-  const screenshotPath = path.join(outputDir, `${name}.png`);
-
-  if (metadata.width && metadata.width >= 400) {
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / 2),
-        kernel: 'cubic' // Bicubic interpolation for sharp downscaling
-      })
-      .webp({ quality: 85 })
-      .toFile(webpPath);
-
-    // Also save 1x PNG
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / 2),
-        kernel: 'cubic'
-      })
-      .png()
-      .toFile(screenshotPath);
-  } else {
-    // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: 85 }).toFile(webpPath);
-    await sharpImage.clone().png().toFile(screenshotPath);
-  }
-
-  const publicPath = `${basePath}/${name}.png`;
-
-  // Return 1x dimensions for the img element
-  const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
-  const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+  const result = await generateImageFormats(screenshot2xPath, outputDir, name, basePath);
 
   return json({
     success: true,
-    path: publicPath,
-    webpPath: `${basePath}/${name}.webp`,
-    webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
-    width: displayWidth,
-    height: displayHeight
+    path: result.publicPath,
+    webpPath: result.webpPath,
+    webp2xPath: result.webp2xPath,
+    width: result.width,
+    height: result.height
   } as ScreenshotResponse);
 }
 
@@ -234,11 +262,7 @@ async function generateWebScreenshot(options: {
   }
 
   // Parse viewport dimensions
-  const viewportDimensions = screenshotConfig?.viewport
-    ? screenshotConfig.viewport.split('x').map(Number)
-    : [1280, 720];
-
-  const [width, height] = viewportDimensions;
+  const [width, height] = parseViewport(screenshotConfig?.viewport, [1280, 720]);
 
   // Launch browser
   const browser = await chromium.launch();
@@ -279,52 +303,14 @@ async function generateWebScreenshot(options: {
 
   // Generate multiple formats and resolutions
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
-  const sharpImage = sharp(screenshot2xPath);
-  const metadata = await sharpImage.metadata();
-
-  // Generate 2x WebP (from high-res source)
-  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: 85 }).toFile(webp2xPath);
-
-  // Downscale to 1x using bicubic interpolation for better quality
-  const webpPath = path.join(outputDir, `${name}.webp`);
-  const screenshotPath = path.join(outputDir, `${name}.png`);
-
-  if (metadata.width && metadata.width >= 400) {
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / 2),
-        kernel: 'cubic' // Bicubic interpolation for sharp downscaling
-      })
-      .webp({ quality: 85 })
-      .toFile(webpPath);
-
-    // Also save 1x PNG
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / 2),
-        kernel: 'cubic'
-      })
-      .png()
-      .toFile(screenshotPath);
-  } else {
-    // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: 85 }).toFile(webpPath);
-    await sharpImage.clone().png().toFile(screenshotPath);
-  }
-
-  const publicPath = `${basePath}/${name}.png`;
-
-  // Return 1x dimensions for the img element
-  const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
-  const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+  const result = await generateImageFormats(screenshot2xPath, outputDir, name, basePath);
 
   return json({
     success: true,
-    path: publicPath,
-    webpPath: `${basePath}/${name}.webp`,
-    webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
-    width: displayWidth,
-    height: displayHeight
+    path: result.publicPath,
+    webpPath: result.webpPath,
+    webp2xPath: result.webp2xPath,
+    width: result.width,
+    height: result.height
   } as ScreenshotResponse);
 }
