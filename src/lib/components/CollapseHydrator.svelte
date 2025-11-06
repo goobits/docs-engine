@@ -40,7 +40,10 @@
 		if (!browser) return;
 
 		const unsubscribe = afterNavigate(() => hydrate());
-		hydrate();
+		// Defer hydration to avoid conflicts with Svelte's hydration phase
+		queueMicrotask(() => {
+			requestAnimationFrame(hydrate);
+		});
 
 		return () => {
 			unsubscribe?.();

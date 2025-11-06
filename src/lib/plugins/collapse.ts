@@ -25,6 +25,9 @@ export function collapsePlugin() {
 				return;
 			}
 
+			// Sanitize tree: remove any undefined/null nodes
+			sanitizeTree(tree);
+
 			visit(tree, 'containerDirective', (node: any) => {
 				// Extra defensive checks
 				if (!node) return;
@@ -159,4 +162,18 @@ function renderInlineContent(children: any[]): string {
 			return '';
 		})
 		.join('');
+}
+
+/**
+ * Recursively remove undefined/null nodes from the AST tree
+ */
+function sanitizeTree(node: any): void {
+	if (!node || typeof node !== 'object') return;
+
+	if (Array.isArray(node.children)) {
+		// Filter out undefined/null children
+		node.children = node.children.filter((child: any) => child != null);
+		// Recursively sanitize remaining children
+		node.children.forEach((child: any) => sanitizeTree(child));
+	}
 }

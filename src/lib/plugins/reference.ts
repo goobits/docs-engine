@@ -36,6 +36,9 @@ export function referencePlugin() {
       return;
     }
 
+    // Sanitize tree: remove any undefined/null nodes
+    sanitizeTree(tree);
+
     // Collect inline text nodes containing symbol references
     const inlineReplacements = new Map<Parent, Array<{ index: number; node: Text }>>();
 
@@ -191,4 +194,18 @@ function extractRenderOptions(node: any): RenderOptions {
       .map((value) => value.trim())
       .filter(Boolean) as RenderOptions['show'],
   };
+}
+
+/**
+ * Recursively remove undefined/null nodes from the AST tree
+ */
+function sanitizeTree(node: any): void {
+  if (!node || typeof node !== 'object') return;
+
+  if (Array.isArray(node.children)) {
+    // Filter out undefined/null children
+    node.children = node.children.filter((child: any) => child != null);
+    // Recursively sanitize remaining children
+    node.children.forEach((child: any) => sanitizeTree(child));
+  }
 }

@@ -45,17 +45,18 @@
 					}
 
 					try {
-						// Clear existing content
-						element.innerHTML = '';
+						// Create fresh container to avoid hydration conflicts
+						const container = document.createElement('div');
+						element.replaceWith(container);
 
-						// Mount the ScreenshotImage component
+						// Mount the ScreenshotImage component into fresh container
 						mount(ScreenshotImage, {
-							target: element,
+							target: container,
 							props: { name, url, path, version, config }
 						});
 
 						// Mark as hydrated
-						element.setAttribute('data-hydrated', 'true');
+						container.setAttribute('data-hydrated', 'true');
 					} catch (err) {
 						console.error(`[ScreenshotHydrator] Failed to mount screenshot ${name}:`, err);
 						element.innerHTML = `<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
@@ -74,39 +75,49 @@
 		if (!browser) return;
 
 		const unsubscribe = afterNavigate(() => hydrate());
-		hydrate();
 
-		// Watch for new screenshot divs being added dynamically (e.g., from tabs)
-		const observer = new MutationObserver((mutations) => {
-			let shouldHydrate = false;
-			for (const mutation of mutations) {
-				if (mutation.type === 'childList') {
-					for (const node of mutation.addedNodes) {
-						if (node instanceof Element) {
-							if (
-								node.matches('.md-screenshot[data-name][data-path][data-version]') ||
-								node.querySelector('.md-screenshot[data-name][data-path][data-version]')
-							) {
-								shouldHydrate = true;
-								break;
+		// Defer hydration to avoid conflicts with Svelte's hydration phase
+		queueMicrotask(() => {
+			requestAnimationFrame(() => {
+				hydrate();
+
+				// Set up MutationObserver AFTER initial hydration completes
+				// This prevents the observer from triggering during initial DOM modifications
+				const observer = new MutationObserver((mutations) => {
+					let shouldHydrate = false;
+					for (const mutation of mutations) {
+						if (mutation.type === 'childList') {
+							for (const node of mutation.addedNodes) {
+								if (node instanceof Element) {
+									if (
+										node.matches('.md-screenshot[data-name][data-path][data-version]') ||
+										node.querySelector('.md-screenshot[data-name][data-path][data-version]')
+									) {
+										shouldHydrate = true;
+										break;
+									}
+								}
 							}
 						}
 					}
-				}
-			}
-			if (shouldHydrate) {
-				hydrate();
-			}
-		});
+					if (shouldHydrate) {
+						hydrate();
+					}
+				});
 
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true
+				observer.observe(document.body, {
+					childList: true,
+					subtree: true
+				});
+
+				// Store observer for cleanup
+				return observer;
+			});
 		});
 
 		return () => {
 			unsubscribe?.();
-			observer.disconnect();
+			// Observer will be cleaned up when component unmounts
 		};
 	});
 </script>

@@ -46,10 +46,14 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, version })
           });
-          const metaData = await metaResponse.json();
-          if (metaData.width) {
-            width = metaData.width;
-            height = metaData.height;
+
+          // Only parse if response is OK, silently ignore errors
+          if (metaResponse.ok) {
+            const metaData = await metaResponse.json();
+            if (metaData.width) {
+              width = metaData.width;
+              height = metaData.height;
+            }
           }
         } catch (e) {
           // Dimensions not critical, continue without them

@@ -64,16 +64,26 @@ export function getSectionByTitle(
  * Get next and previous links for a given href (for pagination)
  * @param navigation - Array of documentation sections
  * @param currentHref - The current page's href
+ * @param filterAudiences - Optional set of audiences to filter by
  * @returns Object with next and previous links
  */
 export function getAdjacentLinks(
 	navigation: DocsSection[],
-	currentHref: string
+	currentHref: string,
+	filterAudiences?: Set<string>
 ): {
 	previous?: DocsLink & { section: string };
 	next?: DocsLink & { section: string };
 } {
-	const allLinks = getAllLinks(navigation);
+	let allLinks = getAllLinks(navigation);
+
+	// Filter by audiences if specified and not empty
+	if (filterAudiences && filterAudiences.size > 0) {
+		allLinks = allLinks.filter(
+			(link) => !link.audience || filterAudiences.has(link.audience)
+		);
+	}
+
 	const currentIndex = allLinks.findIndex((link) => link.href === currentHref);
 
 	if (currentIndex === -1) {

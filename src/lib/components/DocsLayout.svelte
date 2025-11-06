@@ -11,6 +11,7 @@
 	 */
 
 	import { Menu, X } from '@lucide/svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import DocsSidebar from './DocsSidebar.svelte';
 	import DocsPrevNext from './DocsPrevNext.svelte';
 	import EditThisPage from './EditThisPage.svelte';
@@ -110,10 +111,13 @@
 	// Mobile sidebar state
 	let mobileMenuOpen = $state(false);
 
+	// Audience state shared between sidebar and prev/next
+	let selectedAudiences = $state(new SvelteSet<string>(["new-users", "developers"]));
+
 	// Previous/Next navigation links
 	const adjacentLinks = $derived(
 		navigation.length > 0 && currentPath
-			? getAdjacentLinks(navigation, currentPath)
+			? getAdjacentLinks(navigation, currentPath, selectedAudiences)
 			: { previous: undefined, next: undefined }
 	);
 
@@ -144,7 +148,7 @@
 	<!-- Sidebar -->
 	<div class="docs-sidebar-container {mobileMenuOpen ? 'mobile-open' : ''}">
 		{#if navigation.length > 0}
-			<DocsSidebar {navigation} {currentPath} />
+			<DocsSidebar {navigation} {currentPath} bind:selectedAudiences />
 		{/if}
 	</div>
 
@@ -254,12 +258,16 @@
 <style>
 	/* === Base Layout === */
 	.docs-layout {
-		/* Full viewport minus header - parent layout handles padding removal */
-		height: calc(100vh - var(--header-height, 70px));
+		/* Use 100% height since parent (docs-content-area) provides the flex container */
+		height: 100%;
+		min-height: 0; /* Critical for flex children to enable scrolling */
 		overflow: hidden;
 		display: grid;
 		grid-template-columns: auto 1fr;
 		position: relative;
+		max-width: 1400px; /* Match header width */
+		margin: 0 auto; /* Center content */
+		width: 100%; /* Fill available space up to max-width */
 
 		/* Default theme variables (dracula) */
 		--docs-bg: #282a36;
@@ -341,7 +349,8 @@
 
 	/* Sidebar Container */
 	.docs-sidebar-container {
-		height: calc(100vh - var(--header-height, 70px));
+		height: 100%;
+		min-height: 0; /* Enable scrolling in grid layout */
 		overflow-y: auto;
 		padding: var(--docs-spacing-md) 0;
 	}
@@ -365,7 +374,8 @@
 		gap: var(--docs-spacing-xl);
 		padding: var(--docs-spacing-2xl);
 		max-width: 900px;
-		height: calc(100vh - var(--header-height, 70px));
+		height: 100%;
+		min-height: 0; /* Enable scrolling in grid layout */
 		overflow-y: auto;
 	}
 

@@ -7,14 +7,9 @@
 
   import { page } from "$app/stores";
   import { Search, ChevronDown, X } from "@lucide/svelte";
-  import { docsNavigation, getAllDocsLinks, type DocsLink } from "$lib/config/docs-navigation";
+  import { getAllDocsLinks, type DocsLink } from "$lib/config/docs-navigation";
   import { SvelteSet } from "svelte/reactivity";
-
-  interface Props {
-    currentPath?: string;
-  }
-
-  let { currentPath = "" }: Props = $props();
+  import type { DocsSection } from './types';
 
   // Audience filter state
   const AUDIENCE_TYPES = [
@@ -34,71 +29,79 @@
     contributors: "Contributors",
   };
 
-  let selectedAudiences = $state(new SvelteSet<AudienceType>());
+  interface Props {
+    navigation: DocsSection[];
+    currentPath?: string;
+    selectedAudiences?: SvelteSet<AudienceType>;
+  }
+
+  let {
+    navigation,
+    currentPath = "",
+    selectedAudiences = $bindable(new SvelteSet<AudienceType>(["new-users", "developers"]))
+  }: Props = $props();
 
   // Search state
   let searchQuery = $state("");
   let searchResults = $state<Array<DocsLink & { section: string }>>([]);
 
-  // Expanded sections state - dynamically initialized from navigation
-  let expandedSections = $state<Record<string, boolean>>({});
+  // Expanded sections state - initialize all sections as open by default (SSR-safe)
+  let expandedSections = $state<Record<string, boolean>>(
+    Object.fromEntries(navigation.map(section => [section.title, true]))
+  );
 
   // All links for search
   const allLinks = getAllDocsLinks();
 
-  // Initialize audience filter from localStorage or default to new-users and developers
+  // Track if we've loaded from localStorage (prevents infinite loops)
+  let hasLoadedFromStorage = $state(false);
+
+  // Load from localStorage on client (runs once on mount)
   $effect(() => {
-    if (typeof window === "undefined") return;
-    const stored = localStorage.getItem("docs-audience-filter");
-    if (stored) {
+    if (typeof window === "undefined" || hasLoadedFromStorage) return;
+
+    // Load audience filter
+    const storedAudiences = localStorage.getItem("docs-audience-filter");
+    if (storedAudiences) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(storedAudiences);
         selectedAudiences = new SvelteSet(parsed);
       } catch {
-        // Parse error - use defaults
-        selectedAudiences = new SvelteSet(["new-users", "developers"]);
+        // Keep SSR defaults on parse error
       }
-    } else {
-      // First visit - default to new-users and developers
-      selectedAudiences = new SvelteSet(["new-users", "developers"]);
     }
+
+    // Load expanded sections
+    const storedSections = localStorage.getItem("docs-expanded-sections");
+    if (storedSections) {
+      try {
+        const parsed = JSON.parse(storedSections);
+        // Merge stored state with current navigation to handle new sections
+        const defaultSections = Object.fromEntries(navigation.map(section => [section.title, true]));
+        const merged = { ...defaultSections };
+        Object.keys(parsed).forEach(key => {
+          if (key in merged) {
+            merged[key] = parsed[key];
+          }
+        });
+        expandedSections = merged;
+      } catch {
+        // Keep SSR defaults on parse error
+      }
+    }
+
+    hasLoadedFromStorage = true;
   });
 
   // Save audience filter to localStorage when changed
   $effect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !hasLoadedFromStorage) return;
     localStorage.setItem("docs-audience-filter", JSON.stringify(Array.from(selectedAudiences)));
-  });
-
-  // Initialize expanded sections from localStorage or default to all open
-  $effect(() => {
-    if (typeof window === "undefined") return;
-
-    const stored = localStorage.getItem("docs-expanded-sections");
-    if (stored) {
-      try {
-        expandedSections = JSON.parse(stored);
-      } catch {
-        // If parse fails, default to all sections open
-        const allOpen: Record<string, boolean> = {};
-        for (const section of docsNavigation) {
-          allOpen[section.title] = true;
-        }
-        expandedSections = allOpen;
-      }
-    } else {
-      // First visit - default to all sections open
-      const allOpen: Record<string, boolean> = {};
-      for (const section of docsNavigation) {
-        allOpen[section.title] = true;
-      }
-      expandedSections = allOpen;
-    }
   });
 
   // Save expanded sections to localStorage when changed
   $effect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !hasLoadedFromStorage) return;
     if (Object.keys(expandedSections).length > 0) {
       localStorage.setItem("docs-expanded-sections", JSON.stringify(expandedSections));
     }
@@ -107,10 +110,10 @@
   // Filter navigation by selected audiences
   const filteredNavigation = $derived.by(() => {
     if (selectedAudiences.size === 0) {
-      return docsNavigation; // Show all if no filters selected
+      return navigation; // Show all if no filters selected
     }
 
-    return docsNavigation
+    return navigation
       .map((section) => ({
         ...section,
         links: section.links.filter(
