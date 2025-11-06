@@ -35,8 +35,20 @@ export class CliExecutor {
   /**
    * Validate command against allowlist
    * Only allows commands that start with an allowed prefix
+   * Blocks shell metacharacters to prevent command injection
    */
   private validateCommand(command: string): boolean {
+    // Check for shell metacharacters that could enable command injection
+    const dangerousChars = /[;&|`$()<>{}[\]!*?]/;
+    if (dangerousChars.test(command)) {
+      throw new Error('Command contains dangerous characters');
+    }
+
+    // Check for newline injection
+    if (command.includes('\n') || command.includes('\r')) {
+      throw new Error('Command contains newline characters');
+    }
+
     const baseCommand = command.trim().split(' ')[0];
     return this.config.allowedCommands.some(allowed =>
       baseCommand === allowed || baseCommand.startsWith(allowed + '/')
