@@ -23,171 +23,171 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 interface ProjectConfig {
-	projectName: string;
-	packageManager: 'npm' | 'pnpm' | 'yarn';
-	features: {
-		screenshots: boolean;
-		mermaid: boolean;
-		git: boolean;
-	};
-	gitRepo?: string;
+  projectName: string;
+  packageManager: 'npm' | 'pnpm' | 'yarn';
+  features: {
+    screenshots: boolean;
+    mermaid: boolean;
+    git: boolean;
+  };
+  gitRepo?: string;
 }
 
 /**
  * Main CLI function
  */
 async function main() {
-	console.log(chalk.bold.cyan('\n🚀 Create Docs Engine\n'));
+  console.log(chalk.bold.cyan('\n🚀 Create Docs Engine\n'));
 
-	// Get project name from args or prompt
-	const args = process.argv.slice(2);
-	let projectName = args[0];
+  // Get project name from args or prompt
+  const args = process.argv.slice(2);
+  let projectName = args[0];
 
-	if (!projectName) {
-		const response = await prompts({
-			type: 'text',
-			name: 'projectName',
-			message: 'Project name:',
-			initial: 'my-docs'
-		});
-		projectName = response.projectName;
-	}
+  if (!projectName) {
+    const response = await prompts({
+      type: 'text',
+      name: 'projectName',
+      message: 'Project name:',
+      initial: 'my-docs',
+    });
+    projectName = response.projectName;
+  }
 
-	if (!projectName) {
-		console.error(chalk.red('❌ Project name is required'));
-		process.exit(1);
-	}
+  if (!projectName) {
+    console.error(chalk.red('❌ Project name is required'));
+    process.exit(1);
+  }
 
-	// Check if directory exists
-	const projectPath = path.resolve(process.cwd(), projectName);
-	const dirExists = await fs.access(projectPath).then(() => true).catch(() => false);
+  // Check if directory exists
+  const projectPath = path.resolve(process.cwd(), projectName);
+  const dirExists = await fs
+    .access(projectPath)
+    .then(() => true)
+    .catch(() => false);
 
-	if (dirExists) {
-		const response = await prompts({
-			type: 'confirm',
-			name: 'overwrite',
-			message: `Directory "${projectName}" already exists. Overwrite?`,
-			initial: false
-		});
+  if (dirExists) {
+    const response = await prompts({
+      type: 'confirm',
+      name: 'overwrite',
+      message: `Directory "${projectName}" already exists. Overwrite?`,
+      initial: false,
+    });
 
-		if (!response.overwrite) {
-			console.log(chalk.yellow('Aborted'));
-			process.exit(0);
-		}
+    if (!response.overwrite) {
+      console.log(chalk.yellow('Aborted'));
+      process.exit(0);
+    }
 
-		await fs.rm(projectPath, { recursive: true, force: true });
-	}
+    await fs.rm(projectPath, { recursive: true, force: true });
+  }
 
-	// Prompt for configuration
-	const answers = await prompts([
-		{
-			type: 'select',
-			name: 'packageManager',
-			message: 'Package manager:',
-			choices: [
-				{ title: 'pnpm (recommended)', value: 'pnpm' },
-				{ title: 'npm', value: 'npm' },
-				{ title: 'yarn', value: 'yarn' }
-			],
-			initial: 0
-		},
-		{
-			type: 'multiselect',
-			name: 'features',
-			message: 'Select features:',
-			choices: [
-				{ title: 'Screenshots (web + CLI)', value: 'screenshots', selected: true },
-				{ title: 'Mermaid diagrams', value: 'mermaid', selected: true },
-				{ title: 'Git integration', value: 'git', selected: true }
-			]
-		},
-		{
-			type: (prev, values) => values.features.includes('git') ? 'text' : null,
-			name: 'gitRepo',
-			message: 'Git repository URL (optional):',
-			initial: ''
-		}
-	]);
+  // Prompt for configuration
+  const answers = await prompts([
+    {
+      type: 'select',
+      name: 'packageManager',
+      message: 'Package manager:',
+      choices: [
+        { title: 'pnpm (recommended)', value: 'pnpm' },
+        { title: 'npm', value: 'npm' },
+        { title: 'yarn', value: 'yarn' },
+      ],
+      initial: 0,
+    },
+    {
+      type: 'multiselect',
+      name: 'features',
+      message: 'Select features:',
+      choices: [
+        { title: 'Screenshots (web + CLI)', value: 'screenshots', selected: true },
+        { title: 'Mermaid diagrams', value: 'mermaid', selected: true },
+        { title: 'Git integration', value: 'git', selected: true },
+      ],
+    },
+    {
+      type: (prev, values) => (values.features.includes('git') ? 'text' : null),
+      name: 'gitRepo',
+      message: 'Git repository URL (optional):',
+      initial: '',
+    },
+  ]);
 
-	const config: ProjectConfig = {
-		projectName,
-		packageManager: answers.packageManager,
-		features: {
-			screenshots: answers.features.includes('screenshots'),
-			mermaid: answers.features.includes('mermaid'),
-			git: answers.features.includes('git')
-		},
-		gitRepo: answers.gitRepo
-	};
+  const config: ProjectConfig = {
+    projectName,
+    packageManager: answers.packageManager,
+    features: {
+      screenshots: answers.features.includes('screenshots'),
+      mermaid: answers.features.includes('mermaid'),
+      git: answers.features.includes('git'),
+    },
+    gitRepo: answers.gitRepo,
+  };
 
-	// Generate project
-	const spinner = ora('Creating project...').start();
+  // Generate project
+  const spinner = ora('Creating project...').start();
 
-	try {
-		await generateProject(projectPath, config);
-		spinner.succeed('Project created successfully!');
+  try {
+    await generateProject(projectPath, config);
+    spinner.succeed('Project created successfully!');
 
-		// Install dependencies
-		spinner.text = 'Installing dependencies...';
-		spinner.start();
-		await installDependencies(projectPath, config.packageManager);
-		spinner.succeed('Dependencies installed!');
+    // Install dependencies
+    spinner.text = 'Installing dependencies...';
+    spinner.start();
+    await installDependencies(projectPath, config.packageManager);
+    spinner.succeed('Dependencies installed!');
 
-		// Success message
-		console.log(chalk.green.bold('\n✨ All done!\n'));
-		console.log(chalk.cyan('Next steps:'));
-		console.log(chalk.gray(`  cd ${projectName}`));
-		console.log(chalk.gray(`  ${config.packageManager} dev`));
-		console.log();
-	} catch (error) {
-		spinner.fail('Failed to create project');
-		console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
-		process.exit(1);
-	}
+    // Success message
+    console.log(chalk.green.bold('\n✨ All done!\n'));
+    console.log(chalk.cyan('Next steps:'));
+    console.log(chalk.gray(`  cd ${projectName}`));
+    console.log(chalk.gray(`  ${config.packageManager} dev`));
+    console.log();
+  } catch (error) {
+    spinner.fail('Failed to create project');
+    console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
+    process.exit(1);
+  }
 }
 
 /**
  * Generate project files
  */
 async function generateProject(projectPath: string, config: ProjectConfig) {
-	await fs.mkdir(projectPath, { recursive: true });
+  await fs.mkdir(projectPath, { recursive: true });
 
-	// Create package.json
-	const packageJson = {
-		name: config.projectName,
-		version: '0.1.0',
-		private: true,
-		type: 'module',
-		scripts: {
-			dev: 'vite dev',
-			build: 'vite build',
-			preview: 'vite preview'
-		},
-		dependencies: {
-			'@goobits/docs-engine': 'latest',
-			'@sveltejs/kit': '^2.0.0',
-			'svelte': '^5.0.0'
-		},
-		devDependencies: {
-			'@sveltejs/adapter-auto': '^3.0.0',
-			'@sveltejs/vite-plugin-svelte': '^4.0.0',
-			'vite': '^6.0.0'
-		}
-	};
+  // Create package.json
+  const packageJson = {
+    name: config.projectName,
+    version: '0.1.0',
+    private: true,
+    type: 'module',
+    scripts: {
+      dev: 'vite dev',
+      build: 'vite build',
+      preview: 'vite preview',
+    },
+    dependencies: {
+      '@goobits/docs-engine': 'latest',
+      '@sveltejs/kit': '^2.0.0',
+      svelte: '^5.0.0',
+    },
+    devDependencies: {
+      '@sveltejs/adapter-auto': '^3.0.0',
+      '@sveltejs/vite-plugin-svelte': '^4.0.0',
+      vite: '^6.0.0',
+    },
+  };
 
-	await fs.writeFile(
-		path.join(projectPath, 'package.json'),
-		JSON.stringify(packageJson, null, 2)
-	);
+  await fs.writeFile(path.join(projectPath, 'package.json'), JSON.stringify(packageJson, null, 2));
 
-	// Create basic documentation structure
-	await fs.mkdir(path.join(projectPath, 'docs'), { recursive: true });
-	await fs.mkdir(path.join(projectPath, 'src/routes'), { recursive: true });
+  // Create basic documentation structure
+  await fs.mkdir(path.join(projectPath, 'docs'), { recursive: true });
+  await fs.mkdir(path.join(projectPath, 'src/routes'), { recursive: true });
 
-	// Create sample docs
-	await fs.writeFile(
-		path.join(projectPath, 'docs/index.md'),
-		`---
+  // Create sample docs
+  await fs.writeFile(
+    path.join(projectPath, 'docs/index.md'),
+    `---
 title: Home
 description: Welcome to the documentation
 section: Getting Started
@@ -207,11 +207,11 @@ This is your new documentation site powered by docs-engine.
 - 🔧 Git integration with edit links
 - 📊 Mermaid diagrams
 ${config.features.screenshots ? '- 📸 Screenshot support\n' : ''}`
-	);
+  );
 
-	await fs.writeFile(
-		path.join(projectPath, 'docs/getting-started.md'),
-		`---
+  await fs.writeFile(
+    path.join(projectPath, 'docs/getting-started.md'),
+    `---
 title: Getting Started
 description: Learn how to use docs-engine
 section: Getting Started
@@ -235,12 +235,12 @@ order: 1
 ---
 \`\`\`
 `
-	);
+  );
 
-	// Create README
-	await fs.writeFile(
-		path.join(projectPath, 'README.md'),
-		`# ${config.projectName}
+  // Create README
+  await fs.writeFile(
+    path.join(projectPath, 'README.md'),
+    `# ${config.projectName}
 
 Documentation site built with [docs-engine](https://github.com/goobits/docs-engine).
 
@@ -256,38 +256,38 @@ ${config.packageManager} dev
 ${config.packageManager} build
 \`\`\`
 `
-	);
+  );
 
-	// Create .gitignore
-	await fs.writeFile(
-		path.join(projectPath, '.gitignore'),
-		`node_modules/
+  // Create .gitignore
+  await fs.writeFile(
+    path.join(projectPath, '.gitignore'),
+    `node_modules/
 .svelte-kit/
 build/
 .DS_Store
 *.log
 `
-	);
+  );
 }
 
 /**
  * Install dependencies
  */
 async function installDependencies(projectPath: string, packageManager: string) {
-	const commands: Record<string, string> = {
-		npm: 'npm install',
-		pnpm: 'pnpm install',
-		yarn: 'yarn'
-	};
+  const commands: Record<string, string> = {
+    npm: 'npm install',
+    pnpm: 'pnpm install',
+    yarn: 'yarn',
+  };
 
-	execSync(commands[packageManager], {
-		cwd: projectPath,
-		stdio: 'ignore'
-	});
+  execSync(commands[packageManager], {
+    cwd: projectPath,
+    stdio: 'ignore',
+  });
 }
 
 // Run CLI
 main().catch((error) => {
-	console.error(chalk.red('Unexpected error:'), error);
-	process.exit(1);
+  console.error(chalk.red('Unexpected error:'), error);
+  process.exit(1);
 });

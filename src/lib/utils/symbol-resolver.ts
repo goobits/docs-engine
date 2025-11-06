@@ -55,19 +55,14 @@ export function loadSymbolMap(): SymbolMap {
   }
 
   if (!mapPath) {
-    throw new Error(
-      'Symbol map not found. Run `pnpm docs:symbols` to generate it.'
-    );
+    throw new Error('Symbol map not found. Run `pnpm docs:symbols` to generate it.');
   }
 
   cachedMap = JSON.parse(fs.readFileSync(mapPath, 'utf-8')) as SymbolMap;
   return cachedMap;
 }
 
-export function resolveSymbol(
-  reference: string,
-  symbolMap: SymbolMap
-): SymbolDefinition {
+export function resolveSymbol(reference: string, symbolMap: SymbolMap): SymbolDefinition {
   const [pathHint, symbolName] = parseReference(reference);
   const candidates = symbolMap[symbolName] || [];
 
@@ -97,7 +92,7 @@ export function resolveSymbol(
   }
 
   // Filter by path (and optionally by kind)
-  const filtered = candidates.filter(c => {
+  const filtered = candidates.filter((c) => {
     const matchesPath = c.path.includes(pathOnly);
     const matchesKind = !kindFilter || c.kind === kindFilter;
     return matchesPath && matchesKind;
@@ -116,15 +111,17 @@ export function resolveSymbol(
 
   // Still ambiguous - suggest using kind suffix if multiple kinds exist
   if (!kindFilter && filtered.length > 1) {
-    const kinds = [...new Set(filtered.map(c => c.kind))];
+    const kinds = [...new Set(filtered.map((c) => c.kind))];
     if (kinds.length > 1) {
-      const suggestions = filtered.map(d => `{@${pathOnly}/${d.kind}#${symbolName}}  // ${d.kind} at line ${d.line}`).join('\n  - ');
+      const suggestions = filtered
+        .map((d) => `{@${pathOnly}/${d.kind}#${symbolName}}  // ${d.kind} at line ${d.line}`)
+        .join('\n  - ');
       throw new AmbiguousSymbolError(
         symbolName,
         filtered,
         pathHint,
         `Symbol "${symbolName}" with hint "${pathHint}" is still ambiguous (${filtered.length} matches with different kinds).\n\n` +
-        `Add a kind suffix to disambiguate:\n  - ${suggestions}`
+          `Add a kind suffix to disambiguate:\n  - ${suggestions}`
       );
     }
   }
@@ -140,13 +137,9 @@ function parseReference(reference: string): [string | null, string] {
   return [parts[0], parts[1]];
 }
 
-function findSimilarSymbols(
-  input: string,
-  symbolMap: SymbolMap,
-  threshold = 3
-): string[] {
+function findSimilarSymbols(input: string, symbolMap: SymbolMap, threshold = 3): string[] {
   return Object.keys(symbolMap)
-    .filter(name => levenshteinDistance(input, name) <= threshold)
+    .filter((name) => levenshteinDistance(input, name) <= threshold)
     .slice(0, 5);
 }
 
@@ -188,8 +181,8 @@ export class AmbiguousSymbolError extends Error {
     if (typeof candidates[0] === 'string') {
       super(
         `Symbol "${symbolName}" not found.\n\n` +
-        `Did you mean one of these?\n` +
-        `${candidates.map(c => `  - {@${c}}`).join('\n')}`
+          `Did you mean one of these?\n` +
+          `${candidates.map((c) => `  - {@${c}}`).join('\n')}`
       );
     } else if (customMessage) {
       super(customMessage);
@@ -198,15 +191,15 @@ export class AmbiguousSymbolError extends Error {
       const minimalPaths = findMinimalPaths(defs);
       super(
         `Symbol "${symbolName}" is ambiguous (${defs.length} matches).\n\n` +
-        `Use a path hint to disambiguate:\n` +
-        `${defs.map((d, i) => `  - {@${minimalPaths[i]}#${symbolName}}  // ${d.path}`).join('\n')}`
+          `Use a path hint to disambiguate:\n` +
+          `${defs.map((d, i) => `  - {@${minimalPaths[i]}#${symbolName}}  // ${d.path}`).join('\n')}`
       );
     } else {
       const defs = candidates as SymbolDefinition[];
       super(
         `Symbol "${symbolName}" with hint "${pathHint}" is still ambiguous (${defs.length} matches).\n\n` +
-        `Matching paths:\n` +
-        `${defs.map(d => `  - ${d.path}:${d.line}`).join('\n')}`
+          `Matching paths:\n` +
+          `${defs.map((d) => `  - ${d.path}:${d.line}`).join('\n')}`
       );
     }
     this.name = 'AmbiguousSymbolError';
@@ -214,14 +207,14 @@ export class AmbiguousSymbolError extends Error {
 }
 
 function findMinimalPaths(candidates: SymbolDefinition[]): string[] {
-  const paths = candidates.map(c => c.path);
-  const segments = paths.map(p => p.split('/'));
+  const paths = candidates.map((c) => c.path);
+  const segments = paths.map((p) => p.split('/'));
 
   return segments.map((seg, idx) => {
     let pathSegment = seg[seg.length - 1];
     for (let i = seg.length - 2; i >= 0; i--) {
       const candidate = seg.slice(i).join('/');
-      if (paths.filter(p => p.includes(candidate)).length === 1) {
+      if (paths.filter((p) => p.includes(candidate)).length === 1) {
         return candidate.replace(/\.ts$/, '');
       }
     }

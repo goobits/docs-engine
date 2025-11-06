@@ -180,21 +180,20 @@ export function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): 
   }
 
   // Show related symbols (from type references and @see tags)
-  const relatedSymbols = [
-    ...(symbol.related || []),
-    ...(symbol.jsDoc?.see || [])
-  ];
+  const relatedSymbols = [...(symbol.related || []), ...(symbol.jsDoc?.see || [])];
 
   if (relatedSymbols.length > 0) {
     const uniqueRelated = [...new Set(relatedSymbols)];
-    const relatedLinks = uniqueRelated.map(name => {
-      // Check if it's a URL (from @see tags)
-      if (name.startsWith('http://') || name.startsWith('https://')) {
-        return `<a href="${escapeHtml(name)}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
-      }
-      // Otherwise treat as symbol reference
-      return `{@${escapeHtml(name)}}`;
-    }).join(', ');
+    const relatedLinks = uniqueRelated
+      .map((name) => {
+        // Check if it's a URL (from @see tags)
+        if (name.startsWith('http://') || name.startsWith('https://')) {
+          return `<a href="${escapeHtml(name)}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
+        }
+        // Otherwise treat as symbol reference
+        return `{@${escapeHtml(name)}}`;
+      })
+      .join(', ');
 
     sections.push(`
       <div class="symbol-doc__related">
@@ -218,13 +217,17 @@ export interface RenderOptions {
 }
 
 function renderParams(params: Array<{ name: string; description: string; type: string }>): string {
-  const rows = params.map(p => `
+  const rows = params
+    .map(
+      (p) => `
     <tr>
       <td><code>${escapeHtml(p.name)}</code></td>
       <td><code>${escapeHtml(p.type)}</code></td>
       <td>${escapeHtml(p.description)}</td>
     </tr>
-  `).join('');
+  `
+    )
+    .join('');
 
   return `
     <div class="symbol-doc__params">
@@ -243,7 +246,7 @@ function symbolToDocUrl(symbol: SymbolDefinition): string {
   const relativePath = symbol.path
     .replace(/^src\/lib\/server\//, '')
     .replace(/^\.\.\/packages\/shared\/src\//, 'shared/');
-  
+
   return `/docs/api/${relativePath.replace(/\.ts$/, '')}#${symbol.name}`;
 }
 
@@ -251,7 +254,7 @@ export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
   const repoPath = symbol.path.startsWith('../')
     ? symbol.path.replace(/^\.\.\//, '')
     : `web/${symbol.path}`;
-  
+
   return `https://github.com/goobits/spacebase/blob/main/${repoPath}#L${symbol.line}`;
 }
 
@@ -270,6 +273,6 @@ function markdownToHtml(markdown: string): string {
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .split('\n\n')
-    .map(para => `<p>${para.replace(/\n/g, ' ')}</p>`)
+    .map((para) => `<p>${para.replace(/\n/g, ' ')}</p>`)
     .join('\n');
 }

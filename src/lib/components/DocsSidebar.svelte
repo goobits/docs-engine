@@ -5,28 +5,28 @@
    * Integrated sidebar matching v2 design system
    */
 
-  import { page } from "$app/stores";
-  import { Search, ChevronDown, X } from "@lucide/svelte";
-  import { getAllDocsLinks, type DocsLink } from "$lib/config/docs-navigation";
-  import { SvelteSet } from "svelte/reactivity";
+  import { page } from '$app/stores';
+  import { Search, ChevronDown, X } from '@lucide/svelte';
+  import { getAllDocsLinks, type DocsLink } from '$lib/config/docs-navigation';
+  import { SvelteSet } from 'svelte/reactivity';
   import type { DocsSection } from './types';
 
   // Audience filter state
   const AUDIENCE_TYPES = [
-    "new-users",
-    "developers",
-    "operators",
-    "integrators",
-    "contributors",
+    'new-users',
+    'developers',
+    'operators',
+    'integrators',
+    'contributors',
   ] as const;
   type AudienceType = (typeof AUDIENCE_TYPES)[number];
 
   const AUDIENCE_LABELS: Record<AudienceType, string> = {
-    "new-users": "New Users",
-    developers: "Developers",
-    operators: "Operators",
-    integrators: "Integrators",
-    contributors: "Contributors",
+    'new-users': 'New Users',
+    developers: 'Developers',
+    operators: 'Operators',
+    integrators: 'Integrators',
+    contributors: 'Contributors',
   };
 
   interface Props {
@@ -37,17 +37,17 @@
 
   let {
     navigation,
-    currentPath = "",
-    selectedAudiences = $bindable(new SvelteSet<AudienceType>(["new-users", "developers"]))
+    currentPath = '',
+    selectedAudiences = $bindable(new SvelteSet<AudienceType>(['new-users', 'developers'])),
   }: Props = $props();
 
   // Search state
-  let searchQuery = $state("");
+  let searchQuery = $state('');
   let searchResults = $state<Array<DocsLink & { section: string }>>([]);
 
   // Expanded sections state - initialize all sections as open by default (SSR-safe)
   let expandedSections = $state<Record<string, boolean>>(
-    Object.fromEntries(navigation.map(section => [section.title, true]))
+    Object.fromEntries(navigation.map((section) => [section.title, true]))
   );
 
   // All links for search
@@ -58,10 +58,10 @@
 
   // Load from localStorage on client (runs once on mount)
   $effect(() => {
-    if (typeof window === "undefined" || hasLoadedFromStorage) return;
+    if (typeof window === 'undefined' || hasLoadedFromStorage) return;
 
     // Load audience filter
-    const storedAudiences = localStorage.getItem("docs-audience-filter");
+    const storedAudiences = localStorage.getItem('docs-audience-filter');
     if (storedAudiences) {
       try {
         const parsed = JSON.parse(storedAudiences);
@@ -72,14 +72,16 @@
     }
 
     // Load expanded sections
-    const storedSections = localStorage.getItem("docs-expanded-sections");
+    const storedSections = localStorage.getItem('docs-expanded-sections');
     if (storedSections) {
       try {
         const parsed = JSON.parse(storedSections);
         // Merge stored state with current navigation to handle new sections
-        const defaultSections = Object.fromEntries(navigation.map(section => [section.title, true]));
+        const defaultSections = Object.fromEntries(
+          navigation.map((section) => [section.title, true])
+        );
         const merged = { ...defaultSections };
-        Object.keys(parsed).forEach(key => {
+        Object.keys(parsed).forEach((key) => {
           if (key in merged) {
             merged[key] = parsed[key];
           }
@@ -95,15 +97,15 @@
 
   // Save audience filter to localStorage when changed
   $effect(() => {
-    if (typeof window === "undefined" || !hasLoadedFromStorage) return;
-    localStorage.setItem("docs-audience-filter", JSON.stringify(Array.from(selectedAudiences)));
+    if (typeof window === 'undefined' || !hasLoadedFromStorage) return;
+    localStorage.setItem('docs-audience-filter', JSON.stringify(Array.from(selectedAudiences)));
   });
 
   // Save expanded sections to localStorage when changed
   $effect(() => {
-    if (typeof window === "undefined" || !hasLoadedFromStorage) return;
+    if (typeof window === 'undefined' || !hasLoadedFromStorage) return;
     if (Object.keys(expandedSections).length > 0) {
-      localStorage.setItem("docs-expanded-sections", JSON.stringify(expandedSections));
+      localStorage.setItem('docs-expanded-sections', JSON.stringify(expandedSections));
     }
   });
 
@@ -125,7 +127,7 @@
 
   // Search functionality
   $effect(() => {
-    if (searchQuery.trim() === "") {
+    if (searchQuery.trim() === '') {
       searchResults = [];
       return;
     }
@@ -144,7 +146,7 @@
   }
 
   function clearSearch() {
-    searchQuery = "";
+    searchQuery = '';
   }
 
   function toggleAudience(audience: AudienceType) {
@@ -271,7 +273,7 @@
 </aside>
 
 <style lang="scss">
-  @use "$lib/styles/v2-tokens.scss" as *;
+  @use '$lib/styles/v2-tokens.scss' as *;
 
   .v2-docs-sidebar {
     width: 280px;

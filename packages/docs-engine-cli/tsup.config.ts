@@ -1,11 +1,11 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-	entry: ['src/index.ts'],
-	format: ['esm'],
-	dts: true,
-	clean: true,
-	sourcemap: true,
-	shims: true,
-	external: ['@goobits/docs-engine']
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  dts: true,
+  clean: true,
+  sourcemap: true,
+  shims: true,
+  external: ['@goobits/docs-engine'],
 });

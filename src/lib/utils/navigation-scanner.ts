@@ -11,12 +11,12 @@ import type { DocFile } from './navigation-builder.js';
  * Options for scanning documentation files
  */
 export interface ScanOptions {
-	/** Root directory to scan */
-	docsRoot: string;
-	/** Base URL path for hrefs (default: "/docs") */
-	basePath?: string;
-	/** File patterns to exclude */
-	exclude?: (path: string) => boolean;
+  /** Root directory to scan */
+  docsRoot: string;
+  /** Base URL path for hrefs (default: "/docs") */
+  basePath?: string;
+  /** File patterns to exclude */
+  exclude?: (path: string) => boolean;
 }
 
 /**
@@ -33,19 +33,19 @@ export interface ScanOptions {
  * ```
  */
 export async function findMarkdownFiles(dir: string, baseDir: string = dir): Promise<string[]> {
-	const entries = await readdir(dir, { withFileTypes: true });
-	const files = await Promise.all(
-		entries.map(async (entry) => {
-			const fullPath = join(dir, entry.name);
-			if (entry.isDirectory()) {
-				return findMarkdownFiles(fullPath, baseDir);
-			} else if (entry.name.endsWith('.md')) {
-				return [relative(baseDir, fullPath).replace(/\\/g, '/')];
-			}
-			return [];
-		})
-	);
-	return files.flat();
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        return findMarkdownFiles(fullPath, baseDir);
+      } else if (entry.name.endsWith('.md')) {
+        return [relative(baseDir, fullPath).replace(/\\/g, '/')];
+      }
+      return [];
+    })
+  );
+  return files.flat();
 }
 
 /**
@@ -62,7 +62,7 @@ export async function findMarkdownFiles(dir: string, baseDir: string = dir): Pro
  * ```
  */
 export function pathToHref(filePath: string, basePath: string = '/docs'): string {
-	return `${basePath}/${filePath.replace(/\.md$/, '')}`;
+  return `${basePath}/${filePath.replace(/\.md$/, '')}`;
 }
 
 /**
@@ -87,30 +87,30 @@ export function pathToHref(filePath: string, basePath: string = '/docs'): string
  * ```
  */
 export async function scanDocumentation(options: ScanOptions): Promise<DocFile[]> {
-	const { docsRoot, basePath = '/docs', exclude } = options;
+  const { docsRoot, basePath = '/docs', exclude } = options;
 
-	// Find all markdown files
-	const markdownFiles = await findMarkdownFiles(docsRoot);
+  // Find all markdown files
+  const markdownFiles = await findMarkdownFiles(docsRoot);
 
-	// Filter excluded files
-	const filteredFiles = exclude ? markdownFiles.filter((path) => !exclude(path)) : markdownFiles;
+  // Filter excluded files
+  const filteredFiles = exclude ? markdownFiles.filter((path) => !exclude(path)) : markdownFiles;
 
-	// Create DocFile objects
-	const docFiles = await Promise.all(
-		filteredFiles.map(async (filePath) => {
-			const fullPath = join(docsRoot, filePath);
-			const content = await readFile(fullPath, 'utf-8');
-			const href = pathToHref(filePath, basePath);
+  // Create DocFile objects
+  const docFiles = await Promise.all(
+    filteredFiles.map(async (filePath) => {
+      const fullPath = join(docsRoot, filePath);
+      const content = await readFile(fullPath, 'utf-8');
+      const href = pathToHref(filePath, basePath);
 
-			return {
-				path: filePath,
-				content,
-				href,
-			} as DocFile;
-		})
-	);
+      return {
+        path: filePath,
+        content,
+        href,
+      } as DocFile;
+    })
+  );
 
-	return docFiles;
+  return docFiles;
 }
 
 /**
@@ -122,15 +122,15 @@ export async function scanDocumentation(options: ScanOptions): Promise<DocFile[]
  * - Pre/post processing hooks
  */
 export interface EnhancedNavigationOptions {
-	/** Custom function to infer section from file path */
-	inferSection?: (path: string) => string | null;
-	/** Map frontmatter fields to standard fields */
-	mapFrontmatter?: (frontmatter: any) => any;
-	/** Custom field names for frontmatter */
-	frontmatterFields?: {
-		section?: string; // Field name for section (default: 'section')
-		order?: string; // Field name for order (default: 'order')
-		description?: string; // Field name for description (default: 'description')
-		hidden?: string; // Field name for hidden flag (default: 'hidden')
-	};
+  /** Custom function to infer section from file path */
+  inferSection?: (path: string) => string | null;
+  /** Map frontmatter fields to standard fields */
+  mapFrontmatter?: (frontmatter: any) => any;
+  /** Custom field names for frontmatter */
+  frontmatterFields?: {
+    section?: string; // Field name for section (default: 'section')
+    order?: string; // Field name for order (default: 'order')
+    description?: string; // Field name for description (default: 'description')
+    hidden?: string; // Field name for hidden flag (default: 'hidden')
+  };
 }

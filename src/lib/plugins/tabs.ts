@@ -8,9 +8,9 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  * Tab definition
  */
 interface Tab {
-	label: string;
-	content: string;
-	language?: string;
+  label: string;
+  content: string;
+  language?: string;
 }
 
 /**
@@ -37,28 +37,28 @@ interface Tab {
  * Which is then hydrated client-side into an interactive tabs component
  */
 export function tabsPlugin() {
-	return (tree: Root) => {
-		visit(tree, 'code', (node: any) => {
-			// Check if this is a tabs code block
-			if (!node.lang?.startsWith('tabs:')) return;
+  return (tree: Root) => {
+    visit(tree, 'code', (node: any) => {
+      // Check if this is a tabs code block
+      if (!node.lang?.startsWith('tabs:')) return;
 
-			// Extract tabs ID from language
-			const tabsId = node.lang.replace('tabs:', '');
-			const content = node.value;
+      // Extract tabs ID from language
+      const tabsId = node.lang.replace('tabs:', '');
+      const content = node.value;
 
-			// Parse tabs from content
-			const tabs = parseTabs(content);
+      // Parse tabs from content
+      const tabs = parseTabs(content);
 
-			if (tabs.length === 0) return;
+      if (tabs.length === 0) return;
 
-			// Encode tabs data for client-side hydration
-			const encoded = encodeJsonBase64(tabs);
+      // Encode tabs data for client-side hydration
+      const encoded = encodeJsonBase64(tabs);
 
-			// Transform to HTML div that will be hydrated client-side
-			node.type = 'html';
-			node.value = `<div class="md-code-tabs" data-tabs-id="${escapeHtml(tabsId)}" data-tabs="${encoded}"></div>`;
-		});
-	};
+      // Transform to HTML div that will be hydrated client-side
+      node.type = 'html';
+      node.value = `<div class="md-code-tabs" data-tabs-id="${escapeHtml(tabsId)}" data-tabs="${encoded}"></div>`;
+    });
+  };
 }
 
 /**
@@ -78,57 +78,57 @@ export function tabsPlugin() {
  * ```
  */
 function parseTabs(content: string): Tab[] {
-	const tabs: Tab[] = [];
-	const lines = content.split('\n');
+  const tabs: Tab[] = [];
+  const lines = content.split('\n');
 
-	let currentLabel: string | null = null;
-	let currentLanguage: string | undefined;
-	let currentContent: string[] = [];
-	let inCodeBlock = false;
+  let currentLabel: string | null = null;
+  let currentLanguage: string | undefined;
+  let currentContent: string[] = [];
+  let inCodeBlock = false;
 
-	for (const line of lines) {
-		const trimmed = line.trim();
+  for (const line of lines) {
+    const trimmed = line.trim();
 
-		if (trimmed.startsWith('tab:')) {
-			// Finalize previous tab if exists
-			if (currentLabel && currentContent.length > 0) {
-				tabs.push({
-					label: currentLabel,
-					content: currentContent.join('\n').trim(),
-					language: currentLanguage
-				});
-			}
+    if (trimmed.startsWith('tab:')) {
+      // Finalize previous tab if exists
+      if (currentLabel && currentContent.length > 0) {
+        tabs.push({
+          label: currentLabel,
+          content: currentContent.join('\n').trim(),
+          language: currentLanguage,
+        });
+      }
 
-			// Start new tab
-			currentLabel = line.replace(/^tab:\s*/, '').trim();
-			currentContent = [];
-			currentLanguage = undefined;
-			inCodeBlock = false;
-		} else if (trimmed === '---') {
-			// Skip separator lines
-			continue;
-		} else if (trimmed.startsWith('```') && !inCodeBlock) {
-			// Start of code block
-			inCodeBlock = true;
-			const lang = trimmed.slice(3).trim();
-			if (lang) currentLanguage = lang;
-		} else if (trimmed === '```' && inCodeBlock) {
-			// End of code block
-			inCodeBlock = false;
-		} else if (inCodeBlock) {
-			// Content line inside code block
-			currentContent.push(line);
-		}
-	}
+      // Start new tab
+      currentLabel = line.replace(/^tab:\s*/, '').trim();
+      currentContent = [];
+      currentLanguage = undefined;
+      inCodeBlock = false;
+    } else if (trimmed === '---') {
+      // Skip separator lines
+      continue;
+    } else if (trimmed.startsWith('```') && !inCodeBlock) {
+      // Start of code block
+      inCodeBlock = true;
+      const lang = trimmed.slice(3).trim();
+      if (lang) currentLanguage = lang;
+    } else if (trimmed === '```' && inCodeBlock) {
+      // End of code block
+      inCodeBlock = false;
+    } else if (inCodeBlock) {
+      // Content line inside code block
+      currentContent.push(line);
+    }
+  }
 
-	// Finalize last tab
-	if (currentLabel && currentContent.length > 0) {
-		tabs.push({
-			label: currentLabel,
-			content: currentContent.join('\n').trim(),
-			language: currentLanguage
-		});
-	}
+  // Finalize last tab
+  if (currentLabel && currentContent.length > 0) {
+    tabs.push({
+      label: currentLabel,
+      content: currentContent.join('\n').trim(),
+      language: currentLanguage,
+    });
+  }
 
-	return tabs;
+  return tabs;
 }

@@ -4,20 +4,20 @@ import type { ComponentType } from 'svelte';
  * Documentation link definition
  */
 export interface DocsLink {
-	title: string;
-	href: string;
-	description: string;
-	audience?: string;
+  title: string;
+  href: string;
+  description: string;
+  audience?: string;
 }
 
 /**
  * Documentation section with grouped links
  */
 export interface DocsSection {
-	title: string;
-	description: string;
-	icon: ComponentType;
-	links: DocsLink[];
+  title: string;
+  description: string;
+  icon: ComponentType;
+  links: DocsLink[];
 }
 
 /**
@@ -26,12 +26,12 @@ export interface DocsSection {
  * @returns Flattened array of links with their section titles
  */
 export function getAllLinks(navigation: DocsSection[]): Array<DocsLink & { section: string }> {
-	return navigation.flatMap((section) =>
-		section.links.map((link) => ({
-			...link,
-			section: section.title
-		}))
-	);
+  return navigation.flatMap((section) =>
+    section.links.map((link) => ({
+      ...link,
+      section: section.title,
+    }))
+  );
 }
 
 /**
@@ -41,10 +41,10 @@ export function getAllLinks(navigation: DocsSection[]): Array<DocsLink & { secti
  * @returns The matching link with section info, or undefined
  */
 export function findLinkByHref(
-	navigation: DocsSection[],
-	href: string
+  navigation: DocsSection[],
+  href: string
 ): (DocsLink & { section: string }) | undefined {
-	return getAllLinks(navigation).find((link) => link.href === href);
+  return getAllLinks(navigation).find((link) => link.href === href);
 }
 
 /**
@@ -54,10 +54,10 @@ export function findLinkByHref(
  * @returns The matching section, or undefined
  */
 export function getSectionByTitle(
-	navigation: DocsSection[],
-	title: string
+  navigation: DocsSection[],
+  title: string
 ): DocsSection | undefined {
-	return navigation.find((section) => section.title === title);
+  return navigation.find((section) => section.title === title);
 }
 
 /**
@@ -68,30 +68,28 @@ export function getSectionByTitle(
  * @returns Object with next and previous links
  */
 export function getAdjacentLinks(
-	navigation: DocsSection[],
-	currentHref: string,
-	filterAudiences?: Set<string>
+  navigation: DocsSection[],
+  currentHref: string,
+  filterAudiences?: Set<string>
 ): {
-	previous?: DocsLink & { section: string };
-	next?: DocsLink & { section: string };
+  previous?: DocsLink & { section: string };
+  next?: DocsLink & { section: string };
 } {
-	let allLinks = getAllLinks(navigation);
+  let allLinks = getAllLinks(navigation);
 
-	// Filter by audiences if specified and not empty
-	if (filterAudiences && filterAudiences.size > 0) {
-		allLinks = allLinks.filter(
-			(link) => !link.audience || filterAudiences.has(link.audience)
-		);
-	}
+  // Filter by audiences if specified and not empty
+  if (filterAudiences && filterAudiences.size > 0) {
+    allLinks = allLinks.filter((link) => !link.audience || filterAudiences.has(link.audience));
+  }
 
-	const currentIndex = allLinks.findIndex((link) => link.href === currentHref);
+  const currentIndex = allLinks.findIndex((link) => link.href === currentHref);
 
-	if (currentIndex === -1) {
-		return {};
-	}
+  if (currentIndex === -1) {
+    return {};
+  }
 
-	return {
-		previous: currentIndex > 0 ? allLinks[currentIndex - 1] : undefined,
-		next: currentIndex < allLinks.length - 1 ? allLinks[currentIndex + 1] : undefined
-	};
+  return {
+    previous: currentIndex > 0 ? allLinks[currentIndex - 1] : undefined,
+    next: currentIndex < allLinks.length - 1 ? allLinks[currentIndex + 1] : undefined,
+  };
 }

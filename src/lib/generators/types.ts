@@ -62,29 +62,29 @@ export interface MarkdownTemplate {
  */
 export type ParserConfig =
   | {
-      type: "json";
+      type: 'json';
       /** JSONPath to extract items (e.g., "scripts" for package.json) */
       path?: string;
     }
   | {
-      type: "env";
+      type: 'env';
       /** Comment prefix for categories */
       categoryPrefix?: string;
     }
   | {
-      type: "sql";
+      type: 'sql';
       /** Table pattern to match */
       tablePattern?: RegExp;
     }
   | {
-      type: "grep";
+      type: 'grep';
       /** Grep command to execute */
       command: string;
       /** Pattern to extract from matches */
       extractPattern?: RegExp;
     }
   | {
-      type: "custom";
+      type: 'custom';
       /** Custom parser function */
       parse: (content: string, config: any) => any[];
     };

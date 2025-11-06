@@ -6,99 +6,99 @@ import { join, dirname, relative } from 'path';
  * Recursively copy files matching a pattern from src to dist
  */
 function copyFiles(srcDir: string, destDir: string, pattern: RegExp) {
-	const items = readdirSync(srcDir);
+  const items = readdirSync(srcDir);
 
-	for (const item of items) {
-		const srcPath = join(srcDir, item);
-		const destPath = join(destDir, item);
-		const stat = statSync(srcPath);
+  for (const item of items) {
+    const srcPath = join(srcDir, item);
+    const destPath = join(destDir, item);
+    const stat = statSync(srcPath);
 
-		if (stat.isDirectory()) {
-			mkdirSync(destPath, { recursive: true });
-			copyFiles(srcPath, destPath, pattern);
-		} else if (pattern.test(item)) {
-			mkdirSync(dirname(destPath), { recursive: true });
-			copyFileSync(srcPath, destPath);
-			console.log(`Copied: ${relative(process.cwd(), destPath)}`);
-		}
-	}
+    if (stat.isDirectory()) {
+      mkdirSync(destPath, { recursive: true });
+      copyFiles(srcPath, destPath, pattern);
+    } else if (pattern.test(item)) {
+      mkdirSync(dirname(destPath), { recursive: true });
+      copyFileSync(srcPath, destPath);
+      console.log(`Copied: ${relative(process.cwd(), destPath)}`);
+    }
+  }
 }
 
 export default defineConfig({
-	// Entry points for all public APIs
-	entry: [
-		'src/lib/index.ts',
-		'src/lib/server/index.ts',
-		'src/lib/plugins/index.ts',
-		'src/lib/components/index.ts',
-		'src/lib/utils/index.ts',
-		'src/lib/config/index.ts',
-	],
+  // Entry points for all public APIs
+  entry: [
+    'src/lib/index.ts',
+    'src/lib/server/index.ts',
+    'src/lib/plugins/index.ts',
+    'src/lib/components/index.ts',
+    'src/lib/utils/index.ts',
+    'src/lib/config/index.ts',
+  ],
 
-	// Output format: ESM only (modern SvelteKit standard)
-	format: ['esm'],
+  // Output format: ESM only (modern SvelteKit standard)
+  format: ['esm'],
 
-	// Generate TypeScript declaration files
-	// Note: components/index.ts is excluded from DTS generation as it exports
-	// Svelte components (.svelte files) which are handled separately by SvelteKit
-	dts: {
-		entry: [
-			'src/lib/index.ts',
-			'src/lib/server/index.ts',
-			'src/lib/plugins/index.ts',
-			'src/lib/utils/index.ts',
-			'src/lib/config/index.ts',
-		],
-	},
+  // Generate TypeScript declaration files
+  // Note: components/index.ts is excluded from DTS generation as it exports
+  // Svelte components (.svelte files) which are handled separately by SvelteKit
+  dts: {
+    entry: [
+      'src/lib/index.ts',
+      'src/lib/server/index.ts',
+      'src/lib/plugins/index.ts',
+      'src/lib/utils/index.ts',
+      'src/lib/config/index.ts',
+    ],
+  },
 
-	// Enable code splitting for better tree-shaking
-	splitting: true,
+  // Enable code splitting for better tree-shaking
+  splitting: true,
 
-	// Generate sourcemaps for debugging
-	sourcemap: true,
+  // Generate sourcemaps for debugging
+  sourcemap: true,
 
-	// Clean dist/ before each build
-	clean: true,
+  // Clean dist/ before each build
+  clean: true,
 
-	// External dependencies (peer deps + runtime deps that should not be bundled)
-	external: [
-		'svelte',
-		'@sveltejs/kit',
-		'mermaid',
-		'@lucide/svelte',
-		'playwright',
-		// Also externalize our own runtime dependencies
-		'shiki',
-		'unist-util-visit',
-		'yaml',
-		// Server-only dependencies (should not be bundled)
-		'ts-morph',
-		'glob',
-		'chokidar',
-	],
+  // External dependencies (peer deps + runtime deps that should not be bundled)
+  external: [
+    'svelte',
+    '@sveltejs/kit',
+    'mermaid',
+    '@lucide/svelte',
+    'playwright',
+    // Also externalize our own runtime dependencies
+    'shiki',
+    'unist-util-visit',
+    'yaml',
+    // Server-only dependencies (should not be bundled)
+    'ts-morph',
+    'glob',
+    'chokidar',
+  ],
 
-	// esbuild options
-	esbuildOptions(options) {
-		// Mark .svelte files as external so they're not processed
-		options.external = [...(options.external || []), '*.svelte'];
-	},
+  // esbuild options
+  esbuildOptions(options) {
+    // Mark .svelte files as external so they're not processed
+    options.external = [...(options.external || []), '*.svelte'];
+  },
 
-	// Post-build: Copy .svelte, .scss, and .json files to dist/
-	onSuccess: async () => {
-		console.log('\nCopying .svelte, .scss, and .json files to dist/...');
+  // Post-build: Copy .svelte, .scss, and .json files to dist/
+  onSuccess: async () => {
+    console.log('\nCopying .svelte, .scss, and .json files to dist/...');
 
-		const srcLib = join(process.cwd(), 'src/lib');
-		const distLib = join(process.cwd(), 'dist');
+    const srcLib = join(process.cwd(), 'src/lib');
+    const distLib = join(process.cwd(), 'dist');
 
-		// Copy .svelte files
-		copyFiles(srcLib, distLib, /\.svelte$/);
+    // Copy .svelte files
+    copyFiles(srcLib, distLib, /\.svelte$/);
 
-		// Copy .scss files
-		copyFiles(srcLib, distLib, /\.scss$/);
+    // Copy .scss files
+    copyFiles(srcLib, distLib, /\.scss$/);
 
-		// Copy .json files (for grammars, etc.)
-		copyFiles(srcLib, distLib, /\.json$/);
+    // Copy .json files (for grammars, etc.)
+    copyFiles(srcLib, distLib, /\.json$/);
 
-		console.log('Non-TS files copied successfully!\n');
-	},
+    console.log('Non-TS files copied successfully!\n');
+  },
 });

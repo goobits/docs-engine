@@ -13,10 +13,13 @@ export interface OpenAPIEndpoint {
     schema: any;
     required?: boolean;
   };
-  responses: Record<string, {
-    description: string;
-    schema?: any;
-  }>;
+  responses: Record<
+    string,
+    {
+      description: string;
+      schema?: any;
+    }
+  >;
   parameters?: Array<{
     name: string;
     in: 'query' | 'path' | 'header' | 'cookie';
@@ -109,7 +112,7 @@ export function filterEndpointsByPath(
   // Remove leading/trailing slashes for consistent matching
   const normalizedFilter = pathFilter.replace(/^\/+|\/+$/g, '');
 
-  return endpoints.filter(endpoint => {
+  return endpoints.filter((endpoint) => {
     const normalizedPath = endpoint.path.replace(/^\/+|\/+$/g, '');
 
     // Exact match
@@ -118,8 +121,10 @@ export function filterEndpointsByPath(
     }
 
     // Prefix match (e.g., "/sessions" matches "/sessions/{id}")
-    if (normalizedPath.startsWith(normalizedFilter + '/') ||
-        normalizedPath.startsWith(normalizedFilter + '{')) {
+    if (
+      normalizedPath.startsWith(normalizedFilter + '/') ||
+      normalizedPath.startsWith(normalizedFilter + '{')
+    ) {
       return true;
     }
 
@@ -207,10 +212,7 @@ export function formatSchema(schema: any, indent: number = 0): string {
 /**
  * Generate cURL command example for endpoint
  */
-export function generateCurlExample(
-  endpoint: OpenAPIEndpoint,
-  baseUrl: string = '/api'
-): string {
+export function generateCurlExample(endpoint: OpenAPIEndpoint, baseUrl: string = '/api'): string {
   const url = `${baseUrl}${endpoint.path}`;
   const lines: string[] = [`curl -X ${endpoint.method} '${url}'`];
 
@@ -272,7 +274,9 @@ export function generateTypeScriptExample(endpoint: OpenAPIEndpoint): string {
 
   if (endpoint.requestBody && ['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
     const exampleBody = generateExampleBody(endpoint.requestBody.schema);
-    lines.push(`  body: JSON.stringify(${JSON.stringify(exampleBody, null, 2).replace(/\n/g, '\n  ')}),`);
+    lines.push(
+      `  body: JSON.stringify(${JSON.stringify(exampleBody, null, 2).replace(/\n/g, '\n  ')}),`
+    );
   }
 
   lines.push(`});\n`);

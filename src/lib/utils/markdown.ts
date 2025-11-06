@@ -27,26 +27,26 @@
  * ```
  */
 export function generateTable(headers: string[], rows: string[][]): string {
-	if (!headers.length || !rows.length) {
-		return '';
-	}
+  if (!headers.length || !rows.length) {
+    return '';
+  }
 
-	const lines: string[] = [];
+  const lines: string[] = [];
 
-	// Header row
-	lines.push(`| ${headers.join(' | ')} |`);
+  // Header row
+  lines.push(`| ${headers.join(' | ')} |`);
 
-	// Separator row
-	lines.push(`| ${headers.map(() => '---').join(' | ')} |`);
+  // Separator row
+  lines.push(`| ${headers.map(() => '---').join(' | ')} |`);
 
-	// Data rows
-	for (const row of rows) {
-		// Escape pipes in cell content
-		const escapedRow = row.map((cell) => String(cell).replace(/\|/g, '\\|'));
-		lines.push(`| ${escapedRow.join(' | ')} |`);
-	}
+  // Data rows
+  for (const row of rows) {
+    // Escape pipes in cell content
+    const escapedRow = row.map((cell) => String(cell).replace(/\|/g, '\\|'));
+    lines.push(`| ${escapedRow.join(' | ')} |`);
+  }
 
-	return lines.join('\n');
+  return lines.join('\n');
 }
 
 /**
@@ -69,22 +69,22 @@ export function generateTable(headers: string[], rows: string[][]): string {
  * ```
  */
 export function generateHeader(sourceFile: string, additionalNote?: string): string {
-	const timestamp = new Date().toISOString();
-	const lines = [
-		`> [!WARNING]`,
-		`> **Auto-generated documentation - Do not edit manually**`,
-		`>`,
-		`> - **Source**: \`${sourceFile}\``,
-		`> - **Generated**: ${timestamp}`,
-	];
+  const timestamp = new Date().toISOString();
+  const lines = [
+    `> [!WARNING]`,
+    `> **Auto-generated documentation - Do not edit manually**`,
+    `>`,
+    `> - **Source**: \`${sourceFile}\``,
+    `> - **Generated**: ${timestamp}`,
+  ];
 
-	if (additionalNote) {
-		lines.push(`> - **Note**: ${additionalNote}`);
-	}
+  if (additionalNote) {
+    lines.push(`> - **Note**: ${additionalNote}`);
+  }
 
-	lines.push('');
+  lines.push('');
 
-	return lines.join('\n');
+  return lines.join('\n');
 }
 
 /**
@@ -105,8 +105,8 @@ export function generateHeader(sourceFile: string, additionalNote?: string): str
  * ```
  */
 export function generateSection(title: string, content: string, level: number = 2): string {
-	const heading = '#'.repeat(Math.max(1, Math.min(6, level)));
-	return `${heading} ${title}\n\n${content}\n`;
+  const heading = '#'.repeat(Math.max(1, Math.min(6, level)));
+  return `${heading} ${title}\n\n${content}\n`;
 }
 
 /**
@@ -122,7 +122,7 @@ export function generateSection(title: string, content: string, level: number = 
  * ```
  */
 export function escapeMarkdown(text: string): string {
-	return text.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1');
+  return text.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1');
 }
 
 /**
@@ -142,7 +142,7 @@ export function escapeMarkdown(text: string): string {
  * ```
  */
 export function codeBlock(code: string, language: string = ''): string {
-	return `\`\`\`${language}\n${code}\n\`\`\``;
+  return `\`\`\`${language}\n${code}\n\`\`\``;
 }
 
 /**
@@ -167,10 +167,10 @@ export function codeBlock(code: string, language: string = ''): string {
  * ```
  */
 export function generateList(items: string[], ordered: boolean = false): string {
-	return items
-		.map((item, index) => {
-			const marker = ordered ? `${index + 1}.` : '-';
-			return `${marker} ${item}`;
-		})
-		.join('\n');
+  return items
+    .map((item, index) => {
+      const marker = ordered ? `${index + 1}.` : '-';
+      return `${marker} ${item}`;
+    })
+    .join('\n');
 }

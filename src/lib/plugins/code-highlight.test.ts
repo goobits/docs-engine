@@ -14,253 +14,253 @@ import type { Root } from 'mdast';
  */
 
 describe('code-highlight plugin', () => {
-	describe('plugin API', () => {
-		it('should export codeHighlightPlugin function', () => {
-			expect(typeof codeHighlightPlugin).toBe('function');
-		});
+  describe('plugin API', () => {
+    it('should export codeHighlightPlugin function', () => {
+      expect(typeof codeHighlightPlugin).toBe('function');
+    });
 
-		it('should accept options and return a transformer', () => {
-			const plugin = codeHighlightPlugin({ theme: 'dracula' });
-			expect(typeof plugin).toBe('function');
-		});
+    it('should accept options and return a transformer', () => {
+      const plugin = codeHighlightPlugin({ theme: 'dracula' });
+      expect(typeof plugin).toBe('function');
+    });
 
-		it('should work with default options', () => {
-			const plugin = codeHighlightPlugin();
-			expect(typeof plugin).toBe('function');
-		});
-	});
+    it('should work with default options', () => {
+      const plugin = codeHighlightPlugin();
+      expect(typeof plugin).toBe('function');
+    });
+  });
 
-	describe('code block transformation', () => {
-		it('should transform basic code blocks', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'typescript',
-						value: 'const x = 1;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+  describe('code block transformation', () => {
+    it('should transform basic code blocks', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'typescript',
+            value: 'const x = 1;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin({ theme: 'dracula' });
-			await plugin(tree);
+      const plugin = codeHighlightPlugin({ theme: 'dracula' });
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.type).toBe('html');
-			expect(transformed.value).toContain('shiki');
-		});
+      const transformed = tree.children[0] as any;
+      expect(transformed.type).toBe('html');
+      expect(transformed.value).toContain('shiki');
+    });
 
-		it('should handle custom language syntax', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'javascript',
-						value: 'console.log("test");',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+    it('should handle custom language syntax', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'javascript',
+            value: 'console.log("test");',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.type).toBe('html');
-			expect(transformed.value).toContain('shiki');
-		});
+      const transformed = tree.children[0] as any;
+      expect(transformed.type).toBe('html');
+      expect(transformed.value).toContain('shiki');
+    });
 
-		it('should skip custom plugin languages', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'filetree',
-						value: 'src/\n  index.ts',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+    it('should skip custom plugin languages', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'filetree',
+            value: 'src/\n  index.ts',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const node = tree.children[0] as any;
-			// Should not transform filetree blocks
-			expect(node.type).toBe('code');
-			expect(node.lang).toBe('filetree');
-		});
-	});
+      const node = tree.children[0] as any;
+      // Should not transform filetree blocks
+      expect(node.type).toBe('code');
+      expect(node.lang).toBe('filetree');
+    });
+  });
 
-	describe('metadata parsing (tested through behavior)', () => {
-		it('should parse and apply title attribute', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'typescript title="app.ts"',
-						value: 'const x = 1;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+  describe('metadata parsing (tested through behavior)', () => {
+    it('should parse and apply title attribute', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'typescript title="app.ts"',
+            value: 'const x = 1;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.value).toContain('code-block-title');
-			expect(transformed.value).toContain('app.ts');
-		});
+      const transformed = tree.children[0] as any;
+      expect(transformed.value).toContain('code-block-title');
+      expect(transformed.value).toContain('app.ts');
+    });
 
-		it('should parse and apply line numbers', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'typescript showLineNumbers',
-						value: 'const x = 1;\nconst y = 2;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 4, column: 4, offset: 30 }
-						}
-					} as any
-				]
-			};
+    it('should parse and apply line numbers', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'typescript showLineNumbers',
+            value: 'const x = 1;\nconst y = 2;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 4, column: 4, offset: 30 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.value).toContain('code-block-line-numbers');
-			expect(transformed.value).toContain('line-number');
-		});
+      const transformed = tree.children[0] as any;
+      expect(transformed.value).toContain('code-block-line-numbers');
+      expect(transformed.value).toContain('line-number');
+    });
 
-		it('should handle diff language', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'diff',
-						value: '+ added line\n- removed line',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 4, column: 4, offset: 30 }
-						}
-					} as any
-				]
-			};
+    it('should handle diff language', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'diff',
+            value: '+ added line\n- removed line',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 4, column: 4, offset: 30 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.value).toContain('diff-add');
-			expect(transformed.value).toContain('diff-remove');
-		});
-	});
+      const transformed = tree.children[0] as any;
+      expect(transformed.value).toContain('diff-add');
+      expect(transformed.value).toContain('diff-remove');
+    });
+  });
 
-	describe('options handling', () => {
-		it('should respect showLineNumbers option', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'typescript',
-						value: 'const x = 1;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+  describe('options handling', () => {
+    it('should respect showLineNumbers option', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'typescript',
+            value: 'const x = 1;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin({ showLineNumbers: true });
-			await plugin(tree);
+      const plugin = codeHighlightPlugin({ showLineNumbers: true });
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.value).toContain('code-block-line-numbers');
-		});
+      const transformed = tree.children[0] as any;
+      expect(transformed.value).toContain('code-block-line-numbers');
+    });
 
-		it('should respect theme option', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'typescript',
-						value: 'const x = 1;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+    it('should respect theme option', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'typescript',
+            value: 'const x = 1;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin({ theme: 'dracula' });
-			await plugin(tree);
+      const plugin = codeHighlightPlugin({ theme: 'dracula' });
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			expect(transformed.value).toContain('shiki');
-		});
-	});
+      const transformed = tree.children[0] as any;
+      expect(transformed.value).toContain('shiki');
+    });
+  });
 
-	describe('error handling', () => {
-		it('should handle invalid language gracefully', async () => {
-			const tree: Root = {
-				type: 'root',
-				children: [
-					{
-						type: 'code',
-						lang: 'nonexistentlanguage123',
-						value: 'const x = 1;',
-						position: {
-							start: { line: 1, column: 1, offset: 0 },
-							end: { line: 3, column: 4, offset: 20 }
-						}
-					} as any
-				]
-			};
+  describe('error handling', () => {
+    it('should handle invalid language gracefully', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'code',
+            lang: 'nonexistentlanguage123',
+            value: 'const x = 1;',
+            position: {
+              start: { line: 1, column: 1, offset: 0 },
+              end: { line: 3, column: 4, offset: 20 },
+            },
+          } as any,
+        ],
+      };
 
-			const plugin = codeHighlightPlugin();
-			await plugin(tree);
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
 
-			const transformed = tree.children[0] as any;
-			// Should still transform to HTML, even if highlighting fails
-			expect(transformed.type).toBe('html');
-		});
-	});
+      const transformed = tree.children[0] as any;
+      // Should still transform to HTML, even if highlighting fails
+      expect(transformed.type).toBe('html');
+    });
+  });
 
-	describe('TypeScript types', () => {
-		it('should export CodeBlockMetadata interface', () => {
-			const metadata: CodeBlockMetadata = {
-				language: 'typescript',
-				raw: 'typescript'
-			};
+  describe('TypeScript types', () => {
+    it('should export CodeBlockMetadata interface', () => {
+      const metadata: CodeBlockMetadata = {
+        language: 'typescript',
+        raw: 'typescript',
+      };
 
-			expect(metadata.language).toBe('typescript');
-		});
-	});
+      expect(metadata.language).toBe('typescript');
+    });
+  });
 });

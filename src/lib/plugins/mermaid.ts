@@ -18,18 +18,18 @@ import { encodeBase64 } from '../utils/base64.js';
  * Which is then rendered client-side by mermaid.js
  */
 export function mermaidPlugin() {
-	return (tree: Root) => {
-		visit(tree, 'code', (node: any) => {
-			if (node.lang !== 'mermaid') return;
+  return (tree: Root) => {
+    visit(tree, 'code', (node: any) => {
+      if (node.lang !== 'mermaid') return;
 
-			const diagram = node.value;
+      const diagram = node.value;
 
-			// Base64 encode the diagram to avoid HTML escaping issues
-			const encoded = encodeBase64(diagram);
+      // Base64 encode the diagram to avoid HTML escaping issues
+      const encoded = encodeBase64(diagram);
 
-			// Transform to HTML div that will be hydrated client-side
-			node.type = 'html';
-			node.value = `<div class="md-mermaid" data-diagram="${encoded}"></div>`;
-		});
-	};
+      // Transform to HTML div that will be hydrated client-side
+      node.type = 'html';
+      node.value = `<div class="md-mermaid" data-diagram="${encoded}"></div>`;
+    });
+  };
 }

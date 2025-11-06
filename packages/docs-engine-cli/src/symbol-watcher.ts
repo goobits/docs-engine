@@ -11,12 +11,12 @@ import { createSymbolMapGenerator } from '@goobits/docs-engine/server';
 import type { SymbolMapGeneratorConfig } from '@goobits/docs-engine/server';
 
 export interface WatchOptions {
-	/** Debounce delay in milliseconds (default: 500) */
-	debounce?: number;
-	/** Callback when symbol map is updated */
-	onChange?: (stats: { duration: number; symbolCount: number }) => void;
-	/** Show verbose output */
-	verbose?: boolean;
+  /** Debounce delay in milliseconds (default: 500) */
+  debounce?: number;
+  /** Callback when symbol map is updated */
+  onChange?: (stats: { duration: number; symbolCount: number }) => void;
+  /** Show verbose output */
+  verbose?: boolean;
 }
 
 /**
@@ -43,34 +43,34 @@ export interface WatchOptions {
  * @public
  */
 export async function watchSymbols(config: SymbolMapGeneratorConfig, options: WatchOptions = {}) {
-	const { debounce = 500, onChange, verbose = false } = options;
+  const { debounce = 500, onChange, verbose = false } = options;
 
-	if (verbose) {
-		console.log('🚀 Starting TypeScript file watcher...');
-		console.log(`   Source patterns: ${config.sourcePatterns.join(', ')}`);
-		console.log(`   Output: ${config.outputPath}`);
-	}
+  if (verbose) {
+    console.log('🚀 Starting TypeScript file watcher...');
+    console.log(`   Source patterns: ${config.sourcePatterns.join(', ')}`);
+    console.log(`   Output: ${config.outputPath}`);
+  }
 
-	const generator = createSymbolMapGenerator(config);
+  const generator = createSymbolMapGenerator(config);
 
-	// Start watching
-	const watcher = await generator.watch({
-		debounce,
-		onChange: (stats) => {
-			if (onChange) {
-				onChange(stats);
-			} else if (verbose) {
-				console.log(
-					`✅ Symbol map updated (${(stats.duration / 1000).toFixed(1)}s, ${stats.symbolCount} symbols)`
-				);
-			}
-		}
-	});
+  // Start watching
+  const watcher = await generator.watch({
+    debounce,
+    onChange: (stats) => {
+      if (onChange) {
+        onChange(stats);
+      } else if (verbose) {
+        console.log(
+          `✅ Symbol map updated (${(stats.duration / 1000).toFixed(1)}s, ${stats.symbolCount} symbols)`
+        );
+      }
+    },
+  });
 
-	if (verbose) {
-		console.log('\n👀 Watching TypeScript files for changes...');
-		console.log('   Press Ctrl+C to stop\n');
-	}
+  if (verbose) {
+    console.log('\n👀 Watching TypeScript files for changes...');
+    console.log('   Press Ctrl+C to stop\n');
+  }
 
-	return watcher;
+  return watcher;
 }

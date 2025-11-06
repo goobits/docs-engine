@@ -9,19 +9,19 @@
  */
 
 const HTML_ESCAPES: Record<string, string> = {
-	'&': '&amp;',
-	'<': '&lt;',
-	'>': '&gt;',
-	'"': '&quot;',
-	"'": '&#39;'
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
 } as const;
 
 const HTML_UNESCAPES: Record<string, string> = {
-	'&amp;': '&',
-	'&lt;': '<',
-	'&gt;': '>',
-	'&quot;': '"',
-	'&#39;': "'"
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
 } as const;
 
 /**
@@ -42,7 +42,7 @@ const HTML_UNESCAPES: Record<string, string> = {
  * @public
  */
 export function escapeHtml(text: string): string {
-	return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
+  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 }
 
 /**
@@ -63,7 +63,7 @@ export function escapeHtml(text: string): string {
  * @public
  */
 export function unescapeHtml(html: string): string {
-	return html.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => HTML_UNESCAPES[entity]);
+  return html.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => HTML_UNESCAPES[entity]);
 }
 
 /**
@@ -84,5 +84,5 @@ export function unescapeHtml(html: string): string {
  * @public
  */
 export function escapeAttribute(text: string): string {
-	return escapeHtml(text).replace(/\n/g, '&#10;').replace(/\r/g, '&#13;');
+  return escapeHtml(text).replace(/\n/g, '&#10;').replace(/\r/g, '&#13;');
 }

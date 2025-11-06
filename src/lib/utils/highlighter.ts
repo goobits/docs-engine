@@ -14,40 +14,40 @@ let highlighterPromise: Promise<Highlighter> | null = null;
  * @returns Highlighter instance
  */
 export async function getHighlighter(theme: string = 'dracula'): Promise<Highlighter> {
-	if (!highlighterPromise) {
-		highlighterPromise = createHighlighter({
-			themes: [theme],
-			langs: [
-				'typescript',
-				'javascript',
-				'python',
-				'rust',
-				'bash',
-				'sql',
-				'json',
-				'html',
-				'css',
-				'svelte',
-				'tsx',
-				'jsx',
-				'yaml',
-				'toml',
-				'markdown',
-				'shell',
-				'sh',
-				'vue',
-				'go',
-				'java',
-				'c',
-				'cpp',
-				'csharp',
-				'php',
-				'ruby'
-			]
-		});
-	}
+  if (!highlighterPromise) {
+    highlighterPromise = createHighlighter({
+      themes: [theme],
+      langs: [
+        'typescript',
+        'javascript',
+        'python',
+        'rust',
+        'bash',
+        'sql',
+        'json',
+        'html',
+        'css',
+        'svelte',
+        'tsx',
+        'jsx',
+        'yaml',
+        'toml',
+        'markdown',
+        'shell',
+        'sh',
+        'vue',
+        'go',
+        'java',
+        'c',
+        'cpp',
+        'csharp',
+        'php',
+        'ruby',
+      ],
+    });
+  }
 
-	return highlighterPromise;
+  return highlighterPromise;
 }
 
 /**
@@ -58,19 +58,19 @@ export async function getHighlighter(theme: string = 'dracula'): Promise<Highlig
  * @returns Highlighted HTML
  */
 export async function highlightCode(
-	code: string,
-	language: string,
-	theme: string = 'dracula'
+  code: string,
+  language: string,
+  theme: string = 'dracula'
 ): Promise<string> {
-	try {
-		const highlighter = await getHighlighter(theme);
-		return highlighter.codeToHtml(code, {
-			lang: language,
-			theme: theme
-		});
-	} catch (err) {
-		console.error(`Failed to highlight ${language} code:`, err);
-		// Fallback to plain code block
-		return `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
-	}
+  try {
+    const highlighter = await getHighlighter(theme);
+    return highlighter.codeToHtml(code, {
+      lang: language,
+      theme: theme,
+    });
+  } catch (err) {
+    console.error(`Failed to highlight ${language} code:`, err);
+    // Fallback to plain code block
+    return `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
+  }
 }

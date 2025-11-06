@@ -80,7 +80,9 @@ export const defaultConfig: MarkdownDocsConfig = {
   },
 };
 
-export function createMarkdownDocs(userConfig: Partial<MarkdownDocsConfig> = {}): MarkdownDocsConfig {
+export function createMarkdownDocs(
+  userConfig: Partial<MarkdownDocsConfig> = {}
+): MarkdownDocsConfig {
   return {
     ...defaultConfig,
     ...userConfig,

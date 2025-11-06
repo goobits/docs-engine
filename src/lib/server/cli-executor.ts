@@ -28,7 +28,7 @@ export class CliExecutor {
       timeout: 10000,
       maxOutputLength: 50000,
       workingDirectory: process.cwd(),
-      ...config
+      ...config,
     };
   }
 
@@ -38,8 +38,8 @@ export class CliExecutor {
    */
   private validateCommand(command: string): boolean {
     const baseCommand = command.trim().split(' ')[0];
-    return this.config.allowedCommands.some(allowed =>
-      baseCommand === allowed || baseCommand.startsWith(allowed + '/')
+    return this.config.allowedCommands.some(
+      (allowed) => baseCommand === allowed || baseCommand.startsWith(allowed + '/')
     );
   }
 
@@ -66,21 +66,21 @@ export class CliExecutor {
           // Force color output for commands that support it
           FORCE_COLOR: '1',
           CLICOLOR_FORCE: '1',
-        }
+        },
       });
 
       return {
         stdout: stdout.slice(0, this.config.maxOutputLength),
         stderr: stderr.slice(0, this.config.maxOutputLength),
         exitCode: 0,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     } catch (error: any) {
       return {
         stdout: error.stdout || '',
         stderr: error.stderr || error.message,
         exitCode: error.code || 1,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     }
   }

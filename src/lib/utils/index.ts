@@ -5,10 +5,10 @@ export type { DocsLink, DocsSection } from './navigation';
 // Navigation builder utilities
 export * from './navigation-builder';
 export type {
-	DocFrontmatter,
-	DocFile,
-	IconMap,
-	NavigationBuilderOptions,
+  DocFrontmatter,
+  DocFile,
+  IconMap,
+  NavigationBuilderOptions,
 } from './navigation-builder';
 
 // NOTE: Navigation scanner moved to server/index.ts (requires Node.js fs/promises)
@@ -47,7 +47,11 @@ export * from './html';
 
 // Search index utilities (Proposal 03)
 export * from './search-index';
-export type { SearchDocument, SearchResult as SearchIndexResult, SearchIndexConfig } from './search-index';
+export type {
+  SearchDocument,
+  SearchResult as SearchIndexResult,
+  SearchIndexConfig,
+} from './search-index';
 
 // Symbol reference utilities
 export * from './symbol-resolver';

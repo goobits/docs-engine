@@ -26,9 +26,7 @@
         "returns": ""
       },
       "signature": "interface TreeNode {\n  name: string;;\n  type: 'file' | 'folder';;\n  extension?: string;;\n  children?: TreeNode[];;\n  path: string;;\n  depth: number;\n}",
-      "related": [
-        "TreeNode"
-      ]
+      "related": ["TreeNode"]
     }
   ],
   "parseTree": [
@@ -50,9 +48,7 @@
         "returns": "Array of root-level TreeNode objects"
       },
       "signature": "function parseTree(treeString: string): TreeNode[]",
-      "related": [
-        "TreeNode"
-      ]
+      "related": ["TreeNode"]
     }
   ],
   "FileTypeConfig": [
@@ -95,9 +91,7 @@
         "returns": ""
       },
       "signature": "function getFileType(name: string, extension?: string): FileTypeConfig",
-      "related": [
-        "FileTypeConfig"
-      ]
+      "related": ["FileTypeConfig"]
     }
   ],
   "SymbolDefinition": [
@@ -112,9 +106,7 @@
         "returns": ""
       },
       "signature": "interface SymbolDefinition {\n  name: string;;\n  path: string;;\n  line: number;;\n  kind: 'type' | 'interface' | 'class' | 'function' | 'enum' | 'const';;\n  exported: boolean;;\n  jsDoc?: {\n    description?: string;\n    params?: Array<{ name: string; description: string; type: string }>;\n    returns?: string;\n    example?: string;\n    see?: string[];\n  };;\n  signature: string;;\n  related?: string[];;\n  extends?: string[];;\n  implements?: string[];\n}",
-      "related": [
-        "Array"
-      ]
+      "related": ["Array"]
     },
     {
       "name": "SymbolDefinition",
@@ -127,9 +119,7 @@
         "returns": ""
       },
       "signature": "interface SymbolDefinition {\n  name: string;;\n  path: string;;\n  line: number;;\n  kind: 'type' | 'interface' | 'class' | 'function' | 'enum' | 'const';;\n  exported: boolean;;\n  jsDoc?: {\n\t\tdescription?: string;\n\t\tparams?: Array<{ name: string; description: string; type: string }>;\n\t\treturns?: string;\n\t\texample?: string;\n\t\tsee?: string[];\n\t};;\n  signature: string;;\n  related?: string[];;\n  extends?: string[];;\n  implements?: string[];\n}",
-      "related": [
-        "Array"
-      ]
+      "related": ["Array"]
     }
   ],
   "SymbolMap": [
@@ -166,9 +156,7 @@
       "kind": "function",
       "exported": true,
       "signature": "function loadSymbolMap(): SymbolMap",
-      "related": [
-        "SymbolMap"
-      ]
+      "related": ["SymbolMap"]
     }
   ],
   "resolveSymbol": [
@@ -179,10 +167,7 @@
       "kind": "function",
       "exported": true,
       "signature": "function resolveSymbol(reference: string, symbolMap: SymbolMap): SymbolDefinition",
-      "related": [
-        "SymbolMap",
-        "SymbolDefinition"
-      ]
+      "related": ["SymbolMap", "SymbolDefinition"]
     }
   ],
   "AmbiguousSymbolError": [
@@ -193,9 +178,7 @@
       "kind": "class",
       "exported": true,
       "signature": "class AmbiguousSymbolError",
-      "extends": [
-        "Error"
-      ]
+      "extends": ["Error"]
     }
   ],
   "renderInline": [
@@ -210,9 +193,7 @@
         "returns": ""
       },
       "signature": "function renderInline(symbol: SymbolDefinition): string",
-      "related": [
-        "SymbolDefinition"
-      ]
+      "related": ["SymbolDefinition"]
     }
   ],
   "renderBlock": [
@@ -227,10 +208,7 @@
         "returns": ""
       },
       "signature": "function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): string",
-      "related": [
-        "SymbolDefinition",
-        "RenderOptions"
-      ]
+      "related": ["SymbolDefinition", "RenderOptions"]
     }
   ],
   "RenderOptions": [
@@ -241,9 +219,7 @@
       "kind": "interface",
       "exported": true,
       "signature": "interface RenderOptions {\n  show?: Array<'signature' | 'description' | 'params' | 'returns' | 'example'>;\n}",
-      "related": [
-        "Array"
-      ]
+      "related": ["Array"]
     }
   ],
   "symbolToGitHubUrl": [
@@ -254,9 +230,7 @@
       "kind": "function",
       "exported": true,
       "signature": "function symbolToGitHubUrl(symbol: SymbolDefinition): string",
-      "related": [
-        "SymbolDefinition"
-      ]
+      "related": ["SymbolDefinition"]
     }
   ],
   "SymbolGeneratorConfig": [
@@ -301,10 +275,7 @@
         "example": "```typescript\nimport { createSymbolMapGenerator } from '@goobits/docs-engine/utils';\n\nconst generator = createSymbolMapGenerator({\n  sourcePatterns: ['src/**\\/*.ts'],\n  excludePatterns: ['**\\/*.test.ts'],\n  cacheDir: '.dev/tmp',\n  cacheVersion: '1.0',\n  outputPath: 'docs/.generated/symbol-map.json'\n});\n\nawait generator.generate();\n// Or watch for changes:\nconst watcher = await generator.watch();\n// Or benchmark:\nconst results = await generator.benchmark();\n```"
       },
       "signature": "function createSymbolMapGenerator(config: SymbolGeneratorConfig): SymbolMapGenerator",
-      "related": [
-        "SymbolGeneratorConfig",
-        "SymbolMapGenerator"
-      ]
+      "related": ["SymbolGeneratorConfig", "SymbolMapGenerator"]
     }
   ],
   "SearchResult": [
@@ -319,9 +290,7 @@
         "returns": ""
       },
       "signature": "interface SearchResult {\n  section: string;;\n  score: number;\n}",
-      "extends": [
-        "DocsLink"
-      ]
+      "extends": ["DocsLink"]
     },
     {
       "name": "SearchResult",
@@ -380,11 +349,7 @@
         "returns": "Array of search results sorted by relevance score"
       },
       "signature": "function searchDocs(navigation: DocsSection[], query: string, options: SearchOptions = {}): SearchResult[]",
-      "related": [
-        "DocsSection",
-        "SearchOptions",
-        "SearchResult"
-      ]
+      "related": ["DocsSection", "SearchOptions", "SearchResult"]
     }
   ],
   "getSearchSuggestions": [
@@ -416,9 +381,7 @@
         "returns": "Array of suggested search terms"
       },
       "signature": "function getSearchSuggestions(navigation: DocsSection[], query: string, limit = 5): string[]",
-      "related": [
-        "DocsSection"
-      ]
+      "related": ["DocsSection"]
     }
   ],
   "SearchDocument": [
@@ -449,9 +412,7 @@
         "returns": ""
       },
       "signature": "interface SearchIndexConfig {\n  fields?: string[];;\n  fieldWeights?: Record<string, number>;;\n  fuzzyThreshold?: number;;\n  maxResults?: number;\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "createSearchIndex": [
@@ -484,11 +445,7 @@
         "example": "```typescript\nconst contentMap = new Map([\n  ['/docs/getting-started', 'Getting started with docs-engine...'],\n  ['/docs/features', 'Features include...']\n]);\n\nconst index = createSearchIndex(navigation, contentMap);\n```"
       },
       "signature": "function createSearchIndex(navigation: DocsSection[], contentMap: Map<string, string>, config: SearchIndexConfig = {}): string",
-      "related": [
-        "DocsSection",
-        "Map",
-        "SearchIndexConfig"
-      ]
+      "related": ["DocsSection", "Map", "SearchIndexConfig"]
     }
   ],
   "loadSearchIndex": [
@@ -515,10 +472,7 @@
         "returns": "MiniSearch instance ready for searching"
       },
       "signature": "function loadSearchIndex(indexJson: string, config: SearchIndexConfig = {}): MiniSearch",
-      "related": [
-        "SearchIndexConfig",
-        "MiniSearch"
-      ]
+      "related": ["SearchIndexConfig", "MiniSearch"]
     }
   ],
   "performSearch": [
@@ -550,11 +504,7 @@
         "returns": "Array of search results with excerpts"
       },
       "signature": "function performSearch(miniSearch: MiniSearch, query: string, config: SearchIndexConfig = {}): SearchResult[]",
-      "related": [
-        "MiniSearch",
-        "SearchIndexConfig",
-        "SearchResult"
-      ]
+      "related": ["MiniSearch", "SearchIndexConfig", "SearchResult"]
     }
   ],
   "highlightMatches": [
@@ -595,10 +545,7 @@
         "returns": ""
       },
       "signature": "interface OpenAPIEndpoint {\n  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';;\n  path: string;;\n  summary: string;;\n  description?: string;;\n  requestBody?: {\n    schema: any;\n    required?: boolean;\n  };;\n  responses: Record<string, {\n    description: string;\n    schema?: any;\n  }>;;\n  parameters?: Array<{\n    name: string;\n    in: 'query' | 'path' | 'header' | 'cookie';\n    required?: boolean;\n    description?: string;\n    schema: any;\n  }>;;\n  tags?: string[];\n}",
-      "related": [
-        "Record",
-        "Array"
-      ]
+      "related": ["Record", "Array"]
     }
   ],
   "parseOpenAPISpec": [
@@ -613,9 +560,7 @@
         "returns": ""
       },
       "signature": "function parseOpenAPISpec(spec: any): OpenAPIEndpoint[]",
-      "related": [
-        "OpenAPIEndpoint"
-      ]
+      "related": ["OpenAPIEndpoint"]
     }
   ],
   "filterEndpointsByPath": [
@@ -630,9 +575,7 @@
         "returns": ""
       },
       "signature": "function filterEndpointsByPath(endpoints: OpenAPIEndpoint[], pathFilter: string): OpenAPIEndpoint[]",
-      "related": [
-        "OpenAPIEndpoint"
-      ]
+      "related": ["OpenAPIEndpoint"]
     }
   ],
   "formatSchema": [
@@ -661,9 +604,7 @@
         "returns": ""
       },
       "signature": "function generateCurlExample(endpoint: OpenAPIEndpoint, baseUrl: string = '/api'): string",
-      "related": [
-        "OpenAPIEndpoint"
-      ]
+      "related": ["OpenAPIEndpoint"]
     }
   ],
   "generateTypeScriptExample": [
@@ -678,9 +619,7 @@
         "returns": ""
       },
       "signature": "function generateTypeScriptExample(endpoint: OpenAPIEndpoint): string",
-      "related": [
-        "OpenAPIEndpoint"
-      ]
+      "related": ["OpenAPIEndpoint"]
     }
   ],
   "DocsLink": [
@@ -709,10 +648,7 @@
         "returns": ""
       },
       "signature": "interface DocsSection {\n  title: string;;\n  description: string;;\n  icon: ComponentType;;\n  links: DocsLink[];\n}",
-      "related": [
-        "ComponentType",
-        "DocsLink"
-      ]
+      "related": ["ComponentType", "DocsLink"]
     }
   ],
   "getAllLinks": [
@@ -734,11 +670,7 @@
         "returns": "Flattened array of links with their section titles"
       },
       "signature": "function getAllLinks(navigation: DocsSection[]): Array<DocsLink & { section: string }>",
-      "related": [
-        "DocsSection",
-        "Array",
-        "DocsLink"
-      ]
+      "related": ["DocsSection", "Array", "DocsLink"]
     }
   ],
   "findLinkByHref": [
@@ -765,10 +697,7 @@
         "returns": "The matching link with section info, or undefined"
       },
       "signature": "function findLinkByHref(navigation: DocsSection[], href: string): (DocsLink & { section: string }) | undefined",
-      "related": [
-        "DocsSection",
-        "DocsLink"
-      ]
+      "related": ["DocsSection", "DocsLink"]
     }
   ],
   "getSectionByTitle": [
@@ -795,9 +724,7 @@
         "returns": "The matching section, or undefined"
       },
       "signature": "function getSectionByTitle(navigation: DocsSection[], title: string): DocsSection | undefined",
-      "related": [
-        "DocsSection"
-      ]
+      "related": ["DocsSection"]
     }
   ],
   "getAdjacentLinks": [
@@ -824,10 +751,7 @@
         "returns": "Object with next and previous links"
       },
       "signature": "function getAdjacentLinks(navigation: DocsSection[], currentHref: string): {\n\tprevious?: DocsLink & { section: string };\n\tnext?: DocsLink & { section: string };\n}",
-      "related": [
-        "DocsSection",
-        "DocsLink"
-      ]
+      "related": ["DocsSection", "DocsLink"]
     }
   ],
   "ScanOptions": [
@@ -869,9 +793,7 @@
         "example": "```typescript\nconst files = await findMarkdownFiles('/workspace/docs');\n// Returns: ['quick-start.md', 'guides/setup.md', ...]\n```"
       },
       "signature": "function findMarkdownFiles(dir: string, baseDir: string = dir): Promise<string[]>",
-      "related": [
-        "Promise"
-      ]
+      "related": ["Promise"]
     }
   ],
   "pathToHref": [
@@ -921,11 +843,7 @@
         "example": "```typescript\nimport { scanDocumentation, buildNavigation } from '@goobits/docs-engine/utils';\n\nconst files = await scanDocumentation({\n  docsRoot: '/workspace/docs',\n  basePath: '/docs',\n  exclude: (path) => path.includes('README') || path.startsWith('meta/')\n});\n\nconst navigation = buildNavigation(files, {\n  icons: { 'Getting Started': RocketIcon }\n});\n```"
       },
       "signature": "function scanDocumentation(options: ScanOptions): Promise<DocFile[]>",
-      "related": [
-        "ScanOptions",
-        "Promise",
-        "DocFile"
-      ]
+      "related": ["ScanOptions", "Promise", "DocFile"]
     }
   ],
   "EnhancedNavigationOptions": [
@@ -982,10 +900,7 @@
         "returns": ""
       },
       "signature": "type IconMap = Record<string, ComponentType>",
-      "related": [
-        "Record",
-        "ComponentType"
-      ]
+      "related": ["Record", "ComponentType"]
     }
   ],
   "NavigationBuilderOptions": [
@@ -1000,10 +915,7 @@
         "returns": ""
       },
       "signature": "interface NavigationBuilderOptions {\n  basePath?: string;;\n  icons?: IconMap;;\n  defaultIcon?: ComponentType;;\n  defaultSection?: string;;\n  defaultSectionDescription?: string;\n}",
-      "related": [
-        "IconMap",
-        "ComponentType"
-      ]
+      "related": ["IconMap", "ComponentType"]
     }
   ],
   "extractFrontmatter": [
@@ -1018,9 +930,7 @@
         "returns": ""
       },
       "signature": "function extractFrontmatter(content: string): {\n\tfrontmatter: DocFrontmatter;\n\tbody: string;\n}",
-      "related": [
-        "DocFrontmatter"
-      ]
+      "related": ["DocFrontmatter"]
     }
   ],
   "buildNavigation": [
@@ -1048,11 +958,7 @@
         "example": "```typescript\nimport { buildNavigation } from '@goobits/docs-engine/utils';\nimport { BookOpen, Code } from 'lucide-svelte';\n\nconst files = [\n  {\n    path: 'quick-start.md',\n    content: '---\\ntitle: Quick Start\\nsection: Getting Started\\n---\\n...',\n    href: '/docs/quick-start'\n  }\n];\n\nconst navigation = buildNavigation(files, {\n  icons: {\n    'Getting Started': BookOpen,\n    'DSL': Code\n  }\n});\n```"
       },
       "signature": "function buildNavigation(files: DocFile[], options: NavigationBuilderOptions = {}): DocsSection[]",
-      "related": [
-        "DocFile",
-        "NavigationBuilderOptions",
-        "DocsSection"
-      ]
+      "related": ["DocFile", "NavigationBuilderOptions", "DocsSection"]
     }
   ],
   "createDocFile": [
@@ -1069,9 +975,7 @@
         "example": "```typescript\n// In your +layout.server.ts or similar\nimport { readdirSync, readFileSync } from 'fs';\nimport { createDocFile } from '@goobits/docs-engine/utils';\n\nconst files = readdirSync('/workspace/docs')\n  .filter(name => name.endsWith('.md'))\n  .map(name => createDocFile({\n    path: name,\n    content: readFileSync(`/workspace/docs/${name}`, 'utf-8'),\n    basePath: '/docs'\n  }));\n```"
       },
       "signature": "function createDocFile(params: {\n\tpath: string;\n\tcontent: string;\n\tbasePath?: string;\n}): DocFile",
-      "related": [
-        "DocFile"
-      ]
+      "related": ["DocFile"]
     }
   ],
   "generateTable": [
@@ -1308,10 +1212,7 @@
         "returns": "Highlighter instance"
       },
       "signature": "function getHighlighter(theme: string = 'dracula'): Promise<Highlighter>",
-      "related": [
-        "Promise",
-        "Highlighter"
-      ]
+      "related": ["Promise", "Highlighter"]
     }
   ],
   "highlightCode": [
@@ -1343,9 +1244,7 @@
         "returns": "Highlighted HTML"
       },
       "signature": "function highlightCode(code: string, language: string, theme: string = 'dracula'): Promise<string>",
-      "related": [
-        "Promise"
-      ]
+      "related": ["Promise"]
     }
   ],
   "GitConfig": [
@@ -1413,9 +1312,7 @@
         "example": "```typescript\nconst lastUpdated = getLastUpdated('docs/getting-started.md');\n// Returns: Date object or null\n```"
       },
       "signature": "function getLastUpdated(filePath: string): Date | null",
-      "related": [
-        "Date"
-      ]
+      "related": ["Date"]
     }
   ],
   "getContributors": [
@@ -1443,9 +1340,7 @@
         "example": "```typescript\nconst contributors = getContributors('docs/getting-started.md', 5);\n// Returns: [{ name: 'John Doe', email: 'john@example.com', commits: 15 }, ...]\n```"
       },
       "signature": "function getContributors(filePath: string, limit = 10): Contributor[]",
-      "related": [
-        "Contributor"
-      ]
+      "related": ["Contributor"]
     }
   ],
   "generateEditLink": [
@@ -1473,9 +1368,7 @@
         "example": "```typescript\nconst editLink = generateEditLink('getting-started.md', {\n  repoUrl: 'https://github.com/user/repo',\n  branch: 'main',\n  docsPath: 'docs'\n});\n// Returns: \"https://github.com/user/repo/edit/main/docs/getting-started.md\"\n```"
       },
       "signature": "function generateEditLink(filePath: string, config: GitConfig): string",
-      "related": [
-        "GitConfig"
-      ]
+      "related": ["GitConfig"]
     }
   ],
   "isGitRepository": [
@@ -1534,9 +1427,7 @@
         "returns": ""
       },
       "signature": "interface ParsedContent {\n  frontmatter: Frontmatter;;\n  content: string;;\n  raw: string;\n}",
-      "related": [
-        "Frontmatter"
-      ]
+      "related": ["Frontmatter"]
     }
   ],
   "parseFrontmatter": [
@@ -1558,9 +1449,7 @@
         "returns": "Parsed frontmatter and content"
       },
       "signature": "function parseFrontmatter(markdown: string): ParsedContent",
-      "related": [
-        "ParsedContent"
-      ]
+      "related": ["ParsedContent"]
     }
   ],
   "extractTitle": [
@@ -1592,9 +1481,7 @@
         "returns": "Extracted title"
       },
       "signature": "function extractTitle(frontmatter: Frontmatter, content: string, fallback: string): string",
-      "related": [
-        "Frontmatter"
-      ]
+      "related": ["Frontmatter"]
     }
   ],
   "readFile": [
@@ -1666,9 +1553,7 @@
         "example": "```typescript\ninterface PackageJson {\n  name: string;\n  version: string;\n}\nconst pkg = readJSON<PackageJson>('./package.json');\nconsole.log(pkg.name);\n```"
       },
       "signature": "function readJSON(filePath: string): T",
-      "related": [
-        "T"
-      ]
+      "related": ["T"]
     }
   ],
   "writeJSON": [
@@ -1701,9 +1586,7 @@
         "example": "```typescript\nwriteJSON('./data.json', { foo: 'bar' }, 2);\n```"
       },
       "signature": "function writeJSON(filePath: string, data: T, indent: number = 2): void",
-      "related": [
-        "T"
-      ]
+      "related": ["T"]
     }
   ],
   "countLines": [
@@ -1740,9 +1623,7 @@
         "returns": ""
       },
       "signature": "function formatRelativeDate(date: Date): string",
-      "related": [
-        "Date"
-      ]
+      "related": ["Date"]
     }
   ],
   "decodeBase64": [
@@ -1800,9 +1681,7 @@
         "example": "```typescript\nconst treeData = { name: 'src', children: [...] };\nconst encoded = encodeJsonBase64(treeData);\n// Use in HTML: <div data-tree=\"${encoded}\"></div>\n```"
       },
       "signature": "function encodeJsonBase64(data: T): string",
-      "related": [
-        "T"
-      ]
+      "related": ["T"]
     }
   ],
   "decodeJsonBase64": [
@@ -1825,9 +1704,7 @@
         "example": "```typescript\nconst encoded = element.getAttribute('data-tree');\nconst treeData = decodeJsonBase64<TreeNode[]>(encoded);\n```"
       },
       "signature": "function decodeJsonBase64(encoded: string): T",
-      "related": [
-        "T"
-      ]
+      "related": ["T"]
     }
   ],
   "remarkTableOfContents": [
@@ -1888,9 +1765,7 @@
         "returns": "A unified plugin"
       },
       "signature": "function screenshotPlugin(options: ScreenshotPluginOptions = {})",
-      "related": [
-        "ScreenshotPluginOptions"
-      ]
+      "related": ["ScreenshotPluginOptions"]
     }
   ],
   "referencePlugin": [
@@ -1964,9 +1839,7 @@
         "returns": ""
       },
       "signature": "function linksPlugin(options: LinksPluginOptions = {})",
-      "related": [
-        "LinksPluginOptions"
-      ]
+      "related": ["LinksPluginOptions"]
     }
   ],
   "KaTeXOptions": [
@@ -1982,9 +1855,7 @@
         "returns": ""
       },
       "signature": "interface KaTeXOptions {\n  strict?: boolean;;\n  trust?: boolean;;\n  macros?: Record<string, string>;;\n  displayMode?: boolean;;\n  errorColor?: string;\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "MathNode": [
@@ -2032,9 +1903,7 @@
         "example": "```typescript\nconst html = renderMath('E = mc^2', false, { strict: false });\n// Returns: '<span class=\"katex\">...</span>'\n```"
       },
       "signature": "function renderMath(latex: string, displayMode: boolean, options: KaTeXOptions = {}): string",
-      "related": [
-        "KaTeXOptions"
-      ]
+      "related": ["KaTeXOptions"]
     }
   ],
   "katexPlugin": [
@@ -2057,9 +1926,7 @@
         "example": "```typescript\nimport { unified } from 'unified';\nimport remarkParse from 'remark-parse';\nimport remarkMath from 'remark-math';\nimport { katexPlugin } from './katex';\n\nconst processor = unified()\n  .use(remarkParse)\n  .use(remarkMath)  // Parse math syntax first\n  .use(katexPlugin, {\n    strict: false,\n    macros: {\n      \"\\\\RR\": \"\\\\mathbb{R}\"\n    }\n  });\n```\n\nMarkdown Usage\n```markdown\nInline math: The famous equation $E = mc^2$ shows mass-energy equivalence.\n\nDisplay math (centered):\n$$\n\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n$$\n\nComplex expressions:\n$$\n\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}\n$$\n```"
       },
       "signature": "function katexPlugin(options: KaTeXOptions = {})",
-      "related": [
-        "KaTeXOptions"
-      ]
+      "related": ["KaTeXOptions"]
     }
   ],
   "remarkMathParser": [
@@ -2082,9 +1949,7 @@
         "example": "```typescript\nimport { unified } from 'unified';\nimport remarkParse from 'remark-parse';\nimport { remarkMathParser, katexPlugin } from './katex';\n\nconst processor = unified()\n  .use(remarkParse)\n  .use(remarkMathParser)  // Simple math parser\n  .use(katexPlugin);       // Render with KaTeX\n```"
       },
       "signature": "function remarkMathParser(options: KaTeXOptions = {})",
-      "related": [
-        "KaTeXOptions"
-      ]
+      "related": ["KaTeXOptions"]
     }
   ],
   "ImageOptimizationOptions": [
@@ -2100,11 +1965,7 @@
         "returns": ""
       },
       "signature": "interface ImageOptimizationOptions {\n  basePath?: string;;\n  formats?: Array<'webp' | 'avif' | 'jpg' | 'png' | 'original'>;;\n  sizes?: number[];;\n  quality?: Partial<Record<'webp' | 'avif' | 'jpg' | 'png', number>>;;\n  lazy?: boolean;;\n  zoom?: boolean;;\n  placeholder?: 'blur' | 'dominant-color' | 'none';;\n  skipExternal?: boolean;\n}",
-      "related": [
-        "Array",
-        "Partial",
-        "Record"
-      ]
+      "related": ["Array", "Partial", "Record"]
     }
   ],
   "ImageMetadata": [
@@ -2141,9 +2002,7 @@
         "returns": "Remark transformer function"
       },
       "signature": "function imageOptimizationPlugin(options: ImageOptimizationOptions = {})",
-      "related": [
-        "ImageOptimizationOptions"
-      ]
+      "related": ["ImageOptimizationOptions"]
     }
   ],
   "filetreePlugin": [
@@ -2224,9 +2083,7 @@
         "example": "```typescript\nimport { unified } from 'unified';\nimport remarkParse from 'remark-parse';\nimport { codeHighlightPlugin } from '@goobits/docs-engine/plugins';\n\nconst processor = unified()\n  .use(remarkParse)\n  .use(codeHighlightPlugin, {\n    theme: 'dracula',\n    showLineNumbers: false\n  });\n```"
       },
       "signature": "function codeHighlightPlugin(options: CodeHighlightOptions = {})",
-      "related": [
-        "CodeHighlightOptions"
-      ]
+      "related": ["CodeHighlightOptions"]
     }
   ],
   "calloutsPlugin": [
@@ -2271,10 +2128,7 @@
       "kind": "function",
       "exported": true,
       "signature": "function createMarkdownDocs(userConfig: Partial<MarkdownDocsConfig> = {}): MarkdownDocsConfig",
-      "related": [
-        "Partial",
-        "MarkdownDocsConfig"
-      ]
+      "related": ["Partial", "MarkdownDocsConfig"]
     }
   ],
   "DocPage": [
@@ -2375,9 +2229,7 @@
         "returns": ""
       },
       "signature": "interface SitemapConfig {\n  siteUrl: string;;\n  defaultPriority?: number;;\n  defaultChangefreq?: 'daily' | 'weekly' | 'monthly';;\n  lastModified?: Map<string, string>;\n}",
-      "related": [
-        "Map"
-      ]
+      "related": ["Map"]
     }
   ],
   "generateSitemap": [
@@ -2405,10 +2257,7 @@
         "example": "```typescript\nconst sitemap = generateSitemap(navigation, {\n  siteUrl: 'https://docs.example.com',\n  defaultPriority: 0.8\n});\n```"
       },
       "signature": "function generateSitemap(navigation: DocsSection[], config: SitemapConfig): string",
-      "related": [
-        "DocsSection",
-        "SitemapConfig"
-      ]
+      "related": ["DocsSection", "SitemapConfig"]
     }
   ],
   "generateRobotsTxt": [
@@ -2452,10 +2301,7 @@
         "returns": "A SvelteKit RequestHandler"
       },
       "signature": "function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHandler",
-      "related": [
-        "MarkdownDocsConfig",
-        "RequestHandler"
-      ]
+      "related": ["MarkdownDocsConfig", "RequestHandler"]
     }
   ],
   "ImageProcessorConfig": [
@@ -2471,10 +2317,7 @@
         "returns": ""
       },
       "signature": "interface ImageProcessorConfig {\n  inputPath: string;;\n  outputDir: string;;\n  formats: Array<'webp' | 'avif' | 'jpg' | 'png' | 'original'>;;\n  sizes: number[];;\n  quality: Record<string, number>;;\n  generatePlaceholder?: boolean;;\n  cacheDir?: string;\n}",
-      "related": [
-        "Array",
-        "Record"
-      ]
+      "related": ["Array", "Record"]
     }
   ],
   "ImageProcessorResult": [
@@ -2490,9 +2333,7 @@
         "returns": ""
       },
       "signature": "interface ImageProcessorResult {\n  width: number;;\n  height: number;;\n  variants: ImageVariant[];;\n  placeholder?: string;\n}",
-      "related": [
-        "ImageVariant"
-      ]
+      "related": ["ImageVariant"]
     }
   ],
   "ImageVariant": [
@@ -2530,11 +2371,7 @@
         "example": "```typescript\nconst result = await processImage({\n  inputPath: './docs/images/screenshot.png',\n  outputDir: './static/images/optimized',\n  formats: ['webp', 'avif', 'original'],\n  sizes: [640, 960, 1280],\n  quality: { webp: 85, avif: 80 }\n});\n```"
       },
       "signature": "function processImage(config: ImageProcessorConfig): Promise<ImageProcessorResult>",
-      "related": [
-        "ImageProcessorConfig",
-        "Promise",
-        "ImageProcessorResult"
-      ]
+      "related": ["ImageProcessorConfig", "Promise", "ImageProcessorResult"]
     }
   ],
   "batchProcessImages": [
@@ -2556,11 +2393,7 @@
         "returns": "Array of processing results"
       },
       "signature": "function batchProcessImages(configs: ImageProcessorConfig[]): Promise<ImageProcessorResult[]>",
-      "related": [
-        "ImageProcessorConfig",
-        "Promise",
-        "ImageProcessorResult"
-      ]
+      "related": ["ImageProcessorConfig", "Promise", "ImageProcessorResult"]
     }
   ],
   "CommandExecutionResult": [
@@ -2623,9 +2456,7 @@
         "returns": ""
       },
       "signature": "interface EnrichmentRule {\n  field: string;;\n  value:\n    | Record<string, any> // Static mapping\n    | ((item: any) => any);\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "MarkdownTemplate": [
@@ -2640,9 +2471,7 @@
         "returns": ""
       },
       "signature": "interface MarkdownTemplate {\n  title: string;;\n  source?: string;;\n  overview?: string | ((stats: any) => string);;\n  columns: Array<{\n    header: string;\n    field: string | ((item: any) => string);\n    format?: (value: any) => string;\n  }>;;\n  footer?: string | string[];;\n  showTOC?: boolean;;\n  showStats?: boolean;\n}",
-      "related": [
-        "Array"
-      ]
+      "related": ["Array"]
     }
   ],
   "ParserConfig": [
@@ -2657,9 +2486,7 @@
         "returns": ""
       },
       "signature": "type ParserConfig = | {\n      type: \"json\";\n      /** JSONPath to extract items (e.g., \"scripts\" for package.json) */\n      path?: string;\n    }\n  | {\n      type: \"env\";\n      /** Comment prefix for categories */\n      categoryPrefix?: string;\n    }\n  | {\n      type: \"sql\";\n      /** Table pattern to match */\n      tablePattern?: RegExp;\n    }\n  | {\n      type: \"grep\";\n      /** Grep command to execute */\n      command: string;\n      /** Pattern to extract from matches */\n      extractPattern?: RegExp;\n    }\n  | {\n      type: \"custom\";\n      /** Custom parser function */\n      parse: (content: string, config: any) => any[];\n    }",
-      "related": [
-        "RegExp"
-      ]
+      "related": ["RegExp"]
     }
   ],
   "GeneratorConfig": [
@@ -2674,13 +2501,7 @@
         "returns": ""
       },
       "signature": "interface GeneratorConfig {\n  input: string;;\n  output: string;;\n  parser: ParserConfig;;\n  categories: CategoryRule[];;\n  enrichments?: EnrichmentRule[];;\n  descriptions?: Record<string, string>;;\n  template: MarkdownTemplate;\n}",
-      "related": [
-        "ParserConfig",
-        "CategoryRule",
-        "EnrichmentRule",
-        "Record",
-        "MarkdownTemplate"
-      ]
+      "related": ["ParserConfig", "CategoryRule", "EnrichmentRule", "Record", "MarkdownTemplate"]
     }
   ],
   "GeneratorStats": [
@@ -2695,9 +2516,7 @@
         "returns": ""
       },
       "signature": "interface GeneratorStats {\n  totalItems: number;;\n  categoryCount: number;;\n  itemsByCategory: Record<string, number>;;\n  uncategorized: number;\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "GeneratorResult": [
@@ -2712,9 +2531,7 @@
         "returns": ""
       },
       "signature": "interface GeneratorResult {\n  markdown: string;;\n  stats: GeneratorStats;;\n  lineCount: number;\n}",
-      "related": [
-        "GeneratorStats"
-      ]
+      "related": ["GeneratorStats"]
     }
   ],
   "GenericGenerator": [
@@ -2743,11 +2560,7 @@
         "returns": ""
       },
       "signature": "function generateDocs(config: GeneratorConfig): Promise<GeneratorResult>",
-      "related": [
-        "GeneratorConfig",
-        "Promise",
-        "GeneratorResult"
-      ]
+      "related": ["GeneratorConfig", "Promise", "GeneratorResult"]
     }
   ],
   "ApiParameter": [
@@ -2793,9 +2606,7 @@
         "returns": ""
       },
       "signature": "interface ApiMetadata {\n  deprecated?: string;;\n  since?: string;;\n  experimental?: boolean;;\n  category?: string;;\n  customTags?: Record<string, string>;\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "ApiItemBase": [
@@ -2811,10 +2622,7 @@
         "returns": ""
       },
       "signature": "interface ApiItemBase {\n  name: string;;\n  description?: string;;\n  source: {\n\t\tfile: string;\n\t\tline: number;\n\t};;\n  examples: ApiExample[];;\n  metadata: ApiMetadata;\n}",
-      "related": [
-        "ApiExample",
-        "ApiMetadata"
-      ]
+      "related": ["ApiExample", "ApiMetadata"]
     }
   ],
   "ApiFunction": [
@@ -2830,12 +2638,8 @@
         "returns": ""
       },
       "signature": "interface ApiFunction {\n  kind: 'function';;\n  signature: string;;\n  parameters: ApiParameter[];;\n  returnType: string;;\n  returnDescription?: string;;\n  typeParameters?: string[];\n}",
-      "related": [
-        "ApiParameter"
-      ],
-      "extends": [
-        "ApiItemBase"
-      ]
+      "related": ["ApiParameter"],
+      "extends": ["ApiItemBase"]
     }
   ],
   "ApiProperty": [
@@ -2866,10 +2670,7 @@
         "returns": ""
       },
       "signature": "interface ApiMethod {\n  name: string;;\n  description?: string;;\n  signature: string;;\n  parameters: ApiParameter[];;\n  returnType: string;;\n  returnDescription?: string;;\n  metadata: ApiMetadata;\n}",
-      "related": [
-        "ApiParameter",
-        "ApiMetadata"
-      ]
+      "related": ["ApiParameter", "ApiMetadata"]
     }
   ],
   "ApiClass": [
@@ -2885,14 +2686,8 @@
         "returns": ""
       },
       "signature": "interface ApiClass {\n  kind: 'class';;\n  signature: string;;\n  typeParameters?: string[];;\n  extends?: string;;\n  implements?: string[];;\n  properties: ApiProperty[];;\n  methods: ApiMethod[];;\n  constructorDoc?: {\n\t\tdescription?: string;\n\t\tparameters: ApiParameter[];\n\t};\n}",
-      "related": [
-        "ApiProperty",
-        "ApiMethod",
-        "ApiParameter"
-      ],
-      "extends": [
-        "ApiItemBase"
-      ]
+      "related": ["ApiProperty", "ApiMethod", "ApiParameter"],
+      "extends": ["ApiItemBase"]
     }
   ],
   "ApiInterface": [
@@ -2908,13 +2703,8 @@
         "returns": ""
       },
       "signature": "interface ApiInterface {\n  kind: 'interface';;\n  signature: string;;\n  typeParameters?: string[];;\n  extends?: string[];;\n  properties: ApiProperty[];;\n  methods: ApiMethod[];\n}",
-      "related": [
-        "ApiProperty",
-        "ApiMethod"
-      ],
-      "extends": [
-        "ApiItemBase"
-      ]
+      "related": ["ApiProperty", "ApiMethod"],
+      "extends": ["ApiItemBase"]
     }
   ],
   "ApiTypeAlias": [
@@ -2930,9 +2720,7 @@
         "returns": ""
       },
       "signature": "interface ApiTypeAlias {\n  kind: 'type';;\n  signature: string;;\n  typeParameters?: string[];;\n  definition: string;\n}",
-      "extends": [
-        "ApiItemBase"
-      ]
+      "extends": ["ApiItemBase"]
     }
   ],
   "ApiEnum": [
@@ -2948,12 +2736,8 @@
         "returns": ""
       },
       "signature": "interface ApiEnum {\n  kind: 'enum';;\n  members: Array<{\n\t\tname: string;\n\t\tvalue?: string | number;\n\t\tdescription?: string;\n\t}>;\n}",
-      "related": [
-        "Array"
-      ],
-      "extends": [
-        "ApiItemBase"
-      ]
+      "related": ["Array"],
+      "extends": ["ApiItemBase"]
     }
   ],
   "ApiItem": [
@@ -2969,13 +2753,7 @@
         "returns": ""
       },
       "signature": "type ApiItem = ApiFunction | ApiClass | ApiInterface | ApiTypeAlias | ApiEnum",
-      "related": [
-        "ApiFunction",
-        "ApiClass",
-        "ApiInterface",
-        "ApiTypeAlias",
-        "ApiEnum"
-      ]
+      "related": ["ApiFunction", "ApiClass", "ApiInterface", "ApiTypeAlias", "ApiEnum"]
     }
   ],
   "ParsedApiFile": [
@@ -2991,9 +2769,7 @@
         "returns": ""
       },
       "signature": "interface ParsedApiFile {\n  file: string;;\n  items: ApiItem[];\n}",
-      "related": [
-        "ApiItem"
-      ]
+      "related": ["ApiItem"]
     }
   ],
   "ApiParserConfig": [
@@ -3024,10 +2800,7 @@
         "returns": ""
       },
       "signature": "function parseApi(config: ApiParserConfig): ParsedApiFile[]",
-      "related": [
-        "ApiParserConfig",
-        "ParsedApiFile"
-      ]
+      "related": ["ApiParserConfig", "ParsedApiFile"]
     }
   ],
   "MarkdownGeneratorConfig": [
@@ -3043,9 +2816,7 @@
         "returns": ""
       },
       "signature": "interface MarkdownGeneratorConfig {\n  baseUrl?: string;;\n  typeLinks?: Record<string, string>;;\n  includeSourceLinks?: boolean;;\n  repoUrl?: string;;\n  repoBranch?: string;\n}",
-      "related": [
-        "Record"
-      ]
+      "related": ["Record"]
     }
   ],
   "generateMarkdown": [
@@ -3061,10 +2832,7 @@
         "returns": ""
       },
       "signature": "function generateMarkdown(item: ApiItem, config: MarkdownGeneratorConfig = {}): string",
-      "related": [
-        "ApiItem",
-        "MarkdownGeneratorConfig"
-      ]
+      "related": ["ApiItem", "MarkdownGeneratorConfig"]
     }
   ],
   "groupByCategory": [
@@ -3080,10 +2848,7 @@
         "returns": ""
       },
       "signature": "function groupByCategory(items: ApiItem[]): Map<string, ApiItem[]>",
-      "related": [
-        "ApiItem",
-        "Map"
-      ]
+      "related": ["ApiItem", "Map"]
     }
   ],
   "generateApiDocFile": [
@@ -3099,10 +2864,7 @@
         "returns": ""
       },
       "signature": "function generateApiDocFile(parsedFile: ParsedApiFile, config: MarkdownGeneratorConfig = {}): { content: string; fileName: string }",
-      "related": [
-        "ParsedApiFile",
-        "MarkdownGeneratorConfig"
-      ]
+      "related": ["ParsedApiFile", "MarkdownGeneratorConfig"]
     }
   ],
   "generateIndexFile": [
@@ -3118,10 +2880,7 @@
         "returns": ""
       },
       "signature": "function generateIndexFile(files: Array<{ fileName: string; items: ApiItem[] }>): string",
-      "related": [
-        "Array",
-        "ApiItem"
-      ]
+      "related": ["Array", "ApiItem"]
     }
   ],
   "DocsSidebarProps": [
@@ -3136,9 +2895,7 @@
         "returns": ""
       },
       "signature": "interface DocsSidebarProps {\n  navigation: DocsSection[];;\n  currentPath?: string;\n}",
-      "related": [
-        "DocsSection"
-      ]
+      "related": ["DocsSection"]
     }
   ],
   "DocsHubProps": [
@@ -3149,9 +2906,7 @@
       "kind": "interface",
       "exported": true,
       "signature": "interface DocsHubProps {\n  navigation: DocsSection[];;\n  title?: string;;\n  description?: string;;\n  githubUrl?: string;\n}",
-      "related": [
-        "DocsSection"
-      ]
+      "related": ["DocsSection"]
     }
   ],
   "SurfaceProps": [

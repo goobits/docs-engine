@@ -23,27 +23,27 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  * Which is then rendered client-side by the FileTree component
  */
 export function filetreePlugin() {
-	return (tree: Root) => {
-		visit(tree, 'code', (node: any) => {
-			if (node.lang !== 'filetree') return;
+  return (tree: Root) => {
+    visit(tree, 'code', (node: any) => {
+      if (node.lang !== 'filetree') return;
 
-			const treeString = node.value;
+      const treeString = node.value;
 
-			try {
-				// Parse the tree structure
-				const treeData = parseTree(treeString);
+      try {
+        // Parse the tree structure
+        const treeData = parseTree(treeString);
 
-				// Base64 encode the tree data to avoid HTML escaping issues
-				const encoded = encodeJsonBase64(treeData);
+        // Base64 encode the tree data to avoid HTML escaping issues
+        const encoded = encodeJsonBase64(treeData);
 
-				// Transform to HTML div that will be hydrated client-side
-				node.type = 'html';
-				node.value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
-			} catch (error) {
-				// If parsing fails, render an error message
-				console.error('Failed to parse filetree:', error);
-				node.type = 'html';
-				node.value = `<div class="md-filetree md-filetree--error">
+        // Transform to HTML div that will be hydrated client-side
+        node.type = 'html';
+        node.value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
+      } catch (error) {
+        // If parsing fails, render an error message
+        console.error('Failed to parse filetree:', error);
+        node.type = 'html';
+        node.value = `<div class="md-filetree md-filetree--error">
   <div class="md-callout md-callout--red">
     <div class="md-callout__header">
       <span class="md-callout__icon">⚠️</span>
@@ -55,7 +55,7 @@ export function filetreePlugin() {
     </div>
   </div>
 </div>`;
-			}
-		});
-	};
+      }
+    });
+  };
 }

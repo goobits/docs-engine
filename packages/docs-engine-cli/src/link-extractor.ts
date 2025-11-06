@@ -11,20 +11,20 @@ import { readFileSync } from 'fs';
  * @public
  */
 export interface ExtractedLink {
-	/** Link URL or path */
-	url: string;
-	/** Link text or alt text */
-	text: string;
-	/** Source file path */
-	file: string;
-	/** Line number in source file */
-	line: number;
-	/** Link type */
-	type: 'link' | 'image' | 'html';
-	/** Whether this is an external URL */
-	isExternal: boolean;
-	/** Whether this is an anchor link */
-	isAnchor: boolean;
+  /** Link URL or path */
+  url: string;
+  /** Link text or alt text */
+  text: string;
+  /** Source file path */
+  file: string;
+  /** Line number in source file */
+  line: number;
+  /** Link type */
+  type: 'link' | 'image' | 'html';
+  /** Whether this is an external URL */
+  isExternal: boolean;
+  /** Whether this is an anchor link */
+  isAnchor: boolean;
 }
 
 /**
@@ -43,7 +43,7 @@ export interface ExtractedLink {
  * @internal
  */
 export function isExternalUrl(url: string): boolean {
-	return /^https?:\/\//i.test(url);
+  return /^https?:\/\//i.test(url);
 }
 
 /**
@@ -61,7 +61,7 @@ export function isExternalUrl(url: string): boolean {
  * @internal
  */
 export function isAnchorOnly(url: string): boolean {
-	return url.startsWith('#');
+  return url.startsWith('#');
 }
 
 /**
@@ -86,70 +86,67 @@ export function isAnchorOnly(url: string): boolean {
  * @public
  */
 export function extractLinksFromFile(filePath: string): ExtractedLink[] {
-	const content = readFileSync(filePath, 'utf-8');
-	const links: ExtractedLink[] = [];
+  const content = readFileSync(filePath, 'utf-8');
+  const links: ExtractedLink[] = [];
 
-	// Parse markdown with MDX support
-	const tree = unified()
-		.use(remarkParse)
-		.use(remarkMdx)
-		.parse(content);
+  // Parse markdown with MDX support
+  const tree = unified().use(remarkParse).use(remarkMdx).parse(content);
 
-	// Extract markdown links and images
-	visit(tree, ['link', 'image'], (node: Link | Image, _index, parent) => {
-		const url = node.url;
-		if (!url) return;
+  // Extract markdown links and images
+  visit(tree, ['link', 'image'], (node: Link | Image, _index, parent) => {
+    const url = node.url;
+    if (!url) return;
 
-		const position = node.position;
-		const line = position?.start.line || 0;
+    const position = node.position;
+    const line = position?.start.line || 0;
 
-		// Get link text
-		let text = '';
-		if (node.type === 'link') {
-			const linkNode = node as Link;
-			if (linkNode.children && linkNode.children.length > 0) {
-				const firstChild = linkNode.children[0];
-				if ('value' in firstChild) {
-					text = firstChild.value as string;
-				}
-			}
-		} else if (node.type === 'image') {
-			const imageNode = node as Image;
-			text = imageNode.alt || '';
-		}
+    // Get link text
+    let text = '';
+    if (node.type === 'link') {
+      const linkNode = node as Link;
+      if (linkNode.children && linkNode.children.length > 0) {
+        const firstChild = linkNode.children[0];
+        if ('value' in firstChild) {
+          text = firstChild.value as string;
+        }
+      }
+    } else if (node.type === 'image') {
+      const imageNode = node as Image;
+      text = imageNode.alt || '';
+    }
 
-		links.push({
-			url,
-			text,
-			file: filePath,
-			line,
-			type: node.type === 'image' ? 'image' : 'link',
-			isExternal: isExternalUrl(url),
-			isAnchor: isAnchorOnly(url)
-		});
-	});
+    links.push({
+      url,
+      text,
+      file: filePath,
+      line,
+      type: node.type === 'image' ? 'image' : 'link',
+      isExternal: isExternalUrl(url),
+      isAnchor: isAnchorOnly(url),
+    });
+  });
 
-	// Extract HTML links (basic regex for <a href="">)
-	const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["']/gi;
-	const lines = content.split('\n');
+  // Extract HTML links (basic regex for <a href="">)
+  const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["']/gi;
+  const lines = content.split('\n');
 
-	lines.forEach((lineContent, index) => {
-		let match;
-		while ((match = htmlLinkRegex.exec(lineContent)) !== null) {
-			const url = match[1];
-			links.push({
-				url,
-				text: '', // Would need HTML parsing to extract text
-				file: filePath,
-				line: index + 1,
-				type: 'html',
-				isExternal: isExternalUrl(url),
-				isAnchor: isAnchorOnly(url)
-			});
-		}
-	});
+  lines.forEach((lineContent, index) => {
+    let match;
+    while ((match = htmlLinkRegex.exec(lineContent)) !== null) {
+      const url = match[1];
+      links.push({
+        url,
+        text: '', // Would need HTML parsing to extract text
+        file: filePath,
+        line: index + 1,
+        type: 'html',
+        isExternal: isExternalUrl(url),
+        isAnchor: isAnchorOnly(url),
+      });
+    }
+  });
 
-	return links;
+  return links;
 }
 
 /**
@@ -168,18 +165,18 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
  * @public
  */
 export function extractLinksFromFiles(filePaths: string[]): ExtractedLink[] {
-	const allLinks: ExtractedLink[] = [];
+  const allLinks: ExtractedLink[] = [];
 
-	for (const file of filePaths) {
-		try {
-			const links = extractLinksFromFile(file);
-			allLinks.push(...links);
-		} catch (error) {
-			console.error(`Error extracting links from ${file}:`, error);
-		}
-	}
+  for (const file of filePaths) {
+    try {
+      const links = extractLinksFromFile(file);
+      allLinks.push(...links);
+    } catch (error) {
+      console.error(`Error extracting links from ${file}:`, error);
+    }
+  }
 
-	return allLinks;
+  return allLinks;
 }
 
 /**
@@ -199,13 +196,13 @@ export function extractLinksFromFiles(filePaths: string[]): ExtractedLink[] {
  * @public
  */
 export function groupLinksByType(links: ExtractedLink[]): {
-	internal: ExtractedLink[];
-	external: ExtractedLink[];
-	anchor: ExtractedLink[];
+  internal: ExtractedLink[];
+  external: ExtractedLink[];
+  anchor: ExtractedLink[];
 } {
-	return {
-		internal: links.filter((l) => !l.isExternal && !l.isAnchor),
-		external: links.filter((l) => l.isExternal),
-		anchor: links.filter((l) => l.isAnchor)
-	};
+  return {
+    internal: links.filter((l) => !l.isExternal && !l.isAnchor),
+    external: links.filter((l) => l.isExternal),
+    anchor: links.filter((l) => l.isAnchor),
+  };
 }

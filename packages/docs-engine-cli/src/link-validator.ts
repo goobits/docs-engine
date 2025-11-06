@@ -9,16 +9,16 @@ import pLimit from 'p-limit';
  * @public
  */
 export interface ValidationResult {
-	/** The link that was validated */
-	link: ExtractedLink;
-	/** Whether the link is valid */
-	isValid: boolean;
-	/** Error message if invalid */
-	error?: string;
-	/** HTTP status code (for external links) */
-	statusCode?: number;
-	/** Redirect URL (if redirected) */
-	redirectUrl?: string;
+  /** The link that was validated */
+  link: ExtractedLink;
+  /** Whether the link is valid */
+  isValid: boolean;
+  /** Error message if invalid */
+  error?: string;
+  /** HTTP status code (for external links) */
+  statusCode?: number;
+  /** Redirect URL (if redirected) */
+  redirectUrl?: string;
 }
 
 /**
@@ -27,18 +27,18 @@ export interface ValidationResult {
  * @public
  */
 export interface ValidationOptions {
-	/** Base directory for resolving relative paths */
-	baseDir: string;
-	/** Validate external links (requires HTTP requests) */
-	checkExternal?: boolean;
-	/** Timeout for external link requests (ms) */
-	timeout?: number;
-	/** Maximum concurrent external requests */
-	concurrency?: number;
-	/** Domains to skip validation */
-	skipDomains?: string[];
-	/** File extensions to treat as valid */
-	validExtensions?: string[];
+  /** Base directory for resolving relative paths */
+  baseDir: string;
+  /** Validate external links (requires HTTP requests) */
+  checkExternal?: boolean;
+  /** Timeout for external link requests (ms) */
+  timeout?: number;
+  /** Maximum concurrent external requests */
+  concurrency?: number;
+  /** Domains to skip validation */
+  skipDomains?: string[];
+  /** File extensions to treat as valid */
+  validExtensions?: string[];
 }
 
 /**
@@ -68,17 +68,17 @@ export interface ValidationOptions {
  * @internal
  */
 export function resolveLinkPath(link: string, sourceFile: string, baseDir: string): string {
-	// Remove anchor
-	const [pathPart] = link.split('#');
+  // Remove anchor
+  const [pathPart] = link.split('#');
 
-	// Handle absolute paths
-	if (pathPart.startsWith('/')) {
-		return resolve(baseDir, pathPart.slice(1));
-	}
+  // Handle absolute paths
+  if (pathPart.startsWith('/')) {
+    return resolve(baseDir, pathPart.slice(1));
+  }
 
-	// Handle relative paths
-	const sourceDir = dirname(sourceFile);
-	return resolve(sourceDir, pathPart);
+  // Handle relative paths
+  const sourceDir = dirname(sourceFile);
+  return resolve(sourceDir, pathPart);
 }
 
 /**
@@ -97,8 +97,8 @@ export function resolveLinkPath(link: string, sourceFile: string, baseDir: strin
  * @internal
  */
 export function extractAnchor(url: string): string | undefined {
-	const parts = url.split('#');
-	return parts.length > 1 ? parts[1] : undefined;
+  const parts = url.split('#');
+  return parts.length > 1 ? parts[1] : undefined;
 }
 
 /**
@@ -121,41 +121,41 @@ export function extractAnchor(url: string): string | undefined {
  * @internal
  */
 export function anchorExistsInFile(filePath: string, anchor: string): boolean {
-	try {
-		const content = readFileSync(filePath, 'utf-8');
+  try {
+    const content = readFileSync(filePath, 'utf-8');
 
-		// Convert anchor to expected format (lowercase, spaces to hyphens)
-		const normalizedAnchor = anchor.toLowerCase().replace(/\s+/g, '-');
+    // Convert anchor to expected format (lowercase, spaces to hyphens)
+    const normalizedAnchor = anchor.toLowerCase().replace(/\s+/g, '-');
 
-		// Check for markdown headers
-		// Match: ## Header, ### Header, etc.
-		const headerRegex = /^#+\s+(.+)$/gm;
-		let match;
+    // Check for markdown headers
+    // Match: ## Header, ### Header, etc.
+    const headerRegex = /^#+\s+(.+)$/gm;
+    let match;
 
-		while ((match = headerRegex.exec(content)) !== null) {
-			const headerText = match[1];
-			const headerId = headerText
-				.toLowerCase()
-				.replace(/[^\w\s-]/g, '') // Remove special chars
-				.replace(/\s+/g, '-'); // Spaces to hyphens
+    while ((match = headerRegex.exec(content)) !== null) {
+      const headerText = match[1];
+      const headerId = headerText
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special chars
+        .replace(/\s+/g, '-'); // Spaces to hyphens
 
-			if (headerId === normalizedAnchor) {
-				return true;
-			}
-		}
+      if (headerId === normalizedAnchor) {
+        return true;
+      }
+    }
 
-		// Check for HTML anchors
-		const htmlAnchorRegex = /<a\s+(?:name|id)=["']([^"']+)["']/gi;
-		while ((match = htmlAnchorRegex.exec(content)) !== null) {
-			if (match[1] === anchor) {
-				return true;
-			}
-		}
+    // Check for HTML anchors
+    const htmlAnchorRegex = /<a\s+(?:name|id)=["']([^"']+)["']/gi;
+    while ((match = htmlAnchorRegex.exec(content)) !== null) {
+      if (match[1] === anchor) {
+        return true;
+      }
+    }
 
-		return false;
-	} catch {
-		return false;
-	}
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -181,74 +181,74 @@ export function anchorExistsInFile(filePath: string, anchor: string): boolean {
  * @public
  */
 export function validateInternalLink(
-	link: ExtractedLink,
-	options: ValidationOptions
+  link: ExtractedLink,
+  options: ValidationOptions
 ): ValidationResult {
-	const { baseDir, validExtensions = ['.md', '.mdx'] } = options;
+  const { baseDir, validExtensions = ['.md', '.mdx'] } = options;
 
-	try {
-		// Resolve the link path
-		let targetPath = resolveLinkPath(link.url, link.file, baseDir);
+  try {
+    // Resolve the link path
+    let targetPath = resolveLinkPath(link.url, link.file, baseDir);
 
-		// Check if file exists as-is
-		let fileExists = existsSync(targetPath);
+    // Check if file exists as-is
+    let fileExists = existsSync(targetPath);
 
-		// If not, try adding valid extensions
-		if (!fileExists) {
-			for (const ext of validExtensions) {
-				const pathWithExt = targetPath + ext;
-				if (existsSync(pathWithExt)) {
-					targetPath = pathWithExt;
-					fileExists = true;
-					break;
-				}
-			}
-		}
+    // If not, try adding valid extensions
+    if (!fileExists) {
+      for (const ext of validExtensions) {
+        const pathWithExt = targetPath + ext;
+        if (existsSync(pathWithExt)) {
+          targetPath = pathWithExt;
+          fileExists = true;
+          break;
+        }
+      }
+    }
 
-		// Check if it's a directory with index file
-		if (!fileExists && existsSync(targetPath) && statSync(targetPath).isDirectory()) {
-			for (const ext of validExtensions) {
-				const indexPath = join(targetPath, `index${ext}`);
-				if (existsSync(indexPath)) {
-					targetPath = indexPath;
-					fileExists = true;
-					break;
-				}
-			}
-		}
+    // Check if it's a directory with index file
+    if (!fileExists && existsSync(targetPath) && statSync(targetPath).isDirectory()) {
+      for (const ext of validExtensions) {
+        const indexPath = join(targetPath, `index${ext}`);
+        if (existsSync(indexPath)) {
+          targetPath = indexPath;
+          fileExists = true;
+          break;
+        }
+      }
+    }
 
-		if (!fileExists) {
-			return {
-				link,
-				isValid: false,
-				error: `File not found: ${targetPath}`
-			};
-		}
+    if (!fileExists) {
+      return {
+        link,
+        isValid: false,
+        error: `File not found: ${targetPath}`,
+      };
+    }
 
-		// Check anchor if present
-		const anchor = extractAnchor(link.url);
-		if (anchor) {
-			const anchorExists = anchorExistsInFile(targetPath, anchor);
-			if (!anchorExists) {
-				return {
-					link,
-					isValid: false,
-					error: `Anchor #${anchor} not found in ${targetPath}`
-				};
-			}
-		}
+    // Check anchor if present
+    const anchor = extractAnchor(link.url);
+    if (anchor) {
+      const anchorExists = anchorExistsInFile(targetPath, anchor);
+      if (!anchorExists) {
+        return {
+          link,
+          isValid: false,
+          error: `Anchor #${anchor} not found in ${targetPath}`,
+        };
+      }
+    }
 
-		return {
-			link,
-			isValid: true
-		};
-	} catch (error) {
-		return {
-			link,
-			isValid: false,
-			error: error instanceof Error ? error.message : 'Unknown error'
-		};
-	}
+    return {
+      link,
+      isValid: true,
+    };
+  } catch (error) {
+    return {
+      link,
+      isValid: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 }
 
 /**
@@ -267,51 +267,51 @@ export function validateInternalLink(
  * @public
  */
 export async function validateExternalLink(
-	link: ExtractedLink,
-	options: ValidationOptions
+  link: ExtractedLink,
+  options: ValidationOptions
 ): Promise<ValidationResult> {
-	const { timeout = 5000, skipDomains = [] } = options;
+  const { timeout = 5000, skipDomains = [] } = options;
 
-	try {
-		// Check if domain should be skipped
-		const url = new URL(link.url);
-		if (skipDomains.some((domain) => url.hostname.includes(domain))) {
-			return {
-				link,
-				isValid: true,
-				statusCode: 0 // Skipped
-			};
-		}
+  try {
+    // Check if domain should be skipped
+    const url = new URL(link.url);
+    if (skipDomains.some((domain) => url.hostname.includes(domain))) {
+      return {
+        link,
+        isValid: true,
+        statusCode: 0, // Skipped
+      };
+    }
 
-		// Make HEAD request with timeout
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), timeout);
+    // Make HEAD request with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-		const response = await fetch(link.url, {
-			method: 'HEAD',
-			signal: controller.signal,
-			redirect: 'follow'
-		});
+    const response = await fetch(link.url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      redirect: 'follow',
+    });
 
-		clearTimeout(timeoutId);
+    clearTimeout(timeoutId);
 
-		const isValid = response.ok; // 200-299
+    const isValid = response.ok; // 200-299
 
-		return {
-			link,
-			isValid,
-			statusCode: response.status,
-			redirectUrl: response.redirected ? response.url : undefined,
-			error: isValid ? undefined : `HTTP ${response.status} ${response.statusText}`
-		};
-	} catch (error) {
-		return {
-			link,
-			isValid: false,
-			statusCode: 0,
-			error: error instanceof Error ? error.message : 'Request failed'
-		};
-	}
+    return {
+      link,
+      isValid,
+      statusCode: response.status,
+      redirectUrl: response.redirected ? response.url : undefined,
+      error: isValid ? undefined : `HTTP ${response.status} ${response.statusText}`,
+    };
+  } catch (error) {
+    return {
+      link,
+      isValid: false,
+      statusCode: 0,
+      error: error instanceof Error ? error.message : 'Request failed',
+    };
+  }
 }
 
 /**
@@ -336,29 +336,29 @@ export async function validateExternalLink(
  * @public
  */
 export async function validateLinks(
-	links: ExtractedLink[],
-	options: ValidationOptions
+  links: ExtractedLink[],
+  options: ValidationOptions
 ): Promise<ValidationResult[]> {
-	const { concurrency = 10, checkExternal = false } = options;
-	const results: ValidationResult[] = [];
+  const { concurrency = 10, checkExternal = false } = options;
+  const results: ValidationResult[] = [];
 
-	// Separate internal and external links
-	const internalLinks = links.filter((l) => !l.isExternal);
-	const externalLinks = links.filter((l) => l.isExternal);
+  // Separate internal and external links
+  const internalLinks = links.filter((l) => !l.isExternal);
+  const externalLinks = links.filter((l) => l.isExternal);
 
-	// Validate internal links (synchronous)
-	for (const link of internalLinks) {
-		results.push(validateInternalLink(link, options));
-	}
+  // Validate internal links (synchronous)
+  for (const link of internalLinks) {
+    results.push(validateInternalLink(link, options));
+  }
 
-	// Validate external links (asynchronous with concurrency)
-	if (checkExternal && externalLinks.length > 0) {
-		const limit = pLimit(concurrency);
-		const externalResults = await Promise.all(
-			externalLinks.map((link) => limit(() => validateExternalLink(link, options)))
-		);
-		results.push(...externalResults);
-	}
+  // Validate external links (asynchronous with concurrency)
+  if (checkExternal && externalLinks.length > 0) {
+    const limit = pLimit(concurrency);
+    const externalResults = await Promise.all(
+      externalLinks.map((link) => limit(() => validateExternalLink(link, options)))
+    );
+    results.push(...externalResults);
+  }
 
-	return results;
+  return results;
 }

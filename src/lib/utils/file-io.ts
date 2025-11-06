@@ -19,12 +19,12 @@ import { dirname } from 'path';
  * ```
  */
 export function readFile(filePath: string): string {
-	try {
-		return readFileSync(filePath, 'utf-8');
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to read file ${filePath}: ${message}`);
-	}
+  try {
+    return readFileSync(filePath, 'utf-8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read file ${filePath}: ${message}`);
+  }
 }
 
 /**
@@ -41,17 +41,17 @@ export function readFile(filePath: string): string {
  * ```
  */
 export function writeFile(filePath: string, content: string): void {
-	try {
-		// Ensure directory exists
-		const dir = dirname(filePath);
-		mkdirSync(dir, { recursive: true });
+  try {
+    // Ensure directory exists
+    const dir = dirname(filePath);
+    mkdirSync(dir, { recursive: true });
 
-		// Write file
-		writeFileSync(filePath, content, 'utf-8');
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to write file ${filePath}: ${message}`);
-	}
+    // Write file
+    writeFileSync(filePath, content, 'utf-8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to write file ${filePath}: ${message}`);
+  }
 }
 
 /**
@@ -72,13 +72,13 @@ export function writeFile(filePath: string, content: string): void {
  * ```
  */
 export function readJSON<T = any>(filePath: string): T {
-	try {
-		const content = readFile(filePath);
-		return JSON.parse(content) as T;
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to parse JSON file ${filePath}: ${message}`);
-	}
+  try {
+    const content = readFile(filePath);
+    return JSON.parse(content) as T;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse JSON file ${filePath}: ${message}`);
+  }
 }
 
 /**
@@ -95,8 +95,8 @@ export function readJSON<T = any>(filePath: string): T {
  * ```
  */
 export function writeJSON<T = any>(filePath: string, data: T, indent: number = 2): void {
-	const content = JSON.stringify(data, null, indent);
-	writeFile(filePath, content);
+  const content = JSON.stringify(data, null, indent);
+  writeFile(filePath, content);
 }
 
 /**
@@ -112,5 +112,5 @@ export function writeJSON<T = any>(filePath: string, data: T, indent: number = 2
  * ```
  */
 export function countLines(text: string): number {
-	return text.split('\n').length;
+  return text.split('\n').length;
 }

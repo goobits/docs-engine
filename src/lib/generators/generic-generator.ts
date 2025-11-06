@@ -5,15 +5,10 @@
  * categorizes content, and generates markdown documentation.
  */
 
-import { readFile } from "fs";
-import { promisify } from "util";
-import { execSync } from "child_process";
-import type {
-  GeneratorConfig,
-  GeneratorResult,
-  GeneratorStats,
-  CategoryRule,
-} from "./types";
+import { readFile } from 'fs';
+import { promisify } from 'util';
+import { execSync } from 'child_process';
+import type { GeneratorConfig, GeneratorResult, GeneratorStats, CategoryRule } from './types';
 
 const readFileAsync = promisify(readFile);
 
@@ -45,7 +40,7 @@ export class GenericGenerator {
     return {
       markdown,
       stats,
-      lineCount: markdown.split("\n").length,
+      lineCount: markdown.split('\n').length,
     };
   }
 
@@ -53,23 +48,23 @@ export class GenericGenerator {
    * Parse source file based on parser configuration
    */
   private async parse(): Promise<any[]> {
-    const content = await readFileAsync(this.config.input, "utf-8");
+    const content = await readFileAsync(this.config.input, 'utf-8');
     const parser = this.config.parser;
 
     switch (parser.type) {
-      case "json":
+      case 'json':
         return this.parseJSON(content, parser.path);
 
-      case "env":
+      case 'env':
         return this.parseEnv(content, parser.categoryPrefix);
 
-      case "sql":
+      case 'sql':
         return this.parseSQL(content, parser.tablePattern);
 
-      case "grep":
+      case 'grep':
         return this.parseGrep(parser.command, parser.extractPattern);
 
-      case "custom":
+      case 'custom':
         return parser.parse(content, this.config);
 
       default:
@@ -85,11 +80,13 @@ export class GenericGenerator {
 
     if (!path) {
       // If no path, assume data is array or convert object to entries
-      return Array.isArray(data) ? data : Object.entries(data).map(([key, value]) => ({ key, value }));
+      return Array.isArray(data)
+        ? data
+        : Object.entries(data).map(([key, value]) => ({ key, value }));
     }
 
     // Extract from path (e.g., "scripts" -> data.scripts)
-    const extracted = path.split(".").reduce((obj, key) => obj?.[key], data);
+    const extracted = path.split('.').reduce((obj, key) => obj?.[key], data);
 
     if (!extracted) {
       throw new Error(`Path "${path}" not found in JSON`);
@@ -103,17 +100,17 @@ export class GenericGenerator {
     // Convert object to array with key-value pairs
     return Object.entries(extracted).map(([key, value]) => ({
       name: key,
-      value: typeof value === "string" ? value : JSON.stringify(value),
+      value: typeof value === 'string' ? value : JSON.stringify(value),
     }));
   }
 
   /**
    * Parse .env file
    */
-  private parseEnv(content: string, categoryPrefix = "#"): any[] {
-    const lines = content.split("\n");
+  private parseEnv(content: string, categoryPrefix = '#'): any[] {
+    const lines = content.split('\n');
     const variables: any[] = [];
-    let currentCategory = "General";
+    let currentCategory = 'General';
     let currentComments: string[] = [];
 
     for (let i = 0; i < lines.length; i++) {
@@ -136,10 +133,10 @@ export class GenericGenerator {
         }
 
         // Multi-line category format
-        if (trimmed === "# ---") {
+        if (trimmed === '# ---') {
           const nextLine = lines[i + 1]?.trim();
-          if (nextLine?.startsWith("#")) {
-            const categoryName = nextLine.replace(/^#\s*/, "").trim();
+          if (nextLine?.startsWith('#')) {
+            const categoryName = nextLine.replace(/^#\s*/, '').trim();
             if (categoryName && !categoryName.match(/^[-=]+$/)) {
               currentCategory = categoryName;
               i += 2; // Skip category lines
@@ -157,18 +154,21 @@ export class GenericGenerator {
         let value = varMatch[3].trim();
 
         // Remove inline comments
-        value = value.replace(/\s*#.*$/, "");
+        value = value.replace(/\s*#.*$/, '');
 
         // Remove quotes
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
           value = value.slice(1, -1);
         }
 
         variables.push({
           category: currentCategory,
           name,
-          value: value || "(not set)",
-          description: currentComments.join(" ").trim() || "No description",
+          value: value || '(not set)',
+          description: currentComments.join(' ').trim() || 'No description',
           isCommented: !!varMatch[1],
         });
 
@@ -178,7 +178,7 @@ export class GenericGenerator {
 
       // Comment line
       if (trimmed.startsWith(categoryPrefix)) {
-        const comment = trimmed.replace(/^#\s*/, "").trim();
+        const comment = trimmed.replace(/^#\s*/, '').trim();
         if (comment && !comment.match(/^[-=]+$/)) {
           currentComments.push(comment);
         }
@@ -193,7 +193,7 @@ export class GenericGenerator {
    */
   private parseSQL(content: string, tablePattern?: RegExp): any[] {
     const tables: any[] = [];
-    const lines = content.split("\n");
+    const lines = content.split('\n');
     let currentTable: any = null;
     let inTableDef = false;
 
@@ -213,7 +213,7 @@ export class GenericGenerator {
       }
 
       // Table end
-      if (inTableDef && trimmed === ");") {
+      if (inTableDef && trimmed === ');') {
         inTableDef = false;
         if (currentTable) {
           tables.push(currentTable);
@@ -223,8 +223,8 @@ export class GenericGenerator {
       }
 
       // Column definition
-      if (inTableDef && currentTable && !trimmed.startsWith("--")) {
-        if (trimmed.startsWith("CONSTRAINT") || trimmed.startsWith("PRIMARY KEY")) {
+      if (inTableDef && currentTable && !trimmed.startsWith('--')) {
+        if (trimmed.startsWith('CONSTRAINT') || trimmed.startsWith('PRIMARY KEY')) {
           currentTable.constraints.push(trimmed);
         } else if (trimmed) {
           const columnMatch = trimmed.match(/^(\w+)\s+([A-Z]+[^,]*)/);
@@ -246,8 +246,8 @@ export class GenericGenerator {
    */
   private parseGrep(command: string, extractPattern?: RegExp): any[] {
     try {
-      const output = execSync(command, { encoding: "utf-8" });
-      const lines = output.split("\n").filter(Boolean);
+      const output = execSync(command, { encoding: 'utf-8' });
+      const lines = output.split('\n').filter(Boolean);
 
       if (!extractPattern) {
         return lines.map((line) => ({ value: line.trim() }));
@@ -278,7 +278,7 @@ export class GenericGenerator {
     for (const rule of this.config.categories) {
       categorized.set(rule.name, []);
     }
-    categorized.set("__uncategorized__", []);
+    categorized.set('__uncategorized__', []);
 
     // Apply rules
     for (const item of items) {
@@ -293,7 +293,7 @@ export class GenericGenerator {
       }
 
       if (!assigned) {
-        categorized.get("__uncategorized__")!.push({ ...item, category: "Other" });
+        categorized.get('__uncategorized__')!.push({ ...item, category: 'Other' });
       }
     }
 
@@ -311,7 +311,7 @@ export class GenericGenerator {
    * Check if item matches category rule
    */
   private matchesRule(item: any, rule: CategoryRule): boolean {
-    if (typeof rule.match === "function") {
+    if (typeof rule.match === 'function') {
       return rule.match(item);
     }
 
@@ -350,7 +350,7 @@ export class GenericGenerator {
     // Apply enrichment rules
     if (this.config.enrichments) {
       for (const rule of this.config.enrichments) {
-        if (typeof rule.value === "function") {
+        if (typeof rule.value === 'function') {
           enriched[rule.field] = rule.value(item);
         } else {
           const key = item.name || item.key;
@@ -388,37 +388,37 @@ export class GenericGenerator {
 
     // Overview
     if (template.overview) {
-      sections.push("## Overview\n");
-      if (typeof template.overview === "function") {
+      sections.push('## Overview\n');
+      if (typeof template.overview === 'function') {
         const stats = this.calculateStats(categorized);
-        sections.push(template.overview(stats) + "\n");
+        sections.push(template.overview(stats) + '\n');
       } else {
-        sections.push(template.overview + "\n");
+        sections.push(template.overview + '\n');
       }
     }
 
     // Statistics
     if (template.showStats) {
       const stats = this.calculateStats(categorized);
-      sections.push("### Statistics\n");
+      sections.push('### Statistics\n');
       sections.push(`- **Total items**: ${stats.totalItems}`);
       sections.push(`- **Categories**: ${stats.categoryCount}\n`);
     }
 
     // Table of contents
     if (template.showTOC) {
-      sections.push("## Categories\n");
+      sections.push('## Categories\n');
       for (const [category, items] of categorized) {
-        if (category === "__uncategorized__") continue;
-        const anchor = category.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        if (category === '__uncategorized__') continue;
+        const anchor = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         sections.push(`- [${category}](#${anchor}) (${items.length} items)`);
       }
-      sections.push("");
+      sections.push('');
     }
 
     // Category sections
     for (const [category, items] of categorized) {
-      if (category === "__uncategorized__") continue;
+      if (category === '__uncategorized__') continue;
 
       sections.push(`## ${category}\n`);
 
@@ -427,7 +427,7 @@ export class GenericGenerator {
       const rows = items.map((item) =>
         template.columns.map((col) => {
           let value: any;
-          if (typeof col.field === "function") {
+          if (typeof col.field === 'function') {
             value = col.field(item);
           } else {
             value = item[col.field];
@@ -442,12 +442,12 @@ export class GenericGenerator {
       );
 
       sections.push(this.generateTable(headers, rows));
-      sections.push("");
+      sections.push('');
     }
 
     // Footer
     if (template.footer) {
-      sections.push("---\n");
+      sections.push('---\n');
       if (Array.isArray(template.footer)) {
         sections.push(...template.footer);
       } else {
@@ -455,7 +455,7 @@ export class GenericGenerator {
       }
     }
 
-    return sections.join("\n");
+    return sections.join('\n');
   }
 
   /**
@@ -465,15 +465,15 @@ export class GenericGenerator {
     const lines: string[] = [];
 
     // Header
-    lines.push("| " + headers.join(" | ") + " |");
-    lines.push("| " + headers.map(() => "---").join(" | ") + " |");
+    lines.push('| ' + headers.join(' | ') + ' |');
+    lines.push('| ' + headers.map(() => '---').join(' | ') + ' |');
 
     // Rows
     for (const row of rows) {
-      lines.push("| " + row.join(" | ") + " |");
+      lines.push('| ' + row.join(' | ') + ' |');
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   /**
@@ -488,7 +488,7 @@ export class GenericGenerator {
     };
 
     for (const [category, items] of categorized) {
-      if (category === "__uncategorized__") {
+      if (category === '__uncategorized__') {
         stats.uncategorized = items.length;
       } else {
         stats.categoryCount++;

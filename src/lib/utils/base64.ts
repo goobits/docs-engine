@@ -9,27 +9,27 @@
  * @returns Decoded UTF-8 string
  */
 export function decodeBase64(encoded: string): string {
-	if (typeof Buffer !== 'undefined') {
-		// Node.js environment
-		return Buffer.from(encoded, 'base64').toString('utf-8');
-	} else if (typeof atob !== 'undefined') {
-		// Browser environment
-		try {
-			// atob returns a binary string, decode UTF-8
-			const binaryString = atob(encoded);
-			// Convert binary string to UTF-8
-			const bytes = new Uint8Array(binaryString.length);
-			for (let i = 0; i < binaryString.length; i++) {
-				bytes[i] = binaryString.charCodeAt(i);
-			}
-			return new TextDecoder('utf-8').decode(bytes);
-		} catch (err) {
-			console.error('Failed to decode base64:', err);
-			return '';
-		}
-	} else {
-		throw new Error('No base64 decoding available in this environment');
-	}
+  if (typeof Buffer !== 'undefined') {
+    // Node.js environment
+    return Buffer.from(encoded, 'base64').toString('utf-8');
+  } else if (typeof atob !== 'undefined') {
+    // Browser environment
+    try {
+      // atob returns a binary string, decode UTF-8
+      const binaryString = atob(encoded);
+      // Convert binary string to UTF-8
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch (err) {
+      console.error('Failed to decode base64:', err);
+      return '';
+    }
+  } else {
+    throw new Error('No base64 decoding available in this environment');
+  }
 }
 
 /**
@@ -38,21 +38,21 @@ export function decodeBase64(encoded: string): string {
  * @returns Base64 encoded string
  */
 export function encodeBase64(text: string): string {
-	if (typeof Buffer !== 'undefined') {
-		// Node.js environment
-		return Buffer.from(text, 'utf-8').toString('base64');
-	} else if (typeof btoa !== 'undefined') {
-		// Browser environment
-		// Encode UTF-8 to binary string
-		const bytes = new TextEncoder().encode(text);
-		let binaryString = '';
-		for (let i = 0; i < bytes.length; i++) {
-			binaryString += String.fromCharCode(bytes[i]);
-		}
-		return btoa(binaryString);
-	} else {
-		throw new Error('No base64 encoding available in this environment');
-	}
+  if (typeof Buffer !== 'undefined') {
+    // Node.js environment
+    return Buffer.from(text, 'utf-8').toString('base64');
+  } else if (typeof btoa !== 'undefined') {
+    // Browser environment
+    // Encode UTF-8 to binary string
+    const bytes = new TextEncoder().encode(text);
+    let binaryString = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binaryString += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binaryString);
+  } else {
+    throw new Error('No base64 encoding available in this environment');
+  }
 }
 
 /**
@@ -72,7 +72,7 @@ export function encodeBase64(text: string): string {
  * ```
  */
 export function encodeJsonBase64<T>(data: T): string {
-	return encodeBase64(JSON.stringify(data));
+  return encodeBase64(JSON.stringify(data));
 }
 
 /**
@@ -90,5 +90,5 @@ export function encodeJsonBase64<T>(data: T): string {
  * ```
  */
 export function decodeJsonBase64<T>(encoded: string): T {
-	return JSON.parse(decodeBase64(encoded));
+  return JSON.parse(decodeBase64(encoded));
 }

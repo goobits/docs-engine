@@ -11,13 +11,7 @@
 
   interface Props extends ScreenshotImageProps {}
 
-  let {
-    name,
-    url,
-    path,
-    version,
-    config = {}
-  }: Props = $props();
+  let { name, url, path, version, config = {} }: Props = $props();
 
   let status: 'checking' | 'cached' | 'generating' | 'ready' | 'error' = $state('checking');
   let imageSrc = $state('');
@@ -44,7 +38,7 @@
           const metaResponse = await fetch('/api/screenshots/metadata', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, version })
+            body: JSON.stringify({ name, version }),
           });
 
           // Only parse if response is OK, silently ignore errors
@@ -67,7 +61,7 @@
           const response = await fetch('/api/screenshots/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, url, version, config })
+            body: JSON.stringify({ name, url, version, config }),
           });
 
           const data = await response.json();
@@ -114,8 +108,8 @@
       <img
         src={imageSrc}
         alt="Screenshot: {name}"
-        width={width}
-        height={height}
+        {width}
+        {height}
         loading="lazy"
         decoding="async"
         class="md-screenshot__image"
@@ -191,7 +185,8 @@
     padding: var(--v2-spacing-sm, 0.5rem) var(--v2-spacing-md, 1rem);
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
     opacity: 0;
-    transition: opacity var(--v2-duration-fast, 200ms) var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
+    transition: opacity var(--v2-duration-fast, 200ms)
+      var(--v2-ease-out, cubic-bezier(0.33, 1, 0.68, 1));
   }
 
   .md-screenshot:hover .md-screenshot__meta {
@@ -238,12 +233,12 @@
   }
 
   /* Status-specific styling */
-  .md-screenshot[data-status="error"] {
+  .md-screenshot[data-status='error'] {
     border-color: rgba(239, 68, 68, 0.3);
     background: rgba(239, 68, 68, 0.05);
   }
 
-  .md-screenshot[data-status="ready"] {
+  .md-screenshot[data-status='ready'] {
     min-height: auto;
   }
 </style>
