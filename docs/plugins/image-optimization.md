@@ -69,6 +69,8 @@ Add hydrator to your layout:
 
 ## Advanced Config (All Options)
 
+The plugin accepts {@ImageOptimizationOptions} for comprehensive control over image processing:
+
 ```typescript
 interface ImageOptimizationOptions {
   /** Base path for optimized images (default: '/images') */

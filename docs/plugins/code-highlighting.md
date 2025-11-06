@@ -36,7 +36,7 @@ export default {
 
 ## Configuration
 
-> **Note:** You can configure code highlighting in multiple ways depending on your setup.
+The plugin accepts {@CodeHighlightOptions} to customize highlighting behavior.
 
 :::tabs
 ```typescript

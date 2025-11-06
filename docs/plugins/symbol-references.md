@@ -68,16 +68,23 @@ export default {
 };
 ```
 
+The plugin accepts {@ReferencePluginOptions} to customize the symbol map path and GitHub repository URL.
+
 ### 3. Use in Markdown
 
 ```markdown
 # API Guide
 
-The {@RequestState} type tracks request context.
+The {@SymbolDefinition} type represents a parsed TypeScript symbol.
 
-:::reference RequestState
+:::reference SymbolDefinition
 :::
 ```
+
+**Real examples from this documentation:**
+- {@KaTeXOptions} - Configuration for the KaTeX plugin
+- {@CodeHighlightOptions} - Options for code highlighting
+- {@SymbolMap} - The generated symbol map structure
 
 ---
 

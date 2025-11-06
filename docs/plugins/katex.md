@@ -180,6 +180,8 @@ $$
 
 ## Configuration
 
+The plugin accepts {@KaTeXOptions} for customizing the rendering behavior.
+
 ### Custom Macros
 
 Define reusable LaTeX macros:

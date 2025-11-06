@@ -41,6 +41,8 @@ The plugin normalizes markdown links to work correctly in SvelteKit by convertin
 
 ## Usage
 
+The plugin accepts {@LinksPluginOptions} to customize link transformation behavior.
+
 :::tabs
 ```javascript
 // JavaScript configuration
