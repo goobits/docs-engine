@@ -3,8 +3,7 @@ import {
 	createSearchIndex,
 	loadSearchIndex,
 	performSearch,
-	highlightMatches,
-	type DocsSection
+	highlightMatches
 } from './search-index';
 import type { DocsSection as NavSection } from './navigation';
 
@@ -13,7 +12,7 @@ describe('search-index utilities', () => {
 		{
 			title: 'Getting Started',
 			description: 'Get started docs',
-			icon: () => null,
+			icon: (() => null) as any,
 			links: [
 				{
 					title: 'Installation Guide',
@@ -30,7 +29,7 @@ describe('search-index utilities', () => {
 		{
 			title: 'Features',
 			description: 'Core features',
-			icon: () => null,
+			icon: (() => null) as any,
 			links: [
 				{
 					title: 'Search Functionality',

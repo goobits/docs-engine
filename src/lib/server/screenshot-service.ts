@@ -153,8 +153,8 @@ async function generateCliScreenshot(options: {
   }
 
   // Execute command
-  const result = await cliExecutor.execute(screenshotConfig.command);
-  const output = result.stdout + (result.stderr ? '\n' + result.stderr : '');
+  const commandResult = await cliExecutor.execute(screenshotConfig.command);
+  const output = commandResult.stdout + (commandResult.stderr ? '\n' + commandResult.stderr : '');
 
   // Import playwright
   let chromium;
