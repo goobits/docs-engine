@@ -41,6 +41,12 @@ export default defineConfig({
 	// Generate TypeScript declaration files
 	// Note: components/index.ts is excluded from DTS generation as it exports
 	// Svelte components (.svelte files) which are handled separately by SvelteKit
+	//
+	// Performance note: DTS generation takes ~8.3s (99% of build time) vs 72ms for ESM.
+	// This is a TypeScript compiler limitation. Options for improvement:
+	// - Use `dts: false` and generate types separately
+	// - Implement incremental DTS generation (only rebuild changed files)
+	// - Use faster alternatives like @microsoft/api-extractor
 	dts: {
 		entry: [
 			'src/lib/index.ts',

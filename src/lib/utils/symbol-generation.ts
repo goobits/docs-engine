@@ -106,8 +106,13 @@ export class SymbolMapGenerator {
 
 	/**
 	 * Generate symbol map from TypeScript source files
+	 *
+	 * Performance note: The file-level cache (based on mtime/hash) significantly
+	 * reduces processing time for unchanged files. Each file's AST is parsed once
+	 * per generation run and cached to disk for subsequent runs.
 	 */
 	async generate(): Promise<SymbolMap> {
+		const startTime = Date.now();
 		logger.info('Scanning TypeScript files');
 
 		// Load cache
@@ -190,7 +195,9 @@ export class SymbolMapGenerator {
 		await this.writeSymbolMap(symbolMap);
 
 		// Print statistics
+		const duration = Date.now() - startTime;
 		this.printStatistics(symbolMap, allFiles.length, cacheHits, cacheMisses);
+		logger.info({ durationMs: duration, durationSec: (duration / 1000).toFixed(2) }, 'Symbol generation complete');
 
 		return symbolMap;
 	}
