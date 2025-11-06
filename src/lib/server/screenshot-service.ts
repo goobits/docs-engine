@@ -9,6 +9,50 @@ import { CliExecutor } from './cli-executor.js';
 import { getVersion } from '../utils/version.js';
 
 /**
+ * Allowed domains for screenshot generation (SSRF protection)
+ * Add your production domains here
+ */
+const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'docs.anthropic.com', 'claude.ai'];
+
+/**
+ * Validates URL to prevent SSRF attacks
+ * @param url - URL to validate
+ * @throws Error if URL is not allowed
+ */
+function validateUrl(url: string): void {
+  // eslint-disable-next-line no-undef
+  const parsed = new URL(url);
+
+  // Block private IP ranges (RFC 1918)
+  if (/^(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\./.test(parsed.hostname)) {
+    throw new Error('Private IP addresses are not allowed');
+  }
+
+  // Block cloud metadata endpoint
+  if (parsed.hostname === '169.254.169.254') {
+    throw new Error('Cloud metadata endpoint access denied');
+  }
+
+  // Block localhost variants (except explicitly allowed)
+  if (
+    parsed.hostname.startsWith('127.') &&
+    parsed.hostname !== '127.0.0.1' &&
+    !ALLOWED_DOMAINS.includes(parsed.hostname)
+  ) {
+    throw new Error('Localhost variants not allowed');
+  }
+
+  // Allowlist check
+  const isAllowed = ALLOWED_DOMAINS.some(
+    (domain) => parsed.hostname === domain || parsed.hostname.endsWith(`.${domain}`)
+  );
+
+  if (!isAllowed) {
+    throw new Error(`Domain ${parsed.hostname} is not in allowlist`);
+  }
+}
+
+/**
  * Creates a screenshot endpoint handler for generating screenshots
  * @param config - Configuration options for screenshot generation
  * @returns A SvelteKit RequestHandler
@@ -18,18 +62,26 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
   const cliExecutor = new CliExecutor({
     allowedCommands: config.screenshots.cli?.allowedCommands || [],
     timeout: config.screenshots.cli?.timeout,
-    maxOutputLength: config.screenshots.cli?.maxOutputLength
+    maxOutputLength: config.screenshots.cli?.maxOutputLength,
   });
 
   return async ({ request, fetch }) => {
     try {
-      const { name, url, version: requestVersion, config: screenshotConfig } = await request.json() as ScreenshotRequest;
+      const {
+        name,
+        url,
+        version: requestVersion,
+        config: screenshotConfig,
+      } = (await request.json()) as ScreenshotRequest;
 
       if (!name) {
-        return json({
-          success: false,
-          error: 'Missing required parameter: name'
-        } as ScreenshotResponse, { status: 400 });
+        return json(
+          {
+            success: false,
+            error: 'Missing required parameter: name',
+          } as ScreenshotResponse,
+          { status: 400 }
+        );
       }
 
       const version = requestVersion || config.screenshots.version || getVersion();
@@ -44,7 +96,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           config: screenshotConfig,
           cliExecutor,
           fetch,
-          screenshotsConfig: config.screenshots
+          screenshotsConfig: config.screenshots,
         });
       } else {
         return await generateWebScreenshot({
@@ -52,15 +104,18 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           url,
           version,
           config: screenshotConfig,
-          screenshotsConfig: config.screenshots
+          screenshotsConfig: config.screenshots,
         });
       }
     } catch (error: any) {
       console.error('Screenshot generation failed:', error);
-      return json({
-        success: false,
-        error: error.message
-      } as ScreenshotResponse, { status: 500 });
+      return json(
+        {
+          success: false,
+          error: error.message,
+        } as ScreenshotResponse,
+        { status: 500 }
+      );
     }
   };
 }
@@ -68,18 +123,29 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
 async function generateCliScreenshot(options: {
   name: string;
   version: string;
-  config: any;
+  config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   cliExecutor: CliExecutor;
-  fetch: typeof fetch;
-  screenshotsConfig: any;
+  fetch: typeof fetch; // eslint-disable-line no-undef
+  screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
-  const { name, version, config: screenshotConfig, cliExecutor, fetch, screenshotsConfig } = options;
+  // eslint-disable-line no-undef
+  const {
+    name,
+    version,
+    config: screenshotConfig,
+    cliExecutor,
+    fetch,
+    screenshotsConfig,
+  } = options;
 
   if (!screenshotConfig?.command) {
-    return json({
-      success: false,
-      error: 'CLI screenshot requires command parameter'
-    } as ScreenshotResponse, { status: 400 });
+    return json(
+      {
+        success: false,
+        error: 'CLI screenshot requires command parameter',
+      } as ScreenshotResponse,
+      { status: 400 }
+    );
   }
 
   // Execute command
@@ -91,10 +157,13 @@ async function generateCliScreenshot(options: {
   try {
     chromium = (await import('playwright')).chromium;
   } catch {
-    return json({
-      success: false,
-      error: 'Playwright not installed. Run: bun add -D playwright'
-    } as ScreenshotResponse, { status: 500 });
+    return json(
+      {
+        success: false,
+        error: 'Playwright not installed. Run: bun add -D playwright',
+      } as ScreenshotResponse,
+      { status: 500 }
+    );
   }
 
   // Get terminal HTML from renderer route
@@ -106,8 +175,8 @@ async function generateCliScreenshot(options: {
       output,
       theme: screenshotConfig.theme || 'dracula',
       showPrompt: screenshotConfig.showPrompt ?? true,
-      promptText: screenshotConfig.promptText || '$'
-    })
+      promptText: screenshotConfig.promptText || '$',
+    }),
   });
 
   if (!renderResponse.ok) {
@@ -128,7 +197,7 @@ async function generateCliScreenshot(options: {
   const context = await browser.newContext({
     viewport: { width, height },
     deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
-    ignoreHTTPSErrors: true // Allow self-signed certificates in development
+    ignoreHTTPSErrors: true, // Allow self-signed certificates in development
   });
   const page = await context.newPage();
 
@@ -149,7 +218,7 @@ async function generateCliScreenshot(options: {
   await page.screenshot({
     path: screenshot2xPath,
     fullPage: false,
-    scale: 'device' // Use device pixel ratio
+    scale: 'device', // Use device pixel ratio
   });
 
   await browser.close();
@@ -171,7 +240,7 @@ async function generateCliScreenshot(options: {
     await sharp(screenshot2xPath)
       .resize({
         width: Math.floor(metadata.width / 2),
-        kernel: 'cubic' // Bicubic interpolation for sharp downscaling
+        kernel: 'cubic', // Bicubic interpolation for sharp downscaling
       })
       .webp({ quality: 85 })
       .toFile(webpPath);
@@ -180,7 +249,7 @@ async function generateCliScreenshot(options: {
     await sharp(screenshot2xPath)
       .resize({
         width: Math.floor(metadata.width / 2),
-        kernel: 'cubic'
+        kernel: 'cubic',
       })
       .png()
       .toFile(screenshotPath);
@@ -202,7 +271,7 @@ async function generateCliScreenshot(options: {
     webpPath: `${basePath}/${name}.webp`,
     webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
     width: displayWidth,
-    height: displayHeight
+    height: displayHeight,
   } as ScreenshotResponse);
 }
 
@@ -210,16 +279,33 @@ async function generateWebScreenshot(options: {
   name: string;
   url?: string;
   version: string;
-  config: any;
-  screenshotsConfig: any;
+  config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
+  // eslint-disable-line no-undef
   const { name, url, version, config: screenshotConfig, screenshotsConfig } = options;
 
   if (!url) {
-    return json({
-      success: false,
-      error: 'Web screenshot requires url parameter'
-    } as ScreenshotResponse, { status: 400 });
+    return json(
+      {
+        success: false,
+        error: 'Web screenshot requires url parameter',
+      } as ScreenshotResponse,
+      { status: 400 }
+    );
+  }
+
+  // Validate URL for SSRF protection
+  try {
+    validateUrl(url);
+  } catch (err) {
+    return json(
+      {
+        success: false,
+        error: err instanceof Error ? err.message : 'Invalid URL',
+      } as ScreenshotResponse,
+      { status: 403 }
+    );
   }
 
   // Import playwright dynamically (it's optional)
@@ -227,10 +313,13 @@ async function generateWebScreenshot(options: {
   try {
     chromium = (await import('playwright')).chromium;
   } catch {
-    return json({
-      success: false,
-      error: 'Playwright not installed. Run: bun add -D playwright'
-    } as ScreenshotResponse, { status: 500 });
+    return json(
+      {
+        success: false,
+        error: 'Playwright not installed. Run: bun add -D playwright',
+      } as ScreenshotResponse,
+      { status: 500 }
+    );
   }
 
   // Parse viewport dimensions
@@ -245,7 +334,7 @@ async function generateWebScreenshot(options: {
   const context = await browser.newContext({
     viewport: { width, height },
     deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
-    ignoreHTTPSErrors: true // Allow self-signed certificates in development
+    ignoreHTTPSErrors: true, // Allow self-signed certificates in development
   });
   const page = await context.newPage();
 
@@ -258,12 +347,15 @@ async function generateWebScreenshot(options: {
   }
 
   // Determine screenshot target
-  const element = screenshotConfig?.selector
-    ? await page.locator(screenshotConfig.selector)
-    : page;
+  const element = screenshotConfig?.selector ? await page.locator(screenshotConfig.selector) : page;
 
   // Create output directory
-  const outputDir = path.join(process.cwd(), 'static', screenshotsConfig.basePath.replace(/^\//, ''), `v${version}`);
+  const outputDir = path.join(
+    process.cwd(),
+    'static',
+    screenshotsConfig.basePath.replace(/^\//, ''),
+    `v${version}`
+  );
   await mkdir(outputDir, { recursive: true });
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
@@ -271,7 +363,7 @@ async function generateWebScreenshot(options: {
   await element.screenshot({
     path: screenshot2xPath,
     fullPage: screenshotConfig?.fullPage ?? false,
-    scale: 'device' // Use device pixel ratio
+    scale: 'device', // Use device pixel ratio
   });
 
   // Cleanup
@@ -294,7 +386,7 @@ async function generateWebScreenshot(options: {
     await sharp(screenshot2xPath)
       .resize({
         width: Math.floor(metadata.width / 2),
-        kernel: 'cubic' // Bicubic interpolation for sharp downscaling
+        kernel: 'cubic', // Bicubic interpolation for sharp downscaling
       })
       .webp({ quality: 85 })
       .toFile(webpPath);
@@ -303,7 +395,7 @@ async function generateWebScreenshot(options: {
     await sharp(screenshot2xPath)
       .resize({
         width: Math.floor(metadata.width / 2),
-        kernel: 'cubic'
+        kernel: 'cubic',
       })
       .png()
       .toFile(screenshotPath);
@@ -325,6 +417,6 @@ async function generateWebScreenshot(options: {
     webpPath: `${basePath}/${name}.webp`,
     webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
     width: displayWidth,
-    height: displayHeight
+    height: displayHeight,
   } as ScreenshotResponse);
 }
