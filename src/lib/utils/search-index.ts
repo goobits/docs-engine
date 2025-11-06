@@ -15,13 +15,13 @@ import type { DocsSection } from './navigation.js';
  * @public
  */
 export interface SearchDocument {
-	id: string;
-	title: string;
-	description: string;
-	content: string;
-	href: string;
-	section: string;
-	headings: string[];
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  href: string;
+  section: string;
+  headings: string[];
 }
 
 /**
@@ -30,16 +30,16 @@ export interface SearchDocument {
  * @public
  */
 export interface SearchResult {
-	id: string;
-	title: string;
-	description: string;
-	href: string;
-	section: string;
-	score: number;
-	match: {
-		field: string;
-		excerpt: string;
-	};
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  section: string;
+  score: number;
+  match: {
+    field: string;
+    excerpt: string;
+  };
 }
 
 /**
@@ -48,30 +48,30 @@ export interface SearchResult {
  * @public
  */
 export interface SearchIndexConfig {
-	/** Fields to index for search */
-	fields?: string[];
-	/** Field weights for ranking (higher = more important) */
-	fieldWeights?: Record<string, number>;
-	/** Fuzzy search threshold (0-1, lower = more strict) */
-	fuzzyThreshold?: number;
-	/** Maximum number of results to return */
-	maxResults?: number;
+  /** Fields to index for search */
+  fields?: string[];
+  /** Field weights for ranking (higher = more important) */
+  fieldWeights?: Record<string, number>;
+  /** Fuzzy search threshold (0-1, lower = more strict) */
+  fuzzyThreshold?: number;
+  /** Maximum number of results to return */
+  maxResults?: number;
 }
 
 /**
  * Default search configuration
  */
 const defaultConfig: Required<SearchIndexConfig> = {
-	fields: ['title', 'description', 'content', 'headings', 'section'],
-	fieldWeights: {
-		title: 3,
-		headings: 2,
-		description: 1.5,
-		content: 1,
-		section: 0.5,
-	},
-	fuzzyThreshold: 0.2,
-	maxResults: 10,
+  fields: ['title', 'description', 'content', 'headings', 'section'],
+  fieldWeights: {
+    title: 3,
+    headings: 2,
+    description: 1.5,
+    content: 1,
+    section: 0.5,
+  },
+  fuzzyThreshold: 0.2,
+  maxResults: 10,
 };
 
 /**
@@ -95,48 +95,48 @@ const defaultConfig: Required<SearchIndexConfig> = {
  * @public
  */
 export function createSearchIndex(
-	navigation: DocsSection[],
-	contentMap: Map<string, string>,
-	config: SearchIndexConfig = {}
+  navigation: DocsSection[],
+  contentMap: Map<string, string>,
+  config: SearchIndexConfig = {}
 ): string {
-	const cfg = { ...defaultConfig, ...config };
+  const cfg = { ...defaultConfig, ...config };
 
-	// Extract all documents
-	const documents: SearchDocument[] = [];
+  // Extract all documents
+  const documents: SearchDocument[] = [];
 
-	navigation.forEach((section) => {
-		section.links.forEach((link) => {
-			const content = contentMap.get(link.href) || '';
-			const headings = extractHeadings(content);
+  navigation.forEach((section) => {
+    section.links.forEach((link) => {
+      const content = contentMap.get(link.href) || '';
+      const headings = extractHeadings(content);
 
-			documents.push({
-				id: link.href,
-				title: link.title,
-				description: link.description,
-				content: stripMarkdown(content),
-				href: link.href,
-				section: section.title,
-				headings,
-			});
-		});
-	});
+      documents.push({
+        id: link.href,
+        title: link.title,
+        description: link.description,
+        content: stripMarkdown(content),
+        href: link.href,
+        section: section.title,
+        headings,
+      });
+    });
+  });
 
-	// Create MiniSearch instance
-	const miniSearch = new MiniSearch({
-		fields: cfg.fields,
-		storeFields: ['title', 'description', 'href', 'section'],
-		searchOptions: {
-			boost: cfg.fieldWeights,
-			fuzzy: cfg.fuzzyThreshold,
-			prefix: true,
-		},
-	});
+  // Create MiniSearch instance
+  const miniSearch = new MiniSearch({
+    fields: cfg.fields,
+    storeFields: ['title', 'description', 'href', 'section'],
+    searchOptions: {
+      boost: cfg.fieldWeights,
+      fuzzy: cfg.fuzzyThreshold,
+      prefix: true,
+    },
+  });
 
-	// Add documents to index
-	miniSearch.addAll(documents);
+  // Add documents to index
+  miniSearch.addAll(documents);
 
-	// Serialize to JSON
-	return JSON.stringify(miniSearch.toJSON());
+  // Serialize to JSON
+  return JSON.stringify(miniSearch.toJSON());
 }
 
 /**
@@ -148,23 +148,20 @@ export function createSearchIndex(
  *
  * @public
  */
-export function loadSearchIndex(
-	indexJson: string,
-	config: SearchIndexConfig = {}
-): MiniSearch {
-	const cfg = { ...defaultConfig, ...config };
+export function loadSearchIndex(indexJson: string, config: SearchIndexConfig = {}): MiniSearch {
+  const cfg = { ...defaultConfig, ...config };
 
-	const miniSearch = MiniSearch.loadJSON(indexJson, {
-		fields: cfg.fields,
-		storeFields: ['title', 'description', 'href', 'section'],
-		searchOptions: {
-			boost: cfg.fieldWeights,
-			fuzzy: cfg.fuzzyThreshold,
-			prefix: true,
-		},
-	});
+  const miniSearch = MiniSearch.loadJSON(indexJson, {
+    fields: cfg.fields,
+    storeFields: ['title', 'description', 'href', 'section'],
+    searchOptions: {
+      boost: cfg.fieldWeights,
+      fuzzy: cfg.fuzzyThreshold,
+      prefix: true,
+    },
+  });
 
-	return miniSearch;
+  return miniSearch;
 }
 
 /**
@@ -178,107 +175,107 @@ export function loadSearchIndex(
  * @public
  */
 export function performSearch(
-	miniSearch: MiniSearch,
-	query: string,
-	config: SearchIndexConfig = {}
+  miniSearch: MiniSearch,
+  query: string,
+  config: SearchIndexConfig = {}
 ): SearchResult[] {
-	const cfg = { ...defaultConfig, ...config };
+  const cfg = { ...defaultConfig, ...config };
 
-	if (!query.trim()) {
-		return [];
-	}
+  if (!query.trim()) {
+    return [];
+  }
 
-	const results = miniSearch.search(query, {
-		boost: cfg.fieldWeights,
-		fuzzy: cfg.fuzzyThreshold,
-		prefix: true,
-	});
+  const results = miniSearch.search(query, {
+    boost: cfg.fieldWeights,
+    fuzzy: cfg.fuzzyThreshold,
+    prefix: true,
+  });
 
-	return results.slice(0, cfg.maxResults).map((result) => ({
-		id: result.id as string,
-		title: (result.title as string) || '',
-		description: (result.description as string) || '',
-		href: (result.href as string) || '',
-		section: (result.section as string) || '',
-		score: result.score,
-		match: {
-			field: getMatchedField(result.match),
-			excerpt: generateExcerpt(result),
-		},
-	}));
+  return results.slice(0, cfg.maxResults).map((result) => ({
+    id: result.id as string,
+    title: (result.title as string) || '',
+    description: (result.description as string) || '',
+    href: (result.href as string) || '',
+    section: (result.section as string) || '',
+    score: result.score,
+    match: {
+      field: getMatchedField(result.match),
+      excerpt: generateExcerpt(result),
+    },
+  }));
 }
 
 /**
  * Extract headings from markdown content
  */
 function extractHeadings(content: string): string[] {
-	const headingRegex = /^#{1,6}\s+(.+)$/gm;
-	const headings: string[] = [];
-	let match;
+  const headingRegex = /^#{1,6}\s+(.+)$/gm;
+  const headings: string[] = [];
+  let match;
 
-	while ((match = headingRegex.exec(content)) !== null) {
-		headings.push(match[1].trim());
-	}
+  while ((match = headingRegex.exec(content)) !== null) {
+    headings.push(match[1].trim());
+  }
 
-	return headings;
+  return headings;
 }
 
 /**
  * Strip markdown formatting from text
  */
 function stripMarkdown(content: string): string {
-	return content
-		// Remove code blocks
-		.replace(/```[\s\S]*?```/g, '')
-		// Remove inline code
-		.replace(/`[^`]+`/g, '')
-		// Remove headings markers
-		.replace(/^#{1,6}\s+/gm, '')
-		// Remove bold/italic
-		.replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
-		// Remove links
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-		// Remove images
-		.replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
-		// Remove horizontal rules
-		.replace(/^[-*_]{3,}$/gm, '')
-		// Remove HTML tags
-		.replace(/<[^>]+>/g, '')
-		// Normalize whitespace
-		.replace(/\s+/g, ' ')
-		.trim();
+  return (
+    content
+      // Remove code blocks
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove inline code
+      .replace(/`[^`]+`/g, '')
+      // Remove headings markers
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove bold/italic
+      .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
+      // Remove links
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove images
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+      // Remove horizontal rules
+      .replace(/^[-*_]{3,}$/gm, '')
+      // Remove HTML tags
+      .replace(/<[^>]+>/g, '')
+      // Normalize whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 /**
  * Get the field that matched in search results
  */
 function getMatchedField(match: Record<string, string[]> | undefined): string {
-	if (!match) return 'content';
+  if (!match) return 'content';
 
-	const fields = Object.keys(match);
-	if (fields.includes('title')) return 'title';
-	if (fields.includes('headings')) return 'headings';
-	if (fields.includes('description')) return 'description';
-	return 'content';
+  const fields = Object.keys(match);
+  if (fields.includes('title')) return 'title';
+  if (fields.includes('headings')) return 'headings';
+  if (fields.includes('description')) return 'description';
+  return 'content';
 }
 
 /**
  * Generate an excerpt from search results
  */
 function generateExcerpt(result: unknown): string {
-	const r = result as { title?: string; description?: string };
+  const r = result as { title?: string; description?: string };
 
-	if (r.description && r.description.length > 0) {
-		return r.description.length > 120
-			? r.description.substring(0, 120) + '...'
-			: r.description;
-	}
+  if (r.description && r.description.length > 0) {
+    return r.description.length > 120 ? r.description.substring(0, 120) + '...' : r.description;
+  }
 
-	if (r.title) {
-		return r.title;
-	}
+  if (r.title) {
+    return r.title;
+  }
 
-	return '';
+  return '';
 }
 
 /**
@@ -286,31 +283,48 @@ function generateExcerpt(result: unknown): string {
  *
  * @param text - Text to highlight
  * @param query - Search query
- * @returns Text with <mark> tags around matches
+ * @returns Sanitized text with <mark> tags around matches
  *
  * @public
  */
 export function highlightMatches(text: string, query: string): string {
-	if (!query.trim()) return text;
+  if (!query.trim()) {
+    // Escape HTML in text when there's no query
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
-	const terms = query
-		.toLowerCase()
-		.split(/\s+/)
-		.filter((t) => t.length > 0);
+  // First, escape HTML entities in the text
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
-	let highlighted = text;
+  const terms = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 0);
 
-	terms.forEach((term) => {
-		const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
-		highlighted = highlighted.replace(regex, '<mark>$1</mark>');
-	});
+  let highlighted = escaped;
 
-	return highlighted;
+  // Now add <mark> tags around matches (escapeRegex ensures query is safe)
+  terms.forEach((term) => {
+    const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+    highlighted = highlighted.replace(regex, '<mark>$1</mark>');
+  });
+
+  return highlighted;
 }
 
 /**
  * Escape special regex characters
  */
 function escapeRegex(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
