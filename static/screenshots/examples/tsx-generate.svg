@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#282a36" rx="6"/>
+  <g font-family="Monaco, Menlo, monospace" font-size="14" text-anchor="start">
+    <text x="20" y="40" fill="#50fa7b" font-weight="bold">$ </text><text x="50" y="40" fill="#8be9fd">tsx generate-symbols.ts</text><text x="20" y="70" fill="#f8f8f2">🚀 Generating symbol map for docs-engine...</text><text x="20" y="110" fill="#f8f8f2">🔍 Scanning TypeScript files...</text><text x="20" y="130" fill="#f8f8f2">   Found 49 TypeScript files</text><text x="20" y="170" fill="#f8f8f2">✅ Generated symbol map: 166 symbols</text><text x="20" y="190" fill="#f8f8f2">   Output: docs/.generated/symbol-map.json</text>
+  </g>
+</svg>

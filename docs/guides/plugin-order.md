@@ -40,6 +40,7 @@ import remarkMath from 'remark-math';
 import {
   filetreePlugin,
   calloutsPlugin,
+  collapsePlugin,
   mermaidPlugin,
   tabsPlugin,
   remarkTableOfContents,
@@ -57,6 +58,7 @@ export default {
         // 1. Structural transformations (don't depend on others)
         filetreePlugin(),
         calloutsPlugin(),
+        collapsePlugin(),
         mermaidPlugin(),
         tabsPlugin(),
 
@@ -91,6 +93,7 @@ export default {
 Plugins that create new markdown structures should run first:
 - `filetreePlugin()` - Transforms code blocks
 - `calloutsPlugin()` - Transforms blockquotes
+- `collapsePlugin()` - Transforms directive blocks
 - `mermaidPlugin()` - Transforms code blocks
 - `tabsPlugin()` - Transforms directive blocks
 
@@ -218,6 +221,7 @@ remarkPlugins: [
   // Content structure
   filetreePlugin(),
   calloutsPlugin(),
+  collapsePlugin(),
   mermaidPlugin(),
   tabsPlugin(),
 
@@ -256,6 +260,7 @@ If you're experiencing issues:
 |--------|---------------|-----------------|
 | `filetreePlugin` | - | `codeHighlightPlugin` |
 | `calloutsPlugin` | - | - |
+| `collapsePlugin` | - | - |
 | `mermaidPlugin` | - | `codeHighlightPlugin` |
 | `tabsPlugin` | - | `codeHighlightPlugin` |
 | `remarkTableOfContents` | Structural plugins | Content plugins |

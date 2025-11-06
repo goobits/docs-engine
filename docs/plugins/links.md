@@ -41,7 +41,11 @@ The plugin normalizes markdown links to work correctly in SvelteKit by convertin
 
 ## Usage
 
+The plugin accepts {@LinksPluginOptions} to customize link transformation behavior.
+
+:::tabs
 ```javascript
+// JavaScript configuration
 import { linksPlugin } from '@goobits/docs-engine/plugins';
 
 export default {
@@ -55,6 +59,27 @@ export default {
   ],
 };
 ```
+
+```typescript
+// TypeScript configuration
+import { mdsvex } from 'mdsvex';
+import { linksPlugin } from '@goobits/docs-engine/plugins';
+import type { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
+
+const config: { preprocess: PreprocessorGroup[] } = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        linksPlugin(),
+        // ... other plugins
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+:::
 
 ## Example
 

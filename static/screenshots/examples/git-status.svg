@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="240" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#282a36" rx="6"/>
+  <g font-family="Monaco, Menlo, monospace" font-size="14" text-anchor="start">
+    <text x="20" y="40" fill="#50fa7b" font-weight="bold">$ </text><text x="50" y="40" fill="#8be9fd">git status</text><text x="20" y="70" fill="#f8f8f2">On branch claude/dogfood-plugins-docs-011CUrE9NDa5YrRHHW8MXYur</text><text x="20" y="90" fill="#f8f8f2">Your branch is up to date with &apos;origin/claude/dogfood-plugins-docs-011CUrE9NDa5YrRHHW8MXYur&apos;.</text><text x="20" y="130" fill="#f8f8f2">Untracked files:</text><text x="20" y="150" fill="#f8f8f2">  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)</text><text x="20" y="170" fill="#f8f8f2">	scripts/</text><text x="20" y="210" fill="#f8f8f2">nothing added to commit but untracked files present (use &quot;git add&quot; to track)</text>
+  </g>
+</svg>
