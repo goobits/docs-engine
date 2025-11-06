@@ -6,6 +6,8 @@
  */
 
 import { execSync } from 'child_process';
+import { LRUCache } from 'lru-cache';
+import pRetry from 'p-retry';
 
 /**
  * Git configuration for repository integration
@@ -13,14 +15,14 @@ import { execSync } from 'child_process';
  * @public
  */
 export interface GitConfig {
-	/** Repository URL (e.g., "https://github.com/user/repo") */
-	repoUrl: string;
-	/** Branch name (default: "main") */
-	branch?: string;
-	/** Path to docs directory within repo (default: "docs") */
-	docsPath?: string;
-	/** Text for edit link (default: "Edit this page") */
-	editLinkText?: string;
+  /** Repository URL (e.g., "https://github.com/user/repo") */
+  repoUrl: string;
+  /** Branch name (default: "main") */
+  branch?: string;
+  /** Path to docs directory within repo (default: "docs") */
+  docsPath?: string;
+  /** Text for edit link (default: "Edit this page") */
+  editLinkText?: string;
 }
 
 /**
@@ -29,10 +31,10 @@ export interface GitConfig {
  * @public
  */
 export interface Contributor {
-	name: string;
-	email: string;
-	commits: number;
-	avatar?: string;
+  name: string;
+  email: string;
+  commits: number;
+  avatar?: string;
 }
 
 /**
@@ -44,38 +46,65 @@ export type GitProvider = 'github' | 'gitlab' | 'gitea' | 'unknown';
 
 /**
  * Cache for Git command results to improve performance
+ * Uses LRU cache to prevent memory leaks on large sites
  */
-const gitCache = new Map<string, unknown>();
+const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
+  max: 1000, // Maximum 1000 entries
+  ttl: 60000, // 60 second TTL
+  updateAgeOnGet: true, // Refresh TTL on access
+  updateAgeOnHas: false,
+});
 
 /**
- * Execute a git command safely with caching
+ * Execute a git command safely with caching and retry logic
+ * Now async to support retry on transient git lock errors
  */
-function execGitCommand(command: string, cacheKey: string, ttl = 60000): string | null {
-	// Check cache first
-	const cached = gitCache.get(cacheKey);
-	if (cached && typeof cached === 'object' && 'value' in cached && 'timestamp' in cached) {
-		const { value, timestamp } = cached as { value: string; timestamp: number };
-		if (Date.now() - timestamp < ttl) {
-			return value;
-		}
-	}
+async function execGitCommand(
+  command: string,
+  cacheKey: string,
+  ttl = 60000
+): Promise<string | null> {
+  // Check cache first (LRUCache handles TTL automatically)
+  const cached = gitCache.get(cacheKey);
+  if (cached && typeof cached.value === 'string') {
+    return cached.value;
+  }
 
-	try {
-		const result = execSync(command, {
-			encoding: 'utf-8',
-			stdio: ['pipe', 'pipe', 'pipe'],
-		}).trim();
+  try {
+    const result = await pRetry(
+      () => {
+        return execSync(command, {
+          encoding: 'utf-8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: 10000,
+        }).trim();
+      },
+      {
+        retries: 2,
+        minTimeout: 500,
+        onFailedAttempt: (error: Error & { attemptNumber: number }) => {
+          // Only retry on git lock errors
+          if (error.message.includes('lock') || error.message.includes('index.lock')) {
+            if (process.env.NODE_ENV !== 'test') {
+              console.warn(`Git lock detected, retrying... (attempt ${error.attemptNumber})`);
+            }
+            return; // Retry
+          }
+          throw error; // Don't retry other errors
+        },
+      }
+    );
 
-		// Cache the result
-		gitCache.set(cacheKey, { value: result, timestamp: Date.now() });
-		return result;
-	} catch (error) {
-		// Log warning but don't break the build
-		if (process.env.NODE_ENV !== 'test') {
-			console.warn(`Git command failed: ${command}`, error);
-		}
-		return null;
-	}
+    // Cache the result
+    gitCache.set(cacheKey, { value: result, timestamp: Date.now() });
+    return result;
+  } catch (error) {
+    // Log warning but don't break the build
+    if (process.env.NODE_ENV !== 'test') {
+      console.warn(`Git command failed: ${command}`, error);
+    }
+    return null;
+  }
 }
 
 /**
@@ -86,23 +115,20 @@ function execGitCommand(command: string, cacheKey: string, ttl = 60000): string 
  *
  * @example
  * ```typescript
- * const lastUpdated = getLastUpdated('docs/getting-started.md');
+ * const lastUpdated = await getLastUpdated('docs/getting-started.md');
  * // Returns: Date object or null
  * ```
  *
  * @public
  */
-export function getLastUpdated(filePath: string): Date | null {
-	const cacheKey = `lastUpdated:${filePath}`;
-	const result = execGitCommand(
-		`git log -1 --format=%ai "${filePath}"`,
-		cacheKey
-	);
+export async function getLastUpdated(filePath: string): Promise<Date | null> {
+  const cacheKey = `lastUpdated:${filePath}`;
+  const result = await execGitCommand(`git log -1 --format=%ai "${filePath}"`, cacheKey);
 
-	if (!result) return null;
+  if (!result) return null;
 
-	const date = new Date(result);
-	return isNaN(date.getTime()) ? null : date;
+  const date = new Date(result);
+  return isNaN(date.getTime()) ? null : date;
 }
 
 /**
@@ -114,72 +140,70 @@ export function getLastUpdated(filePath: string): Date | null {
  *
  * @example
  * ```typescript
- * const contributors = getContributors('docs/getting-started.md', 5);
+ * const contributors = await getContributors('docs/getting-started.md', 5);
  * // Returns: [{ name: 'John Doe', email: 'john@example.com', commits: 15 }, ...]
  * ```
  *
  * @public
  */
-export function getContributors(filePath: string, limit = 10): Contributor[] {
-	const cacheKey = `contributors:${filePath}:${limit}`;
-	const cached = gitCache.get(cacheKey);
+export async function getContributors(filePath: string, limit = 10): Promise<Contributor[]> {
+  const cacheKey = `contributors:${filePath}:${limit}`;
+  const cached = gitCache.get(cacheKey);
 
-	if (cached && typeof cached === 'object' && 'value' in cached && 'timestamp' in cached) {
-		const { value, timestamp } = cached as { value: Contributor[]; timestamp: number };
-		if (Date.now() - timestamp < 60000) {
-			return value;
-		}
-	}
+  // LRUCache handles TTL automatically
+  if (cached && Array.isArray(cached.value)) {
+    return cached.value as Contributor[];
+  }
 
-	const result = execGitCommand(
-		`git log --format="%an|%ae" "${filePath}"`,
-		`contributors-raw:${filePath}`
-	);
+  const result = await execGitCommand(
+    `git log --format="%an|%ae" "${filePath}"`,
+    `contributors-raw:${filePath}`
+  );
 
-	if (!result) return [];
+  if (!result) return [];
 
-	// Count commits per contributor
-	const contributorMap = new Map<string, Contributor>();
+  // Count commits per contributor
+  const contributorMap = new Map<string, Contributor>();
 
-	result.split('\n').forEach((line) => {
-		const [name, email] = line.split('|');
-		if (!name || !email) return;
+  result.split('\n').forEach((line) => {
+    const [name, email] = line.split('|');
+    if (!name || !email) return;
 
-		const key = email.toLowerCase();
-		const existing = contributorMap.get(key);
+    const key = email.toLowerCase();
+    const existing = contributorMap.get(key);
 
-		if (existing) {
-			existing.commits++;
-		} else {
-			contributorMap.set(key, {
-				name,
-				email,
-				commits: 1,
-				avatar: generateGravatarUrl(email),
-			});
-		}
-	});
+    if (existing) {
+      existing.commits++;
+    } else {
+      contributorMap.set(key, {
+        name,
+        email,
+        commits: 1,
+        avatar: generateGravatarUrl(email),
+      });
+    }
+  });
 
-	// Sort by commit count and limit
-	const contributors = Array.from(contributorMap.values())
-		.sort((a, b) => b.commits - a.commits)
-		.slice(0, limit);
+  // Sort by commit count and limit
+  const contributors = Array.from(contributorMap.values())
+    .sort((a, b) => b.commits - a.commits)
+    .slice(0, limit);
 
-	// Cache the result
-	gitCache.set(cacheKey, { value: contributors, timestamp: Date.now() });
+  // Cache the result
+  gitCache.set(cacheKey, { value: contributors, timestamp: Date.now() });
 
-	return contributors;
+  return contributors;
 }
 
 /**
  * Detect Git provider from repository URL
  */
 function detectGitProvider(repoUrl: string): GitProvider {
-	const url = repoUrl.toLowerCase();
-	if (url.includes('github.com')) return 'github';
-	if (url.includes('gitlab.com') || url.includes('gitlab.')) return 'gitlab';
-	if (url.includes('gitea.')) return 'gitea';
-	return 'unknown';
+  const url = repoUrl.toLowerCase();
+  if (url.includes('github.com')) return 'github';
+  if (url.includes('gitlab.com') || url.includes('gitlab.')) return 'gitlab';
+  if (url.includes('gitea.')) return 'gitea';
+  return 'unknown';
 }
 
 /**
@@ -202,39 +226,39 @@ function detectGitProvider(repoUrl: string): GitProvider {
  * @public
  */
 export function generateEditLink(filePath: string, config: GitConfig): string {
-	const { repoUrl, branch = 'main', docsPath = 'docs' } = config;
-	const provider = detectGitProvider(repoUrl);
+  const { repoUrl, branch = 'main', docsPath = 'docs' } = config;
+  const provider = detectGitProvider(repoUrl);
 
-	// Remove trailing slash from repoUrl
-	const baseUrl = repoUrl.replace(/\/$/, '');
+  // Remove trailing slash from repoUrl
+  const baseUrl = repoUrl.replace(/\/$/, '');
 
-	// Construct file path within repository
-	const fullPath = docsPath ? `${docsPath}/${filePath}` : filePath;
+  // Construct file path within repository
+  const fullPath = docsPath ? `${docsPath}/${filePath}` : filePath;
 
-	switch (provider) {
-		case 'github':
-			return `${baseUrl}/edit/${branch}/${fullPath}`;
+  switch (provider) {
+    case 'github':
+      return `${baseUrl}/edit/${branch}/${fullPath}`;
 
-		case 'gitlab':
-			return `${baseUrl}/-/edit/${branch}/${fullPath}`;
+    case 'gitlab':
+      return `${baseUrl}/-/edit/${branch}/${fullPath}`;
 
-		case 'gitea':
-			return `${baseUrl}/_edit/${branch}/${fullPath}`;
+    case 'gitea':
+      return `${baseUrl}/_edit/${branch}/${fullPath}`;
 
-		default:
-			// Fallback to GitHub format
-			return `${baseUrl}/edit/${branch}/${fullPath}`;
-	}
+    default:
+      // Fallback to GitHub format
+      return `${baseUrl}/edit/${branch}/${fullPath}`;
+  }
 }
 
 /**
  * Generate Gravatar URL from email address
  */
 function generateGravatarUrl(email: string): string {
-	// Simple MD5 alternative for browser compatibility
-	// In production, you might want to use a proper crypto library
-	const hash = simpleHash(email.toLowerCase().trim());
-	return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=40`;
+  // Simple MD5 alternative for browser compatibility
+  // In production, you might want to use a proper crypto library
+  const hash = simpleHash(email.toLowerCase().trim());
+  return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=40`;
 }
 
 /**
@@ -242,13 +266,13 @@ function generateGravatarUrl(email: string): string {
  * Note: This is NOT cryptographically secure, just for avatar generation
  */
 function simpleHash(str: string): string {
-	let hash = 0;
-	for (let i = 0; i < str.length; i++) {
-		const char = str.charCodeAt(i);
-		hash = ((hash << 5) - hash) + char;
-		hash = hash & hash; // Convert to 32-bit integer
-	}
-	return Math.abs(hash).toString(16).padStart(8, '0');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0');
 }
 
 /**
@@ -257,14 +281,14 @@ function simpleHash(str: string): string {
  * @public
  */
 export function isGitRepository(): boolean {
-	try {
-		execSync('git rev-parse --git-dir', {
-			stdio: ['pipe', 'pipe', 'pipe'],
-		});
-		return true;
-	} catch {
-		return false;
-	}
+  try {
+    execSync('git rev-parse --git-dir', {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -281,5 +305,5 @@ export { formatRelativeDate } from './date.js';
  * @public
  */
 export function clearGitCache(): void {
-	gitCache.clear();
+  gitCache.clear();
 }
