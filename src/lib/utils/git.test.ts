@@ -1,11 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import {
 	generateEditLink,
 	formatRelativeDate,
+	clearGitCache,
 	type GitConfig
 } from './git';
 
 describe('git utilities', () => {
+	// Clear cache after each test to prevent pollution
+	afterEach(() => {
+		clearGitCache();
+	});
 	describe('generateEditLink', () => {
 		it('should generate correct GitHub edit link', () => {
 			const config: GitConfig = {
