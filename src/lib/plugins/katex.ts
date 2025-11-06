@@ -221,7 +221,7 @@ export function katexPlugin(options: KaTeXOptions = {}) {
  *
  * @public
  */
-export function remarkMathParser(options: KaTeXOptions = {}) {
+export function remarkMathParser() {
 	return (tree: Root) => {
 		visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
 			if (index === undefined || !node.value) return;

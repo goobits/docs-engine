@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';

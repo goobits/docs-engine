@@ -1,6 +1,5 @@
 import { visit, SKIP } from 'unist-util-visit';
-import type { Plugin } from 'unified';
-import type { Root, BlockContent } from 'mdast';
+import type { Root } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 import { renderBlockContent } from '../utils/markdown-renderer.js';
 

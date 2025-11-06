@@ -1,6 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
-import type { Root, BlockContent, Text } from 'mdast';
+import type { Root } from 'mdast';
 import { renderBlockContent } from '../utils/markdown-renderer.js';
 
 /**
@@ -44,7 +43,7 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  */
 export function calloutsPlugin() {
 	return (tree: Root) => {
-		visit(tree, 'blockquote', (node: any, index, parent) => {
+		visit(tree, 'blockquote', (node: any) => {
 			const firstChild = node.children?.[0];
 			if (!firstChild || firstChild.type !== 'paragraph') return;
 

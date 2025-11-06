@@ -64,7 +64,7 @@ export class GenericGenerator {
         return this.parseEnv(content, parser.categoryPrefix);
 
       case "sql":
-        return this.parseSQL(content, parser.tablePattern);
+        return this.parseSQL(content);
 
       case "grep":
         return this.parseGrep(parser.command, parser.extractPattern);
@@ -191,7 +191,7 @@ export class GenericGenerator {
   /**
    * Parse SQL schema
    */
-  private parseSQL(content: string, tablePattern?: RegExp): any[] {
+  private parseSQL(content: string): any[] {
     const tables: any[] = [];
     const lines = content.split("\n");
     let currentTable: any = null;

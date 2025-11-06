@@ -246,9 +246,7 @@ function wrapWithMetadata(
 export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 	const {
 		theme = 'dracula',
-		defaultLanguage = 'plaintext',
-		showLineNumbers = false,
-		showCopyButton = true
+		showLineNumbers = false
 	} = options;
 
 	return async (tree: Root) => {
@@ -306,7 +304,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 
 		// Process each code node asynchronously
 		await Promise.all(
-			codeNodes.map(async ({ node, index, parent }) => {
+			codeNodes.map(async ({ node }) => {
 				const infoString = node.lang || '';
 				const code = node.value;
 

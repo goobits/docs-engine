@@ -1,8 +1,7 @@
 import sharp from 'sharp';
-import { createHash } from 'crypto';
 import fsp from 'fs/promises';
 import { dirname, join, extname, basename } from 'path';
-import { FileIOError, ImageProcessingError, retryWithBackoff } from '../utils/errors.js';
+import { FileIOError, ImageProcessingError } from '../utils/errors.js';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('image-processor');
@@ -60,21 +59,6 @@ export interface ImageVariant {
 	size: number;
 	/** Output file path */
 	path: string;
-}
-
-/**
- * Generate a cache key for an image
- * Module-private helper
- */
-function generateCacheKey(
-	inputPath: string,
-	format: string,
-	width: number,
-	quality: number
-): string {
-	const hash = createHash('md5');
-	hash.update(`${inputPath}:${format}:${width}:${quality}`);
-	return hash.digest('hex');
 }
 
 /**

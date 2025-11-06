@@ -11,7 +11,6 @@
  * - Type inheritance tracking (extends/implements)
  */
 
-import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import * as ts from 'typescript';
@@ -635,7 +634,6 @@ export class SymbolMapGenerator {
 		const symbolCount = Object.values(symbolMap).flat().length;
 		const uniqueNames = Object.keys(symbolMap).length;
 		const cacheHitRate = ((cacheHits / totalFiles) * 100).toFixed(1);
-		const cacheMissRate = ((cacheMisses / totalFiles) * 100).toFixed(1);
 
 		logger.info({
 			symbolCount,

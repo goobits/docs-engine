@@ -239,14 +239,6 @@ function renderParams(params: Array<{ name: string; description: string; type: s
   `;
 }
 
-function symbolToDocUrl(symbol: SymbolDefinition): string {
-  const relativePath = symbol.path
-    .replace(/^src\/lib\/server\//, '')
-    .replace(/^\.\.\/packages\/shared\/src\//, 'shared/');
-  
-  return `/docs/api/${relativePath.replace(/\.ts$/, '')}#${symbol.name}`;
-}
-
 export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
   const repoPath = symbol.path.startsWith('../')
     ? symbol.path.replace(/^\.\.\//, '')

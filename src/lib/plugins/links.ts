@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root, Link } from 'mdast';
 
 /**

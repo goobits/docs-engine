@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { encodeJsonBase64 } from '../utils/base64.js';
 import { getVersion } from '../utils/version.js';
