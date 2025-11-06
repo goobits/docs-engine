@@ -149,6 +149,24 @@ async function processVariant(
 }
 
 /**
+ * Validates that a path is within an allowed base directory (path traversal protection)
+ * @param inputPath - Path to validate
+ * @param allowedBaseDir - Base directory that the path must be within
+ * @returns Validated canonical path
+ * @throws Error if path traversal is detected
+ */
+function validatePath(inputPath: string, allowedBaseDir: string): string {
+  const canonical = resolve(inputPath);
+  const baseCanonical = resolve(allowedBaseDir);
+
+  if (!canonical.startsWith(baseCanonical)) {
+    throw new Error(`Path traversal detected: ${inputPath}`);
+  }
+
+  return canonical;
+}
+
+/**
  * Process an image with Sharp to generate optimized variants
  *
  * Generates:
@@ -177,12 +195,16 @@ async function processVariant(
 export async function processImage(config: ImageProcessorConfig): Promise<ImageProcessorResult> {
   const { inputPath, outputDir, formats, sizes, quality, generatePlaceholder, cacheDir } = config;
 
+  // Validate input path for path traversal protection
+  const baseDir = process.cwd();
+  const validatedInputPath = validatePath(inputPath, baseDir);
+
   // Read input image
-  if (!existsSync(inputPath)) {
+  if (!existsSync(validatedInputPath)) {
     throw new Error(`Input image not found: ${inputPath}`);
   }
 
-  const sharpInstance = sharp(inputPath);
+  const sharpInstance = sharp(validatedInputPath);
   const metadata = await sharpInstance.metadata();
 
   if (!metadata.width || !metadata.height) {
