@@ -107,8 +107,8 @@ export const load = async () => {
 Builds navigation structure from document files.
 
 **Parameters:**
-- `files` (DocFile[]) - Array of document files with path, content, and href
-- `options` (NavigationBuilderOptions, optional) - Configuration options
+- `files` ({@DocFile}[]) - Array of document files with path, content, and href
+- `options` ({@NavigationBuilderOptions}, optional) - Configuration options
   - `icons` (Record<string, Component>) - Icon components for sections
   - `defaultSection` (string) - Default section name (default: "Documentation")
 

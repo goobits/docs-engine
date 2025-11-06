@@ -48,6 +48,8 @@ https://example.com
 
 ## Basic Config
 
+The plugin accepts {@ScreenshotPluginOptions} to configure screenshot generation behavior.
+
 ### Add Plugin
 
 ```javascript
@@ -111,6 +113,116 @@ theme: dracula
 viewport: 800x400
 showPrompt: true
 promptText: $
+```
+````
+
+---
+
+## Real Examples
+
+Here are practical CLI screenshot examples showcasing common documentation scenarios:
+
+### Git Commands
+
+````markdown
+```screenshot:git-status-example
+type: cli
+command: git status
+theme: dracula
+showPrompt: true
+```
+````
+
+````markdown
+```screenshot:git-log-example
+type: cli
+command: git log --oneline -5
+theme: monokai
+showPrompt: true
+```
+````
+
+### Package Manager Commands
+
+````markdown
+```screenshot:npm-install
+type: cli
+command: npm install @goobits/docs-engine
+theme: nord
+showPrompt: true
+promptText: $
+```
+````
+
+````markdown
+```screenshot:pnpm-build
+type: cli
+command: pnpm run build
+theme: dracula
+viewport: 900x500
+```
+````
+
+### File System Operations
+
+````markdown
+```screenshot:ls-tree
+type: cli
+command: ls -la src/lib/plugins/
+theme: solarized
+showPrompt: true
+```
+````
+
+````markdown
+```screenshot:cat-config
+type: cli
+command: cat package.json
+theme: dracula
+viewport: 800x600
+```
+````
+
+### Testing Commands
+
+````markdown
+```screenshot:vitest-run
+type: cli
+command: vitest run --reporter=verbose
+theme: nord
+viewport: 1000x600
+```
+````
+
+### TypeScript Commands
+
+````markdown
+```screenshot:tsc-check
+type: cli
+command: tsc --noEmit
+theme: monokai
+showPrompt: true
+```
+````
+
+````markdown
+```screenshot:tsx-script
+type: cli
+command: tsx scripts/generate-symbols.ts
+theme: dracula
+showPrompt: true
+```
+````
+
+### Docker Commands
+
+````markdown
+```screenshot:docker-ps
+type: cli
+command: docker ps
+theme: nord
+showPrompt: true
+promptText: docker>
 ```
 ````
 

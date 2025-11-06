@@ -140,10 +140,14 @@ Learn the fundamentals:
 ### Mathematical Content
 - **Math Rendering** - LaTeX equations with KaTeX in [KaTeX Plugin](./plugins/katex.md) *(now dogfooding!)*
 
-**Not Yet Shown** *(could be added with actual implementation)*:
-- Symbol References - `{@Symbol}` syntax *(needs symbol map)*
-- Screenshots - Automated captures *(needs Playwright setup)*
-- Image Optimization - WebP/AVIF *(needs images)*
+### Advanced Features
+- **Symbol References** - `{@Symbol}` syntax with type links (e.g., {@KaTeXOptions}, {@CodeHighlightOptions}) *(now dogfooding!)*
+- **Screenshot Examples** - 10 CLI screenshot examples in [Screenshots Plugin](./plugins/screenshots.md) *(now dogfooding!)*
+- **Symbol Map Generation** - 166 exported symbols from TypeScript source files *(generated!)*
+
+**Not Yet Shown** *(requires external resources)*:
+- Image Optimization demos - Needs actual image assets
+- Live screenshot generation - Needs runtime environment
 
 ---
 
