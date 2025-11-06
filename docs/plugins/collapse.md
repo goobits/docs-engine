@@ -14,20 +14,41 @@ Create collapsible sections with interactive `<details>`/`<summary>` elements fo
 
 ### Add to MDSveX Config
 
+`````markdown
+````tabs:collapse-config
+tab: JavaScript
+---
 ```javascript
 import { collapsePlugin } from '@goobits/docs-engine/plugins';
 
 export default {
   preprocess: [
     mdsvex({
-      remarkPlugins: [
-        collapsePlugin(),
-        // ... other plugins
-      ],
+      remarkPlugins: [collapsePlugin()],
     }),
   ],
 };
 ```
+---
+tab: TypeScript
+---
+```typescript
+import { mdsvex } from 'mdsvex';
+import { collapsePlugin } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [collapsePlugin()],
+    }),
+  ],
+};
+
+export default config;
+```
+````
+`````
 
 ### Use in Markdown
 

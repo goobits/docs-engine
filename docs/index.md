@@ -120,14 +120,14 @@ Learn the fundamentals:
 > **Tip:** This documentation practices what it preaches! Here's what you're seeing in action:
 
 ### Visual & Interactive
-- **Callouts** - All the colored `> **Note/Warning/Tip**` boxes you see
+- **Callouts** - All 9 types used with GitHub/Obsidian `[!NOTE]` syntax throughout docs
 - **Collapse Sections** - Collapsible content in [Collapse Plugin](./plugins/collapse.md) *(dogfooding!)*
 - **Mermaid Diagrams** - Flowcharts in [Plugin Order Guide](./guides/plugin-order.md)
 - **File Trees** - Directory structures like the one at the top of this page
 - **Table of Contents** - Auto-generated `## TOC` sections in guides
 
 ### Code Enhancement
-- **Code Tabs** - Multiple language examples (see [code-highlighting.md](./plugins/code-highlighting.md))
+- **Code Tabs** - JS/TS examples in Quick Start sections *(now on callouts, collapse, katex!)*
 - **Line Highlighting** - Important lines highlighted in code blocks
 - **Diff Syntax** - Red/green additions and deletions
 - **Syntax Highlighting** - All code blocks use Shiki

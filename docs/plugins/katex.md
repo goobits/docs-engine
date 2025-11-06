@@ -20,6 +20,10 @@ npm install katex remark-math
 
 ### Add to MDSveX Config
 
+`````markdown
+````tabs:katex-config
+tab: JavaScript
+---
 ```javascript
 import remarkMath from 'remark-math';
 import { katexPlugin } from '@goobits/docs-engine/plugins';
@@ -28,7 +32,6 @@ export default {
   preprocess: [
     mdsvex({
       remarkPlugins: [
-        // ... other plugins
         remarkMath,        // Parse math syntax
         katexPlugin(),     // Render with KaTeX
       ],
@@ -36,6 +39,30 @@ export default {
   ],
 };
 ```
+---
+tab: TypeScript
+---
+```typescript
+import { mdsvex } from 'mdsvex';
+import remarkMath from 'remark-math';
+import { katexPlugin } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        remarkMath,
+        katexPlugin(),
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+````
+`````
 
 ### Import KaTeX CSS
 

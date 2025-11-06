@@ -14,20 +14,41 @@ Styled callout boxes using GitHub/Obsidian-compatible syntax.
 
 ### Add to MDSveX Config
 
+`````markdown
+````tabs:callouts-config
+tab: JavaScript
+---
 ```javascript
 import { calloutsPlugin } from '@goobits/docs-engine/plugins';
 
 export default {
   preprocess: [
     mdsvex({
-      remarkPlugins: [
-        calloutsPlugin(),
-        // ... other plugins
-      ],
+      remarkPlugins: [calloutsPlugin()],
     }),
   ],
 };
 ```
+---
+tab: TypeScript
+---
+```typescript
+import { mdsvex } from 'mdsvex';
+import { calloutsPlugin } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [calloutsPlugin()],
+    }),
+  ],
+};
+
+export default config;
+```
+````
+`````
 
 ### Use in Markdown
 
