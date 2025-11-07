@@ -275,6 +275,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
             'json',
             'html',
             'css',
+            'scss',
             'svelte',
             'tsx',
             'jsx',
