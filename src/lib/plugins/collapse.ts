@@ -17,6 +17,8 @@ import { escapeHtml } from '../utils/html.js';
  * - Chevron icon rotation
  * - Accessible keyboard navigation
  */
+ * @public
+ */
 export function collapsePlugin() {
   return (tree: Root) => {
     try {

@@ -23,6 +23,8 @@ const INLINE_REFERENCE_REGEX = /{@([\w\/<>.,\[\]]+(?:#[\w.<>]+)?)}/g;
  *   - {@implementors/types#SessionState} → disambiguated reference
  *   - :::reference Implementor → full API documentation block
  */
+ * @public
+ */
 export function referencePlugin() {
   return (tree: Root) => {
     // Lazy load symbol map during transform phase (not during plugin init)

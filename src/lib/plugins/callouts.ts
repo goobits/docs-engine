@@ -42,6 +42,8 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  *
  * Into styled HTML callouts with icons and enhanced markdown rendering
  */
+ * @public
+ */
 export function calloutsPlugin() {
   return (tree: Root) => {
     visit(tree, 'blockquote', (node: any, index, parent) => {

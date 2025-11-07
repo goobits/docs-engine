@@ -5,6 +5,8 @@ import type { Root, Heading, List, ListItem } from 'mdast';
  * Creates a remark plugin that generates a table of contents (TOC) from markdown headings
  * @returns A unified plugin
  */
+ * @public
+ */
 export function remarkTableOfContents() {
   return (tree: Root) => {
     /** @type {Array<{depth: number, text: string, id: string}>} */

@@ -17,6 +17,8 @@ import { encodeBase64 } from '../utils/base64.js';
  *
  * Which is then rendered client-side by mermaid.js
  */
+ * @public
+ */
 export function mermaidPlugin() {
   return (tree: Root) => {
     visit(tree, 'code', (node: any) => {
