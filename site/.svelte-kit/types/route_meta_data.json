@@ -1,9 +1,12 @@
 {
 	"/": [],
 	"/docs": [
-		"src/routes/docs/+page.server.ts"
+		"src/routes/docs/+page.server.ts",
+		"src/routes/docs/+layout.server.ts",
+		"src/routes/docs/+layout.server.ts"
 	],
 	"/docs/[...slug]": [
-		"src/routes/docs/[...slug]/+page.server.ts"
+		"src/routes/docs/[...slug]/+page.server.ts",
+		"src/routes/docs/+layout.server.ts"
 	]
 }
