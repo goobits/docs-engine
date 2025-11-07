@@ -10,7 +10,7 @@ import {
 import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.js';
 import type { RenderOptions } from '../utils/symbol-renderer.js';
 
-const INLINE_REFERENCE_REGEX = /{@([\w\/<>.,\[\]]+(?:#[\w.<>]+)?)}/g;
+const INLINE_REFERENCE_REGEX = /{@([\w/<>.,[\]]+(?:#[\w.<>]+)?)}/g;
 
 /**
  * Remark plugin to transform {@symbol} references into documentation

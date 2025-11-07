@@ -1,5 +1,4 @@
 import { visit, SKIP } from 'unist-util-visit';
-import type { Plugin } from 'unified';
 import type { Root, BlockContent, Paragraph } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 

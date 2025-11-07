@@ -257,7 +257,7 @@ export function remarkMathParser(_options: KaTeXOptions = {}) {
 
       // Match $...$ (inline math) in remaining text
       const remainingText = text.slice(lastIndex);
-      const inlineRegex = /\$([^\$\n]+?)\$/g;
+      const inlineRegex = /\$([^$\n]+?)\$/g;
       let inlineLastIndex = 0;
 
       while ((match = inlineRegex.exec(remainingText)) !== null) {

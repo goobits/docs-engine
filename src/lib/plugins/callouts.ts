@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root, BlockContent, Paragraph, Text } from 'mdast';
+import type { Root, BlockContent, Paragraph } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 
 /**
@@ -44,7 +44,7 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  */
 export function calloutsPlugin() {
   return (tree: Root) => {
-    visit(tree, 'blockquote', (node: any, index, parent) => {
+    visit(tree, 'blockquote', (node: any, _index, _parent) => {
       const firstChild = node.children?.[0];
       if (!firstChild || firstChild.type !== 'paragraph') return;
 

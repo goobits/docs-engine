@@ -9,9 +9,9 @@
     copiedPath: string | null;
     allowCopy: boolean;
     githubUrl: string | undefined;
-    toggleFolder: (path: string) => void;
-    copyPath: (path: string) => void;
-    openInGithub: (path: string) => void;
+    toggleFolder: (_path: string) => void;
+    copyPath: (_path: string) => void;
+    openInGithub: (_path: string) => void;
   }
 
   let {
