@@ -1,6 +1,9 @@
 import path from 'path';
+import { error } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { scanDocumentation } from 'dist/server/index.js';
 import { buildNavigation } from 'dist/utils/index.js';
+import { logError, createDevError } from '$lib/utils/error-logger';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async () => {
@@ -35,9 +38,24 @@ export const load: LayoutServerLoad = async () => {
     return {
       navigation: serializableNavigation,
     };
-  } catch (error) {
-    console.error('Failed to load navigation:', error);
-    // Return empty navigation on error
+  } catch (err) {
+    // Log navigation generation errors
+    logError('Navigation', 'Failed to build sidebar navigation', err);
+    console.error('[Navigation] Docs root:', docsRoot);
+
+    if (dev) {
+      throw error(
+        500,
+        createDevError(
+          500,
+          'Failed to generate documentation navigation',
+          err instanceof Error ? err.message : String(err),
+          'Check that the docs folder exists and contains valid markdown files with frontmatter.'
+        ) as any
+      );
+    }
+
+    // In production, return empty navigation (graceful degradation)
     return {
       navigation: [],
     };
