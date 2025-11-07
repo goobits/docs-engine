@@ -1,0 +1,66 @@
+/**
+ * Code Tabs Component (BEM)
+ * Tabbed interface for displaying multiple code examples
+ *
+ * BEM NAMING: .md-code-tabs, .md-code-tabs__*, .md-code-tabs__*--*
+ * Modern CSS with native nesting
+ */
+
+/* ============================================================================
+   Block: .md-code-tabs
+   ========================================================================= */
+
+/**
+ * Code Tabs Block
+ * Usage: <div class="md-code-tabs">...</div>
+ */
+.md-code-tabs {
+  margin: var(--space-8) 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+
+  /* ===== Elements ===== */
+
+  &__header {
+    display: flex;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: var(--color-surface-raised);
+    border-bottom: 1px solid var(--color-border-subtle);
+    overflow-x: auto;
+  }
+
+  &__tab {
+    padding: var(--space-2) var(--space-6);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+
+    /* ===== Modifiers ===== */
+
+    &--active {
+      background: rgba(0, 122, 255, 0.1);
+      border-color: var(--color-text-accent);
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__content {
+    padding: 0;
+  }
+
+  &__panel {
+    display: none;
+
+    /* ===== Modifiers ===== */
+
+    &--active {
+      display: block;
+    }
+  }
+}

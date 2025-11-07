@@ -1,0 +1,37 @@
+/**
+ * Mermaid Diagram Component (BEM)
+ * Container for Mermaid diagram rendering
+ *
+ * BEM NAMING: .md-mermaid, .md-mermaid--*
+ * Modern CSS with native nesting
+ */
+
+/* ============================================================================
+   Block: .md-mermaid
+   ========================================================================= */
+
+/**
+ * Mermaid Diagram Block
+ * Usage: <div class="md-mermaid md-mermaid--rendered">...</div>
+ */
+.md-mermaid {
+  margin: var(--space-8) 0;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+
+  & svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ===== Modifiers ===== */
+
+  &--rendered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

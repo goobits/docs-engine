@@ -1,0 +1,181 @@
+/**
+ * Code Block Component (BEM)
+ * Enhanced code blocks with title bars, line numbers, and syntax highlighting
+ *
+ * BEM NAMING: .code-block-*, .shiki .line.*
+ * Modern CSS with native nesting
+ */
+
+/* ============================================================================
+   Code Block Container
+   ========================================================================= */
+
+/**
+ * Code Block Container
+ * Wraps code blocks with metadata (title, line numbers)
+ * Usage: <div class="code-block-container">...</div>
+ */
+.code-block-container {
+  margin: var(--space-8) 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+
+  /* Remove margins from nested pre tags */
+  & pre {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+}
+
+/* ============================================================================
+   Code Block Title Bar
+   ========================================================================= */
+
+/**
+ * Code Block Title Bar
+ * Displays filename above code block
+ * Usage: <div class="code-block-title">filename.ts</div>
+ */
+.code-block-title {
+  padding: var(--space-2) var(--space-6);
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* File icon (optional enhancement) */
+  &::before {
+    content: '📄';
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ============================================================================
+   Code Block with Line Numbers
+   ========================================================================= */
+
+/**
+ * Code Block with Line Numbers
+ * Container for line numbers + code
+ * Usage: <div class="code-block-with-lines">...</div>
+ */
+.code-block-with-lines {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background: #282a36; /* Dracula theme bg */
+}
+
+/* ============================================================================
+   Line Numbers Column
+   ========================================================================= */
+
+/**
+ * Line Numbers Column
+ * Displays line numbers alongside code
+ * Usage: <div class="code-block-line-numbers">...</div>
+ */
+.code-block-line-numbers {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-2);
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--color-border-subtle);
+  user-select: none;
+  text-align: right;
+  min-width: 3ch;
+}
+
+/**
+ * Individual Line Number
+ * Usage: <span class="line-number">1</span>
+ */
+.line-number {
+  display: block;
+  height: 1.5rem; /* Match line height */
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.5rem;
+
+  &.highlight {
+    color: var(--color-text-accent);
+    font-weight: 700;
+  }
+}
+
+/* ============================================================================
+   Line Highlighting
+   ========================================================================= */
+
+/**
+ * Line Highlighting
+ * Highlight specific lines in code blocks
+ * Usage: <span class="line highlight">code</span>
+ */
+.shiki .line.highlight {
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--color-text-accent, #bd93f9);
+  padding-left: calc(var(--space-4) - 3px);
+  margin-left: calc(var(--space-4) * -1);
+  display: inline-block;
+  width: calc(100% + var(--space-4));
+}
+
+/* ============================================================================
+   Diff Syntax Support
+   ========================================================================= */
+
+/**
+ * Diff Syntax Support
+ * Style added (+) and removed (-) lines
+ */
+
+/* Added lines (green) */
+.shiki .line.diff-add {
+  background: rgba(34, 197, 94, 0.15); /* Green */
+  border-left: 3px solid rgb(34, 197, 94);
+  padding-left: calc(var(--space-4) - 3px);
+  margin-left: calc(var(--space-4) * -1);
+  display: inline-block;
+  width: calc(100% + var(--space-4));
+
+  /* Dim the + symbol itself */
+  &::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    color: rgb(34, 197, 94);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+}
+
+/* Removed lines (red) */
+.shiki .line.diff-remove {
+  background: rgba(239, 68, 68, 0.15); /* Red */
+  border-left: 3px solid rgb(239, 68, 68);
+  padding-left: calc(var(--space-4) - 3px);
+  margin-left: calc(var(--space-4) * -1);
+  display: inline-block;
+  width: calc(100% + var(--space-4));
+  text-decoration: line-through;
+  opacity: 0.8;
+
+  /* Dim the - symbol itself */
+  &::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: rgb(239, 68, 68);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,229 @@
+/**
+ * Callout Component (BEM)
+ * Informational callout boxes with 9 color variants
+ *
+ * BEM NAMING: .md-callout, .md-callout__*, .md-callout--*
+ * Modern CSS with native nesting
+ */
+
+/* ============================================================================
+   Block: .md-callout
+   ========================================================================= */
+
+/**
+ * Callout Block
+ * Usage: <div class="md-callout md-callout--blue">...</div>
+ */
+.md-callout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  margin: var(--space-8) 0;
+  border-left: 4px solid;
+  transition: transform var(--duration-fast) var(--ease-out);
+
+  /* Subtle hover effect for interactive feel */
+  &:hover {
+    transform: translateX(2px);
+  }
+
+  /* ===== Elements ===== */
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__icon {
+    display: inline-flex;
+    font-size: var(--font-size-lg);
+    line-height: 1;
+  }
+
+  &__label {
+    flex: 1;
+  }
+
+  &__content {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+
+    /* Reset margins for first and last elements */
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    & > :last-child {
+      margin-bottom: 0;
+    }
+
+    /* Style nested elements */
+    & p {
+      margin: var(--space-2) 0;
+    }
+
+    & ul,
+    & ol {
+      margin: var(--space-2) 0;
+      padding-left: var(--space-6);
+    }
+
+    & li {
+      margin: var(--space-1) 0;
+    }
+
+    & code {
+      background: var(--color-surface-elevated);
+      padding: 0.125rem 0.375rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875em;
+      font-family: var(--font-family-mono);
+    }
+
+    & pre {
+      background: var(--color-surface-elevated);
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin: var(--space-4) 0;
+
+      & code {
+        background: none;
+        padding: 0;
+      }
+
+      /* Line highlighting support */
+      & .line {
+        display: inline-block;
+        width: 100%;
+
+        &.highlighted {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-left: 3px solid var(--color-text-accent);
+          padding-left: calc(var(--space-2) - 3px);
+          margin-left: calc(var(--space-2) * -1);
+        }
+      }
+    }
+
+    & a {
+      color: var(--color-text-accent);
+      text-decoration: none;
+      transition: opacity var(--duration-fast) var(--ease-out);
+
+      &:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  /* ===== Modifiers: Color Variants ===== */
+
+  &--blue {
+    background: var(--color-callout-blue-bg);
+    border-left-color: var(--color-callout-blue-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-blue-text);
+    }
+  }
+
+  &--green {
+    background: var(--color-callout-green-bg);
+    border-left-color: var(--color-callout-green-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-green-text);
+    }
+  }
+
+  &--purple {
+    background: var(--color-callout-purple-bg);
+    border-left-color: var(--color-callout-purple-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-purple-text);
+    }
+  }
+
+  &--yellow {
+    background: var(--color-callout-yellow-bg);
+    border-left-color: var(--color-callout-yellow-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-yellow-text);
+    }
+  }
+
+  &--red {
+    background: var(--color-callout-red-bg);
+    border-left-color: var(--color-callout-red-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-red-text);
+    }
+  }
+
+  &--success {
+    background: var(--color-callout-success-bg);
+    border-left-color: var(--color-callout-success-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-success-text);
+    }
+  }
+
+  &--danger {
+    background: var(--color-callout-danger-bg);
+    border-left-color: var(--color-callout-danger-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-danger-text);
+    }
+  }
+
+  &--info {
+    background: var(--color-callout-info-bg);
+    border-left-color: var(--color-callout-info-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-info-text);
+    }
+  }
+
+  &--question {
+    background: var(--color-callout-question-bg);
+    border-left-color: var(--color-callout-question-border);
+
+    & .md-callout__header {
+      color: var(--color-callout-question-text);
+    }
+  }
+}
+
+/* ============================================================================
+   Responsive Styles
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .md-callout {
+    padding: var(--space-4);
+    margin: var(--space-6) 0;
+
+    &__header {
+      font-size: var(--font-size-xs);
+    }
+
+    &__content {
+      font-size: var(--font-size-sm);
+    }
+  }
+}

@@ -1,0 +1,50 @@
+/**
+ * @goobits/docs-engine - W3C Design Token + BEM Architecture
+ *
+ * Modern CSS Architecture - No Legacy Support
+ * All components use native CSS nesting and W3C design tokens
+ *
+ * Architecture:
+ * 1. W3C Design Tokens (_design-tokens.css)
+ * 2. BEM Components (components/*.css)
+ * 3. Legacy Styles (base.scss - for backward compatibility only)
+ * 4. External Dependencies (katex)
+ *
+ * Usage:
+ * ```typescript
+ * import '@goobits/docs-engine/styles/index-new.css';
+ * ```
+ */
+
+/* ============================================================================
+   Phase 1: W3C Design Token Foundation
+   ========================================================================= */
+@import './_design-tokens.css';
+
+/* ============================================================================
+   Phase 2: BEM Component Architecture (Modern CSS)
+   ========================================================================= */
+
+@import './components/_symbol.css';
+@import './components/_callout.css';
+@import './components/_code-tabs.css';
+@import './components/_filetree.css';
+@import './components/_mermaid.css';
+@import './components/_code-block.css';
+
+/* ============================================================================
+   Phase 3: Legacy Styles (For Backward Compatibility)
+   ========================================================================= */
+/* NOTE: base.scss still contains utility classes and old token definitions
+   This is kept only for gradual migration. New projects should not use this. */
+@import './base.scss';
+
+/* ============================================================================
+   Phase 4: External Dependencies
+   ========================================================================= */
+
+/**
+ * KaTeX Math Rendering
+ * Import KaTeX CSS for mathematical equation rendering
+ */
+@import 'katex/dist/katex.min.css';

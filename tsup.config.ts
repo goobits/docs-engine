@@ -83,9 +83,9 @@ export default defineConfig({
     options.external = [...(options.external || []), '*.svelte'];
   },
 
-  // Post-build: Copy .svelte, .scss, and .json files to dist/
+  // Post-build: Copy .svelte, .css, .scss, and .json files to dist/
   onSuccess: async () => {
-    console.log('\nCopying .svelte, .scss, and .json files to dist/...');
+    console.log('\nCopying .svelte, .css, .scss, and .json files to dist/...');
 
     const srcLib = join(process.cwd(), 'src/lib');
     const distLib = join(process.cwd(), 'dist');
@@ -93,7 +93,10 @@ export default defineConfig({
     // Copy .svelte files
     copyFiles(srcLib, distLib, /\.svelte$/);
 
-    // Copy .scss files
+    // Copy .css files (modern CSS with native nesting)
+    copyFiles(srcLib, distLib, /\.css$/);
+
+    // Copy .scss files (legacy support)
     copyFiles(srcLib, distLib, /\.scss$/);
 
     // Copy .json files (for grammars, etc.)
