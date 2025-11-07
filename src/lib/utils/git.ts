@@ -62,7 +62,7 @@ const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
 async function execGitCommand(
   command: string,
   cacheKey: string,
-  ttl = 60000
+  _ttl = 60000
 ): Promise<string | null> {
   // Check cache first (LRUCache handles TTL automatically)
   const cached = gitCache.get(cacheKey);
@@ -82,11 +82,11 @@ async function execGitCommand(
       {
         retries: 2,
         minTimeout: 500,
-        onFailedAttempt: (error: Error & { attemptNumber: number }) => {
+        onFailedAttempt: ({ error, attemptNumber }) => {
           // Only retry on git lock errors
           if (error.message.includes('lock') || error.message.includes('index.lock')) {
             if (process.env.NODE_ENV !== 'test') {
-              console.warn(`Git lock detected, retrying... (attempt ${error.attemptNumber})`);
+              console.warn(`Git lock detected, retrying... (attempt ${attemptNumber})`);
             }
             return; // Retry
           }
