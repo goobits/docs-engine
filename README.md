@@ -1,32 +1,27 @@
-# @goobits/docs-engine
+# 📚 @goobits/docs-engine
 
-Battery-included documentation system for SvelteKit with markdown rendering, screenshots, search, and symbol references.
+Documentation system for SvelteKit with markdown rendering, symbol references, and automated tooling.
 
-## Features
+## ✨ Key Features
 
-- **Markdown rendering** with Shiki syntax highlighting
-- **Enhanced code blocks** - Line highlighting, line numbers, file titles, diff syntax
-- **Math rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
-- **API documentation generator** - Auto-generate API docs from TypeScript with JSDoc
-- **Link validation** - CLI tool to check internal and external links
-- **Symbol references** - Link to TypeScript types/functions with `{@Symbol}` syntax
-- **Automated screenshot generation** (web + CLI)
-- **Image optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox
-- **Table of contents** generation with `## TOC` syntax
-- **MDsveX plugins** - Callouts, mermaid, tabs, filetree, TOC, links, screenshots, references
-- **Frontmatter parsing** for metadata
-- **Navigation builder** utility for auto-generating doc structure
-- **Responsive design** with mobile navigation
-- **Customizable theming** with CSS variables
-- **SEO automation** - Sitemap generation, meta tags
-- **Versioning system** - Multi-version documentation support
+- **🎨 Enhanced Code Blocks** - Syntax highlighting, line numbers, diff syntax, copy-to-clipboard
+- **🔗 Symbol References** - Link to TypeScript types/functions with `{@Symbol}` syntax
+- **🖼️ Image Optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox modal
+- **📐 Math Rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
+- **🤖 API Documentation** - Auto-generate API docs from TypeScript with JSDoc
+- **🔍 Link Validation** - CLI tool to check internal and external links
+- **📸 Automated Screenshots** - Web and CLI screenshot generation
+- **🧩 MDsveX Plugins** - Callouts, mermaid, tabs, filetree, TOC, and more
 
-## Installation
+## 🚀 Quick Start
+
 ```bash
+# Installation
 pnpm add @goobits/docs-engine
-```
 
-## Quick Start
+# CLI tools (optional)
+pnpm add -D @goobits/docs-engine-cli
+```
 
 ### 1. Configure MDSveX
 
@@ -100,15 +95,7 @@ In your layout component:
 @import '@goobits/docs-engine/styles';
 ```
 
-## CLI Tools
-
-The `@goobits/docs-engine-cli` package provides command-line tools for maintaining your documentation.
-
-### Installation
-
-```bash
-pnpm add -D @goobits/docs-engine-cli
-```
+## 🛠️ CLI Tools
 
 ### Link Checking
 
@@ -126,49 +113,38 @@ pnpm docs-engine check-links --quiet
 
 # JSON output for CI
 pnpm docs-engine check-links --json
+
+# Configure via .linkcheckerrc.json
 ```
 
-Features:
-- ✅ Internal link validation (files and anchors)
-- 🌐 External link validation with HTTP requests
-- 🎨 Beautiful color-coded output
-- ⚡ Concurrent checking with configurable limits
-- 🔄 CI-friendly (non-zero exit codes on failure)
-- ⚙️ Configurable via `.linkcheckerrc.json`
+Validates internal links (files and anchors), external links with HTTP requests, and provides color-coded output with configurable concurrency.
 
-See [CLI documentation](./packages/docs-engine-cli/README.md) for more details.
+See [CLI documentation](./packages/docs-engine-cli/README.md) for details.
 
-## Documentation
+## 📖 Documentation
 
 **[📚 Complete Documentation Index](./docs/index.md)** - Full documentation with learning paths
 
-### Quick Links
+### Getting Started
 
 - **[Getting Started](./docs/getting-started.md)** - 5-minute setup guide
-- **[Plugin Order Guide](./docs/guides/plugin-order.md)** - Understanding plugin execution order
+- **[Plugin Order Guide](./docs/guides/plugin-order.md)** - Plugin execution order and configuration
+- **[Architecture](./docs/ARCHITECTURE.md)** - Package/consumer split and design decisions
+- **[Examples](./docs/guides/examples.md)** - Code examples and common patterns
 
-### Core Guides
-
-- **[Architecture](./docs/ARCHITECTURE.md)** - Package/consumer split, integration guide, design decisions
-- **[Examples](./docs/guides/examples.md)** - Code examples, recipes, and common patterns
-- **[Diagrams](./docs/guides/diagrams.md)** - Visual architecture diagrams and flowcharts
-
-### Plugin Documentation
+### Plugin Guides
 
 - **[Symbol References](./docs/plugins/symbol-references.md)** - Link to TypeScript symbols with `{@Symbol}` syntax
 - **[Screenshots](./docs/plugins/screenshots.md)** - Automated web and CLI screenshot generation
-- **[Image Optimization](./docs/plugins/image-optimization.md)** - Auto WebP/AVIF generation
+- **[Image Optimization](./docs/plugins/image-optimization.md)** - Auto WebP/AVIF generation with lazy loading
+- **[Code Highlighting](./docs/plugins/code-highlighting.md)** - Syntax highlighting with Shiki
 - **[Table of Contents](./docs/plugins/toc.md)** - Auto-generate TOC with `## TOC` syntax
-- **[Frontmatter Parser](./docs/plugins/frontmatter.md)** - Parse YAML frontmatter metadata
-- **[Navigation Builder](./docs/plugins/navigation.md)** - Auto-generate navigation from markdown files
-- **[File Tree](./docs/plugins/filetree.md)** - Display interactive file trees
-- **[Links Plugin](./docs/plugins/links.md)** - Convert relative links to absolute paths
+- **[File Tree](./docs/plugins/filetree.md)** - Interactive file trees
 - **[Callouts](./docs/plugins/callouts.md)** - Styled note/warning/info boxes
 - **[Mermaid](./docs/plugins/mermaid.md)** - Diagram rendering with mermaid.js
 - **[Code Tabs](./docs/plugins/code-tabs.md)** - Tabbed code examples
-- **[Code Highlighting](./docs/plugins/code-highlighting.md)** - Syntax highlighting with Shiki
 
-### Utilities
+### JavaScript API
 
 ```javascript
 import { parseFrontmatter, extractTitle } from '@goobits/docs-engine/utils';
@@ -186,31 +162,7 @@ const symbolMap = loadSymbolMap();
 const symbol = resolveSymbol('RequestState', symbolMap);
 ```
 
-See individual documentation files for detailed usage examples.
-
-## Architecture
-
-The docs-engine symbol reference system is split between reusable package functionality and consumer-specific implementation:
-
-**Package (this package):**
-- Remark/rehype plugins for transforming `{@Symbol}` syntax
-- Symbol resolution and rendering logic
-- Type definitions and utilities
-
-**Consumer (your project):**
-- Symbol generation scripts (scan TypeScript files)
-- Build pipeline integration
-- Pre-commit hooks and CI validation
-- Directory/file patterns to scan
-
-See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for complete details on:
-- What belongs where
-- Integration guide
-- Configuration options
-- Extension points
-- Design decisions
-
-## Quick Example: Symbol References
+## 🎯 Example: Symbol References
 
 **1. Generate symbol map (in your project):**
 
@@ -234,8 +186,24 @@ The {@RequestState} type tracks request context.
 
 Links to GitHub source with hover tooltips showing type signatures.
 
-See **[docs/guides/examples.md](./docs/guides/examples.md)** for complete examples.
+See **[docs/guides/examples.md](./docs/guides/examples.md)** for more examples.
 
-## License
+## 🏗️ Architecture
 
-MIT
+The symbol reference system separates reusable package functionality from consumer-specific implementation:
+
+**Package (this package):**
+- Remark/rehype plugins for transforming `{@Symbol}` syntax
+- Symbol resolution and rendering logic
+- Type definitions and utilities
+
+**Consumer (your project):**
+- Symbol generation scripts (scan TypeScript files)
+- Build pipeline integration
+- Pre-commit hooks and CI validation
+
+See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for integration guide and design decisions.
+
+## 📝 License
+
+MIT - see [LICENSE](LICENSE) for details

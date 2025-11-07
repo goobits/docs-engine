@@ -244,10 +244,7 @@ function wrapWithMetadata(
  * @public
  */
 export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
-  const {
-    theme = 'dracula',
-    showLineNumbers = false,
-  } = options;
+  const { theme = 'dracula', showLineNumbers = false } = options;
 
   return async (tree: Root) => {
     const codeNodes: Array<{ node: any; index: number; parent: any }> = [];
@@ -278,6 +275,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
             'json',
             'html',
             'css',
+            'scss',
             'svelte',
             'tsx',
             'jsx',
@@ -354,8 +352,9 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
           highlighted = wrapWithMetadata(highlighted, metadata, code);
 
           // Transform the node to HTML
+          // Escape curly braces for Svelte 5 parser compatibility
           node.type = 'html';
-          node.value = highlighted;
+          node.value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
           delete node.lang;
         } catch (error) {
           console.error(
@@ -363,8 +362,10 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
             error
           );
           // Fallback to plain code block
+          // Escape curly braces for Svelte 5 parser compatibility
           node.type = 'html';
-          node.value = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
+          const fallbackHtml = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
+          node.value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
           delete node.lang;
         }
       })
