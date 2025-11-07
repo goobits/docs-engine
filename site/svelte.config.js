@@ -19,30 +19,7 @@ const config = {
       layout: {
         _: resolve(__dirname, './src/lib/layouts/MarkdownLayout.svelte'),
       },
-      remarkPlugins: [
-        // Temporarily testing with minimal plugins to isolate crash
-        codeHighlightPlugin({ theme: 'dracula' }),
-
-        // Content processing
-        // linksPlugin,
-        // remarkTableOfContents,
-
-        // Math support disabled due to Svelte 5 parser issues with LaTeX backslashes
-        // remarkMathParser,
-        // katexPlugin,
-
-        // Markdown enhancements
-        // calloutsPlugin,
-        // filetreePlugin,
-        // tabsPlugin,
-        // mermaidPlugin,
-        // collapsePlugin,
-
-        // Advanced features
-        // referencePlugin,
-        // imageOptimizationPlugin,
-        // screenshotPlugin,
-      ],
+      remarkPlugins: [[codeHighlightPlugin, { theme: 'dracula' }]],
     }),
   ],
 
