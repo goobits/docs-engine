@@ -128,8 +128,6 @@ function cleanUrl(url: string): string {
  *
  * @public
  */
- * @public
- */
 export function imageOptimizationPlugin(options: ImageOptimizationOptions = {}) {
   const basePath = options.basePath || '/images';
   const formats = options.formats || ['webp', 'avif', 'original'];
