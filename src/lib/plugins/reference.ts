@@ -22,7 +22,6 @@ const INLINE_REFERENCE_REGEX = /{@([\w\/<>.,\[\]]+(?:#[\w.<>]+)?)}/g;
  *   - {@RequestState} → links to type definition with hover tooltip
  *   - {@implementors/types#SessionState} → disambiguated reference
  *   - :::reference Implementor → full API documentation block
- */
  * @public
  */
 export function referencePlugin() {

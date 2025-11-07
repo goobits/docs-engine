@@ -49,7 +49,7 @@
               height = metaData.height;
             }
           }
-        } catch (e) {
+        } catch {
           // Dimensions not critical, continue without them
         }
 

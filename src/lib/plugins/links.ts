@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root, Link } from 'mdast';
 
 /**
@@ -40,7 +39,6 @@ const DEFAULT_TOP_LEVEL_FILES = [
  * while rendering proper site paths in the documentation.
  *
  * @param options - Configuration options
- */
  * @public
  */
 export function linksPlugin(options: LinksPluginOptions = {}) {

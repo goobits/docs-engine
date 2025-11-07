@@ -1,8 +1,6 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { parseTree, getFileType } from '../utils/tree-parser.js';
-import type { TreeNode } from '../utils/tree-parser.js';
 import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';
 
@@ -21,7 +19,6 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  * <div class="md-filetree" data-tree="...encoded..."></div>
  *
  * Which is then rendered client-side by the FileTree component
- */
  * @public
  */
 export function filetreePlugin() {

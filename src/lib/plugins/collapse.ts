@@ -16,7 +16,6 @@ import { escapeHtml } from '../utils/html.js';
  * - Smooth animations (CSS-based)
  * - Chevron icon rotation
  * - Accessible keyboard navigation
- */
  * @public
  */
 export function collapsePlugin() {

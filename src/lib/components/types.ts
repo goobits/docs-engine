@@ -1,4 +1,3 @@
-import type { ComponentType } from 'svelte';
 import type { DocsLink, DocsSection } from '../utils/navigation';
 
 // Re-export navigation types for convenience

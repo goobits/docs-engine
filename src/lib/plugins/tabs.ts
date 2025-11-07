@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
 import type { Root } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';
@@ -35,7 +34,6 @@ interface Tab {
  * <div class="md-code-tabs" data-tabs-id="api-example" data-tabs="...encoded..."></div>
  *
  * Which is then hydrated client-side into an interactive tabs component
- */
  * @public
  */
 export function tabsPlugin() {
