@@ -1,6 +1,6 @@
 {
   "name": "@goobits/docs-engine-cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "CLI tools for docs-engine - link checking, validation, versioning, and maintenance",
   "type": "module",
   "bin": {

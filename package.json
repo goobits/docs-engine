@@ -1,6 +1,6 @@
 {
   "name": "@goobits/docs-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
   "type": "module",
   "main": "./dist/index.js",
@@ -31,8 +31,8 @@
       "import": "./dist/config/index.js",
       "types": "./dist/config/index.d.ts"
     },
-    "./styles": "./src/lib/styles/index.scss",
-    "./styles/*": "./src/lib/styles/*"
+    "./styles": "./dist/styles/index.css",
+    "./styles/*": "./dist/styles/*"
   },
   "files": [
     "dist",

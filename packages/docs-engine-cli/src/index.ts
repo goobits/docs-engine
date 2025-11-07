@@ -5,6 +5,9 @@ import { glob } from 'glob';
 import ora from 'ora';
 import chalk from 'chalk';
 import path from 'path';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { extractLinksFromFiles } from './link-extractor.js';
 import { validateLinks } from './link-validator.js';
 import { printResults } from './reporter.js';
@@ -14,6 +17,21 @@ import { createVersion, listVersions, deleteVersion } from './versioning.js';
 import { generateApiDocs } from './api-generator.js';
 import { watchSymbols } from './symbol-watcher.js';
 import { benchmarkSymbols, printBenchmarkResults } from './symbol-benchmarker.js';
+
+/**
+ * Get the CLI version from package.json
+ */
+function getVersion(): string {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const packageJsonPath = join(__dirname, '../package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return packageJson.version || '1.0.0';
+  } catch {
+    return '1.0.0';
+  }
+}
 
 /**
  * Main CLI program
@@ -31,7 +49,7 @@ const program = new Command();
 program
   .name('docs-engine')
   .description('CLI tools for docs-engine - link checking, versioning, and validation')
-  .version('1.0.0');
+  .version(getVersion());
 
 /**
  * Check links command
@@ -133,7 +151,7 @@ program
       if (brokenCount > 0) {
         process.exit(1);
       }
-    } catch (error) {
+    } catch {
       spinner.fail('Link checking failed');
       console.error(error);
       process.exit(1);
@@ -165,7 +183,7 @@ versionCmd
       );
       console.log(chalk.gray(`  - Updated versions.json`));
       console.log(chalk.gray(`  - Deploy your updated documentation`));
-    } catch (error) {
+    } catch {
       spinner.fail('Failed to create version');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
@@ -192,7 +210,7 @@ versionCmd
         console.log(`  ${version.version}${label}`);
       });
       console.log();
-    } catch (error) {
+    } catch {
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
     }
@@ -210,7 +228,7 @@ versionCmd
       const docsDir = path.resolve(process.cwd(), options.docsDir);
       await deleteVersion(version, docsDir);
       spinner.succeed(`Version ${version} deleted successfully!`);
-    } catch (error) {
+    } catch {
       spinner.fail('Failed to delete version');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
@@ -262,7 +280,7 @@ program
       if (options.index) {
         console.log(chalk.gray(`  Index file: ${path.join(options.outputDir, 'index.md')}`));
       }
-    } catch (error) {
+    } catch {
       spinner.fail('API documentation generation failed');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       if (error instanceof Error && error.stack) {
@@ -362,7 +380,7 @@ program
       console.log(chalk.gray(`  Output: ${options.output}`));
       console.log(chalk.gray(`  Symbols: ${stats.symbolCount}`));
       console.log(chalk.gray(`  Duration: ${(stats.duration / 1000).toFixed(2)}s`));
-    } catch (error) {
+    } catch {
       console.error(chalk.red('Symbol generation failed'));
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       if (error instanceof Error && error.stack && options.verbose) {
