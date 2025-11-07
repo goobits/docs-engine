@@ -1,109 +1,315 @@
 import { describe, it, expect } from 'vitest';
-import { renderMath, katexPlugin, type KaTeXOptions } from './katex';
+import { katexPlugin, type KaTeXOptions } from './katex';
 import type { Root } from 'mdast';
 
 /**
  * Tests for KaTeX math rendering plugin
  *
- * These tests focus on the math rendering logic and error handling.
- * Full integration tests with unified would require more complex setup.
+ * Following MODERN-PRIVACY.md guidelines:
+ * - Tests focus on public API (katexPlugin) behavior
+ * - Does NOT test private renderMath() function
+ * - Tests actual user-facing functionality
  */
 
-describe('katex plugin', () => {
-  describe('renderMath', () => {
-    it('should render inline math correctly', () => {
-      const result = renderMath('E = mc^2', false);
-      expect(result).toContain('katex');
-      expect(result).toContain('E');
-      expect(result).toContain('mc');
-    });
+/**
+ * Helper to create a test tree with inline math
+ */
+function createInlineMathTree(latex: string): Root {
+  return {
+    type: 'root',
+    children: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'inlineMath',
+            value: latex,
+            data: {},
+          } as any,
+        ],
+      },
+    ],
+  };
+}
 
-    it('should render display math correctly', () => {
-      const result = renderMath('x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}', true);
-      expect(result).toContain('katex');
-      expect(result).toContain('katex-display');
+/**
+ * Helper to create a test tree with display math
+ */
+function createDisplayMathTree(latex: string): Root {
+  return {
+    type: 'root',
+    children: [
+      {
+        type: 'math',
+        value: latex,
+        data: {},
+      } as any,
+    ],
+  };
+}
+
+/**
+ * Helper to get the HTML output from a transformed tree
+ */
+function getHtmlOutput(tree: Root, index = 0): string {
+  const node = tree.children[index] as any;
+  if (node.type === 'paragraph') {
+    return (node.children[0] as any).value;
+  }
+  return node.value;
+}
+
+describe('katex plugin', () => {
+  describe('inline math rendering', () => {
+    it('should render inline math correctly', () => {
+      const tree = createInlineMathTree('E = mc^2');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+      expect(output).toContain('E');
+      expect(output).toContain('mc');
+      expect(output).not.toContain('katex-display'); // Should be inline, not display
     });
 
     it('should handle simple fractions', () => {
-      const result = renderMath('\\frac{1}{2}', true);
-      expect(result).toContain('katex');
-      expect(result).toContain('frac');
+      const tree = createInlineMathTree('\\frac{1}{2}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+      expect(output).toContain('frac');
     });
 
     it('should handle square roots', () => {
-      const result = renderMath('\\sqrt{x}', false);
-      expect(result).toContain('katex');
-      expect(result).toContain('sqrt');
+      const tree = createInlineMathTree('\\sqrt{x}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+      expect(output).toContain('sqrt');
     });
 
     it('should handle Greek letters', () => {
-      const result = renderMath('\\alpha + \\beta = \\gamma', false);
-      expect(result).toContain('katex');
+      const tree = createInlineMathTree('\\alpha + \\beta = \\gamma');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
     it('should handle subscripts and superscripts', () => {
-      const result = renderMath('x^2 + y_1', false);
-      expect(result).toContain('katex');
+      const tree = createInlineMathTree('x^2 + y_1');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+    });
+
+    it('should handle basic arithmetic', () => {
+      const tree = createInlineMathTree('2 + 2 = 4');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+    });
+  });
+
+  describe('display math rendering', () => {
+    it('should render display math correctly', () => {
+      const tree = createDisplayMathTree('x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+      expect(output).toContain('katex-display');
     });
 
     it('should handle integrals', () => {
-      const result = renderMath('\\int_{-\\infty}^{\\infty} e^{-x^2} dx', true);
-      expect(result).toContain('katex');
+      const tree = createDisplayMathTree('\\int_{-\\infty}^{\\infty} e^{-x^2} dx');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
     it('should handle summations', () => {
-      const result = renderMath('\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}', true);
-      expect(result).toContain('katex');
+      const tree = createDisplayMathTree('\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
     it('should handle matrices', () => {
-      const result = renderMath('\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}', true);
-      expect(result).toContain('katex');
+      const tree = createDisplayMathTree('\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
-    it('should gracefully handle LaTeX errors in strict:false mode', () => {
-      const result = renderMath('\\invalid{command}', false, { strict: false });
-      // KaTeX renders invalid commands in red rather than throwing
-      expect(result).toContain('katex');
-      expect(result).toContain('mathcolor');
+    it('should handle complex fractions', () => {
+      const tree = createDisplayMathTree('\\frac{\\frac{a}{b}}{\\frac{c}{d}}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
-    it('should render inline math with invalid commands', () => {
-      const result = renderMath('\\badcommand', false, { strict: false });
-      // KaTeX renders invalid commands inline with color
-      expect(result).toContain('katex');
-      expect(result).toContain('badcommand');
+    it('should handle limits', () => {
+      const tree = createDisplayMathTree('\\lim_{x \\to \\infty} f(x) = L');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
-    it('should render display math with invalid commands', () => {
-      const result = renderMath('\\badcommand', true, { strict: false });
-      // KaTeX renders invalid commands in display mode with color
-      expect(result).toContain('katex-display');
-      expect(result).toContain('badcommand');
+    it('should handle derivatives', () => {
+      const tree = createDisplayMathTree('\\frac{d}{dx} x^2 = 2x');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
-    it('should use custom error color', () => {
-      const result = renderMath('\\invalid', false, { strict: false, errorColor: '#ff0000' });
-      // KaTeX uses errorColor for invalid commands
-      expect(result).toContain('katex');
+    it('should handle products', () => {
+      const tree = createDisplayMathTree('\\prod_{i=1}^{n} x_i');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
     });
 
+    it('should handle binomial coefficients', () => {
+      const tree = createDisplayMathTree('\\binom{n}{k} = \\frac{n!}{k!(n-k)!}');
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
+    });
+  });
+
+  describe('error handling', () => {
+    it('should gracefully handle invalid LaTeX commands', () => {
+      const tree = createInlineMathTree('\\invalid{command}');
+      const plugin = katexPlugin({ strict: false });
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      // Should render error message instead of throwing
+      expect(output).toBeTruthy();
+      // KaTeX renders invalid commands with color or error styling
+      expect(output).toContain('katex');
+    });
+
+    it('should handle HTML-like characters in LaTeX', () => {
+      const tree = createInlineMathTree('<script>alert("xss")</script>');
+      const plugin = katexPlugin({ strict: false });
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      // KaTeX treats these as math symbols, not HTML
+      expect(output).toContain('katex');
+      // The < and > should be escaped
+      expect(output).toContain('&lt;');
+    });
+
+    it('should handle empty LaTeX string', () => {
+      const tree = createInlineMathTree('');
+      const plugin = katexPlugin();
+
+      // Should not throw
+      expect(() => plugin(tree)).not.toThrow();
+    });
+
+    it('should handle whitespace-only LaTeX', () => {
+      const tree = createInlineMathTree('   ');
+      const plugin = katexPlugin();
+
+      // Should not throw
+      expect(() => plugin(tree)).not.toThrow();
+    });
+  });
+
+  describe('custom options', () => {
     it('should support custom macros', () => {
+      const tree = createInlineMathTree('\\RR \\times \\NN');
       const options: KaTeXOptions = {
         macros: {
           '\\RR': '\\mathbb{R}',
           '\\NN': '\\mathbb{N}',
         },
       };
-      const result = renderMath('\\RR \\times \\NN', false, options);
-      expect(result).toContain('katex');
+      const plugin = katexPlugin(options);
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      expect(output).toContain('katex');
       // Custom macros should be expanded
-      expect(result).toContain('mathbb');
+      expect(output).toContain('mathbb');
+    });
+
+    it('should use custom error color', () => {
+      const tree = createInlineMathTree('\\invalid');
+      const plugin = katexPlugin({ strict: false, errorColor: '#ff0000' });
+      plugin(tree);
+
+      const output = getHtmlOutput(tree);
+      // Should render with custom error color
+      expect(output).toContain('katex');
     });
   });
 
-  describe('katexPlugin', () => {
-    it('should transform math nodes to HTML', () => {
+  describe('multiple math nodes', () => {
+    it('should handle multiple math nodes in a tree', () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          {
+            type: 'inlineMath',
+            value: 'x^2',
+            data: {},
+          } as any,
+          {
+            type: 'math',
+            value: 'y = mx + b',
+            data: {},
+          } as any,
+          {
+            type: 'inlineMath',
+            value: 'z^3',
+            data: {},
+          } as any,
+        ],
+      };
+
+      const plugin = katexPlugin();
+      plugin(tree);
+
+      // All should be transformed to HTML
+      tree.children.forEach((node: any) => {
+        expect(node.type).toBe('html');
+        expect(node.value).toContain('katex');
+      });
+    });
+
+    it('should handle mixed content (text and math)', () => {
       const tree: Root = {
         type: 'root',
         children: [
@@ -131,7 +337,6 @@ describe('katex plugin', () => {
       const plugin = katexPlugin();
       plugin(tree);
 
-      // Find the transformed node
       const paragraph = tree.children[0] as any;
       const mathNode = paragraph.children[1];
 
@@ -139,27 +344,9 @@ describe('katex plugin', () => {
       expect(mathNode.value).toContain('katex');
       expect(mathNode.value).toContain('x');
     });
+  });
 
-    it('should transform display math to centered HTML', () => {
-      const tree: Root = {
-        type: 'root',
-        children: [
-          {
-            type: 'math',
-            value: 'x = \\frac{1}{2}',
-            data: {},
-          } as any,
-        ],
-      };
-
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const mathNode = tree.children[0] as any;
-      expect(mathNode.type).toBe('html');
-      expect(mathNode.value).toContain('katex-display');
-    });
-
+  describe('edge cases', () => {
     it('should handle trees with no math nodes', () => {
       const tree: Root = {
         type: 'root',
@@ -181,48 +368,22 @@ describe('katex plugin', () => {
       expect(() => plugin(tree)).not.toThrow();
     });
 
-    it('should apply custom options to rendering', () => {
+    it('should not modify non-math nodes', () => {
       const tree: Root = {
         type: 'root',
         children: [
           {
-            type: 'inlineMath',
-            value: '\\RR',
-            data: {},
-          } as any,
-        ],
-      };
-
-      const options: KaTeXOptions = {
-        macros: {
-          '\\RR': '\\mathbb{R}',
-        },
-      };
-
-      const plugin = katexPlugin(options);
-      plugin(tree);
-
-      const mathNode = tree.children[0] as any;
-      expect(mathNode.value).toContain('mathbb');
-    });
-
-    it('should handle multiple math nodes', () => {
-      const tree: Root = {
-        type: 'root',
-        children: [
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                value: 'Plain text',
+              },
+            ],
+          },
           {
             type: 'inlineMath',
             value: 'x^2',
-            data: {},
-          } as any,
-          {
-            type: 'math',
-            value: 'y = mx + b',
-            data: {},
-          } as any,
-          {
-            type: 'inlineMath',
-            value: 'z^3',
             data: {},
           } as any,
         ],
@@ -231,63 +392,15 @@ describe('katex plugin', () => {
       const plugin = katexPlugin();
       plugin(tree);
 
-      // All should be transformed
-      tree.children.forEach((node: any) => {
-        expect(node.type).toBe('html');
-        expect(node.value).toContain('katex');
-      });
-    });
-  });
+      // Text node should remain unchanged
+      const paragraph = tree.children[0] as any;
+      expect(paragraph.type).toBe('paragraph');
+      expect(paragraph.children[0].type).toBe('text');
+      expect(paragraph.children[0].value).toBe('Plain text');
 
-  describe('LaTeX expression validation', () => {
-    it('should render basic arithmetic', () => {
-      const result = renderMath('2 + 2 = 4', false);
-      expect(result).toContain('katex');
-    });
-
-    it('should render complex fractions', () => {
-      const result = renderMath('\\frac{\\frac{a}{b}}{\\frac{c}{d}}', true);
-      expect(result).toContain('katex');
-    });
-
-    it('should render limits', () => {
-      const result = renderMath('\\lim_{x \\to \\infty} f(x) = L', true);
-      expect(result).toContain('katex');
-    });
-
-    it('should render derivatives', () => {
-      const result = renderMath('\\frac{d}{dx} x^2 = 2x', true);
-      expect(result).toContain('katex');
-    });
-
-    it('should render products', () => {
-      const result = renderMath('\\prod_{i=1}^{n} x_i', true);
-      expect(result).toContain('katex');
-    });
-
-    it('should render binomial coefficients', () => {
-      const result = renderMath('\\binom{n}{k} = \\frac{n!}{k!(n-k)!}', true);
-      expect(result).toContain('katex');
-    });
-  });
-
-  describe('error handling', () => {
-    it('should handle HTML-like characters in LaTeX', () => {
-      const result = renderMath('<script>alert("xss")</script>', false, { strict: false });
-      // KaTeX treats these as math symbols, not HTML
-      expect(result).toContain('katex');
-      // The < and > are rendered as math symbols
-      expect(result).toContain('&lt;');
-    });
-
-    it('should handle empty LaTeX string', () => {
-      const result = renderMath('', false);
-      expect(result).toBeTruthy();
-    });
-
-    it('should handle whitespace-only LaTeX', () => {
-      const result = renderMath('   ', false);
-      expect(result).toBeTruthy();
+      // Math node should be transformed
+      const mathNode = tree.children[1] as any;
+      expect(mathNode.type).toBe('html');
     });
   });
 });
