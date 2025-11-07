@@ -5,7 +5,7 @@ import type { Root, Heading, List, ListItem } from 'mdast';
  * @returns A unified plugin
  * @public
  */
-export function remarkTableOfContents() {
+export function remarkTableOfContents(): (tree: Root) => void {
   return (tree: Root) => {
     /** @type {Array<{depth: number, text: string, id: string}>} */
     const headings: Array<{ depth: number; text: string; id: string }> = [];

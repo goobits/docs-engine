@@ -17,7 +17,7 @@ import { escapeHtml } from '../utils/html.js';
  * - Accessible keyboard navigation
  * @public
  */
-export function collapsePlugin() {
+export function collapsePlugin(): (tree: Root) => void {
   return (tree: Root) => {
     try {
       // Validate tree before visiting

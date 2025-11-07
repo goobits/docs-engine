@@ -5,7 +5,7 @@ import { join, dirname, relative } from 'path';
 /**
  * Recursively copy files matching a pattern from src to dist
  */
-function copyFiles(srcDir: string, destDir: string, pattern: RegExp) {
+function copyFiles(srcDir: string, destDir: string, pattern: RegExp): void {
   const items = readdirSync(srcDir);
 
   for (const item of items) {

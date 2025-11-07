@@ -42,7 +42,10 @@ export interface WatchOptions {
  *
  * @public
  */
-export async function watchSymbols(config: SymbolMapGeneratorConfig, options: WatchOptions = {}) {
+export async function watchSymbols(
+  config: SymbolMapGeneratorConfig,
+  options: WatchOptions = {}
+): Promise<{ close: () => Promise<void> }> {
   const { debounce = 500, onChange, verbose = false } = options;
 
   if (verbose) {

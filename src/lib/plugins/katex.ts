@@ -78,11 +78,7 @@ interface _MathNode {
  * @param options - KaTeX rendering options
  * @returns HTML string with rendered math
  */
-function renderMath(
-  latex: string,
-  displayMode: boolean,
-  options: KaTeXOptions = {}
-): string {
+function renderMath(latex: string, displayMode: boolean, options: KaTeXOptions = {}): string {
   try {
     return katex.renderToString(latex, {
       displayMode,
@@ -165,7 +161,7 @@ function renderMath(
  *
  * @public
  */
-export function katexPlugin(options: KaTeXOptions = {}) {
+export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
     const mathNodes: Array<{ node: any; index: number; parent: any }> = [];
 
@@ -223,7 +219,7 @@ export function katexPlugin(options: KaTeXOptions = {}) {
  *
  * @public
  */
-export function remarkMathParser(_options: KaTeXOptions = {}) {
+export function remarkMathParser(_options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
     visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
       if (index === undefined || !node.value) return;

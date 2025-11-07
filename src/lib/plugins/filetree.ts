@@ -21,7 +21,7 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  * Which is then rendered client-side by the FileTree component
  * @public
  */
-export function filetreePlugin() {
+export function filetreePlugin(): (tree: Root) => void {
   return (tree: Root) => {
     visit(tree, 'code', (node: any) => {
       if (node.lang !== 'filetree') return;

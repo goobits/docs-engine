@@ -36,7 +36,7 @@ interface Tab {
  * Which is then hydrated client-side into an interactive tabs component
  * @public
  */
-export function tabsPlugin() {
+export function tabsPlugin(): (tree: Root) => void {
   return (tree: Root) => {
     visit(tree, 'code', (node: any) => {
       // Check if this is a tabs code block

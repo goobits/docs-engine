@@ -32,7 +32,7 @@ interface ProjectConfig {
 /**
  * Main CLI function
  */
-async function main() {
+async function main(): Promise<void> {
   console.log(chalk.bold.cyan('\n🚀 Create Docs Engine\n'));
 
   // Get project name from args or prompt
@@ -101,7 +101,8 @@ async function main() {
       ],
     },
     {
-      type: (prev, values) => (values.features.includes('git') ? 'text' : null),
+      type: (prev: unknown, values: { features: string[] }): string | null =>
+        values.features.includes('git') ? 'text' : null,
       name: 'gitRepo',
       message: 'Git repository URL (optional):',
       initial: '',
@@ -148,7 +149,7 @@ async function main() {
 /**
  * Generate project files
  */
-async function generateProject(projectPath: string, config: ProjectConfig) {
+async function generateProject(projectPath: string, config: ProjectConfig): Promise<void> {
   await fs.mkdir(projectPath, { recursive: true });
 
   // Create package.json
@@ -269,7 +270,7 @@ build/
 /**
  * Install dependencies
  */
-async function installDependencies(projectPath: string, packageManager: string) {
+async function installDependencies(projectPath: string, packageManager: string): Promise<void> {
   const commands: Record<string, string> = {
     npm: 'npm install',
     pnpm: 'pnpm install',

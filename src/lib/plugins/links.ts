@@ -41,7 +41,7 @@ const DEFAULT_TOP_LEVEL_FILES = [
  * @param options - Configuration options
  * @public
  */
-export function linksPlugin(options: LinksPluginOptions = {}) {
+export function linksPlugin(options: LinksPluginOptions = {}): (tree: Root) => Root {
   const topLevelFiles = options.topLevelFiles || DEFAULT_TOP_LEVEL_FILES;
 
   return (tree: Root) => {

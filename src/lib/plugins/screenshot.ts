@@ -35,7 +35,7 @@ export interface ScreenshotPluginOptions {
  * @returns A unified plugin
  * @public
  */
-export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
+export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: Root) => void {
   const basePath = options.basePath || '/screenshots';
   const version = options.version || getVersion();
 

@@ -356,7 +356,7 @@ program
         console.log('   Press Ctrl+C to stop\n');
 
         // Handle graceful shutdown
-        const shutdown = async () => {
+        const shutdown = async (): Promise<void> => {
           console.log('\n\n👋 Stopping file watcher...');
           await watcher.close();
           console.log('✅ File watcher stopped');
