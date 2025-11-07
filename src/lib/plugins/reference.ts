@@ -103,6 +103,8 @@ export function referencePlugin() {
 
 export interface ReferencePluginOptions {
   // Future: add options like strictMode, customSymbolMap path, etc.
+  // Placeholder property to satisfy ESLint (empty interfaces are discouraged)
+  _placeholder?: never;
 }
 
 function createInlineNodes(value: string, symbolMap: SymbolMap): PhrasingContent[] {

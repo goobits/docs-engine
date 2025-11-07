@@ -191,7 +191,7 @@ export class GenericGenerator {
   /**
    * Parse SQL schema
    */
-  private parseSQL(content: string, tablePattern?: RegExp): any[] {
+  private parseSQL(content: string, _tablePattern?: RegExp): any[] {
     const tables: any[] = [];
     const lines = content.split('\n');
     let currentTable: any = null;
@@ -262,7 +262,7 @@ export class GenericGenerator {
       }
 
       return items;
-    } catch (error) {
+    } catch {
       console.warn(`Grep command failed: ${command}`);
       return [];
     }

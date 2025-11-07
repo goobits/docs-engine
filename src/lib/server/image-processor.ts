@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import { createHash } from 'crypto';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, statSync } from 'fs';
 import { dirname, join, extname, basename, resolve } from 'path';
 import pLimit from 'p-limit';
 import os from 'os';
@@ -62,9 +62,10 @@ export interface ImageVariant {
 
 /**
  * Generate a cache key for an image
- * Module-private helper
+ * Module-private helper (currently unused, kept for future use)
  */
-function generateCacheKey(
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _generateCacheKey(
   inputPath: string,
   format: string,
   width: number,
@@ -84,8 +85,8 @@ function isCacheValid(inputPath: string, cachedPath: string): boolean {
     return false;
   }
 
-  const inputStats = existsSync(inputPath) ? require('fs').statSync(inputPath) : null;
-  const cachedStats = require('fs').statSync(cachedPath);
+  const inputStats = existsSync(inputPath) ? statSync(inputPath) : null;
+  const cachedStats = statSync(cachedPath);
 
   if (!inputStats) {
     return false;
@@ -137,7 +138,7 @@ async function processVariant(
 
   // Write file
   const metadata = await pipeline.toFile(outputPath);
-  const stats = require('fs').statSync(outputPath);
+  const stats = statSync(outputPath);
 
   return {
     format,
@@ -232,7 +233,7 @@ export async function processImage(config: ImageProcessorConfig): Promise<ImageP
       // Check cache
       if (cacheDir && isCacheValid(inputPath, outputPath)) {
         // Use cached version
-        const stats = require('fs').statSync(outputPath);
+        const stats = statSync(outputPath);
         const cachedMetadata = await sharp(outputPath).metadata();
 
         variants.push({

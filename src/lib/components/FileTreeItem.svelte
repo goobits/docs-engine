@@ -9,9 +9,12 @@
     copiedPath: string | null;
     allowCopy: boolean;
     githubUrl: string | undefined;
-    toggleFolder: (_path: string) => void;
-    copyPath: (_path: string) => void;
-    openInGithub: (_path: string) => void;
+    // eslint-disable-next-line no-unused-vars
+    toggleFolder: (path: string) => void;
+    // eslint-disable-next-line no-unused-vars
+    copyPath: (path: string) => void;
+    // eslint-disable-next-line no-unused-vars
+    openInGithub: (path: string) => void;
   }
 
   let {

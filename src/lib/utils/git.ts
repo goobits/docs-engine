@@ -62,7 +62,7 @@ const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
 async function execGitCommand(
   command: string,
   cacheKey: string,
-  ttl = 60000
+  _ttl = 60000
 ): Promise<string | null> {
   // Check cache first (LRUCache handles TTL automatically)
   const cached = gitCache.get(cacheKey);

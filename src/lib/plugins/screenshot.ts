@@ -33,7 +33,6 @@ export interface ScreenshotPluginOptions {
  *
  * @param options - Optional configuration (basePath, version)
  * @returns A unified plugin
- */
  * @public
  */
 export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
