@@ -64,3 +64,6 @@ lerna-debug.log*
 *.bak
 *.orig
 package-lock.json
+
+# pnpm
+.pnpm-store/
