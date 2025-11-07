@@ -244,12 +244,7 @@ function wrapWithMetadata(
  * @public
  */
 export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
-  const {
-    theme = 'dracula',
-    defaultLanguage = 'plaintext',
-    showLineNumbers = false,
-    showCopyButton = true,
-  } = options;
+  const { theme = 'dracula', showLineNumbers = false } = options;
 
   return async (tree: Root) => {
     const codeNodes: Array<{ node: any; index: number; parent: any }> = [];
@@ -262,7 +257,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
     });
 
     if (codeNodes.length === 0) {
-      return;
+      return tree;
     }
 
     // Get or create highlighter with enhanced language support
@@ -306,7 +301,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 
     // Process each code node asynchronously
     await Promise.all(
-      codeNodes.map(async ({ node, index, parent }) => {
+      codeNodes.map(async ({ node, index: _index, parent: _parent }) => {
         const infoString = node.lang || '';
         const code = node.value;
 

@@ -1,26 +1,12 @@
-import adapter from '@sveltejs/adapter-auto'
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
-import { mdsvex } from 'mdsvex'
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
-import {
-  calloutsPlugin,
-  codeHighlightPlugin,
-  mermaidPlugin,
-  filetreePlugin,
-  tabsPlugin,
-  collapsePlugin,
-  linksPlugin,
-  katexPlugin,
-  remarkMathParser,
-  remarkTableOfContents,
-  referencePlugin,
-  imageOptimizationPlugin,
-  screenshotPlugin
-} from '../dist/plugins/index.js'
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { mdsvex } from 'mdsvex';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { codeHighlightPlugin } from '../dist/plugins/index.js';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /** @type {import("@sveltejs/kit").Config} */
 const config = {
@@ -31,11 +17,11 @@ const config = {
     mdsvex({
       extensions: ['.md'],
       layout: {
-        _: resolve(__dirname, './src/lib/layouts/MarkdownLayout.svelte')
+        _: resolve(__dirname, './src/lib/layouts/MarkdownLayout.svelte'),
       },
       remarkPlugins: [
         // Temporarily testing with minimal plugins to isolate crash
-        codeHighlightPlugin({ theme: 'dracula' })
+        codeHighlightPlugin({ theme: 'dracula' }),
 
         // Content processing
         // linksPlugin,
@@ -56,13 +42,13 @@ const config = {
         // referencePlugin,
         // imageOptimizationPlugin,
         // screenshotPlugin,
-      ]
+      ],
     }),
   ],
 
   kit: {
-    adapter: adapter()
-  }
-}
+    adapter: adapter(),
+  },
+};
 
-export default config
+export default config;
