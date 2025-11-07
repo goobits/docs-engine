@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/routes/docs/plugins/frontmatter/+page.md";

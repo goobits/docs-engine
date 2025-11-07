@@ -1,0 +1,23 @@
+{
+	"/": [],
+	"/docs": [],
+	"/docs/architecture": [],
+	"/docs/getting-started": [],
+	"/docs/guides/diagrams": [],
+	"/docs/guides/examples": [],
+	"/docs/guides/plugin-order": [],
+	"/docs/plugins/callouts": [],
+	"/docs/plugins/code-highlighting": [],
+	"/docs/plugins/code-tabs": [],
+	"/docs/plugins/collapse": [],
+	"/docs/plugins/filetree": [],
+	"/docs/plugins/frontmatter": [],
+	"/docs/plugins/image-optimization": [],
+	"/docs/plugins/katex": [],
+	"/docs/plugins/links": [],
+	"/docs/plugins/mermaid": [],
+	"/docs/plugins/navigation": [],
+	"/docs/plugins/screenshots": [],
+	"/docs/plugins/symbol-references": [],
+	"/docs/plugins/toc": []
+}
