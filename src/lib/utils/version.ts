@@ -15,7 +15,7 @@ export function getVersion(): string {
 
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
     return packageJson.version || '1.0.0';
-  } catch (error) {
+  } catch {
     console.warn('Failed to read version from package.json, using default: 1.0.0');
     return '1.0.0';
   }

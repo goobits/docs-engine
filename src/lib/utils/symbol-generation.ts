@@ -111,7 +111,6 @@ export class SymbolMapGenerator {
 
     // Use Object.create(null) to avoid prototype pollution issues
     const symbolMap: SymbolMap = Object.create(null);
-    let symbolCount = 0;
     let cacheHits = 0;
     let cacheMisses = 0;
 
@@ -141,7 +140,6 @@ export class SymbolMapGenerator {
             symbolMap[symbol.name] = [];
           }
           symbolMap[symbol.name].push(symbol);
-          symbolCount++;
         }
 
         // Copy cache entry to new cache
@@ -161,7 +159,6 @@ export class SymbolMapGenerator {
           symbolMap[symbol.name] = [];
         }
         symbolMap[symbol.name].push(symbol);
-        symbolCount++;
         console.log(`      ✓ ${symbol.kind} ${symbol.name}`);
       }
 
@@ -497,7 +494,7 @@ export class SymbolMapGenerator {
       }
 
       return cache;
-    } catch (error) {
+    } catch {
       console.log('   ⚠️  Failed to load cache, starting fresh');
       return { version: this.config.cacheVersion, files: {} };
     }

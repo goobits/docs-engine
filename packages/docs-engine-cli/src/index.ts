@@ -151,7 +151,7 @@ program
       if (brokenCount > 0) {
         process.exit(1);
       }
-    } catch {
+    } catch (error) {
       spinner.fail('Link checking failed');
       console.error(error);
       process.exit(1);
@@ -183,7 +183,7 @@ versionCmd
       );
       console.log(chalk.gray(`  - Updated versions.json`));
       console.log(chalk.gray(`  - Deploy your updated documentation`));
-    } catch {
+    } catch (error) {
       spinner.fail('Failed to create version');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
@@ -210,7 +210,7 @@ versionCmd
         console.log(`  ${version.version}${label}`);
       });
       console.log();
-    } catch {
+    } catch (error) {
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
     }
@@ -228,7 +228,7 @@ versionCmd
       const docsDir = path.resolve(process.cwd(), options.docsDir);
       await deleteVersion(version, docsDir);
       spinner.succeed(`Version ${version} deleted successfully!`);
-    } catch {
+    } catch (error) {
       spinner.fail('Failed to delete version');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       process.exit(1);
@@ -280,7 +280,7 @@ program
       if (options.index) {
         console.log(chalk.gray(`  Index file: ${path.join(options.outputDir, 'index.md')}`));
       }
-    } catch {
+    } catch (error) {
       spinner.fail('API documentation generation failed');
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       if (error instanceof Error && error.stack) {
@@ -380,7 +380,7 @@ program
       console.log(chalk.gray(`  Output: ${options.output}`));
       console.log(chalk.gray(`  Symbols: ${stats.symbolCount}`));
       console.log(chalk.gray(`  Duration: ${(stats.duration / 1000).toFixed(2)}s`));
-    } catch {
+    } catch (error) {
       console.error(chalk.red('Symbol generation failed'));
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
       if (error instanceof Error && error.stack && options.verbose) {

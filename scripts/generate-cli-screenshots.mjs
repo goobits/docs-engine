@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
-import { mkdirSync, existsSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { join } from 'path';
 
 // CLI commands to screenshot (safe subset)

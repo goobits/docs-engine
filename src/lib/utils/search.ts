@@ -119,9 +119,10 @@ export function searchDocs(
 
 /**
  * Escape special regex characters
- * Module-private helper
+ * Module-private helper (currently unused but kept for future use)
  */
-function escapeRegex(str: string): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 

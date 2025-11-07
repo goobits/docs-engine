@@ -93,7 +93,8 @@
     loaded = true;
   });
 
-  function escapeHtml(text: string): string {
+  // eslint-disable-next-line no-unused-vars
+  function _escapeHtml(text: string): string {
     const htmlEscapes: Record<string, string> = {
       '&': '&amp;',
       '<': '&lt;',

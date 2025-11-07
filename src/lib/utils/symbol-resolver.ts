@@ -210,8 +210,7 @@ function findMinimalPaths(candidates: SymbolDefinition[]): string[] {
   const paths = candidates.map((c) => c.path);
   const segments = paths.map((p) => p.split('/'));
 
-  return segments.map((seg, idx) => {
-    let pathSegment = seg[seg.length - 1];
+  return segments.map((seg, _idx) => {
     for (let i = seg.length - 2; i >= 0; i--) {
       const candidate = seg.slice(i).join('/');
       if (paths.filter((p) => p.includes(candidate)).length === 1) {

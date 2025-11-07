@@ -2,7 +2,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { visit } from 'unist-util-visit';
-import type { Root, Link, Image } from 'mdast';
+import type { Link, Image } from 'mdast';
 import { readFileSync } from 'fs';
 
 /**
@@ -80,7 +80,7 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
   const tree = unified().use(remarkParse).use(remarkMdx).parse(content);
 
   // Extract markdown links and images
-  visit(tree, ['link', 'image'], (node: Link | Image, _index, parent) => {
+  visit(tree, ['link', 'image'], (node: Link | Image, _index, _parent) => {
     const url = node.url;
     if (!url) return;
 

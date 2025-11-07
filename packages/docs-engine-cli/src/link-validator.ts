@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from 'fs';
-import { resolve, dirname, join, extname } from 'path';
+import { resolve, dirname, join } from 'path';
 import type { ExtractedLink } from './link-extractor.js';
 import pLimit from 'p-limit';
 

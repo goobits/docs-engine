@@ -57,8 +57,10 @@ export interface KaTeXOptions {
 /**
  * Math node metadata extracted from markdown
  * Module-private interface - not exported, not accessible outside this module
+ * Currently unused but kept for documentation
  */
-interface MathNode {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _MathNode {
   /** LaTeX expression to render */
   value: string;
   /** Display mode (block) vs inline mode */
@@ -221,7 +223,7 @@ export function katexPlugin(options: KaTeXOptions = {}) {
  *
  * @public
  */
-export function remarkMathParser(options: KaTeXOptions = {}) {
+export function remarkMathParser(_options: KaTeXOptions = {}) {
   return (tree: Root) => {
     visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
       if (index === undefined || !node.value) return;

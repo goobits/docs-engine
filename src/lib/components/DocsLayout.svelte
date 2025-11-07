@@ -87,7 +87,6 @@
 
   let {
     content,
-    title,
     navigation = [],
     currentPath = '',
     breadcrumbs = [],
