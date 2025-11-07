@@ -50,12 +50,15 @@ export interface KaTeXOptions {
   errorColor?: string;
 }
 
+// ============================================================================
+// Module-Private Helpers (True Privacy via ESM)
+// ============================================================================
+
 /**
  * Math node metadata extracted from markdown
- *
- * @internal
+ * Module-private interface - not exported, not accessible outside this module
  */
-export interface MathNode {
+interface MathNode {
   /** LaTeX expression to render */
   value: string;
   /** Display mode (block) vs inline mode */
@@ -66,21 +69,14 @@ export interface MathNode {
 
 /**
  * Render LaTeX math expression to HTML using KaTeX
+ * Module-private helper - not exported, not accessible outside this module
  *
  * @param latex - LaTeX expression to render
  * @param displayMode - Render as display (block) or inline math
  * @param options - KaTeX rendering options
  * @returns HTML string with rendered math
- *
- * @example
- * ```typescript
- * const html = renderMath('E = mc^2', false, { strict: false });
- * // Returns: '<span class="katex">...</span>'
- * ```
- *
- * @internal
  */
-export function renderMath(
+function renderMath(
   latex: string,
   displayMode: boolean,
   options: KaTeXOptions = {}
@@ -110,6 +106,10 @@ export function renderMath(
     }
   }
 }
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Remark plugin for rendering mathematical equations with KaTeX
