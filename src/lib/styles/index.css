@@ -7,22 +7,21 @@
  * Architecture:
  * 1. W3C Design Tokens (_design-tokens.css)
  * 2. BEM Components (components/*.css)
- * 3. Legacy Styles (base.scss - for backward compatibility only)
- * 4. External Dependencies (katex)
+ * 3. External Dependencies (katex)
  *
  * Usage:
  * ```typescript
- * import '@goobits/docs-engine/styles/index-new.css';
+ * import '@goobits/docs-engine/styles/index.css';
  * ```
  */
 
 /* ============================================================================
-   Phase 1: W3C Design Token Foundation
+   W3C Design Token Foundation
    ========================================================================= */
 @import './_design-tokens.css';
 
 /* ============================================================================
-   Phase 2: BEM Component Architecture (Modern CSS)
+   BEM Component Architecture (Modern CSS with Native Nesting)
    ========================================================================= */
 
 @import './components/_symbol.css';
@@ -33,14 +32,7 @@
 @import './components/_code-block.css';
 
 /* ============================================================================
-   Phase 3: Legacy Styles (For Backward Compatibility)
-   ========================================================================= */
-/* NOTE: base.scss still contains utility classes and old token definitions
-   This is kept only for gradual migration. New projects should not use this. */
-@import './base.scss';
-
-/* ============================================================================
-   Phase 4: External Dependencies
+   External Dependencies
    ========================================================================= */
 
 /**
