@@ -294,21 +294,43 @@ Click any image to view full-size in a lightbox:
 
 ## Performance Benefits
 
-### Before
+### Visual Comparison
 
-```
-Original PNG: 2.4 MB
-Load time: 3.2s on 3G
-Lighthouse: 65
+```mermaid
+graph LR
+    subgraph Before["❌ Before Optimization"]
+        B1["Original PNG"]
+        B2["2.4 MB"]
+        B3["No responsive images"]
+        B4["3.2s load on 3G"]
+        B5["Lighthouse: 65"]
+        B1 --> B2 --> B3 --> B4 --> B5
+    end
+
+    subgraph After["✅ After Optimization"]
+        A1["AVIF + WebP + Original"]
+        A2["180 KB (93% smaller)"]
+        A3["4 responsive sizes"]
+        A4["0.4s load on 3G"]
+        A5["Lighthouse: 95"]
+        A1 --> A2 --> A3 --> A4 --> A5
+    end
+
+    Before -.->|"imageOptimizationPlugin()"| After
+
+    style Before fill:#45283c,stroke:#f38ba8
+    style After fill:#2d3748,stroke:#a6e3a1
 ```
 
-### After
+### Real Numbers
 
-```
-AVIF 1280px: 180 KB (92% reduction)
-Load time: 0.4s on 3G (8x faster)
-Lighthouse: 95
-```
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| File Size | 2.4 MB | 180 KB | **93% smaller** |
+| Load Time (3G) | 3.2s | 0.4s | **8x faster** |
+| Formats | 1 (PNG) | 3 (AVIF, WebP, PNG) | **Better compatibility** |
+| Responsive Sizes | 1 | 4 (640px, 960px, 1280px, 1920px) | **Mobile-optimized** |
+| Lighthouse Score | 65 | 95 | **+30 points** |
 
 ### Typical Savings
 
@@ -316,6 +338,62 @@ Lighthouse: 95
 - **PNG → WebP**: 50-60% smaller
 - **WebP → AVIF**: 20-30% smaller
 - **Lazy loading**: 40-60% faster initial load
+
+### Example Transformation
+
+**Input (Markdown):**
+```markdown
+![Dashboard screenshot showing user analytics](./screenshots/dashboard.png)
+```
+
+**Output (Generated HTML):**
+```html
+<figure class="optimized-image-container">
+  <picture>
+    <!-- Modern format: Best compression -->
+    <source
+      type="image/avif"
+      srcset="
+        /images/dashboard-640w.avif 640w,
+        /images/dashboard-960w.avif 960w,
+        /images/dashboard-1280w.avif 1280w,
+        /images/dashboard-1920w.avif 1920w
+      "
+      sizes="(max-width: 640px) 100vw, (max-width: 960px) 90vw, 1280px"
+    />
+
+    <!-- Widely supported format -->
+    <source
+      type="image/webp"
+      srcset="
+        /images/dashboard-640w.webp 640w,
+        /images/dashboard-960w.webp 960w,
+        /images/dashboard-1280w.webp 1280w,
+        /images/dashboard-1920w.webp 1920w
+      "
+      sizes="(max-width: 640px) 100vw, (max-width: 960px) 90vw, 1280px"
+    />
+
+    <!-- Fallback for older browsers -->
+    <img
+      src="/images/dashboard-960w.png"
+      alt="Dashboard screenshot showing user analytics"
+      loading="lazy"
+      class="optimized-image zoomable"
+      style="background-image: url(data:image/svg+xml;base64,...)"
+    />
+  </picture>
+  <figcaption>Dashboard screenshot showing user analytics</figcaption>
+</figure>
+```
+
+**Result:**
+- 📦 **12 files generated** (4 sizes × 3 formats)
+- 📊 **Automatic format selection** (browser picks best supported format)
+- 📱 **Responsive loading** (mobile gets 640px, desktop gets 1280px)
+- ⚡ **Lazy loading** (loads only when scrolled into view)
+- 🔍 **Click-to-zoom** (full-size lightbox on click)
+- 🎨 **Blur placeholder** (smooth loading transition)
 
 ---
 
