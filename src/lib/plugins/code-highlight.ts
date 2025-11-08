@@ -257,7 +257,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
     });
 
     if (codeNodes.length === 0) {
-      return;
+      return tree;
     }
 
     // Get or create highlighter with enhanced language support

@@ -10,7 +10,57 @@ import {
 import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.js';
 import type { RenderOptions } from '../utils/symbol-renderer.js';
 
-const INLINE_REFERENCE_REGEX = /{@([\w\/<>.,\[\]]+(?:#[\w.<>]+)?)}/g;
+const INLINE_REFERENCE_REGEX = /{@([\w/<>.,[\]]+(?:#[\w.<>]+)?)}/g;
+
+// ============================================================================
+// Helper Functions (defined first to avoid hoisting issues)
+// ============================================================================
+
+/**
+ * Escape HTML special characters
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
+}
+
+/**
+ * Create an inline warning node for unresolved symbol references
+ * Includes client-side console.error that will show in browser console
+ */
+function createWarningNode(reference: string, message: string): PhrasingContent {
+  // For now, return a simple text node to test if the issue is with HTML nodes
+  // TODO: Add back visual styling and console errors once we verify text nodes work
+  return {
+    type: 'html',
+    value: `<span class="symbol-ref-error" title="${escapeHtml(message)}" style="color: #e74c3c; background: #fee; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 0.9em; cursor: help; border: 1px solid #fcc;">⚠️${escapeHtml(reference)}</span>`,
+  } as any;
+}
+
+/**
+ * Create a warning block for unresolved reference blocks
+ * Includes client-side console.error that will show in browser console
+ */
+function createWarningBlockHtml(reference: string, message: string): string {
+  // Add client-side console error
+  const consoleScript = `<script>console.error('[Symbol Reference Block Error]', '${escapeHtml(reference)}', '${escapeHtml(message).replace(/'/g, "\\'")}');</script>`;
+
+  return `${consoleScript}<div class="symbol-ref-block-error" style="background: #fee; border-left: 4px solid #e74c3c; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+  <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: #c0392b;">⚠️ Symbol Reference Error</p>
+  <p style="margin: 0 0 0.5rem 0; font-family: monospace; font-size: 0.9em;">${escapeHtml(reference)}</p>
+  <p style="margin: 0; color: #666; font-size: 0.9em;">${escapeHtml(message)}</p>
+</div>`;
+}
+
+// ============================================================================
+// Main Plugin
+// ============================================================================
 
 /**
  * Remark plugin to transform {@symbol} references into documentation
@@ -94,12 +144,22 @@ export function referencePlugin() {
         delete node.data;
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to resolve symbol in :::reference ${symbolRef}: ${message}`);
+        console.warn(
+          `[ReferencePlugin] Failed to resolve symbol in :::reference ${symbolRef}: ${message}`
+        );
+        // Instead of throwing, render a warning block
+        node.type = 'html';
+        node.value = createWarningBlockHtml(`:::reference ${symbolRef}`, message);
+        delete node.children;
+        delete node.name;
+        delete node.attributes;
+        delete node.data;
       }
     });
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ReferencePluginOptions {
   // Future: add options like strictMode, customSymbolMap path, etc.
 }
@@ -126,7 +186,9 @@ function createInlineNodes(value: string, symbolMap: SymbolMap): PhrasingContent
       nodes.push(createInlineReferenceNode(symbol));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to resolve symbol {@${reference}} in documentation: ${message}`);
+      console.warn(`[ReferencePlugin] Failed to resolve symbol {@${reference}}: ${message}`);
+      // Instead of throwing, render an inline warning
+      nodes.push(createWarningNode(`{@${reference}}`, message));
     }
 
     lastIndex = match.index + match[0].length;
