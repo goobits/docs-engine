@@ -86,6 +86,101 @@ $$
 
 ---
 
+## Alternative: Built-in Math Parser
+
+The KaTeX plugin provides a lightweight alternative to `remark-math` called `remarkMathParser`.
+
+### When to Use remarkMathParser
+
+**Use `remarkMathParser` if:**
+- ✅ You want zero external dependencies for math parsing
+- ✅ Your math syntax is simple (basic inline and block equations)
+- ✅ You prefer a smaller bundle size
+- ✅ You want faster build times
+
+**Use `remark-math` if:**
+- ✅ You need robust edge case handling
+- ✅ Your docs have complex math syntax
+- ✅ You want battle-tested, widely-used parsing
+- ✅ You're already using other remark plugins
+
+### Using remarkMathParser
+
+`````markdown
+````tabs:remarkMathParser-config
+tab: JavaScript
+---
+```javascript
+import { remarkMathParser, katexPlugin } from '@goobits/docs-engine/plugins';
+
+export default {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        remarkMathParser(),  // Built-in parser (no remark-math needed)
+        katexPlugin(),       // Render with KaTeX
+      ],
+    }),
+  ],
+};
+```
+---
+tab: TypeScript
+---
+```typescript
+import { mdsvex } from 'mdsvex';
+import { remarkMathParser, katexPlugin } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        remarkMathParser(),  // Built-in lightweight parser
+        katexPlugin(),       // Render with KaTeX
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+````
+`````
+
+### Comparison: remarkMathParser vs remark-math
+
+| Feature | remarkMathParser | remark-math |
+|---------|------------------|-------------|
+| **Bundle size** | ~2KB (built-in) | ~15KB (external) |
+| **Installation** | None needed | `npm install remark-math` |
+| **Edge cases** | Basic coverage | Comprehensive |
+| **Maintenance** | Part of docs-engine | Separate package |
+| **Speed** | Very fast | Fast |
+| **Community support** | Limited | Extensive |
+
+### Limitations of remarkMathParser
+
+The built-in parser has some limitations:
+
+1. **No escaped dollar signs** - Can't use `\$` for literal dollars inside math
+2. **Newlines in inline math** - Inline math must be on single line
+3. **Limited nesting** - Complex nested expressions may not parse correctly
+
+**Example issues:**
+
+```markdown
+<!-- ❌ Won't parse correctly with remarkMathParser -->
+Price is $100 and equation is $x + y = \$100$
+
+<!-- ✅ Works fine -->
+Price is $100 and equation is $x + y = 100$
+```
+
+> **Recommendation:** Start with `remarkMathParser` for simplicity. Switch to `remark-math` if you encounter parsing issues.
+
+---
+
 ## Syntax
 
 ### Inline Math
