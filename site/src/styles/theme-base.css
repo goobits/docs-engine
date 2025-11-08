@@ -45,6 +45,27 @@ html:not([class*='theme-']) {
   --color-bg: var(--bg-primary);
   --color-text: var(--text-primary);
   --color-secondary: var(--text-secondary);
+
+  /* V2 Design Tokens (for DocsLayout compatibility) */
+  --v2-surface-base: var(--bg-primary);
+  --v2-surface-raised: var(--bg-secondary);
+  --v2-surface-interactive: var(--bg-tertiary);
+  --v2-surface-interactive-hover: rgba(0, 0, 0, 0.1);
+  --v2-text-primary: var(--text-primary);
+  --v2-text-secondary: var(--text-secondary);
+  --v2-text-tertiary: var(--text-tertiary);
+  --v2-text-accent: var(--color-primary);
+  --v2-border-subtle: var(--border-primary);
+  --v2-border-medium: var(--border-secondary);
+  --v2-radius-sm: 6px;
+  --v2-radius-md: 10px;
+  --v2-radius-lg: 14px;
+  --v2-spacing-xs: 0.25rem;
+  --v2-spacing-sm: 0.5rem;
+  --v2-spacing-md: 1rem;
+  --v2-spacing-lg: 1.5rem;
+  --v2-spacing-xl: 2rem;
+  --v2-spacing-2xl: 3rem;
 }
 
 /* ========================================
@@ -88,4 +109,25 @@ html.theme-system-dark {
   --color-bg: var(--bg-primary);
   --color-text: var(--text-primary);
   --color-secondary: var(--text-secondary);
+
+  /* V2 Design Tokens (for DocsLayout compatibility) */
+  --v2-surface-base: var(--bg-primary);
+  --v2-surface-raised: var(--bg-secondary);
+  --v2-surface-interactive: var(--bg-tertiary);
+  --v2-surface-interactive-hover: rgba(255, 255, 255, 0.1);
+  --v2-text-primary: var(--text-primary);
+  --v2-text-secondary: var(--text-secondary);
+  --v2-text-tertiary: var(--text-tertiary);
+  --v2-text-accent: var(--color-primary);
+  --v2-border-subtle: var(--border-primary);
+  --v2-border-medium: var(--border-secondary);
+  --v2-radius-sm: 6px;
+  --v2-radius-md: 10px;
+  --v2-radius-lg: 14px;
+  --v2-spacing-xs: 0.25rem;
+  --v2-spacing-sm: 0.5rem;
+  --v2-spacing-md: 1rem;
+  --v2-spacing-lg: 1.5rem;
+  --v2-spacing-xl: 2rem;
+  --v2-spacing-2xl: 3rem;
 }

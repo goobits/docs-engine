@@ -1,0 +1,17 @@
+/**
+ * V2 Design Tokens Stub for DocsEngine Site
+ *
+ * Provides compatibility with Spacebase v2-token imports
+ * Maps to docs-engine's existing theme variables
+ */
+
+// Mixin: Focus ring for interactive elements
+@mixin v2-focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary, #ff5722);
+    outline-offset: 2px;
+  }
+}
+
+// These CSS variables are defined in the theme-base.css
+// Just re-exporting them here for SCSS context if needed
