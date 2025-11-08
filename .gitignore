@@ -13,6 +13,7 @@ build/
 coverage/
 .nyc_output/
 *.lcov
+test-results/
 
 # IDEs and editors
 .vscode/
@@ -65,6 +66,9 @@ lerna-debug.log*
 *.bak
 *.orig
 package-lock.json
+
+# VM configuration
+vm.yaml
 
 # pnpm
 .pnpm-store/
