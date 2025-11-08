@@ -104,6 +104,17 @@ my-app/
 ```
 ````
 
+**Result:**
+
+```filetree
+my-app/
+├── src/
+│   ├── index.ts
+│   └── styles.css
+├── package.json
+└── README.md
+```
+
 ### Nested Structure
 
 ````markdown
@@ -123,6 +134,24 @@ packages/
     └── package.json
 ```
 ````
+
+**Result:**
+
+```filetree
+packages/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Button.svelte
+│   │   │   └── Input.svelte
+│   │   └── main.ts
+│   └── package.json
+└── server/
+    ├── api/
+    │   ├── routes.ts
+    │   └── models.ts
+    └── package.json
+```
 
 ---
 
