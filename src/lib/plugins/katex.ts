@@ -50,12 +50,17 @@ export interface KaTeXOptions {
   errorColor?: string;
 }
 
+// ============================================================================
+// Module-Private Helpers (True Privacy via ESM)
+// ============================================================================
+
 /**
  * Math node metadata extracted from markdown
- *
- * @internal
+ * Module-private interface - not exported, not accessible outside this module
+ * Currently unused but kept for documentation
  */
-export interface MathNode {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _MathNode {
   /** LaTeX expression to render */
   value: string;
   /** Display mode (block) vs inline mode */
@@ -66,25 +71,14 @@ export interface MathNode {
 
 /**
  * Render LaTeX math expression to HTML using KaTeX
+ * Module-private helper - not exported, not accessible outside this module
  *
  * @param latex - LaTeX expression to render
  * @param displayMode - Render as display (block) or inline math
  * @param options - KaTeX rendering options
  * @returns HTML string with rendered math
- *
- * @example
- * ```typescript
- * const html = renderMath('E = mc^2', false, { strict: false });
- * // Returns: '<span class="katex">...</span>'
- * ```
- *
- * @internal
  */
-export function renderMath(
-  latex: string,
-  displayMode: boolean,
-  options: KaTeXOptions = {}
-): string {
+function renderMath(latex: string, displayMode: boolean, options: KaTeXOptions = {}): string {
   try {
     return katex.renderToString(latex, {
       displayMode,
@@ -110,6 +104,10 @@ export function renderMath(
     }
   }
 }
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Remark plugin for rendering mathematical equations with KaTeX
@@ -163,16 +161,20 @@ export function renderMath(
  *
  * @public
  */
-export function katexPlugin(options: KaTeXOptions = {}) {
+export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
-    const mathNodes: Array<{ node: any; index: number; parent: any }> = [];
+    const mathNodes: Array<{ node: unknown; index: number; parent: unknown }> = [];
 
     // Collect all math nodes (both inline and block)
-    visit(tree, ['math', 'inlineMath'], (node: any, index: number | undefined, parent: any) => {
-      if (index !== undefined) {
-        mathNodes.push({ node, index, parent });
+    visit(
+      tree,
+      ['math', 'inlineMath'],
+      (node: unknown, index: number | undefined, parent: unknown) => {
+        if (index !== undefined) {
+          mathNodes.push({ node, index, parent });
+        }
       }
-    });
+    );
 
     if (mathNodes.length === 0) {
       return;
@@ -221,13 +223,16 @@ export function katexPlugin(options: KaTeXOptions = {}) {
  *
  * @public
  */
-export function remarkMathParser(options: KaTeXOptions = {}) {
+export function remarkMathParser(_options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
-      if (index === undefined || !node.value) return;
+    visit(tree, 'text', (node: unknown, index: number | undefined, parent: unknown) => {
+      if (index === undefined) return;
+      if (!(node && typeof node === 'object' && 'value' in node)) return;
+      const nodeObj = node as Record<string, unknown>;
+      if (typeof nodeObj.value !== 'string') return;
 
-      const text = node.value;
-      const parts: any[] = [];
+      const text = nodeObj.value;
+      const parts: unknown[] = [];
       let lastIndex = 0;
 
       // Match $$...$$ (display math) first to avoid conflicts
@@ -255,7 +260,7 @@ export function remarkMathParser(options: KaTeXOptions = {}) {
 
       // Match $...$ (inline math) in remaining text
       const remainingText = text.slice(lastIndex);
-      const inlineRegex = /\$([^\$\n]+?)\$/g;
+      const inlineRegex = /\$([^$\n]+?)\$/g;
       let inlineLastIndex = 0;
 
       while ((match = inlineRegex.exec(remainingText)) !== null) {
@@ -291,8 +296,11 @@ export function remarkMathParser(options: KaTeXOptions = {}) {
       }
 
       // Replace the text node with parsed parts
-      if (parts.length > 0) {
-        parent.children.splice(index, 1, ...parts);
+      if (parts.length > 0 && parent && typeof parent === 'object' && 'children' in parent) {
+        const parentObj = parent as Record<string, unknown>;
+        if (Array.isArray(parentObj.children)) {
+          parentObj.children.splice(index, 1, ...parts);
+        }
       }
     });
   };

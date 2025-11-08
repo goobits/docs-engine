@@ -13,14 +13,10 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import prompts from 'prompts';
 import chalk from 'chalk';
 import ora from 'ora';
 import { execSync } from 'child_process';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 interface ProjectConfig {
   projectName: string;
@@ -36,7 +32,7 @@ interface ProjectConfig {
 /**
  * Main CLI function
  */
-async function main() {
+async function main(): Promise<void> {
   console.log(chalk.bold.cyan('\n🚀 Create Docs Engine\n'));
 
   // Get project name from args or prompt
@@ -105,7 +101,8 @@ async function main() {
       ],
     },
     {
-      type: (prev, values) => (values.features.includes('git') ? 'text' : null),
+      type: (prev: unknown, values: { features: string[] }): string | null =>
+        values.features.includes('git') ? 'text' : null,
       name: 'gitRepo',
       message: 'Git repository URL (optional):',
       initial: '',
@@ -152,7 +149,7 @@ async function main() {
 /**
  * Generate project files
  */
-async function generateProject(projectPath: string, config: ProjectConfig) {
+async function generateProject(projectPath: string, config: ProjectConfig): Promise<void> {
   await fs.mkdir(projectPath, { recursive: true });
 
   // Create package.json
@@ -273,7 +270,7 @@ build/
 /**
  * Install dependencies
  */
-async function installDependencies(projectPath: string, packageManager: string) {
+async function installDependencies(projectPath: string, packageManager: string): Promise<void> {
   const commands: Record<string, string> = {
     npm: 'npm install',
     pnpm: 'pnpm install',

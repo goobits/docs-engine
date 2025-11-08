@@ -22,6 +22,8 @@ export default [
         fetch: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
         URL: 'readonly',
         AbortController: 'readonly',
         require: 'readonly',
@@ -111,6 +113,52 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'build/', '.svelte-kit/', 'node_modules/'],
+    // Browser environment for site files
+    files: [
+      'site/**/*.js',
+      'packages/create-docs-engine/site/**/*.js',
+      'packages/create-docs-engine/workspace/**/*.js',
+    ],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+        navigator: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+  },
+  {
+    // Build tools and CLI: Allow fs operations (these are intentional and safe)
+    files: [
+      'packages/docs-engine-cli/**/*.ts',
+      'packages/create-docs-engine/src/**/*.ts',
+      'src/lib/server/**/*.ts',
+      'src/lib/utils/file-io.ts',
+      'src/lib/utils/symbol-generation.ts',
+      'src/lib/utils/navigation-scanner.ts',
+      'src/lib/utils/symbol-resolver.ts',
+      'site/src/routes/**/*.ts',
+      'tsup.config.ts',
+      '**/*.test.ts', // Test files often use fs for fixtures
+    ],
+    rules: {
+      // These are build/CLI tools that need to read/write files
+      // All file paths come from user configuration or validated sources
+      'security/detect-non-literal-fs-filename': 'off',
+    },
+  },
+  {
+    ignores: [
+      'dist/',
+      'build/',
+      'node_modules/',
+      'coverage/',
+      '**/.svelte-kit/**',
+      'site/.svelte-kit/**',
+      'packages/**/site/**',
+      'packages/**/workspace/**',
+    ],
   },
 ];

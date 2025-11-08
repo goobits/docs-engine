@@ -37,7 +37,6 @@
     basePath,
     formats,
     sizes,
-    quality,
     lazy,
     zoom,
     placeholder,

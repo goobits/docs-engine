@@ -15,7 +15,7 @@
     theme?: string;
   }
 
-  let { code, language, theme = 'dracula' }: Props = $props();
+  let { code }: Props = $props();
 
   let copied = $state(false);
   let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined;

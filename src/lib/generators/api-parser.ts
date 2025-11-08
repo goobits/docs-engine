@@ -3,7 +3,19 @@
  * Extracts functions, classes, interfaces, types, and enums from TypeScript source files
  */
 
-import { Project, type SourceFile, SyntaxKind, Node } from 'ts-morph';
+import {
+  Project,
+  type SourceFile,
+  SyntaxKind,
+  Node,
+  type FunctionDeclaration,
+  type ClassDeclaration,
+  type InterfaceDeclaration,
+  type TypeAliasDeclaration,
+  type EnumDeclaration,
+  type ParameterDeclaration,
+  type JSDocableNode,
+} from 'ts-morph';
 
 /**
  * Represents a parsed parameter from a function or method
@@ -184,7 +196,7 @@ export interface ApiParserConfig {
 /**
  * Parse JSDoc tags from a node
  */
-function parseJsDocTags(node: Node): {
+function parseJsDocTags(node: Node & Partial<JSDocableNode>): {
   description?: string;
   params: Map<string, string>;
   returns?: string;
@@ -199,7 +211,7 @@ function parseJsDocTags(node: Node): {
     metadata: {} as ApiMetadata,
   };
 
-  const jsDocs = (node as any).getJsDocs?.() || [];
+  const jsDocs = node.getJsDocs?.() || [];
 
   for (const jsDoc of jsDocs) {
     // Get description
@@ -214,9 +226,7 @@ function parseJsDocTags(node: Node): {
       const tagName = tag.getTagName();
       const tagText = tag.getComment();
       const text =
-        typeof tagText === 'string'
-          ? tagText
-          : tagText?.map((c: any) => c.getText()).join('') || '';
+        typeof tagText === 'string' ? tagText : tagText?.map((c) => c.getText()).join('') || '';
 
       switch (tagName) {
         case 'param': {
@@ -264,7 +274,10 @@ function parseJsDocTags(node: Node): {
 /**
  * Parse parameters from a function or method
  */
-function parseParameters(node: any, paramDocs: Map<string, string>): ApiParameter[] {
+function parseParameters(
+  node: { getParameters?: () => ParameterDeclaration[] },
+  paramDocs: Map<string, string>
+): ApiParameter[] {
   const parameters: ApiParameter[] = [];
   const params = node.getParameters?.() || [];
 
@@ -301,11 +314,11 @@ function getSourceInfo(node: Node): { file: string; line: number } {
 /**
  * Parse a function declaration
  */
-function parseFunction(node: any): ApiFunction {
+function parseFunction(node: FunctionDeclaration): ApiFunction {
   const name = node.getName();
   const signature = node.getText();
   const returnType = node.getReturnType().getText();
-  const typeParameters = node.getTypeParameters?.()?.map((tp: any) => tp.getText());
+  const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
 
   const jsDoc = parseJsDocTags(node);
   const parameters = parseParameters(node, jsDoc.params);
@@ -328,12 +341,12 @@ function parseFunction(node: any): ApiFunction {
 /**
  * Parse a class declaration
  */
-function parseClass(node: any): ApiClass {
+function parseClass(node: ClassDeclaration): ApiClass {
   const name = node.getName();
   const signature = node.getText().split('{')[0].trim();
-  const typeParameters = node.getTypeParameters?.()?.map((tp: any) => tp.getText());
+  const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
   const extendsClause = node.getExtends()?.getText();
-  const implementsClauses = node.getImplements?.()?.map((impl: any) => impl.getText());
+  const implementsClauses = node.getImplements?.()?.map((impl) => impl.getText());
 
   const jsDoc = parseJsDocTags(node);
 
@@ -400,11 +413,11 @@ function parseClass(node: any): ApiClass {
 /**
  * Parse an interface declaration
  */
-function parseInterface(node: any): ApiInterface {
+function parseInterface(node: InterfaceDeclaration): ApiInterface {
   const name = node.getName();
   const signature = node.getText().split('{')[0].trim();
-  const typeParameters = node.getTypeParameters?.()?.map((tp: any) => tp.getText());
-  const extendsClauses = node.getExtends?.()?.map((ext: any) => ext.getText());
+  const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
+  const extendsClauses = node.getExtends?.()?.map((ext) => ext.getText());
 
   const jsDoc = parseJsDocTags(node);
 
@@ -456,10 +469,10 @@ function parseInterface(node: any): ApiInterface {
 /**
  * Parse a type alias declaration
  */
-function parseTypeAlias(node: any): ApiTypeAlias {
+function parseTypeAlias(node: TypeAliasDeclaration): ApiTypeAlias {
   const name = node.getName();
   const signature = node.getText();
-  const typeParameters = node.getTypeParameters?.()?.map((tp: any) => tp.getText());
+  const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
   const definition = node.getType().getText();
 
   const jsDoc = parseJsDocTags(node);
@@ -480,11 +493,11 @@ function parseTypeAlias(node: any): ApiTypeAlias {
 /**
  * Parse an enum declaration
  */
-function parseEnum(node: any): ApiEnum {
+function parseEnum(node: EnumDeclaration): ApiEnum {
   const name = node.getName();
   const jsDoc = parseJsDocTags(node);
 
-  const members = node.getMembers().map((member: any) => {
+  const members = node.getMembers().map((member) => {
     const memberJsDoc = parseJsDocTags(member);
     const value = member.getValue();
 
@@ -539,10 +552,11 @@ function parseSourceFile(sourceFile: SourceFile): ApiItem[] {
           // Skip other kinds (variables, etc.)
         }
       } catch (error) {
-        console.warn(
-          `Failed to parse ${declaration.getKindName()} "${(declaration as any).getName?.() || 'unknown'}":`,
-          error
-        );
+        const nodeName =
+          'getName' in declaration && typeof declaration.getName === 'function'
+            ? declaration.getName()
+            : 'unknown';
+        console.warn(`Failed to parse ${declaration.getKindName()} "${nodeName}":`, error);
       }
     }
   }

@@ -7,6 +7,11 @@ import type { MarkdownDocsConfig } from '../config/index.js';
 import type { ScreenshotRequest, ScreenshotResponse } from './types.js';
 import { CliExecutor } from './cli-executor.js';
 import { getVersion } from '../utils/version.js';
+import { createLogger } from './logger.js';
+import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.js';
+import { checkRateLimit } from './rate-limiter.js';
+
+const logger = createLogger('screenshot-service');
 
 /**
  * Allowed domains for screenshot generation (SSRF protection)
@@ -20,7 +25,6 @@ const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'docs.anthropic.com', 'claude
  * @throws Error if URL is not allowed
  */
 function validateUrl(url: string): void {
-  // eslint-disable-next-line no-undef
   const parsed = new URL(url);
 
   // Block private IP ranges (RFC 1918)
@@ -52,6 +56,21 @@ function validateUrl(url: string): void {
   }
 }
 
+// Circuit breakers for web and CLI screenshot generation (prevents cascading failures)
+const webScreenshotBreaker = new CircuitBreaker({
+  name: 'web-screenshot',
+  failureThreshold: 5,
+  recoveryTimeout: 30000,
+  requestTimeout: 15000,
+});
+
+const cliScreenshotBreaker = new CircuitBreaker({
+  name: 'cli-screenshot',
+  failureThreshold: 5,
+  recoveryTimeout: 30000,
+  requestTimeout: 20000, // CLI can be slower
+});
+
 /**
  * Creates a screenshot endpoint handler for generating screenshots
  * @param config - Configuration options for screenshot generation
@@ -65,7 +84,25 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
     maxOutputLength: config.screenshots.cli?.maxOutputLength,
   });
 
-  return async ({ request, fetch }) => {
+  return async ({ request, fetch, getClientAddress }) => {
+    const clientIp = getClientAddress();
+
+    // Rate limiting: 100 requests per minute per IP
+    if (!checkRateLimit(clientIp, 100, 60000)) {
+      logger.warn({ ip: clientIp }, 'Rate limit exceeded for screenshot endpoint');
+      return json(
+        {
+          success: false,
+          error: 'Too many requests. Please try again later.',
+        } as ScreenshotResponse,
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+          },
+        }
+      );
+    }
     try {
       const {
         name,
@@ -89,30 +126,56 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
       // Determine screenshot type
       const type = screenshotConfig?.type || 'web';
 
+      logger.info(
+        {
+          name,
+          type,
+          url: url || undefined,
+          ip: clientIp,
+        },
+        'Processing screenshot request'
+      );
+
       if (type === 'cli') {
-        return await generateCliScreenshot({
-          name,
-          version,
-          config: screenshotConfig,
-          cliExecutor,
-          fetch,
-          screenshotsConfig: config.screenshots,
-        });
+        return await cliScreenshotBreaker.execute(() =>
+          generateCliScreenshot({
+            name,
+            version,
+            config: screenshotConfig,
+            cliExecutor,
+            fetch,
+            screenshotsConfig: config.screenshots,
+          })
+        );
       } else {
-        return await generateWebScreenshot({
-          name,
-          url,
-          version,
-          config: screenshotConfig,
-          screenshotsConfig: config.screenshots,
-        });
+        return await webScreenshotBreaker.execute(() =>
+          generateWebScreenshot({
+            name,
+            url,
+            version,
+            config: screenshotConfig,
+            screenshotsConfig: config.screenshots,
+          })
+        );
       }
-    } catch (error: any) {
-      console.error('Screenshot generation failed:', error);
+    } catch (error: unknown) {
+      if (error instanceof CircuitBreakerError) {
+        logger.error({ breaker: error.message }, 'Circuit breaker is open');
+        return json(
+          {
+            success: false,
+            error: 'Screenshot service temporarily unavailable. Please try again later.',
+          } as ScreenshotResponse,
+          { status: 503 }
+        );
+      }
+
+      logger.error({ err: error }, 'Screenshot generation failed');
+      const message = error instanceof Error ? error.message : String(error);
       return json(
         {
           success: false,
-          error: error.message,
+          error: message,
         } as ScreenshotResponse,
         { status: 500 }
       );
@@ -125,10 +188,9 @@ async function generateCliScreenshot(options: {
   version: string;
   config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   cliExecutor: CliExecutor;
-  fetch: typeof fetch; // eslint-disable-line no-undef
+  fetch: typeof fetch;
   screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
-  // eslint-disable-line no-undef
   const {
     name,
     version,
@@ -149,8 +211,10 @@ async function generateCliScreenshot(options: {
   }
 
   // Execute command
+  logger.debug({ command: screenshotConfig.command }, 'Executing CLI command for screenshot');
   const result = await cliExecutor.execute(screenshotConfig.command);
   const output = result.stdout + (result.stderr ? '\n' + result.stderr : '');
+  logger.debug({ outputLength: output.length }, 'CLI command executed successfully');
 
   // Import playwright
   let chromium;
@@ -193,6 +257,7 @@ async function generateCliScreenshot(options: {
   const [width, height] = viewportDimensions;
 
   // Launch browser and screenshot the terminal HTML
+  logger.debug({ width, height }, 'Launching browser for CLI screenshot');
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
@@ -203,6 +268,7 @@ async function generateCliScreenshot(options: {
 
   // Set content directly (faster than navigating)
   await page.setContent(terminalHtml);
+  logger.debug('Terminal HTML content set, capturing screenshot');
 
   // Create output directory
   const outputDir = path.join(
@@ -222,6 +288,7 @@ async function generateCliScreenshot(options: {
   });
 
   await browser.close();
+  logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
   // Generate multiple formats and resolutions
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
@@ -265,6 +332,16 @@ async function generateCliScreenshot(options: {
   const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
   const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
 
+  logger.info(
+    {
+      name,
+      publicPath,
+      width: displayWidth,
+      height: displayHeight,
+    },
+    'CLI screenshot generated successfully'
+  );
+
   return json({
     success: true,
     path: publicPath,
@@ -282,7 +359,6 @@ async function generateWebScreenshot(options: {
   config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
-  // eslint-disable-line no-undef
   const { name, url, version, config: screenshotConfig, screenshotsConfig } = options;
 
   if (!url) {
@@ -298,7 +374,12 @@ async function generateWebScreenshot(options: {
   // Validate URL for SSRF protection
   try {
     validateUrl(url);
+    logger.debug({ url }, 'URL validation passed');
   } catch (err) {
+    logger.warn(
+      { url, error: err instanceof Error ? err.message : 'Invalid URL' },
+      'URL validation failed'
+    );
     return json(
       {
         success: false,
@@ -330,6 +411,7 @@ async function generateWebScreenshot(options: {
   const [width, height] = viewportDimensions;
 
   // Launch browser
+  logger.debug({ width, height, url }, 'Launching browser for web screenshot');
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
@@ -339,10 +421,12 @@ async function generateWebScreenshot(options: {
   const page = await context.newPage();
 
   // Navigate to URL
+  logger.debug({ url }, 'Navigating to URL');
   await page.goto(url, { waitUntil: 'networkidle' });
 
   // Wait for selector if specified
   if (screenshotConfig?.waitFor) {
+    logger.debug({ selector: screenshotConfig.waitFor }, 'Waiting for selector');
     await page.waitForSelector(screenshotConfig.waitFor, { timeout: 10000 });
   }
 
@@ -360,6 +444,10 @@ async function generateWebScreenshot(options: {
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
   const screenshot2xPath = path.join(outputDir, `${name}@2x.png`);
+  logger.debug(
+    { selector: screenshotConfig?.selector, fullPage: screenshotConfig?.fullPage },
+    'Capturing screenshot'
+  );
   await element.screenshot({
     path: screenshot2xPath,
     fullPage: screenshotConfig?.fullPage ?? false,
@@ -368,6 +456,7 @@ async function generateWebScreenshot(options: {
 
   // Cleanup
   await browser.close();
+  logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
   // Generate multiple formats and resolutions
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
@@ -410,6 +499,17 @@ async function generateWebScreenshot(options: {
   // Return 1x dimensions for the img element
   const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
   const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+
+  logger.info(
+    {
+      name,
+      url,
+      publicPath,
+      width: displayWidth,
+      height: displayHeight,
+    },
+    'Web screenshot generated successfully'
+  );
 
   return json({
     success: true,

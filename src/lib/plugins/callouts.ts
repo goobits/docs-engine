@@ -1,6 +1,15 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
-import type { Root, BlockContent, Paragraph, Text } from 'mdast';
+import type {
+  Root,
+  BlockContent,
+  Paragraph,
+  List,
+  ListItem,
+  Code,
+  Blockquote,
+  Heading,
+} from 'mdast';
+import type { PhrasingContent } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 
 /**
@@ -41,10 +50,11 @@ const CALLOUT_TYPES: Record<string, CalloutConfig> = {
  * Supports: NOTE, TIP, IMPORTANT, WARNING, CAUTION, SUCCESS, DANGER, INFO, QUESTION
  *
  * Into styled HTML callouts with icons and enhanced markdown rendering
+ * @public
  */
-export function calloutsPlugin() {
+export function calloutsPlugin(): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'blockquote', (node: any, index, parent) => {
+    visit(tree, 'blockquote', (node: Blockquote) => {
       const firstChild = node.children?.[0];
       if (!firstChild || firstChild.type !== 'paragraph') return;
 
@@ -98,17 +108,17 @@ function renderCalloutContent(children: BlockContent[]): string {
         const text = renderInlineContent(paragraph.children);
         return `    <p>${text}</p>`;
       } else if (child.type === 'list') {
-        return renderList(child as any, 1);
+        return renderList(child as List, 1);
       } else if (child.type === 'code') {
-        const code = child as any;
+        const code = child as Code;
         const lang = code.lang ? ` class="language-${code.lang}"` : '';
         return `    <pre><code${lang}>${escapeHtml(code.value)}</code></pre>`;
       } else if (child.type === 'blockquote') {
-        const quote = child as any;
+        const quote = child as Blockquote;
         const quoteContent = renderCalloutContent(quote.children);
         return `    <blockquote>\n${quoteContent}\n    </blockquote>`;
       } else if (child.type === 'heading') {
-        const heading = child as any;
+        const heading = child as Heading;
         const level = heading.depth;
         const text = renderInlineContent(heading.children);
         return `    <h${level}>${text}</h${level}>`;
@@ -121,13 +131,13 @@ function renderCalloutContent(children: BlockContent[]): string {
 /**
  * Render list with support for nested lists
  */
-function renderList(list: any, depth: number): string {
+function renderList(list: List, depth: number): string {
   const indent = '    '.repeat(depth);
   const listType = list.ordered ? 'ol' : 'ul';
   const items = list.children
-    .map((item: any) => {
+    .map((item: ListItem) => {
       const itemParts: string[] = [];
-      item.children.forEach((itemChild: any) => {
+      item.children.forEach((itemChild: BlockContent) => {
         if (itemChild.type === 'paragraph') {
           itemParts.push(renderInlineContent(itemChild.children));
         } else if (itemChild.type === 'list') {
@@ -149,7 +159,7 @@ function renderList(list: any, depth: number): string {
 /**
  * Render inline content (text, emphasis, strong, code, links, strikethrough, etc.)
  */
-function renderInlineContent(children: any[]): string {
+function renderInlineContent(children: PhrasingContent[]): string {
   return children
     .map((child) => {
       if (child.type === 'text') {

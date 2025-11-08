@@ -4,7 +4,6 @@ import {
   loadSearchIndex,
   performSearch,
   highlightMatches,
-  type DocsSection,
 } from './search-index';
 import type { DocsSection as NavSection } from './navigation';
 

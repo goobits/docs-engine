@@ -2,7 +2,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { visit } from 'unist-util-visit';
-import type { Root, Link, Image } from 'mdast';
+import type { Link, Image } from 'mdast';
 import { readFileSync } from 'fs';
 
 /**
@@ -27,42 +27,29 @@ export interface ExtractedLink {
   isAnchor: boolean;
 }
 
+// ============================================================================
+// Module-Private Helpers (True Privacy via ESM)
+// ============================================================================
+
 /**
  * Check if a URL is external (http/https)
- *
- * @param url - URL to check
- * @returns True if URL is external
- *
- * @example
- * ```typescript
- * isExternalUrl('https://example.com'); // true
- * isExternalUrl('/docs/guide'); // false
- * isExternalUrl('../README.md'); // false
- * ```
- *
- * @internal
+ * Module-private helper - not exported, not accessible outside this module
  */
-export function isExternalUrl(url: string): boolean {
+function isExternalUrl(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
 
 /**
  * Check if a URL is an anchor-only link
- *
- * @param url - URL to check
- * @returns True if URL is just an anchor
- *
- * @example
- * ```typescript
- * isAnchorOnly('#section'); // true
- * isAnchorOnly('/docs/guide#section'); // false
- * ```
- *
- * @internal
+ * Module-private helper - not exported, not accessible outside this module
  */
-export function isAnchorOnly(url: string): boolean {
+function isAnchorOnly(url: string): boolean {
   return url.startsWith('#');
 }
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Extract all links from a markdown file
@@ -93,7 +80,7 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
   const tree = unified().use(remarkParse).use(remarkMdx).parse(content);
 
   // Extract markdown links and images
-  visit(tree, ['link', 'image'], (node: Link | Image, _index, parent) => {
+  visit(tree, ['link', 'image'], (node: Link | Image, _index, _parent) => {
     const url = node.url;
     if (!url) return;
 

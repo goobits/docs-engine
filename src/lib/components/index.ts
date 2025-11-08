@@ -31,6 +31,7 @@ export { default as SearchModal } from './SearchModal.svelte';
 export { default as MetaTags } from './MetaTags.svelte';
 export { default as VersionSwitcher } from './VersionSwitcher.svelte';
 export { default as VersionBanner } from './VersionBanner.svelte';
+export { default as ThemeToggle } from './ThemeToggle.svelte';
 
 // Image Optimization (Proposal 10)
 export { default as OptimizedImage } from './OptimizedImage.svelte';

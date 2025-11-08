@@ -10,14 +10,14 @@ export interface OpenAPIEndpoint {
   summary: string;
   description?: string;
   requestBody?: {
-    schema: any;
+    schema: unknown;
     required?: boolean;
   };
   responses: Record<
     string,
     {
       description: string;
-      schema?: any;
+      schema?: unknown;
     }
   >;
   parameters?: Array<{
@@ -25,7 +25,7 @@ export interface OpenAPIEndpoint {
     in: 'query' | 'path' | 'header' | 'cookie';
     required?: boolean;
     description?: string;
-    schema: any;
+    schema: unknown;
   }>;
   tags?: string[];
 }
@@ -33,8 +33,14 @@ export interface OpenAPIEndpoint {
 /**
  * Parse OpenAPI 3.0 specification into endpoint array
  */
-export function parseOpenAPISpec(spec: any): OpenAPIEndpoint[] {
-  if (!spec || !spec.paths) {
+export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
+  if (
+    !spec ||
+    typeof spec !== 'object' ||
+    !('paths' in spec) ||
+    typeof spec.paths !== 'object' ||
+    !spec.paths
+  ) {
     console.warn('[OpenAPI] Invalid spec: missing paths');
     return [];
   }
@@ -45,7 +51,7 @@ export function parseOpenAPISpec(spec: any): OpenAPIEndpoint[] {
     const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 
     for (const method of methods) {
-      const operation = (pathItem as any)[method];
+      const operation = (pathItem as Record<string, unknown>)[method];
       if (!operation) continue;
 
       const endpoint: OpenAPIEndpoint = {
@@ -70,19 +76,19 @@ export function parseOpenAPISpec(spec: any): OpenAPIEndpoint[] {
 
       // Parse parameters (query, path, header)
       if (operation.parameters) {
-        endpoint.parameters = operation.parameters.map((param: any) => ({
-          name: param.name,
-          in: param.in,
-          required: param.required,
-          description: param.description,
-          schema: param.schema,
+        endpoint.parameters = operation.parameters.map((param: unknown) => ({
+          name: (param as Record<string, unknown>).name,
+          in: (param as Record<string, unknown>).in,
+          required: (param as Record<string, unknown>).required,
+          description: (param as Record<string, unknown>).description,
+          schema: (param as Record<string, unknown>).schema,
         }));
       }
 
       // Parse responses
       if (operation.responses) {
         for (const [statusCode, response] of Object.entries(operation.responses)) {
-          const responseObj = response as any;
+          const responseObj = response as Record<string, unknown>;
           endpoint.responses[statusCode] = {
             description: responseObj.description || '',
             schema: responseObj.content?.['application/json']?.schema,
@@ -135,7 +141,7 @@ export function filterEndpointsByPath(
 /**
  * Format JSON schema as readable TypeScript interface
  */
-export function formatSchema(schema: any, indent: number = 0): string {
+export function formatSchema(schema: unknown, indent: number = 0): string {
   if (!schema) return 'any';
 
   const indentStr = '  '.repeat(indent);
@@ -162,9 +168,9 @@ export function formatSchema(schema: any, indent: number = 0): string {
 
     if (schema.properties) {
       for (const [key, prop] of Object.entries(schema.properties)) {
-        const propSchema = prop as any;
+        const propSchema = prop as Record<string, unknown>;
         const optional = !schema.required?.includes(key);
-        const description = propSchema.description;
+        const description = propSchema.description as string | undefined;
 
         if (description) {
           props.push(`${nextIndent}/** ${description} */`);
@@ -184,13 +190,13 @@ export function formatSchema(schema: any, indent: number = 0): string {
 
   // Handle enum types
   if (schema.enum) {
-    return schema.enum.map((v: any) => JSON.stringify(v)).join(' | ');
+    return schema.enum.map((v: unknown) => JSON.stringify(v)).join(' | ');
   }
 
   // Handle union types (oneOf, anyOf)
   if (schema.oneOf || schema.anyOf) {
     const variants = schema.oneOf || schema.anyOf;
-    return variants.map((s: any) => formatSchema(s, indent)).join(' | ');
+    return variants.map((s: unknown) => formatSchema(s, indent)).join(' | ');
   }
 
   // Handle primitive types
@@ -288,21 +294,23 @@ export function generateTypeScriptExample(endpoint: OpenAPIEndpoint): string {
 /**
  * Generate example request body from schema
  */
-function generateExampleBody(schema: any): any {
-  if (!schema) return {};
+function generateExampleBody(schema: unknown): unknown {
+  if (!schema || typeof schema !== 'object') return {};
 
-  if (schema.$ref) {
+  const schemaObj = schema as Record<string, unknown>;
+
+  if (schemaObj.$ref) {
     // Can't generate example from $ref without dereferencing
     return {};
   }
 
-  if (schema.type === 'object' || schema.properties) {
+  if (schemaObj.type === 'object' || schemaObj.properties) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const example: any = {};
 
-    if (schema.properties) {
-      for (const [key, prop] of Object.entries(schema.properties)) {
-        const propSchema = prop as any;
-        example[key] = generateExampleValue(propSchema);
+    if (schemaObj.properties) {
+      for (const [key, prop] of Object.entries(schemaObj.properties)) {
+        example[key] = generateExampleValue(prop);
       }
     }
 
@@ -315,7 +323,7 @@ function generateExampleBody(schema: any): any {
 /**
  * Generate example value for a schema property
  */
-function generateExampleValue(schema: any): any {
+function generateExampleValue(schema: unknown): unknown {
   if (schema.example !== undefined) {
     return schema.example;
   }

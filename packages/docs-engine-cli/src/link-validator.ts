@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from 'fs';
-import { resolve, dirname, join, extname } from 'path';
+import { resolve, dirname, join } from 'path';
 import type { ExtractedLink } from './link-extractor.js';
 import pLimit from 'p-limit';
 
@@ -41,33 +41,21 @@ export interface ValidationOptions {
   validExtensions?: string[];
 }
 
+// ============================================================================
+// Module-Private Helpers (True Privacy via ESM)
+// ============================================================================
+
 /**
  * Resolve a relative link to an absolute file path
+ * Module-private helper - not exported, not accessible outside this module
  *
  * Handles:
  * - Relative paths: `./file.md`, `../file.md`
  * - Absolute paths: `/docs/file.md`
  * - Removes `.md` extension for route matching
  * - Supports anchor links: `file.md#section`
- *
- * @param link - Link to resolve
- * @param sourceFile - Source file containing the link
- * @param baseDir - Base directory for absolute paths
- * @returns Resolved file path (without anchor)
- *
- * @example
- * ```typescript
- * resolveLinkPath(
- *   './guide.md#intro',
- *   '/docs/getting-started.md',
- *   '/project'
- * );
- * // Returns: '/project/docs/guide.md'
- * ```
- *
- * @internal
  */
-export function resolveLinkPath(link: string, sourceFile: string, baseDir: string): string {
+function resolveLinkPath(link: string, sourceFile: string, baseDir: string): string {
   // Remove anchor
   const [pathPart] = link.split('#');
 
@@ -83,44 +71,22 @@ export function resolveLinkPath(link: string, sourceFile: string, baseDir: strin
 
 /**
  * Extract anchor from URL
- *
- * @param url - URL with potential anchor
- * @returns Anchor name (without #) or undefined
- *
- * @example
- * ```typescript
- * extractAnchor('guide.md#installation'); // 'installation'
- * extractAnchor('#intro'); // 'intro'
- * extractAnchor('guide.md'); // undefined
- * ```
- *
- * @internal
+ * Module-private helper - not exported, not accessible outside this module
  */
-export function extractAnchor(url: string): string | undefined {
+function extractAnchor(url: string): string | undefined {
   const parts = url.split('#');
   return parts.length > 1 ? parts[1] : undefined;
 }
 
 /**
  * Check if an anchor exists in a markdown file
+ * Module-private helper - not exported, not accessible outside this module
  *
  * Checks for:
  * - Headers: `## Section Name` → `#section-name`
  * - HTML anchors: `<a name="anchor">` or `<a id="anchor">`
- *
- * @param filePath - Path to markdown file
- * @param anchor - Anchor to find (without #)
- * @returns True if anchor exists
- *
- * @example
- * ```typescript
- * anchorExistsInFile('./docs/guide.md', 'installation');
- * // Returns: true if file has ## Installation heading
- * ```
- *
- * @internal
  */
-export function anchorExistsInFile(filePath: string, anchor: string): boolean {
+function anchorExistsInFile(filePath: string, anchor: string): boolean {
   try {
     const content = readFileSync(filePath, 'utf-8');
 
@@ -157,6 +123,10 @@ export function anchorExistsInFile(filePath: string, anchor: string): boolean {
     return false;
   }
 }
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Validate an internal link

@@ -1,6 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
-import type { Root } from 'mdast';
+import type { Root, Code } from 'mdast';
 import { encodeBase64 } from '../utils/base64.js';
 
 /**
@@ -16,10 +15,11 @@ import { encodeBase64 } from '../utils/base64.js';
  * <div class="md-mermaid" data-diagram="...encoded..."></div>
  *
  * Which is then rendered client-side by mermaid.js
+ * @public
  */
-export function mermaidPlugin() {
+export function mermaidPlugin(): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'code', (node: any) => {
+    visit(tree, 'code', (node: Code) => {
       if (node.lang !== 'mermaid') return;
 
       const diagram = node.value;

@@ -242,7 +242,8 @@ function renderParams(params: Array<{ name: string; description: string; type: s
   `;
 }
 
-function symbolToDocUrl(symbol: SymbolDefinition): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _symbolToDocUrl(symbol: SymbolDefinition): string {
   const relativePath = symbol.path
     .replace(/^src\/lib\/server\//, '')
     .replace(/^\.\.\/packages\/shared\/src\//, 'shared/');

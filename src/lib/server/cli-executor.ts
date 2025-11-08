@@ -75,11 +75,12 @@ export class CliExecutor {
         exitCode: 0,
         duration: Date.now() - startTime,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Record<string, unknown>;
       return {
-        stdout: error.stdout || '',
-        stderr: error.stderr || error.message,
-        exitCode: error.code || 1,
+        stdout: (err.stdout as string) || '',
+        stderr: (err.stderr as string) || (err.message as string) || '',
+        exitCode: (err.code as number) || 1,
         duration: Date.now() - startTime,
       };
     }

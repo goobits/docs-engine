@@ -253,10 +253,10 @@ function generateProperties(properties: ApiProperty[], config: MarkdownGenerator
 
   for (const prop of properties) {
     const readonly = prop.readonly ? ' (readonly)' : '';
-    const optional = prop.optional ? '?' : '';
+    const optional = prop.optional ? ' (optional)' : '';
     const type = linkType(prop.type, config);
 
-    md += `#### \`${prop.name}\`${readonly}\n\n`;
+    md += `#### \`${prop.name}\`${readonly}${optional}\n\n`;
     md += `**Type:** ${type}\n`;
 
     if (prop.description) {

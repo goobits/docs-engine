@@ -316,6 +316,14 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
+
+  /* ===== THEME TRANSITIONS ===== */
+
+  /* Enable smooth color transitions for theme switching */
+  --transition-theme:
+    background-color var(--duration-normal) var(--ease-out),
+    color var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out);
 }
 
 /* ===== DARK THEME ===== */

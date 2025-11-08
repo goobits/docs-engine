@@ -1,6 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Plugin, Transformer } from 'unified';
-import type { Root } from 'mdast';
+import type { Root, Code } from 'mdast';
 import { encodeJsonBase64 } from '../utils/base64.js';
 import { getVersion } from '../utils/version.js';
 
@@ -34,13 +33,14 @@ export interface ScreenshotPluginOptions {
  *
  * @param options - Optional configuration (basePath, version)
  * @returns A unified plugin
+ * @public
  */
-export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
+export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: Root) => void {
   const basePath = options.basePath || '/screenshots';
   const version = options.version || getVersion();
 
   return (tree: Root) => {
-    visit(tree, 'code', (node: any) => {
+    visit(tree, 'code', (node: Code) => {
       // Match code blocks with lang="screenshot:name"
       if (!node.lang?.startsWith('screenshot:')) return;
 
@@ -51,7 +51,7 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
       }
 
       const content = node.value?.trim() || '';
-      let config: Record<string, any> = {};
+      let config: Record<string, unknown> = {};
 
       // Simple URL-only syntax
       if (content && !content.includes(':')) {
@@ -66,7 +66,7 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}) {
           if (colonIndex === -1) continue;
 
           const key = line.slice(0, colonIndex).trim();
-          let value: any = line.slice(colonIndex + 1).trim();
+          let value: unknown = line.slice(colonIndex + 1).trim();
 
           // Parse boolean values
           if (value === 'true') value = true;

@@ -30,6 +30,7 @@
 @import './components/_filetree.css';
 @import './components/_mermaid.css';
 @import './components/_code-block.css';
+@import './components/_theme-toggle.css';
 
 /* ============================================================================
    External Dependencies

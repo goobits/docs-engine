@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { getFileType, FILE_TYPES } from '@goobits/docs-engine/utils';
   import FileTreeItem from './FileTreeItem.svelte';
 
   interface Props {
@@ -11,7 +10,7 @@
     githubUrl?: string | undefined;
   }
 
-  let { data = [], showPath = true, allowCopy = true, githubUrl = undefined }: Props = $props();
+  let { data = [], allowCopy = true, githubUrl = undefined }: Props = $props();
 
   // State
   let expandedFolders = $state(new Set<string>());

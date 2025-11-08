@@ -125,7 +125,7 @@ export interface EnhancedNavigationOptions {
   /** Custom function to infer section from file path */
   inferSection?: (path: string) => string | null;
   /** Map frontmatter fields to standard fields */
-  mapFrontmatter?: (frontmatter: any) => any;
+  mapFrontmatter?: (frontmatter: unknown) => unknown;
   /** Custom field names for frontmatter */
   frontmatterFields?: {
     section?: string; // Field name for section (default: 'section')

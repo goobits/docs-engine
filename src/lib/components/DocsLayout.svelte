@@ -17,6 +17,7 @@
   import EditThisPage from './EditThisPage.svelte';
   import PageMetadata from './PageMetadata.svelte';
   import SearchModal from './SearchModal.svelte';
+  import ThemeToggle from './ThemeToggle.svelte';
   import CodeTabsHydrator from './CodeTabsHydrator.svelte';
   import CodeCopyHydrator from './CodeCopyHydrator.svelte';
   import FileTreeHydrator from './FileTreeHydrator.svelte';
@@ -87,7 +88,6 @@
 
   let {
     content,
-    title,
     navigation = [],
     currentPath = '',
     breadcrumbs = [],
@@ -131,19 +131,27 @@
 </script>
 
 <div class="docs-layout" data-theme={theme}>
-  <!-- Mobile Menu Toggle -->
-  <button
-    class="docs-mobile-toggle"
-    onclick={toggleMobileMenu}
-    type="button"
-    aria-label="Toggle menu"
-  >
-    {#if mobileMenuOpen}
-      <X size={20} />
-    {:else}
-      <Menu size={20} />
-    {/if}
-  </button>
+  <!-- Top Controls Container -->
+  <div class="docs-controls">
+    <!-- Mobile Menu Toggle -->
+    <button
+      class="docs-mobile-toggle"
+      onclick={toggleMobileMenu}
+      type="button"
+      aria-label="Toggle menu"
+    >
+      {#if mobileMenuOpen}
+        <X size={20} />
+      {:else}
+        <Menu size={20} />
+      {/if}
+    </button>
+
+    <!-- Theme Toggle -->
+    <div class="docs-theme-toggle-wrapper">
+      <ThemeToggle />
+    </div>
+  </div>
 
   <!-- Sidebar -->
   <div class="docs-sidebar-container {mobileMenuOpen ? 'mobile-open' : ''}">
@@ -325,13 +333,25 @@
     --docs-border-medium: #cccccc;
   }
 
+  /* Top Controls Container */
+  .docs-controls {
+    position: fixed;
+    top: var(--docs-spacing-lg);
+    right: var(--docs-spacing-lg);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: var(--docs-spacing-sm);
+  }
+
+  .docs-theme-toggle-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
   /* Mobile Menu Toggle */
   .docs-mobile-toggle {
     display: none;
-    position: fixed;
-    top: var(--docs-spacing-lg);
-    left: var(--docs-spacing-lg);
-    z-index: 1001;
     padding: var(--docs-spacing-sm);
     background: var(--docs-surface-raised);
     backdrop-filter: blur(10px);

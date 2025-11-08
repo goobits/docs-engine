@@ -1,4 +1,3 @@
-import type { ComponentType } from 'svelte';
 import type { DocsLink, DocsSection } from '../utils/navigation';
 
 // Re-export navigation types for convenience
@@ -39,5 +38,5 @@ export interface ScreenshotImageProps {
   url: string;
   path: string;
   version: string;
-  config?: any;
+  config?: unknown;
 }
