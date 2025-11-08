@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Root, Code } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';
 
@@ -38,7 +38,7 @@ interface Tab {
  */
 export function tabsPlugin(): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'code', (node: any) => {
+    visit(tree, 'code', (node: Code) => {
       // Check if this is a tabs code block
       if (!node.lang?.startsWith('tabs:')) return;
 

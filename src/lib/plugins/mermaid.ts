@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Root, Code } from 'mdast';
 import { encodeBase64 } from '../utils/base64.js';
 
 /**
@@ -19,7 +19,7 @@ import { encodeBase64 } from '../utils/base64.js';
  */
 export function mermaidPlugin(): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'code', (node: any) => {
+    visit(tree, 'code', (node: Code) => {
       if (node.lang !== 'mermaid') return;
 
       const diagram = node.value;

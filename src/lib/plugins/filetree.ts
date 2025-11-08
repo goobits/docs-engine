@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Root, Code } from 'mdast';
 import { parseTree } from '../utils/tree-parser.js';
 import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';
@@ -23,7 +23,7 @@ import { encodeJsonBase64 } from '../utils/base64.js';
  */
 export function filetreePlugin(): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'code', (node: any) => {
+    visit(tree, 'code', (node: Code) => {
       if (node.lang !== 'filetree') return;
 
       const treeString = node.value;
