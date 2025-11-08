@@ -111,6 +111,32 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'build/', '.svelte-kit/', 'node_modules/'],
+    // Browser environment for site files
+    files: [
+      'site/**/*.js',
+      'packages/create-docs-engine/site/**/*.js',
+      'packages/create-docs-engine/workspace/**/*.js',
+    ],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+        navigator: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+  },
+  {
+    ignores: [
+      'dist/',
+      'build/',
+      'node_modules/',
+      'coverage/',
+      '**/.svelte-kit/**',
+      'site/.svelte-kit/**',
+      'packages/**/site/**',
+      'packages/**/workspace/**',
+    ],
   },
 ];
