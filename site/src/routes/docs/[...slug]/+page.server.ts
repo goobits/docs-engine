@@ -4,6 +4,8 @@ import path from 'path';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkDirective from 'remark-directive';
+import remarkMath from 'remark-math';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import matter from 'gray-matter';
@@ -18,6 +20,7 @@ import {
   mermaidPlugin,
   collapsePlugin,
   referencePlugin,
+  katexPlugin,
 } from 'dist/plugins/index.js';
 import { logError, createDevError } from '$lib/utils/error-logger';
 import type { PageServerLoad } from './$types';
@@ -88,20 +91,31 @@ export const load: PageServerLoad = async ({ params }) => {
     // Process markdown with unified pipeline
     let content;
     try {
+      console.log('[DocLoader] Building unified processor with remarkDirective');
+      console.log('[DocLoader] remarkDirective type:', typeof remarkDirective);
+      console.log('[DocLoader] remarkDirective value:', remarkDirective);
       const processor = unified()
+        // 1. Parse markdown
         .use(remarkParse)
         .use(remarkGfm)
+        .use(remarkDirective) // MUST be early to parse ::: containers
+        .use(remarkMath) // MUST be before katexPlugin
+
+        // 2. Transform markdown AST (order matters!)
         .use(remarkTableOfContents)
         .use(linksPlugin)
+        .use(tabsPlugin) // MUST be before codeHighlightPlugin
         .use(calloutsPlugin)
         .use(filetreePlugin)
-        .use(tabsPlugin)
         .use(mermaidPlugin)
         .use(collapsePlugin)
         .use(referencePlugin)
-        .use(codeHighlightPlugin, { theme: 'dracula' })
-        .use(remarkRehype)
-        .use(rehypeStringify);
+        .use(katexPlugin) // MUST be after remarkMath
+        .use(codeHighlightPlugin, { theme: 'dracula' }) // MUST be LAST remark plugin
+
+        // 3. Convert to HTML
+        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeStringify, { allowDangerousHtml: true });
 
       content = String(await processor.process(markdown));
     } catch (err) {

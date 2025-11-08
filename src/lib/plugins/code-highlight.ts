@@ -260,7 +260,7 @@ export function codeHighlightPlugin(
     });
 
     if (codeNodes.length === 0) {
-      return tree;
+      return;
     }
 
     // Get or create highlighter with enhanced language support
