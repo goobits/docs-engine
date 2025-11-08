@@ -168,9 +168,9 @@ export function formatSchema(schema: unknown, indent: number = 0): string {
 
     if (schema.properties) {
       for (const [key, prop] of Object.entries(schema.properties)) {
-        const propSchema = prop as any;
+        const propSchema = prop as Record<string, unknown>;
         const optional = !schema.required?.includes(key);
-        const description = propSchema.description;
+        const description = propSchema.description as string | undefined;
 
         if (description) {
           props.push(`${nextIndent}/** ${description} */`);

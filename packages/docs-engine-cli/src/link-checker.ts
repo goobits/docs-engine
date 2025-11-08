@@ -12,7 +12,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import { visit } from 'unist-util-visit';
-import type { Link, Image } from 'mdast';
+import type { Link, Image, Heading } from 'mdast';
 
 /**
  * Link found in documentation
@@ -227,14 +227,17 @@ async function extractAnchorsFromFile(filePath: string): Promise<string[]> {
 
   const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
 
-  visit(tree, 'heading', (node: any) => {
-    if (node.children?.[0]?.value) {
-      const text = node.children[0].value;
-      const anchor = text
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w-]/g, '');
-      anchors.push(anchor);
+  visit(tree, 'heading', (node: Heading) => {
+    if (node.children?.[0]) {
+      const firstChild = node.children[0] as Record<string, unknown>;
+      if (firstChild.value && typeof firstChild.value === 'string') {
+        const text = firstChild.value;
+        const anchor = text
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\w-]/g, '');
+        anchors.push(anchor);
+      }
     }
   });
 
