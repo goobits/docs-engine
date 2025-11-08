@@ -226,11 +226,16 @@ function parseJsDocTags(node: Node & Partial<JSDocableNode>): {
       const tagName = tag.getTagName();
       const tagText = tag.getComment();
       const text =
-        typeof tagText === 'string' ? tagText : tagText?.map((c) => c.getText()).join('') || '';
+        typeof tagText === 'string'
+          ? tagText
+          : tagText
+              ?.filter((c) => c !== undefined)
+              .map((c) => c.getText())
+              .join('') || '';
 
       switch (tagName) {
         case 'param': {
-          const paramName = tag.compilerNode.name?.getText();
+          const paramName = (tag.compilerNode as { name?: { getText(): string } }).name?.getText();
           if (paramName) {
             // Strip the "- " prefix that ts-morph includes
             const cleanText = text.replace(/^-\s*/, '');
@@ -315,7 +320,7 @@ function getSourceInfo(node: Node): { file: string; line: number } {
  * Parse a function declaration
  */
 function parseFunction(node: FunctionDeclaration): ApiFunction {
-  const name = node.getName();
+  const name = node.getName() || 'anonymous';
   const signature = node.getText();
   const returnType = node.getReturnType().getText();
   const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
@@ -326,7 +331,7 @@ function parseFunction(node: FunctionDeclaration): ApiFunction {
   return {
     kind: 'function',
     name,
-    description: jsDoc.description,
+    description: jsDoc.description || '',
     signature,
     parameters,
     returnType,
@@ -342,7 +347,7 @@ function parseFunction(node: FunctionDeclaration): ApiFunction {
  * Parse a class declaration
  */
 function parseClass(node: ClassDeclaration): ApiClass {
-  const name = node.getName();
+  const name = node.getName() || 'AnonymousClass';
   const signature = node.getText().split('{')[0].trim();
   const typeParameters = node.getTypeParameters?.()?.map((tp) => tp.getText());
   const extendsClause = node.getExtends()?.getText();
@@ -396,7 +401,7 @@ function parseClass(node: ClassDeclaration): ApiClass {
   return {
     kind: 'class',
     name,
-    description: jsDoc.description,
+    description: jsDoc.description || '',
     signature,
     typeParameters,
     extends: extendsClause,
@@ -535,19 +540,19 @@ function parseSourceFile(sourceFile: SourceFile): ApiItem[] {
       try {
         switch (kind) {
           case SyntaxKind.FunctionDeclaration:
-            items.push(parseFunction(declaration));
+            items.push(parseFunction(declaration as FunctionDeclaration));
             break;
           case SyntaxKind.ClassDeclaration:
-            items.push(parseClass(declaration));
+            items.push(parseClass(declaration as ClassDeclaration));
             break;
           case SyntaxKind.InterfaceDeclaration:
-            items.push(parseInterface(declaration));
+            items.push(parseInterface(declaration as InterfaceDeclaration));
             break;
           case SyntaxKind.TypeAliasDeclaration:
-            items.push(parseTypeAlias(declaration));
+            items.push(parseTypeAlias(declaration as TypeAliasDeclaration));
             break;
           case SyntaxKind.EnumDeclaration:
-            items.push(parseEnum(declaration));
+            items.push(parseEnum(declaration as EnumDeclaration));
             break;
           // Skip other kinds (variables, etc.)
         }

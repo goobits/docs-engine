@@ -15,4 +15,4 @@ export type { ReferencePluginOptions } from './reference';
 export { imageOptimizationPlugin } from './image-optimization';
 export type { ImageOptimizationOptions, ImageMetadata } from './image-optimization';
 export { katexPlugin, remarkMathParser } from './katex';
-export type { KaTeXOptions, MathNode } from './katex';
+export type { KaTeXOptions } from './katex';
