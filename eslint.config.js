@@ -22,6 +22,8 @@ export default [
         fetch: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
         URL: 'readonly',
         AbortController: 'readonly',
         require: 'readonly',
