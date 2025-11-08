@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
-import { createHighlighter } from 'shiki';
+import type { Root, Code } from 'mdast';
+import type { Parent } from 'unist';
+import { createHighlighter, type Highlighter } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
 import { escapeHtml } from '../utils/html.js';
 
@@ -53,7 +54,7 @@ export interface CodeBlockMetadata {
  * Cache the highlighter instance at module level
  * This is private to the module - not accessible from outside
  */
-let highlighterPromise: Promise<any> | null = null;
+let highlighterPromise: Promise<Highlighter> | null = null;
 
 /**
  * Parse metadata from code fence info string
@@ -243,15 +244,17 @@ function wrapWithMetadata(
  *
  * @public
  */
-export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
+export function codeHighlightPlugin(
+  options: CodeHighlightOptions = {}
+): (tree: Root) => Promise<void> {
   const { theme = 'dracula', showLineNumbers = false } = options;
 
-  return async (tree: Root) => {
-    const codeNodes: Array<{ node: any; index: number; parent: any }> = [];
+  return async (tree: Root): Promise<void> => {
+    const codeNodes: Array<{ node: Code; index: number; parent: Parent }> = [];
 
     // Collect all code nodes
-    visit(tree, 'code', (node: any, index: number | undefined, parent: any) => {
-      if (index !== undefined) {
+    visit(tree, 'code', (node: Code, index: number | undefined, parent: Parent | undefined) => {
+      if (index !== undefined && parent) {
         codeNodes.push({ node, index, parent });
       }
     });
@@ -290,7 +293,7 @@ export function codeHighlightPlugin(options: CodeHighlightOptions = {}) {
 
         // Register AgentFlow grammar with aliases
         await h.loadLanguage({
-          ...(agentflowGrammar as any),
+          ...(agentflowGrammar as unknown as Parameters<typeof h.loadLanguage>[0]),
           aliases: ['dsl', 'agentflow'],
         });
 
