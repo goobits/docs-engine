@@ -87,6 +87,15 @@ flowchart TD
 ```
 ````
 
+**Result:**
+
+```mermaid
+flowchart TD
+  Start([Start]) --> Decision{Is it?}
+  Decision -->|Yes| End1([Success])
+  Decision -->|No| End2([Failure])
+```
+
 ### Sequence Diagram
 
 ````markdown
@@ -98,6 +107,16 @@ sequenceDiagram
   Server-->>Client: Response
 ```
 ````
+
+**Result:**
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Server
+  Client->>Server: Request
+  Server-->>Client: Response
+```
 
 ### State Diagram
 
@@ -112,6 +131,18 @@ stateDiagram-v2
   Failed --> [*]
 ```
 ````
+
+**Result:**
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Running
+  Running --> Completed
+  Running --> Failed
+  Completed --> [*]
+  Failed --> [*]
+```
 
 ### Class Diagram
 

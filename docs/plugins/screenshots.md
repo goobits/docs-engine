@@ -133,6 +133,16 @@ showPrompt: true
 ```
 ````
 
+**Example Result:**
+
+```screenshot:git-status-demo
+type: cli
+command: echo "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"
+theme: dracula
+showPrompt: true
+promptText: $
+```
+
 ````markdown
 ```screenshot:git-log-example
 type: cli

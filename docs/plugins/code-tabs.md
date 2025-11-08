@@ -14,6 +14,9 @@ Display code examples in multiple languages with an interactive tabbed interface
 
 ### Add to MDSveX Config
 
+````tabs:code-tabs-config
+tab: JavaScript
+---
 ```javascript
 import { tabsPlugin } from '@goobits/docs-engine/plugins';
 
@@ -28,6 +31,28 @@ export default {
   ],
 };
 ```
+---
+tab: TypeScript
+---
+```typescript
+import { mdsvex } from 'mdsvex';
+import { tabsPlugin } from '@goobits/docs-engine/plugins';
+import type { Config } from '@sveltejs/kit';
+
+const config: Config = {
+  preprocess: [
+    mdsvex({
+      remarkPlugins: [
+        tabsPlugin(),
+        // ... other plugins
+      ],
+    }),
+  ],
+};
+
+export default config;
+```
+````
 
 ### Add Hydrator to Layout
 

@@ -10,6 +10,8 @@ tags: [plugin, markdown, toc, navigation]
 
 Auto-generate a table of contents from markdown headings.
 
+## TOC:3
+
 ## Usage
 
 ### Add to MDSveX Config
