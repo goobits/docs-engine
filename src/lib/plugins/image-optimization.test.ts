@@ -24,7 +24,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin();
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     expect(transformed.type).toBe('html');
@@ -52,7 +52,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin();
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     // Should have removed dimensions from URL
@@ -83,7 +83,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin({ skipExternal: true });
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const node = paragraph.children[0];
 
     // Should NOT be transformed (still an image node)
@@ -110,7 +110,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin({ skipExternal: false });
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     // Should be transformed
@@ -146,7 +146,7 @@ describe('imageOptimizationPlugin', () => {
 
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     expect(transformed.type).toBe('html');
@@ -180,7 +180,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin();
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     // Alt text is encoded in the config
@@ -207,7 +207,7 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin();
     await plugin(tree);
 
-    const paragraph = tree.children[0] as any;
+    const paragraph = tree.children[0] as unknown;
     const transformed = paragraph.children[0];
 
     expect(transformed.type).toBe('html');
@@ -244,8 +244,8 @@ describe('imageOptimizationPlugin', () => {
     const plugin = imageOptimizationPlugin();
     await plugin(tree);
 
-    const first = (tree.children[0] as any).children[0];
-    const second = (tree.children[1] as any).children[0];
+    const first = (tree.children[0] as unknown).children[0];
+    const second = (tree.children[1] as unknown).children[0];
 
     expect(first.type).toBe('html');
     expect(first.value).toContain('md-optimized-image');

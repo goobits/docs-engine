@@ -25,7 +25,7 @@ function createInlineMathTree(latex: string): Root {
             type: 'inlineMath',
             value: latex,
             data: {},
-          } as any,
+          } as unknown,
         ],
       },
     ],
@@ -43,7 +43,7 @@ function createDisplayMathTree(latex: string): Root {
         type: 'math',
         value: latex,
         data: {},
-      } as any,
+      } as unknown,
     ],
   };
 }
@@ -52,9 +52,9 @@ function createDisplayMathTree(latex: string): Root {
  * Helper to get the HTML output from a transformed tree
  */
 function getHtmlOutput(tree: Root, index = 0): string {
-  const node = tree.children[index] as any;
+  const node = tree.children[index] as unknown;
   if (node.type === 'paragraph') {
-    return (node.children[0] as any).value;
+    return (node.children[0] as unknown).value;
   }
   return node.value;
 }
@@ -285,17 +285,17 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as any,
+          } as unknown,
           {
             type: 'math',
             value: 'y = mx + b',
             data: {},
-          } as any,
+          } as unknown,
           {
             type: 'inlineMath',
             value: 'z^3',
             data: {},
-          } as any,
+          } as unknown,
         ],
       };
 
@@ -324,7 +324,7 @@ describe('katex plugin', () => {
                 type: 'inlineMath',
                 value: 'x^2',
                 data: {},
-              } as any,
+              } as unknown,
               {
                 type: 'text',
                 value: ' more text',
@@ -337,7 +337,7 @@ describe('katex plugin', () => {
       const plugin = katexPlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as unknown;
       const mathNode = paragraph.children[1];
 
       expect(mathNode.type).toBe('html');
@@ -385,7 +385,7 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as any,
+          } as unknown,
         ],
       };
 
@@ -393,13 +393,13 @@ describe('katex plugin', () => {
       plugin(tree);
 
       // Text node should remain unchanged
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as unknown;
       expect(paragraph.type).toBe('paragraph');
       expect(paragraph.children[0].type).toBe('text');
       expect(paragraph.children[0].value).toBe('Plain text');
 
       // Math node should be transformed
-      const mathNode = tree.children[1] as any;
+      const mathNode = tree.children[1] as unknown;
       expect(mathNode.type).toBe('html');
     });
   });

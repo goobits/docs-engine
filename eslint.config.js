@@ -128,6 +128,26 @@ export default [
     },
   },
   {
+    // Build tools and CLI: Allow fs operations (these are intentional and safe)
+    files: [
+      'packages/docs-engine-cli/**/*.ts',
+      'packages/create-docs-engine/src/**/*.ts',
+      'src/lib/server/**/*.ts',
+      'src/lib/utils/file-io.ts',
+      'src/lib/utils/symbol-generation.ts',
+      'src/lib/utils/navigation-scanner.ts',
+      'src/lib/utils/symbol-resolver.ts',
+      'site/src/routes/**/*.ts',
+      'tsup.config.ts',
+      '**/*.test.ts', // Test files often use fs for fixtures
+    ],
+    rules: {
+      // These are build/CLI tools that need to read/write files
+      // All file paths come from user configuration or validated sources
+      'security/detect-non-literal-fs-filename': 'off',
+    },
+  },
+  {
     ignores: [
       'dist/',
       'build/',

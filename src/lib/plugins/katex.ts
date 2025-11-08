@@ -163,14 +163,18 @@ function renderMath(latex: string, displayMode: boolean, options: KaTeXOptions =
  */
 export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
-    const mathNodes: Array<{ node: any; index: number; parent: any }> = [];
+    const mathNodes: Array<{ node: unknown; index: number; parent: unknown }> = [];
 
     // Collect all math nodes (both inline and block)
-    visit(tree, ['math', 'inlineMath'], (node: any, index: number | undefined, parent: any) => {
-      if (index !== undefined) {
-        mathNodes.push({ node, index, parent });
+    visit(
+      tree,
+      ['math', 'inlineMath'],
+      (node: unknown, index: number | undefined, parent: unknown) => {
+        if (index !== undefined) {
+          mathNodes.push({ node, index, parent });
+        }
       }
-    });
+    );
 
     if (mathNodes.length === 0) {
       return;
@@ -221,11 +225,14 @@ export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
  */
 export function remarkMathParser(_options: KaTeXOptions = {}): (tree: Root) => void {
   return (tree: Root) => {
-    visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
-      if (index === undefined || !node.value) return;
+    visit(tree, 'text', (node: unknown, index: number | undefined, parent: unknown) => {
+      if (index === undefined) return;
+      if (!(node && typeof node === 'object' && 'value' in node)) return;
+      const nodeObj = node as Record<string, unknown>;
+      if (typeof nodeObj.value !== 'string') return;
 
-      const text = node.value;
-      const parts: any[] = [];
+      const text = nodeObj.value;
+      const parts: unknown[] = [];
       let lastIndex = 0;
 
       // Match $$...$$ (display math) first to avoid conflicts
@@ -289,8 +296,11 @@ export function remarkMathParser(_options: KaTeXOptions = {}): (tree: Root) => v
       }
 
       // Replace the text node with parsed parts
-      if (parts.length > 0) {
-        parent.children.splice(index, 1, ...parts);
+      if (parts.length > 0 && parent && typeof parent === 'object' && 'children' in parent) {
+        const parentObj = parent as Record<string, unknown>;
+        if (Array.isArray(parentObj.children)) {
+          parentObj.children.splice(index, 1, ...parts);
+        }
       }
     });
   };

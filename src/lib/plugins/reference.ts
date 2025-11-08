@@ -69,9 +69,9 @@ export function referencePlugin() {
     }
 
     // Collect reference block directives to transform after traversal
-    const referenceBlocks: Array<any> = [];
-    visit(tree, 'containerDirective', (node: any) => {
-      if (node?.name === 'reference') {
+    const referenceBlocks: Array<unknown> = [];
+    visit(tree, 'containerDirective', (node: unknown) => {
+      if (node && typeof node === 'object' && 'name' in node && node.name === 'reference') {
         referenceBlocks.push(node);
       }
     });
@@ -176,9 +176,16 @@ function createInlineReferenceNode(symbol: SymbolDefinition): PhrasingContent {
   };
 }
 
-function extractSymbolReference(node: any): string | undefined {
-  const firstChild = node.children?.[0];
-  if (firstChild?.type === 'paragraph') {
+function extractSymbolReference(node: unknown): string | undefined {
+  if (!node || typeof node !== 'object' || !('children' in node)) return undefined;
+  const nodeObj = node as Record<string, unknown>;
+  const firstChild = Array.isArray(nodeObj.children) ? nodeObj.children[0] : undefined;
+  if (
+    firstChild &&
+    typeof firstChild === 'object' &&
+    'type' in firstChild &&
+    firstChild.type === 'paragraph'
+  ) {
     const textNode = (firstChild as Paragraph).children?.[0];
     if (textNode?.type === 'text') {
       return textNode.value.trim();
@@ -187,8 +194,10 @@ function extractSymbolReference(node: any): string | undefined {
   return undefined;
 }
 
-function extractRenderOptions(node: any): RenderOptions {
-  const showAttr = node.attributes?.show;
+function extractRenderOptions(node: unknown): RenderOptions {
+  if (!node || typeof node !== 'object' || !('attributes' in node)) return {};
+  const nodeObj = node as Record<string, unknown>;
+  const showAttr = (nodeObj.attributes as Record<string, unknown> | undefined)?.show;
   if (!showAttr) return {};
 
   return {
@@ -202,13 +211,14 @@ function extractRenderOptions(node: any): RenderOptions {
 /**
  * Recursively remove undefined/null nodes from the AST tree
  */
-function sanitizeTree(node: any): void {
+function sanitizeTree(node: unknown): void {
   if (!node || typeof node !== 'object') return;
 
-  if (Array.isArray(node.children)) {
+  const obj = node as Record<string, unknown>;
+  if (Array.isArray(obj.children)) {
     // Filter out undefined/null children
-    node.children = node.children.filter((child: any) => child != null);
+    obj.children = obj.children.filter((child: unknown) => child != null);
     // Recursively sanitize remaining children
-    node.children.forEach((child: any) => sanitizeTree(child));
+    obj.children.forEach((child: unknown) => sanitizeTree(child));
   }
 }
