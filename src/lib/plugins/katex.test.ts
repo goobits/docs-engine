@@ -303,9 +303,10 @@ describe('katex plugin', () => {
       plugin(tree);
 
       // All should be transformed to HTML
-      tree.children.forEach((node: any) => {
-        expect(node.type).toBe('html');
-        expect(node.value).toContain('katex');
+      tree.children.forEach((node: unknown) => {
+        const nodeObj = node as Record<string, unknown>;
+        expect(nodeObj.type).toBe('html');
+        expect(String(nodeObj.value)).toContain('katex');
       });
     });
 

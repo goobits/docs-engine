@@ -20,7 +20,6 @@ const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'docs.anthropic.com', 'claude
  * @throws Error if URL is not allowed
  */
 function validateUrl(url: string): void {
-  // eslint-disable-next-line no-undef
   const parsed = new URL(url);
 
   // Block private IP ranges (RFC 1918)
@@ -107,12 +106,13 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           screenshotsConfig: config.screenshots,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Screenshot generation failed:', error);
+      const message = error instanceof Error ? error.message : String(error);
       return json(
         {
           success: false,
-          error: error.message,
+          error: message,
         } as ScreenshotResponse,
         { status: 500 }
       );
@@ -125,10 +125,9 @@ async function generateCliScreenshot(options: {
   version: string;
   config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   cliExecutor: CliExecutor;
-  fetch: typeof fetch; // eslint-disable-line no-undef
+  fetch: typeof fetch;
   screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
-  // eslint-disable-line no-undef
   const {
     name,
     version,
@@ -282,7 +281,6 @@ async function generateWebScreenshot(options: {
   config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }): Promise<Response> {
-  // eslint-disable-line no-undef
   const { name, url, version, config: screenshotConfig, screenshotsConfig } = options;
 
   if (!url) {

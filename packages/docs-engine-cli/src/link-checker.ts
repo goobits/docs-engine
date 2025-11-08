@@ -90,9 +90,16 @@ async function extractLinksFromFile(filePath: string, content: string): Promise<
   const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
 
   visit(tree, ['link', 'image'], (node: Link | Image) => {
+    let text = node.url;
+    if ('children' in node && node.children?.[0]) {
+      const firstChild = node.children[0] as Record<string, unknown>;
+      if (firstChild.value && typeof firstChild.value === 'string') {
+        text = firstChild.value;
+      }
+    }
     links.push({
       url: node.url,
-      text: 'children' in node && node.children?.[0] ? (node.children[0] as any).value : node.url,
+      text,
       filePath,
       lineNumber: node.position?.start.line,
       type: node.type === 'image' ? 'image' : 'link',
