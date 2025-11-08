@@ -38,5 +38,5 @@ export interface ScreenshotImageProps {
   url: string;
   path: string;
   version: string;
-  config?: any;
+  config?: unknown;
 }

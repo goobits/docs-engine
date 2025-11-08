@@ -186,11 +186,12 @@ export function imageOptimizationPlugin(options: ImageOptimizationOptions = {}) 
       const encodedConfig = encodeJsonBase64(config);
 
       // Transform to HTML div that will be hydrated
-      (node as any).type = 'html';
-      (node as any).value = `<div class="md-optimized-image" data-config="${encodedConfig}"></div>`;
-      delete (node as any).url;
-      delete (node as any).alt;
-      delete (node as any).title;
+      const htmlNode = node as unknown as Record<string, unknown>;
+      htmlNode.type = 'html';
+      htmlNode.value = `<div class="md-optimized-image" data-config="${encodedConfig}"></div>`;
+      delete htmlNode.url;
+      delete htmlNode.alt;
+      delete htmlNode.title;
     });
   };
 }

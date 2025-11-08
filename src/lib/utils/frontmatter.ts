@@ -12,7 +12,7 @@ export interface Frontmatter {
   categories?: string[];
   draft?: boolean;
   order?: number;
-  [key: string]: any; // Allow custom fields
+  [key: string]: unknown; // Allow custom fields
 }
 
 /**

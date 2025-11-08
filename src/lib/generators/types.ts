@@ -16,7 +16,7 @@ export interface CategoryRule {
   /** Match condition */
   match:
     | string // Regex pattern as string
-    | ((item: any) => boolean); // Custom function
+    | ((item: unknown) => boolean); // Custom function
   /** Optional category description */
   description?: string;
 }
@@ -29,8 +29,8 @@ export interface EnrichmentRule {
   field: string;
   /** Value mapping or function */
   value:
-    | Record<string, any> // Static mapping
-    | ((item: any) => any); // Dynamic function
+    | Record<string, unknown> // Static mapping
+    | ((item: unknown) => unknown); // Dynamic function
 }
 
 /**
@@ -42,12 +42,12 @@ export interface MarkdownTemplate {
   /** Source file description */
   source?: string;
   /** Overview section content */
-  overview?: string | ((stats: any) => string);
+  overview?: string | ((stats: unknown) => string);
   /** Table columns configuration */
   columns: Array<{
     header: string;
-    field: string | ((item: any) => string);
-    format?: (value: any) => string;
+    field: string | ((item: unknown) => string);
+    format?: (value: unknown) => string;
   }>;
   /** Additional sections to append */
   footer?: string | string[];
@@ -86,7 +86,7 @@ export type ParserConfig =
   | {
       type: 'custom';
       /** Custom parser function */
-      parse: (content: string, config: any) => any[];
+      parse: (content: string, config: unknown) => unknown[];
     };
 
 /**
