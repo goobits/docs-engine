@@ -1,4 +1,14 @@
 <script lang="ts">
+  /**
+   * Docs Index Page
+   *
+   * Uses the official DocsLayout component from @goobits/docs-engine
+   * for a polished documentation experience.
+   */
+
+  import { page } from '$app/stores';
+  import { Home } from '@lucide/svelte';
+  import { DocsLayout } from 'dist/components/index.js';
   import type { PageData } from './$types';
 
   interface Props {
@@ -6,20 +16,44 @@
   }
 
   let { data }: Props = $props();
+
+  // Get navigation from parent layout
+  const navigation = $derived($page.data.navigation || []);
+
+  // Configure breadcrumbs
+  const breadcrumbs = [
+    {
+      label: '',
+      href: '/',
+      icon: Home,
+    },
+    {
+      label: 'Docs',
+      href: '/docs',
+    },
+  ];
+
+  // Configure footer
+  const footer = {
+    text: 'Questions or feedback?',
+    editLink: {
+      text: 'Edit this page on GitHub',
+      url: `https://github.com/goobits/docs-engine/edit/main/docs/index.md`,
+    },
+  };
 </script>
 
 <svelte:head>
-  <title>{data.title}</title>
+  <title>{data.title} - DocsEngine Documentation</title>
 </svelte:head>
 
-<article class="docs-content">
-  {@html data.content}
-</article>
-
-<style>
-  .docs-content {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-</style>
+<!-- Use official DocsLayout component -->
+<DocsLayout
+  content={data.content}
+  title={data.title}
+  {navigation}
+  currentPath={$page.url.pathname}
+  {breadcrumbs}
+  {footer}
+  theme="dracula"
+/>

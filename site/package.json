@@ -18,8 +18,10 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@lucide/svelte": "^0.553.0",
     "dist": "link:../dist",
     "gray-matter": "^4.0.3",
+    "katex": "^0.16.25",
     "mdsvex": "^0.12.6",
     "rehype-stringify": "^10.0.1",
     "remark-directive": "^4.0.0",
