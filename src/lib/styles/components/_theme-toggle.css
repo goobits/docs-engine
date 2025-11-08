@@ -1,0 +1,149 @@
+/**
+ * Theme Toggle Component Styles
+ * BEM Architecture with W3C Design Tokens
+ *
+ * Provides global styles for theme transitions and color scheme support.
+ * Component-specific styles are in ThemeToggle.svelte
+ */
+
+/* ============================================================================
+   Theme Transition System
+   ========================================================================== */
+
+/**
+ * Smooth color transitions for theme switching
+ * Applied to root to affect all elements
+ */
+:root {
+  /* Enable smooth color transitions */
+  transition:
+    background-color var(--duration-normal, 200ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)),
+    color var(--duration-normal, 200ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+/* Prevent transitions on initial page load */
+:root.no-transition,
+:root.no-transition * {
+  transition: none !important;
+}
+
+/* ============================================================================
+   Theme-Specific Global Styles
+   ========================================================================== */
+
+/**
+ * Light theme (default)
+ * Uses existing design tokens from _design-tokens.css
+ */
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+/**
+ * Dark theme
+ * Overrides semantic colors from _design-tokens.css
+ */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* These overrides are already in _design-tokens.css */
+  /* Included here for documentation purposes */
+
+  /* Background colors */
+  /* --color-background: hsl(0, 0%, 7%); */
+  /* --color-surface: hsla(0, 0%, 100%, 0.03); */
+  /* --color-surface-raised: hsla(0, 0%, 100%, 0.06); */
+  /* --color-surface-elevated: hsla(0, 0%, 100%, 0.09); */
+  /* --color-surface-overlay: hsla(0, 0%, 100%, 0.1); */
+
+  /* Text colors */
+  /* --color-text-primary: hsla(0, 0%, 100%, 0.95); */
+  /* --color-text-secondary: hsla(0, 0%, 100%, 0.7); */
+  /* --color-text-tertiary: hsla(0, 0%, 100%, 0.5); */
+
+  /* Border colors */
+  /* --color-border-subtle: hsla(0, 0%, 100%, 0.06); */
+  /* --color-border-medium: hsla(0, 0%, 100%, 0.12); */
+  /* --color-border-strong: hsla(0, 0%, 100%, 0.24); */
+}
+
+/* ============================================================================
+   Catppuccin Mocha Theme (Enhanced Dark Theme)
+   ========================================================================== */
+
+/**
+ * Optional: Enhanced dark theme using Catppuccin Mocha color palette
+ * Uncomment to use this theme instead of the default dark theme
+ */
+/*
+[data-theme='dark-catppuccin'] {
+  color-scheme: dark;
+
+  // Base colors from Catppuccin Mocha
+  --color-background: hsl(240, 21%, 15%); // #1e1e2e (base)
+  --color-surface: hsl(237, 16%, 23%); // #313244 (surface0)
+  --color-surface-raised: hsl(234, 13%, 31%); // #45475a (surface1)
+  --color-surface-elevated: hsl(237, 12%, 40%); // #585b70 (surface2)
+  --color-surface-overlay: hsl(240, 17%, 47%); // #6c7086 (overlay0)
+
+  // Text colors
+  --color-text-primary: hsl(226, 64%, 88%); // #cdd6f4 (text)
+  --color-text-secondary: hsl(227, 35%, 80%); // #bac2de (subtext1)
+  --color-text-tertiary: hsl(228, 24%, 72%); // #a6adc8 (subtext0)
+
+  // Accent colors
+  --color-text-accent: hsl(217, 92%, 76%); // #89b4fa (blue)
+  --color-primary-500: hsl(217, 92%, 76%); // #89b4fa (blue)
+
+  // Border colors
+  --color-border-subtle: hsl(237, 16%, 23%);
+  --color-border-medium: hsl(234, 13%, 31%);
+  --color-border-strong: hsl(237, 12%, 40%);
+}
+*/
+
+/* ============================================================================
+   System Preference Support
+   ========================================================================== */
+
+/**
+ * Respect user's system preference when no theme is explicitly set
+ * This is overridden by ThemeToggle component when user makes a choice
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Apply dark theme by default if no theme is set */
+    /* This is already handled in _design-tokens.css */
+  }
+}
+
+/* ============================================================================
+   Accessibility & Performance
+   ========================================================================== */
+
+/**
+ * Reduce motion for users who prefer it
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none !important;
+  }
+
+  .theme-toggle {
+    transition: none !important;
+
+    & * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+/**
+ * High contrast mode support
+ */
+@media (prefers-contrast: high) {
+  .theme-toggle {
+    border-width: 2px;
+  }
+}

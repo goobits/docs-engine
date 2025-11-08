@@ -101,7 +101,7 @@
 
     // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
+    const handleChange = (e: { matches: boolean }) => {
       // Only auto-update if user hasn't set a preference
       if (!localStorage.getItem('theme')) {
         theme = e.matches ? 'dark' : 'light';
