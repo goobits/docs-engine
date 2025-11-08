@@ -13,6 +13,13 @@ import type { GeneratorConfig, GeneratorResult, GeneratorStats, CategoryRule } f
 const readFileAsync = promisify(readFile);
 
 /**
+ * Generic parsed item - represents any parsed data structure
+ * The actual shape depends on the parser type (JSON, ENV, SQL, etc.)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ParsedItem = any;
+
+/**
  * Generic documentation generator
  */
 export class GenericGenerator {
@@ -47,7 +54,7 @@ export class GenericGenerator {
   /**
    * Parse source file based on parser configuration
    */
-  private async parse(): Promise<any[]> {
+  private async parse(): Promise<ParsedItem[]> {
     const content = await readFileAsync(this.config.input, 'utf-8');
     const parser = this.config.parser;
 
@@ -68,14 +75,14 @@ export class GenericGenerator {
         return parser.parse(content, this.config);
 
       default:
-        throw new Error(`Unknown parser type: ${(parser as any).type}`);
+        throw new Error(`Unknown parser type: ${(parser as { type?: string }).type}`);
     }
   }
 
   /**
    * Parse JSON file
    */
-  private parseJSON(content: string, path?: string): any[] {
+  private parseJSON(content: string, path?: string): ParsedItem[] {
     const data = JSON.parse(content);
 
     if (!path) {
@@ -107,9 +114,9 @@ export class GenericGenerator {
   /**
    * Parse .env file
    */
-  private parseEnv(content: string, categoryPrefix = '#'): any[] {
+  private parseEnv(content: string, categoryPrefix = '#'): ParsedItem[] {
     const lines = content.split('\n');
-    const variables: any[] = [];
+    const variables: ParsedItem[] = [];
     let currentCategory = 'General';
     let currentComments: string[] = [];
 
@@ -191,10 +198,10 @@ export class GenericGenerator {
   /**
    * Parse SQL schema
    */
-  private parseSQL(content: string, _tablePattern?: RegExp): any[] {
-    const tables: any[] = [];
+  private parseSQL(content: string, _tablePattern?: RegExp): ParsedItem[] {
+    const tables: ParsedItem[] = [];
     const lines = content.split('\n');
-    let currentTable: any = null;
+    let currentTable: ParsedItem | null = null;
     let inTableDef = false;
 
     for (const line of lines) {
@@ -244,7 +251,7 @@ export class GenericGenerator {
   /**
    * Parse grep output
    */
-  private parseGrep(command: string, extractPattern?: RegExp): any[] {
+  private parseGrep(command: string, extractPattern?: RegExp): ParsedItem[] {
     try {
       const output = execSync(command, { encoding: 'utf-8' });
       const lines = output.split('\n').filter(Boolean);
@@ -253,7 +260,7 @@ export class GenericGenerator {
         return lines.map((line) => ({ value: line.trim() }));
       }
 
-      const items: any[] = [];
+      const items: ParsedItem[] = [];
       for (const line of lines) {
         const match = line.match(extractPattern);
         if (match) {
@@ -271,8 +278,8 @@ export class GenericGenerator {
   /**
    * Categorize items based on rules
    */
-  private categorize(items: any[]): Map<string, any[]> {
-    const categorized = new Map<string, any[]>();
+  private categorize(items: ParsedItem[]): Map<string, ParsedItem[]> {
+    const categorized = new Map<string, ParsedItem[]>();
 
     // Initialize categories
     for (const rule of this.config.categories) {
@@ -310,7 +317,7 @@ export class GenericGenerator {
   /**
    * Check if item matches category rule
    */
-  private matchesRule(item: any, rule: CategoryRule): boolean {
+  private matchesRule(item: ParsedItem, rule: CategoryRule): boolean {
     if (typeof rule.match === 'function') {
       return rule.match(item);
     }
@@ -324,12 +331,12 @@ export class GenericGenerator {
   /**
    * Enrich items with metadata
    */
-  private enrich(categorized: Map<string, any[]>): Map<string, any[]> {
+  private enrich(categorized: Map<string, ParsedItem[]>): Map<string, ParsedItem[]> {
     if (!this.config.enrichments && !this.config.descriptions) {
       return categorized;
     }
 
-    const enriched = new Map<string, any[]>();
+    const enriched = new Map<string, ParsedItem[]>();
 
     for (const [category, items] of categorized) {
       enriched.set(
@@ -344,7 +351,7 @@ export class GenericGenerator {
   /**
    * Enrich single item
    */
-  private enrichItem(item: any): any {
+  private enrichItem(item: ParsedItem): ParsedItem {
     const enriched = { ...item };
 
     // Apply enrichment rules
@@ -373,7 +380,7 @@ export class GenericGenerator {
   /**
    * Generate markdown from categorized items
    */
-  private generateMarkdown(categorized: Map<string, any[]>): string {
+  private generateMarkdown(categorized: Map<string, ParsedItem[]>): string {
     const sections: string[] = [];
     const template = this.config.template;
 
@@ -426,7 +433,7 @@ export class GenericGenerator {
       const headers = template.columns.map((col) => col.header);
       const rows = items.map((item) =>
         template.columns.map((col) => {
-          let value: any;
+          let value: unknown;
           if (typeof col.field === 'function') {
             value = col.field(item);
           } else {
@@ -479,7 +486,7 @@ export class GenericGenerator {
   /**
    * Calculate statistics
    */
-  private calculateStats(categorized: Map<string, any[]>): GeneratorStats {
+  private calculateStats(categorized: Map<string, ParsedItem[]>): GeneratorStats {
     const stats: GeneratorStats = {
       totalItems: 0,
       categoryCount: 0,
