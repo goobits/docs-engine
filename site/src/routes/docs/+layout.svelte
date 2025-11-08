@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { ThemeToggle } from '@goobits/themes/svelte';
   import type { LayoutData } from './$types';
 
   interface Props {
@@ -56,6 +57,11 @@
       </svg>
     {/if}
   </button>
+
+  <!-- Theme Toggle -->
+  <div class="docs-theme-toggle">
+    <ThemeToggle />
+  </div>
 
   <!-- Sidebar -->
   <nav class="docs-sidebar {mobileMenuOpen ? 'mobile-open' : ''}">
@@ -117,6 +123,13 @@
 
   .docs-mobile-toggle:hover {
     background: #f9fafb;
+  }
+
+  .docs-theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1001;
   }
 
   .docs-sidebar {

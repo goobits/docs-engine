@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@goobits/themes':
+        specifier: ^1.0.1
+        version: 1.0.1(@sveltejs/kit@2.48.4(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1)))(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1)))(svelte@5.43.4)
       '@lucide/svelte':
         specifier: ^0.546.0
         version: 0.546.0(svelte@5.43.4)
@@ -397,6 +400,13 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@goobits/themes@1.0.1':
+    resolution: {integrity: sha512-EL+Q6oMRwW41uj+dD7TZxhCoi7rylsF1OXymjVK9psT95F7mxGHGWvVftGxEcwmJLuA7ALnuIwTvJuhIVx+bfw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@sveltejs/kit': ^2.0.0
+      svelte: ^5.0.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2975,6 +2985,11 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@goobits/themes@1.0.1(@sveltejs/kit@2.48.4(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1)))(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1)))(svelte@5.43.4)':
+    dependencies:
+      '@sveltejs/kit': 2.48.4(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1)))(svelte@5.43.4)(vite@7.1.12(@types/node@24.10.0)(yaml@2.8.1))
+      svelte: 5.43.4
 
   '@humanfs/core@0.19.1': {}
 

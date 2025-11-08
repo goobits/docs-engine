@@ -54,6 +54,7 @@
     "prepare": "husky || true"
   },
   "dependencies": {
+    "@goobits/themes": "^1.0.1",
     "dompurify": "^3.3.0",
     "glob": "^11.0.0",
     "katex": "^0.16.25",

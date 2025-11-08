@@ -16,4 +16,10 @@ export default defineConfig({
       dist: resolve(__dirname, '../dist'),
     },
   },
+  optimizeDeps: {
+    exclude: ['@goobits/themes'],
+  },
+  ssr: {
+    noExternal: ['@goobits/themes', '@lucide/svelte'],
+  },
 });
