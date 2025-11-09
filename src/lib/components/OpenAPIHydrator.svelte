@@ -10,8 +10,8 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import OpenAPIDoc from './OpenAPIDoc.svelte';
-  import { parseOpenAPISpec, filterEndpointsByPath } from '../utils/openapi-formatter';
-  import { sanitizeHtml } from '../utils/sanitize';
+  import { parseOpenAPISpec, filterEndpointsByPath } from '../utils';
+  import { sanitizeHtml } from '../utils/index.js';
 
   interface Props {
     /** Theme for styling */

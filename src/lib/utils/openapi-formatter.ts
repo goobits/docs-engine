@@ -54,29 +54,32 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
       const operation = (pathItem as Record<string, unknown>)[method];
       if (!operation) continue;
 
+      // Type assertion needed for OpenAPI operation object
+      const op = operation as any;
+
       const endpoint: OpenAPIEndpoint = {
         method: method.toUpperCase() as OpenAPIEndpoint['method'],
         path,
-        summary: operation.summary || '',
-        description: operation.description,
+        summary: op.summary || '',
+        description: op.description,
         responses: {},
-        tags: operation.tags,
+        tags: op.tags,
       };
 
       // Parse request body
-      if (operation.requestBody) {
-        const content = operation.requestBody.content?.['application/json'];
+      if (op.requestBody) {
+        const content = op.requestBody.content?.['application/json'];
         if (content?.schema) {
           endpoint.requestBody = {
             schema: content.schema,
-            required: operation.requestBody.required,
+            required: op.requestBody.required,
           };
         }
       }
 
       // Parse parameters (query, path, header)
-      if (operation.parameters) {
-        endpoint.parameters = operation.parameters.map((param: unknown) => ({
+      if (op.parameters) {
+        endpoint.parameters = op.parameters.map((param: unknown) => ({
           name: (param as Record<string, unknown>).name,
           in: (param as Record<string, unknown>).in,
           required: (param as Record<string, unknown>).required,
@@ -86,12 +89,12 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
       }
 
       // Parse responses
-      if (operation.responses) {
-        for (const [statusCode, response] of Object.entries(operation.responses)) {
+      if (op.responses) {
+        for (const [statusCode, response] of Object.entries(op.responses)) {
           const responseObj = response as Record<string, unknown>;
           endpoint.responses[statusCode] = {
-            description: responseObj.description || '',
-            schema: responseObj.content?.['application/json']?.schema,
+            description: (responseObj.description as string) || '',
+            schema: (responseObj.content as any)?.['application/json']?.schema,
           };
         }
       }
@@ -144,32 +147,35 @@ export function filterEndpointsByPath(
 export function formatSchema(schema: unknown, indent: number = 0): string {
   if (!schema) return 'any';
 
+  // Type assertion needed for OpenAPI schema objects
+  const s = schema as any;
+
   const indentStr = '  '.repeat(indent);
   const nextIndent = '  '.repeat(indent + 1);
 
   // Handle $ref (dereference if needed)
-  if (schema.$ref) {
-    const refName = schema.$ref.split('/').pop();
+  if (s.$ref) {
+    const refName = s.$ref.split('/').pop();
     return refName || 'any';
   }
 
   // Handle array types
-  if (schema.type === 'array') {
-    if (schema.items) {
-      const itemType = formatSchema(schema.items, indent);
+  if (s.type === 'array') {
+    if (s.items) {
+      const itemType = formatSchema(s.items, indent);
       return `${itemType}[]`;
     }
     return 'any[]';
   }
 
   // Handle object types
-  if (schema.type === 'object' || schema.properties) {
+  if (s.type === 'object' || s.properties) {
     const props: string[] = [];
 
-    if (schema.properties) {
-      for (const [key, prop] of Object.entries(schema.properties)) {
+    if (s.properties) {
+      for (const [key, prop] of Object.entries(s.properties)) {
         const propSchema = prop as Record<string, unknown>;
-        const optional = !schema.required?.includes(key);
+        const optional = !s.required?.includes(key);
         const description = propSchema.description as string | undefined;
 
         if (description) {
@@ -189,18 +195,18 @@ export function formatSchema(schema: unknown, indent: number = 0): string {
   }
 
   // Handle enum types
-  if (schema.enum) {
-    return schema.enum.map((v: unknown) => JSON.stringify(v)).join(' | ');
+  if (s.enum) {
+    return s.enum.map((v: unknown) => JSON.stringify(v)).join(' | ');
   }
 
   // Handle union types (oneOf, anyOf)
-  if (schema.oneOf || schema.anyOf) {
-    const variants = schema.oneOf || schema.anyOf;
+  if (s.oneOf || s.anyOf) {
+    const variants = s.oneOf || s.anyOf;
     return variants.map((s: unknown) => formatSchema(s, indent)).join(' | ');
   }
 
   // Handle primitive types
-  switch (schema.type) {
+  switch (s.type) {
     case 'string':
       return 'string';
     case 'number':
@@ -324,25 +330,28 @@ function generateExampleBody(schema: unknown): unknown {
  * Generate example value for a schema property
  */
 function generateExampleValue(schema: unknown): unknown {
-  if (schema.example !== undefined) {
-    return schema.example;
+  // Type assertion needed for OpenAPI schema objects
+  const s = schema as any;
+
+  if (s.example !== undefined) {
+    return s.example;
   }
 
-  if (schema.enum) {
-    return schema.enum[0];
+  if (s.enum) {
+    return s.enum[0];
   }
 
-  if (schema.type === 'array') {
-    return schema.items ? [generateExampleValue(schema.items)] : [];
+  if (s.type === 'array') {
+    return s.items ? [generateExampleValue(s.items)] : [];
   }
 
-  if (schema.type === 'object' || schema.properties) {
+  if (s.type === 'object' || s.properties) {
     return generateExampleBody(schema);
   }
 
-  switch (schema.type) {
+  switch (s.type) {
     case 'string':
-      return schema.format === 'date-time' ? '2025-01-01T00:00:00Z' : 'string';
+      return s.format === 'date-time' ? '2025-01-01T00:00:00Z' : 'string';
     case 'number':
     case 'integer':
       return 0;

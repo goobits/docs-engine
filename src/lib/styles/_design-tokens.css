@@ -328,8 +328,31 @@
 
 /* ===== DARK THEME ===== */
 
+/* Dark theme for explicit class/attribute selectors */
 [data-theme='dark'],
-.dark,
+.dark {
+  /* Dark theme semantic color overrides */
+  --color-background: hsl(0, 0%, 7%);
+  --color-surface: hsla(0, 0%, 100%, 0.03);
+  --color-surface-raised: hsla(0, 0%, 100%, 0.06);
+  --color-surface-elevated: hsla(0, 0%, 100%, 0.09);
+  --color-surface-overlay: hsla(0, 0%, 100%, 0.1);
+
+  --color-text-primary: hsla(0, 0%, 100%, 0.95);
+  --color-text-secondary: hsla(0, 0%, 100%, 0.7);
+  --color-text-tertiary: hsla(0, 0%, 100%, 0.5);
+
+  --color-border-subtle: hsla(0, 0%, 100%, 0.06);
+  --color-border-medium: hsla(0, 0%, 100%, 0.12);
+  --color-border-strong: hsla(0, 0%, 100%, 0.24);
+
+  /* Shadow adjustments for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.7);
+}
+
+/* Dark theme for system preference */
 @media (prefers-color-scheme: dark) {
   :root {
     /* Dark theme semantic color overrides */

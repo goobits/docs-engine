@@ -42,6 +42,9 @@ export type { OpenAPIEndpoint } from './openapi-formatter';
 // HTML utilities
 export * from './html';
 
+// Sanitize utilities
+export * from './sanitize';
+
 // NOTE: Git utilities moved to server/index.ts (requires Node.js child_process)
 // Import from '@goobits/docs-engine/server' instead
 

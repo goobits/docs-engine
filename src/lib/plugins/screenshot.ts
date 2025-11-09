@@ -94,8 +94,9 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: 
       const configEncoded = encodeJsonBase64(config);
 
       // Replace with HTML div for client-side hydration
-      node.type = 'html';
-      node.value = `<div class="md-screenshot" data-name="${name}" data-url="${url}" data-path="${screenshotPath}" data-version="${version}" data-config="${configEncoded}"></div>`;
+      (node as any).type = 'html';
+      (node as any).value =
+        `<div class="md-screenshot" data-name="${name}" data-url="${url}" data-path="${screenshotPath}" data-version="${version}" data-config="${configEncoded}"></div>`;
     });
   };
 }

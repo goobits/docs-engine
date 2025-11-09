@@ -127,6 +127,9 @@ export function referencePlugin() {
     });
 
     referenceBlocks.forEach((node) => {
+      // Type assertion needed for node transformation
+      const n = node as any;
+
       const symbolRef = extractSymbolReference(node);
       if (!symbolRef) {
         throw new Error(':::reference directive requires a symbol name');
@@ -137,24 +140,24 @@ export function referencePlugin() {
       try {
         const symbol = resolveSymbol(symbolRef, symbolMap);
 
-        node.type = 'html';
-        node.value = renderBlock(symbol, options);
-        delete node.children;
-        delete node.name;
-        delete node.attributes;
-        delete node.data;
+        n.type = 'html';
+        n.value = renderBlock(symbol, options);
+        delete n.children;
+        delete n.name;
+        delete n.attributes;
+        delete n.data;
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(
           `[ReferencePlugin] Failed to resolve symbol in :::reference ${symbolRef}: ${message}`
         );
         // Instead of throwing, render a warning block
-        node.type = 'html';
-        node.value = createWarningBlockHtml(`:::reference ${symbolRef}`, message);
-        delete node.children;
-        delete node.name;
-        delete node.attributes;
-        delete node.data;
+        n.type = 'html';
+        n.value = createWarningBlockHtml(`:::reference ${symbolRef}`, message);
+        delete n.children;
+        delete n.name;
+        delete n.attributes;
+        delete n.data;
       }
     });
   };
@@ -277,9 +280,10 @@ function sanitizeTree(node: unknown): void {
 
   const obj = node as Record<string, unknown>;
   if (Array.isArray(obj.children)) {
-    // Filter out undefined/null children
-    obj.children = obj.children.filter((child: unknown) => child != null);
+    // Filter out undefined/null children and cast to array
+    const children = obj.children.filter((child: unknown) => child != null);
+    obj.children = children;
     // Recursively sanitize remaining children
-    obj.children.forEach((child: unknown) => sanitizeTree(child));
+    children.forEach((child: unknown) => sanitizeTree(child));
   }
 }

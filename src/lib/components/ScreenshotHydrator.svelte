@@ -10,7 +10,7 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import ScreenshotImage from './ScreenshotImage.svelte';
-  import { sanitizeErrorMessage } from '../utils/sanitize';
+  import { sanitizeErrorMessage } from '../utils/index.js';
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered

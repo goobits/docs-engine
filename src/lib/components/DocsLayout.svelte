@@ -26,8 +26,8 @@
   import OpenAPIHydrator from './OpenAPIHydrator.svelte';
   import CollapseHydrator from './CollapseHydrator.svelte';
   import type { DocsSection } from './types';
-  import { getAdjacentLinks } from '../utils/navigation';
-  import type { Contributor } from '../utils/git';
+  import { getAdjacentLinks } from '../utils';
+  import type { Contributor } from '../utils';
 
   interface BreadcrumbItem {
     label: string;

@@ -78,11 +78,12 @@ export function calloutsPlugin(): (tree: Root) => void {
       node.children.shift();
 
       // Convert blockquote content to HTML
-      const contentHtml = renderCalloutContent(node.children);
+      const contentHtml = renderCalloutContent(node.children as BlockContent[]);
 
-      // Transform node to HTML
-      node.type = 'html';
-      node.value = `<div class="md-callout md-callout--${config.color}" role="note" aria-label="${displayTitle}">
+      // Transform node to HTML - type assertions needed for node type transformation
+      (node as any).type = 'html';
+      (node as any).value =
+        `<div class="md-callout md-callout--${config.color}" role="note" aria-label="${displayTitle}">
   <div class="md-callout__header">
     <span class="md-callout__icon" aria-hidden="true">${config.icon}</span>
     <span class="md-callout__label">${displayTitle}</span>
@@ -91,7 +92,7 @@ export function calloutsPlugin(): (tree: Root) => void {
 ${contentHtml}
   </div>
 </div>`;
-      delete node.children;
+      delete (node as any).children;
     });
   };
 }
@@ -115,7 +116,7 @@ function renderCalloutContent(children: BlockContent[]): string {
         return `    <pre><code${lang}>${escapeHtml(code.value)}</code></pre>`;
       } else if (child.type === 'blockquote') {
         const quote = child as Blockquote;
-        const quoteContent = renderCalloutContent(quote.children);
+        const quoteContent = renderCalloutContent(quote.children as BlockContent[]);
         return `    <blockquote>\n${quoteContent}\n    </blockquote>`;
       } else if (child.type === 'heading') {
         const heading = child as Heading;
@@ -137,7 +138,7 @@ function renderList(list: List, depth: number): string {
   const items = list.children
     .map((item: ListItem) => {
       const itemParts: string[] = [];
-      item.children.forEach((itemChild: BlockContent) => {
+      (item.children as BlockContent[]).forEach((itemChild: BlockContent) => {
         if (itemChild.type === 'paragraph') {
           itemParts.push(renderInlineContent(itemChild.children));
         } else if (itemChild.type === 'list') {

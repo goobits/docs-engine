@@ -36,13 +36,13 @@ export function filetreePlugin(): (tree: Root) => void {
         const encoded = encodeJsonBase64(treeData);
 
         // Transform to HTML div that will be hydrated client-side
-        node.type = 'html';
-        node.value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
+        (node as any).type = 'html';
+        (node as any).value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
       } catch (error) {
         // If parsing fails, render an error message
         console.error('Failed to parse filetree:', error);
-        node.type = 'html';
-        node.value = `<div class="md-filetree md-filetree--error">
+        (node as any).type = 'html';
+        (node as any).value = `<div class="md-filetree md-filetree--error">
   <div class="md-callout md-callout--red">
     <div class="md-callout__header">
       <span class="md-callout__icon">⚠️</span>

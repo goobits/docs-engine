@@ -292,8 +292,9 @@ export function codeHighlightPlugin(
         });
 
         // Register AgentFlow grammar with aliases
+        const grammar = agentflowGrammar as any;
         await h.loadLanguage({
-          ...(agentflowGrammar as unknown as Parameters<typeof h.loadLanguage>[0]),
+          ...grammar,
           aliases: ['dsl', 'agentflow'],
         });
 
@@ -356,8 +357,8 @@ export function codeHighlightPlugin(
 
           // Transform the node to HTML
           // Escape curly braces for Svelte 5 parser compatibility
-          node.type = 'html';
-          node.value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+          (node as any).type = 'html';
+          (node as any).value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
           delete node.lang;
         } catch (error) {
           console.error(
@@ -366,9 +367,9 @@ export function codeHighlightPlugin(
           );
           // Fallback to plain code block
           // Escape curly braces for Svelte 5 parser compatibility
-          node.type = 'html';
+          (node as any).type = 'html';
           const fallbackHtml = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
-          node.value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+          (node as any).value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
           delete node.lang;
         }
       })

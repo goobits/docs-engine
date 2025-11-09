@@ -28,8 +28,9 @@ export function mermaidPlugin(): (tree: Root) => void {
       const encoded = encodeBase64(diagram);
 
       // Transform to HTML div that will be hydrated client-side
-      node.type = 'html';
-      node.value = `<div class="md-mermaid" data-diagram="${encoded}"></div>`;
+      // Type assertion needed as we're transforming from Code to HTML node
+      (node as any).type = 'html';
+      (node as any).value = `<div class="md-mermaid" data-diagram="${encoded}"></div>`;
     });
   };
 }

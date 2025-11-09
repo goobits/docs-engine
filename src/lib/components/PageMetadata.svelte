@@ -7,8 +7,8 @@
    */
 
   import { Clock, Users } from '@lucide/svelte';
-  import type { Contributor } from '../utils/git';
-  import { formatRelativeDate } from '../utils/date';
+  import type { Contributor } from '../utils';
+  import { formatRelativeDate } from '../utils';
 
   interface Props {
     /** Last updated date from Git history */

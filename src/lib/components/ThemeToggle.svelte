@@ -4,12 +4,12 @@
    *
    * @public
    *
-   * A theme toggle button that switches between light and dark themes.
-   * Uses Svelte 5 runes for reactive state management.
+   * A theme toggle button that cycles between light, dark, and system themes.
+   * Integrates with @goobits/themes for consistent theme management.
    *
    * Features:
-   * - Persists theme preference to localStorage
-   * - Respects system preference on first load
+   * - Cycles through light → dark → system
+   * - Persists theme preference via @goobits/themes store
    * - Smooth transitions between themes
    * - Accessible (keyboard navigation, ARIA labels)
    * - BEM CSS naming convention
@@ -20,68 +20,57 @@
    * ```
    */
 
-  import { onMount } from 'svelte';
+  import { getContext, onMount } from 'svelte';
+  import type { ThemeStore } from '@goobits/themes/svelte';
 
   interface Props {
-    /** Default theme if no preference is saved */
-    defaultTheme?: 'light' | 'dark';
     /** Custom class name for additional styling */
     class?: string;
   }
 
-  let { defaultTheme = 'light', class: className = '' }: Props = $props();
+  let { class: className = '' }: Props = $props();
 
-  // Theme state using Svelte 5 runes
-  let theme = $state<'light' | 'dark'>(defaultTheme);
+  // Get theme store from context (may be null during SSR)
+  let themeStore: ThemeStore | undefined;
+  try {
+    themeStore = getContext<ThemeStore>('theme');
+  } catch {
+    // Context not available during SSR
+  }
+
   let mounted = $state(false);
 
+  // Get current theme from store (default to 'system' during SSR)
+  const currentTheme = $derived(themeStore?.theme ?? 'system');
+
+  // Determine display theme (resolve 'system' to actual theme)
+  const displayTheme = $derived.by(() => {
+    if (currentTheme === 'system') {
+      // Detect system preference
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
+    }
+    return currentTheme;
+  });
+
   // Derived state for accessibility
-  const ariaLabel = $derived(theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  const ariaLabel = $derived(
+    currentTheme === 'light'
+      ? 'Switch to dark theme'
+      : currentTheme === 'dark'
+        ? 'Switch to system theme'
+        : 'Switch to light theme'
+  );
 
   /**
-   * Initialize theme from localStorage or system preference
+   * Cycle through themes: light → dark → system → light
    */
-  function initializeTheme() {
-    // Check localStorage first
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-
-    if (savedTheme) {
-      theme = savedTheme;
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      theme = prefersDark ? 'dark' : 'light';
+  function cycleTheme() {
+    if (themeStore) {
+      themeStore.cycleMode();
     }
-
-    applyTheme(theme);
-  }
-
-  /**
-   * Apply theme to document
-   */
-  function applyTheme(newTheme: 'light' | 'dark') {
-    document.documentElement.setAttribute('data-theme', newTheme);
-
-    // Also add/remove class for compatibility
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
-
-  /**
-   * Toggle between light and dark themes
-   */
-  function toggleTheme() {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    theme = newTheme;
-
-    // Persist to localStorage
-    localStorage.setItem('theme', newTheme);
-
-    // Apply theme to document
-    applyTheme(newTheme);
   }
 
   /**
@@ -90,46 +79,29 @@
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      toggleTheme();
+      cycleTheme();
     }
   }
 
-  // Initialize theme on mount
+  // Mark as mounted to prevent hydration mismatches
   onMount(() => {
-    initializeTheme();
     mounted = true;
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: { matches: boolean }) => {
-      // Only auto-update if user hasn't set a preference
-      if (!localStorage.getItem('theme')) {
-        theme = e.matches ? 'dark' : 'light';
-        applyTheme(theme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
   });
 </script>
 
 <button
   class="theme-toggle {className}"
-  onclick={toggleTheme}
+  onclick={cycleTheme}
   onkeydown={handleKeydown}
   type="button"
   role="switch"
-  aria-checked={theme === 'dark'}
+  aria-checked={displayTheme === 'dark'}
   aria-label={ariaLabel}
   title={ariaLabel}
 >
   <span class="theme-toggle__icon-wrapper">
     {#if mounted}
-      {#if theme === 'light'}
+      {#if displayTheme === 'light'}
         <!-- Sun Icon (Light Mode) -->
         <svg
           class="theme-toggle__icon theme-toggle__icon--sun"
@@ -239,7 +211,8 @@
     }
 
     /* Dark theme adjustments */
-    [data-theme='dark'] & {
+    :global(.theme-dark) &,
+    :global(.theme-system-dark) & {
       background-color: var(--color-surface, hsla(0, 0%, 100%, 0.03));
       border-color: var(--color-border-medium, hsla(0, 0%, 100%, 0.12));
       color: var(--color-text-primary, hsla(0, 0%, 100%, 0.95));

@@ -9,12 +9,8 @@
    * - Collapsible sections
    */
 
-  import type { OpenAPIEndpoint } from '../utils/openapi-formatter';
-  import {
-    formatSchema,
-    generateCurlExample,
-    generateTypeScriptExample,
-  } from '../utils/openapi-formatter';
+  import type { OpenAPIEndpoint } from '../utils';
+  import { formatSchema, generateCurlExample, generateTypeScriptExample } from '../utils';
 
   interface Props {
     endpoint: OpenAPIEndpoint;

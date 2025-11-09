@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { sanitizeSvg } from '../utils/sanitize';
+  import { sanitizeSvg } from '../utils/index.js';
 
   interface Props {
     /** Base64-encoded mermaid diagram source */

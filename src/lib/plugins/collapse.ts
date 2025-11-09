@@ -41,19 +41,20 @@ export function collapsePlugin(): (tree: Root) => void {
       visit(tree, 'containerDirective', (node: unknown) => {
         // Extra defensive checks
         if (!node) return;
-        if (typeof node.name !== 'string') return;
-        if (node.name !== 'collapse') return;
+        const n = node as any;
+        if (typeof n.name !== 'string') return;
+        if (n.name !== 'collapse') return;
 
         // Extract attributes
-        const title = node.attributes?.title || 'Details';
-        const open = node.attributes?.open !== 'false'; // "false" string means closed
+        const title = n.attributes?.title || 'Details';
+        const open = n.attributes?.open !== 'false'; // "false" string means closed
 
         // Render nested markdown to HTML
-        const contentHtml = renderChildren(node.children || []);
+        const contentHtml = renderChildren(n.children || []);
 
         // Transform to HTML
-        node.type = 'html';
-        node.value = `<details class="md-collapse" ${open ? 'open' : ''}>
+        n.type = 'html';
+        n.value = `<details class="md-collapse" ${open ? 'open' : ''}>
   <summary class="md-collapse__summary">
     <svg class="md-collapse__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -64,7 +65,7 @@ export function collapsePlugin(): (tree: Root) => void {
 ${contentHtml}
   </div>
 </details>`;
-        delete node.children;
+        delete n.children;
 
         // Return SKIP to prevent visiting children of the transformed node
         return SKIP;
@@ -95,7 +96,7 @@ function renderChildren(children: BlockContent[]): string {
         return `    <pre><code${lang}>${escapeHtml(code.value)}</code></pre>`;
       } else if (child.type === 'blockquote') {
         const quote = child as Blockquote;
-        const quoteContent = renderChildren(quote.children);
+        const quoteContent = renderChildren(quote.children as BlockContent[]);
         return `    <blockquote>\n${quoteContent}\n    </blockquote>`;
       } else if (child.type === 'heading') {
         const heading = child as Heading;
@@ -117,7 +118,7 @@ function renderList(list: List, depth: number): string {
   const items = list.children
     .map((item: ListItem) => {
       const itemParts: string[] = [];
-      item.children.forEach((itemChild: BlockContent) => {
+      (item.children as BlockContent[]).forEach((itemChild: BlockContent) => {
         if (itemChild.type === 'paragraph') {
           itemParts.push(renderInlineContent(itemChild.children));
         } else if (itemChild.type === 'list') {
@@ -182,9 +183,10 @@ function sanitizeTree(node: unknown): void {
 
   const obj = node as Record<string, unknown>;
   if (Array.isArray(obj.children)) {
-    // Filter out undefined/null children
-    obj.children = obj.children.filter((child: unknown) => child != null);
+    // Filter out undefined/null children and cast to array
+    const children = obj.children.filter((child: unknown) => child != null);
+    obj.children = children;
     // Recursively sanitize remaining children
-    obj.children.forEach((child: unknown) => sanitizeTree(child));
+    children.forEach((child: unknown) => sanitizeTree(child));
   }
 }

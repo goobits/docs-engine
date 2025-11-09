@@ -55,8 +55,10 @@ export function tabsPlugin(): (tree: Root) => void {
       const encoded = encodeJsonBase64(tabs);
 
       // Transform to HTML div that will be hydrated client-side
-      node.type = 'html';
-      node.value = `<div class="md-code-tabs" data-tabs-id="${escapeHtml(tabsId)}" data-tabs="${encoded}"></div>`;
+      // Type assertion needed as we're transforming from Code to HTML node
+      (node as any).type = 'html';
+      (node as any).value =
+        `<div class="md-code-tabs" data-tabs-id="${escapeHtml(tabsId)}" data-tabs="${encoded}"></div>`;
     });
   };
 }

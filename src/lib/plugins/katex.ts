@@ -182,16 +182,18 @@ export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
 
     // Transform each math node to HTML
     mathNodes.forEach(({ node }) => {
-      const latex = node.value;
-      const displayMode = node.type === 'math'; // 'math' = display (block), 'inlineMath' = inline
+      // Type assertion needed for accessing node properties
+      const n = node as any;
+      const latex = n.value;
+      const displayMode = n.type === 'math'; // 'math' = display (block), 'inlineMath' = inline
 
       // Render with KaTeX
       const html = renderMath(latex, displayMode, options);
 
       // Transform node to HTML
-      node.type = 'html';
-      node.value = html;
-      delete node.data;
+      n.type = 'html';
+      n.value = html;
+      delete n.data;
     });
   };
 }
