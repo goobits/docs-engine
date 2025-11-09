@@ -10,7 +10,6 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import CodeTabs from './CodeTabs.svelte';
-  import { sanitizeErrorMessage } from '../utils/index.js';
 
   interface Props {
     /** Theme for syntax highlighting */
@@ -18,6 +17,16 @@
   }
 
   let { theme = 'dracula' }: Props = $props();
+
+  // Simple HTML escape for error messages
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered
@@ -45,9 +54,10 @@
             element.removeAttribute('data-tabs');
           } catch (err) {
             console.error(`[CodeTabsHydrator] Failed to mount tabs ${tabsId}:`, err);
+            const errorMsg = err instanceof Error ? err.message : String(err);
             element.innerHTML = `<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
 							<strong>Code Tabs Error</strong>
-							<p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Failed to load code tabs. ${sanitizeErrorMessage(err)}</p>
+							<p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Failed to load code tabs. ${escapeHtml(errorMsg)}</p>
 						</div>`;
           }
         }

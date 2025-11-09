@@ -10,7 +10,16 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import ScreenshotImage from './ScreenshotImage.svelte';
-  import { sanitizeErrorMessage } from '../utils/index.js';
+
+  // Simple HTML escape for error messages
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered
@@ -62,9 +71,10 @@
             container.setAttribute('data-hydrated', 'true');
           } catch (err) {
             console.error(`[ScreenshotHydrator] Failed to mount screenshot ${name}:`, err);
+            const errorMsg = err instanceof Error ? err.message : String(err);
             element.innerHTML = `<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
 							<strong>Screenshot Error</strong>
-							<p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Failed to load screenshot. ${sanitizeErrorMessage(err)}</p>
+							<p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Failed to load screenshot. ${escapeHtml(errorMsg)}</p>
 						</div>`;
           }
         }

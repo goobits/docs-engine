@@ -8,13 +8,22 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
-  import { sanitizeSvg, sanitizeErrorMessage } from '../utils/index.js';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';
   }
 
   let { theme = 'dark' }: Props = $props();
+
+  // Simple HTML escape for error messages
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   let mermaidApi: typeof import('mermaid').default | undefined;
   let initialized = false;
@@ -32,7 +41,8 @@
   let dragStartPanY = 0;
 
   function openModal(svg: string) {
-    modalSvg = sanitizeSvg(svg);
+    // Mermaid already sanitizes its SVG output
+    modalSvg = svg;
     modalOpen = true;
   }
 
@@ -149,10 +159,10 @@
 
           const { svg } = await mermaidApi.render(id, source);
 
-          // Wrap SVG in clickable container
+          // Wrap SVG in clickable container (Mermaid already sanitizes its SVG output)
           const wrapper = document.createElement('div');
           wrapper.className = 'md-mermaid-clickable';
-          wrapper.innerHTML = sanitizeSvg(svg);
+          wrapper.innerHTML = svg;
           wrapper.style.cursor = 'pointer';
           wrapper.style.transition = 'all 0.2s ease';
           wrapper.setAttribute('role', 'button');
@@ -197,9 +207,10 @@
           element.removeAttribute('data-diagram');
         } catch (err) {
           console.error('Failed to render mermaid diagram:', err);
+          const errorMsg = err instanceof Error ? err.message : String(err);
           element.innerHTML = `<div class="md-mermaid-error" style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
 						<strong>Failed to render diagram</strong>
-						<pre style="margin-top: 0.5rem; font-size: 0.875rem; overflow-x: auto;">${sanitizeErrorMessage(err)}</pre>
+						<pre style="margin-top: 0.5rem; font-size: 0.875rem; overflow-x: auto;">${escapeHtml(errorMsg)}</pre>
 					</div>`;
         }
       }

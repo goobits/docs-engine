@@ -10,7 +10,6 @@
   import { afterNavigate } from '$app/navigation';
   import FileTree from './FileTree.svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { sanitizeErrorMessage } from '../utils/index.js';
 
   interface Props {
     githubUrl?: string;
@@ -18,6 +17,16 @@
   }
 
   let { githubUrl, allowCopy = true }: Props = $props();
+
+  // Simple HTML escape for error messages
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   function hydrate() {
     requestAnimationFrame(() => {
@@ -47,6 +56,7 @@
             });
           } catch (err) {
             console.error('[FileTreeHydrator] Failed to render file tree:', err);
+            const errorMsg = err instanceof Error ? err.message : String(err);
             element.innerHTML = `<div class="md-callout md-callout--red">
 							<div class="md-callout__header">
 								<span class="md-callout__icon">⚠️</span>
@@ -54,7 +64,7 @@
 							</div>
 							<div class="md-callout__content">
 								<p>Failed to render file tree. Invalid data format.</p>
-								<pre>${sanitizeErrorMessage(err)}</pre>
+								<pre>${escapeHtml(errorMsg)}</pre>
 							</div>
 						</div>`;
           }
