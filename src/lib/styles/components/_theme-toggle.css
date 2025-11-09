@@ -35,7 +35,8 @@
  * Light theme (default)
  * Uses existing design tokens from _design-tokens.css
  */
-[data-theme='light'] {
+.theme-light,
+.theme-system-light {
   color-scheme: light;
 }
 
@@ -43,7 +44,8 @@
  * Dark theme
  * Overrides semantic colors from _design-tokens.css
  */
-[data-theme='dark'] {
+.theme-dark,
+.theme-system-dark {
   color-scheme: dark;
 
   /* These overrides are already in _design-tokens.css */
@@ -111,7 +113,7 @@
  * This is overridden by ThemeToggle component when user makes a choice
  */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
+  :root:not([class*='theme-']) {
     /* Apply dark theme by default if no theme is set */
     /* This is already handled in _design-tokens.css */
   }

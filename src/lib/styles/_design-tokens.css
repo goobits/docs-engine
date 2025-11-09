@@ -329,8 +329,8 @@
 /* ===== DARK THEME ===== */
 
 /* Dark theme for explicit class/attribute selectors */
-[data-theme='dark'],
-.dark {
+.theme-dark,
+.theme-system-dark {
   /* Dark theme semantic color overrides */
   --color-background: hsl(0, 0%, 7%);
   --color-surface: hsla(0, 0%, 100%, 0.03);
