@@ -11,7 +11,7 @@
   import { afterNavigate } from '$app/navigation';
   import OpenAPIDoc from './OpenAPIDoc.svelte';
   import { parseOpenAPISpec, filterEndpointsByPath } from '../utils/openapi-formatter';
-  import { sanitizeHtml } from '$lib/utils/sanitize';
+  import { sanitizeHtml } from '../utils/sanitize';
 
   interface Props {
     /** Theme for styling */

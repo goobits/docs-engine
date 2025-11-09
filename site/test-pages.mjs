@@ -4,7 +4,7 @@
 
 import { chromium } from 'playwright';
 
-const BASE_URL = 'http://localhost:3390';
+const BASE_URL = 'http://localhost:3391';
 
 const PAGES_TO_TEST = [
   '/docs',

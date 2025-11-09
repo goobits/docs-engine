@@ -8,7 +8,7 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
-  import { sanitizeSvg, sanitizeErrorMessage } from '$lib/utils/sanitize';
+  import { sanitizeSvg, sanitizeErrorMessage } from '../utils/sanitize';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';

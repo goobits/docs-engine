@@ -1,6 +1,6 @@
-import { createThemeHooks } from '@goobits/themes/server';
-import { themeConfig } from '$lib/config/theme';
+import type { Handle } from '@sveltejs/kit';
 
-const { transform } = createThemeHooks(themeConfig);
-
-export const handle = transform;
+// Theme is handled by DocsLayout's ThemeToggle component via localStorage
+export const handle: Handle = async ({ event, resolve }) => {
+  return await resolve(event);
+};

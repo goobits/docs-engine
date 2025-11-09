@@ -10,7 +10,7 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import CodeTabs from './CodeTabs.svelte';
-  import { sanitizeErrorMessage } from '$lib/utils/sanitize';
+  import { sanitizeErrorMessage } from '../utils/sanitize';
 
   interface Props {
     /** Theme for syntax highlighting */

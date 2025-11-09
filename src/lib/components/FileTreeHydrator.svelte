@@ -10,7 +10,7 @@
   import { afterNavigate } from '$app/navigation';
   import FileTree from './FileTree.svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { sanitizeErrorMessage } from '$lib/utils/sanitize';
+  import { sanitizeErrorMessage } from '../utils/sanitize';
 
   interface Props {
     githubUrl?: string;
