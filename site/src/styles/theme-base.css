@@ -6,8 +6,9 @@
 /* ========================================
  * LIGHT MODE (Default)
  * ======================================== */
-html[data-theme='light'],
-html:not([data-theme]) {
+html.theme-light,
+html.theme-system-light,
+html:not([class*='theme-']) {
   /* Background colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f9fafb;
@@ -70,8 +71,8 @@ html:not([data-theme]) {
 /* ========================================
  * DARK MODE
  * ======================================== */
-html[data-theme='dark'],
-html.dark {
+html.theme-dark,
+html.theme-system-dark {
   /* Background colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #13131f;
