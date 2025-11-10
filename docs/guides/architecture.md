@@ -1,8 +1,17 @@
+---
+title: Architecture
+description: Package & Consumer split design philosophy and system architecture
+section: Guides
+difficulty: advanced
+tags: [architecture, design, philosophy]
+order: 2
+---
+
 # Architecture: Package & Consumer Split
 
-The docs-engine symbol reference system is deliberately split between reusable package functionality and consumer-specific implementation. This architecture enables any project to adopt the system while maintaining flexibility for project-specific needs.
+Everything in docs-engine falls into two categories: what we provide, and what you build.
 
-This guide explains what belongs in the package versus consuming repositories, how they interact, and how to integrate the system into new projects.
+This separation keeps the package lightweight while giving you complete control over how your documentation discovers and links symbols. You get the transformation engine. You write the generation script that fits your project.
 
 ## Table of Contents
 
@@ -21,57 +30,57 @@ This guide explains what belongs in the package versus consuming repositories, h
 - [Contributing](#contributing)
 
 > [!TIP]
-> Visual learner? Check out the **[Architecture Diagrams](./DIAGRAMS.md)** for flowcharts and system overviews.
+> Visual learner? Check out the **[Architecture Diagrams](./diagrams.md)** for flowcharts and system overviews.
 
 ## Design Philosophy
 
-The symbol reference system follows a **generation-consumption split**:
+The symbol reference system splits generation from consumption:
 
-1. **Generation** (consumer): Project-specific scripts scan TypeScript files and generate `symbol-map.json`
-2. **Consumption** (package): Generic remark plugins read the symbol map and transform markdown
+1. **You generate** the symbol map - Scan your TypeScript files, create `symbol-map.json`
+2. **We consume** the symbol map - Transform `{@Symbol}` references in your markdown
 
-This separation provides:
+Why this split?
 
-- **Flexibility**: Each project controls what symbols to capture and how to scan for them
-- **Simplicity**: Package remains lightweight and focused on markdown transformation
-- **Customization**: Easy to adapt to different project structures, monorepos, or special requirements
-- **Performance**: Symbol generation can be optimized per-project (caching, incremental builds)
+**Flexibility** - You control what symbols matter and how to find them
+**Simplicity** - We focus on markdown transformation, you focus on symbol discovery
+**Customization** - Works with any project structure, monorepo, or special needs
+**Performance** - Cache and optimize your symbol generation however you want
 
 > [!NOTE]
-> The package is stateless at build time—it simply reads pre-generated JSON. This makes it fast, predictable, and easy to debug.
+> The package is stateless at build time. We read your pre-generated JSON, transform markdown, and move on. Fast, predictable, debuggable.
 
-## Package Responsibilities
+## What the Package Provides
 
-The `@goobits/docs-engine` package provides **reusable transformation logic** that works with any project:
+We give you reusable transformation logic that works with any project.
 
 ### Core Plugins
 
-Located in `src/lib/plugins/`:
+All plugins live in `src/lib/plugins/`:
 
-- **`reference.ts`** - Remark plugin that transforms `{@Symbol}` and `:::reference` syntax
-- **`links.ts`** - Converts relative markdown links to absolute paths
-- **`callouts.ts`** - Renders note/warning/info boxes
-- **`mermaid.ts`** - Diagram rendering
-- **`tabs.ts`** - Tabbed code examples
-- **`toc.ts`** - Table of contents generation
-- **`screenshot.ts`** - Screenshot embedding
-- **`filetree.ts`** - Interactive file trees
+**`reference.ts`** - Transforms `{@Symbol}` and `:::reference` syntax
+**`links.ts`** - Converts relative links to absolute paths
+**`callouts.ts`** - Renders note/warning/info boxes
+**`mermaid.ts`** - Diagram rendering
+**`tabs.ts`** - Tabbed code examples
+**`toc.ts`** - Table of contents generation
+**`screenshot.ts`** - Screenshot embedding
+**`filetree.ts`** - Interactive file trees
 
-### Symbol Resolution Logic
+### Symbol Resolution
 
-Located in `src/lib/utils/`:
+Utilities live in `src/lib/utils/`:
 
-- **`symbol-resolver.ts`** - Core resolution logic:
-  - Load `symbol-map.json` from various paths
-  - Resolve symbol references (with path hints for disambiguation)
-  - Handle ambiguous symbols with helpful error messages
-  - Fuzzy matching for typos (Levenshtein distance)
+**`symbol-resolver.ts`** finds your symbols:
+- Loads `symbol-map.json` from your project
+- Resolves references (supports path hints for disambiguation)
+- Shows helpful errors for ambiguous symbols
+- Fuzzy-matches typos using Levenshtein distance
 
-- **`symbol-renderer.ts`** - Rendering utilities:
-  - Inline rendering (links with tooltips)
-  - Block rendering (full API documentation)
-  - GitHub URL generation
-  - HTML sanitization
+**`symbol-renderer.ts`** displays them:
+- Inline: links with hover tooltips
+- Block: full API documentation
+- Generates GitHub source URLs
+- Sanitizes HTML output
 
 ### Type Definitions
 

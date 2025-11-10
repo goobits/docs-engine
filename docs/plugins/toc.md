@@ -524,7 +524,7 @@ Inspect the rendered HTML:
 
 **Next Steps:**
 - [Links Plugin](./links.md) - Convert relative links to absolute paths
-- [Frontmatter Parser](./frontmatter.md) - Parse metadata from markdown
+- [Frontmatter Parser](../utilities/frontmatter.md) - Parse metadata from markdown
 
 **Related:**
 - [Navigation Builder](./navigation.md) - Auto-generate navigation from files

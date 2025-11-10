@@ -1,3 +1,12 @@
+---
+title: Migration Guide
+description: Migrate from v1.0 to v2.0 with breaking changes and upgrade instructions
+section: Guides
+difficulty: intermediate
+tags: [migration, upgrade, breaking-changes]
+order: 3
+---
+
 # Migration Guide: v1.0 → v2.0
 
 This guide will help you migrate your project from @goobits/docs-engine v1.0 to v2.0.

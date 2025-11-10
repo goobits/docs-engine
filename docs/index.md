@@ -15,6 +15,7 @@ docs/
 ├── getting-started.md
 ├── guides/
 │   ├── architecture.md
+│   ├── migration.md
 │   ├── examples.md
 │   ├── diagrams.md
 │   └── plugin-order.md
@@ -24,7 +25,6 @@ docs/
 │   ├── code-tabs.md
 │   ├── collapse.md
 │   ├── filetree.md
-│   ├── frontmatter.md
 │   ├── image-optimization.md
 │   ├── katex.md
 │   ├── links.md
@@ -33,8 +33,10 @@ docs/
 │   ├── screenshots.md
 │   ├── symbol-references.md
 │   └── toc.md
-└── reference/
-    └── (future API docs)
+├── components/
+│   └── theme-toggle.md
+└── utilities/
+    └── frontmatter.md
 ```
 
 ## Quick Start
@@ -118,7 +120,7 @@ Learn the fundamentals:
 
 - **[Links](./plugins/links.md)** - Convert relative paths to absolute URLs
 - **[Table of Contents](./plugins/toc.md)** - Auto-generate TOC
-- **[Frontmatter Parser](./plugins/frontmatter.md)** - Parse YAML metadata
+- **[Frontmatter Parser](./utilities/frontmatter.md)** - Parse YAML metadata
 
 ### Navigation
 
@@ -136,7 +138,8 @@ Learn the fundamentals:
 
 ## Reference
 
-- **[API Generation](./reference/api-generation.md)** - Auto-generate API docs from TypeScript
+<!-- Coming soon: API Generation guide (Phase 3) -->
+<!-- - **[API Generation](./reference/api-generation.md)** - Auto-generate API docs from TypeScript -->
 
 ## Learning Paths
 
@@ -147,7 +150,7 @@ Learn the fundamentals:
 1. [Getting Started](./getting-started.md)
 2. [Links Plugin](./plugins/links.md)
 3. [Table of Contents](./plugins/toc.md)
-4. [Frontmatter Parser](./plugins/frontmatter.md)
+4. [Frontmatter Parser](./utilities/frontmatter.md)
 
 ### Intermediate Path
 
@@ -161,7 +164,8 @@ Learn the fundamentals:
 1. [Architecture](./guides/architecture.md)
 2. [Symbol References](./plugins/symbol-references.md)
 3. [Examples](./guides/examples.md)
-4. [API Generation](./reference/api-generation.md)
+<!-- Coming soon: API Generation guide (Phase 3) -->
+<!-- 4. [API Generation](./reference/api-generation.md) -->
 
 ## Features Showcased in This Documentation
 
@@ -191,7 +195,7 @@ Learn the fundamentals:
 ### Advanced Features
 - **Symbol References** - `{@Symbol}` syntax with type links (e.g., {@KaTeXOptions}, {@CodeHighlightOptions}) *(now dogfooding!)*
 - **Screenshot Examples** - 10 CLI screenshot examples in [Screenshots Plugin](./plugins/screenshots.md) *(now dogfooding!)*
-- **Symbol Map Generation** - 166 exported symbols from TypeScript source files *(generated!)*
+- **Symbol Map Generation** - 163 exported symbols from TypeScript source files *(generated!)*
 
 **Performance Highlights:**
 - 🚀 4x faster image processing

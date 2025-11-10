@@ -225,7 +225,7 @@ function createInlineReferenceNode(symbol: SymbolDefinition): PhrasingContent {
       hName: 'a',
       hProperties: {
         href,
-        className: ['symbol-ref', `symbol-ref--${symbol.kind}`],
+        className: ['symbol', `symbol--${symbol.kind}`],
         title: tooltip,
         target: '_blank',
         rel: 'noopener',
