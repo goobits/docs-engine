@@ -414,4 +414,4 @@ linksPlugin({
 
 **Related:**
 - [Plugin Order Guide](../guides/plugin-order.md) - Understanding plugin execution order
-- [Frontmatter Parser](./frontmatter.md) - Parse metadata from markdown
+- [Frontmatter Parser](../utilities/frontmatter.md) - Parse metadata from markdown

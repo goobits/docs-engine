@@ -66,7 +66,7 @@ export function renderInline(symbol: SymbolDefinition): string {
     ? escapeHtml(symbol.jsDoc.description.split('\n')[0]) // First line of description
     : escapeHtml(symbol.signature);
 
-  return `<a href="${githubUrl}" class="symbol-ref symbol-ref--${symbol.kind}" title="${tooltip}" target="_blank" rel="noopener">${escapeHtml(symbol.name)}</a>`;
+  return `<a href="${githubUrl}" class="symbol symbol--${symbol.kind}" title="${tooltip}" target="_blank" rel="noopener">${escapeHtml(symbol.name)}</a>`;
 }
 
 /**

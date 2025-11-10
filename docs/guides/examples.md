@@ -1,3 +1,12 @@
+---
+title: Examples
+description: Practical examples and recipes for the symbol reference system
+section: Guides
+difficulty: intermediate
+tags: [examples, recipes, code, typescript]
+order: 4
+---
+
 # Examples: Symbol Reference System
 
 Practical examples and recipes for using the symbol reference system in your documentation.
@@ -891,9 +900,9 @@ Returns {@WorkflowState}.
 
 ## Next Steps
 
-- [Architecture Guide](./ARCHITECTURE.md) - Understand the package/consumer split
+- [Architecture Guide](./architecture.md) - Understand the package/consumer split
 - [Plugin Docs](../README.md) - Learn about other available plugins
-- [Troubleshooting](./ARCHITECTURE.md#troubleshooting) - Common issues and solutions
+- [Troubleshooting](./architecture.md#troubleshooting) - Common issues and solutions
 
 ---
 

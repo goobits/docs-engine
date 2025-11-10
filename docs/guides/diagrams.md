@@ -1,3 +1,12 @@
+---
+title: Architecture Diagrams
+description: Visual representations of the docs-engine symbol reference system
+section: Guides
+difficulty: intermediate
+tags: [diagrams, mermaid, architecture, visual]
+order: 5
+---
+
 # Architecture Diagrams
 
 Visual representations of the docs-engine symbol reference system.
@@ -390,6 +399,6 @@ flowchart TD
 ---
 
 See also:
-- [Architecture Guide](./ARCHITECTURE.md)
-- [Examples](./EXAMPLES.md)
-- [Symbol References](./SYMBOL-REFERENCES.md)
+- [Architecture Guide](./architecture.md)
+- [Examples](./examples.md)
+- [Symbol References](../plugins/symbol-references.md)

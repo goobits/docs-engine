@@ -187,7 +187,7 @@ This is useful for work-in-progress docs that exist in the repo but shouldn't be
 **Prerequisites:** Basic YAML knowledge, SvelteKit understanding
 
 **Next Steps:**
-- [Frontmatter Parser](./frontmatter.md) - Parse YAML frontmatter
+- [Frontmatter Parser](../utilities/frontmatter.md) - Parse YAML frontmatter
 
 **Related:**
 - [Getting Started](../getting-started.md) - Quick start guide
