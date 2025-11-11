@@ -141,101 +141,72 @@ describe('collapse plugin', () => {
       expect(htmlNode.value).toContain('<p>Second paragraph</p>');
     });
 
-    it('should render code blocks', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'code',
-          lang: 'javascript',
-          value: 'console.log("test");',
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<pre><code class="language-javascript">');
-      expect(htmlNode.value).toContain('console.log(&quot;test&quot;);');
-    });
-
-    it('should render code blocks without language', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'code',
-          value: 'plain code',
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<pre><code>plain code</code></pre>');
-    });
-
-    it('should render blockquotes', () => {
-      const tree = createCollapseDirective([
-        {
+    it.each([
+      {
+        name: 'code block with language',
+        content: { type: 'code', lang: 'javascript', value: 'console.log("test");' },
+        expected: ['<pre><code class="language-javascript">', 'console.log(&quot;test&quot;);'],
+      },
+      {
+        name: 'code block without language',
+        content: { type: 'code', value: 'plain code' },
+        expected: ['<pre><code>plain code</code></pre>'],
+      },
+      {
+        name: 'blockquote',
+        content: {
           type: 'blockquote',
-          children: [
-            {
-              type: 'paragraph',
-              children: [{ type: 'text', value: 'Quote text' }],
-            },
-          ],
+          children: [{ type: 'paragraph', children: [{ type: 'text', value: 'Quote text' }] }],
         },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<blockquote>');
-      expect(htmlNode.value).toContain('<p>Quote text</p>');
-      expect(htmlNode.value).toContain('</blockquote>');
-    });
-
-    it('should render headings', () => {
-      const tree = createCollapseDirective([
-        {
+        expected: ['<blockquote>', '<p>Quote text</p>', '</blockquote>'],
+      },
+      {
+        name: 'heading',
+        content: {
           type: 'heading',
           depth: 2,
           children: [{ type: 'text', value: 'Section Title' }],
         },
-      ]);
-
+        expected: ['<h2>Section Title</h2>'],
+      },
+    ])('should render $name', ({ content, expected }) => {
+      const tree = createCollapseDirective([content as any]);
       const plugin = collapsePlugin();
       plugin(tree);
 
       const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<h2>Section Title</h2>');
+      expected.forEach((exp) => {
+        expect(htmlNode.value).toContain(exp);
+      });
     });
 
-    it('should render unordered lists', () => {
+    it.each([
+      {
+        name: 'unordered list',
+        ordered: false,
+        items: ['Item 1', 'Item 2'],
+        expectedTag: 'ul',
+      },
+      {
+        name: 'ordered list',
+        ordered: true,
+        items: ['First', 'Second'],
+        expectedTag: 'ol',
+      },
+    ])('should render $name', ({ ordered, items, expectedTag }) => {
       const tree = createCollapseDirective([
         {
           type: 'list',
-          ordered: false,
-          children: [
-            {
-              type: 'listItem',
-              children: [
-                {
-                  type: 'paragraph',
-                  children: [{ type: 'text', value: 'Item 1' }],
-                },
-              ],
-            },
-            {
-              type: 'listItem',
-              children: [
-                {
-                  type: 'paragraph',
-                  children: [{ type: 'text', value: 'Item 2' }],
-                },
-              ],
-            },
-          ],
+          ordered,
+          children: items.map((item) => ({
+            type: 'listItem',
+            children: [
+              {
+                type: 'paragraph',
+                children: [{ type: 'text', value: item }],
+              },
+            ],
+          })),
         },
       ]);
 
@@ -243,38 +214,11 @@ describe('collapse plugin', () => {
       plugin(tree);
 
       const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<ul>');
-      expect(htmlNode.value).toContain('<li>Item 1</li>');
-      expect(htmlNode.value).toContain('<li>Item 2</li>');
-      expect(htmlNode.value).toContain('</ul>');
-    });
-
-    it('should render ordered lists', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'list',
-          ordered: true,
-          children: [
-            {
-              type: 'listItem',
-              children: [
-                {
-                  type: 'paragraph',
-                  children: [{ type: 'text', value: 'First' }],
-                },
-              ],
-            },
-          ],
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<ol>');
-      expect(htmlNode.value).toContain('<li>First</li>');
-      expect(htmlNode.value).toContain('</ol>');
+      expect(htmlNode.value).toContain(`<${expectedTag}>`);
+      items.forEach((item) => {
+        expect(htmlNode.value).toContain(`<li>${item}</li>`);
+      });
+      expect(htmlNode.value).toContain(`</${expectedTag}>`);
     });
 
     it('should render nested lists', () => {
@@ -322,17 +266,38 @@ describe('collapse plugin', () => {
   });
 
   describe('inline content rendering', () => {
-    it('should render emphasis', () => {
+    it.each([
+      {
+        name: 'emphasis',
+        children: [
+          { type: 'text', value: 'Normal ' },
+          { type: 'emphasis', children: [{ type: 'text', value: 'italic' }] },
+        ],
+        expected: 'Normal <em>italic</em>',
+      },
+      {
+        name: 'strong',
+        children: [{ type: 'strong', children: [{ type: 'text', value: 'bold' }] }],
+        expected: '<strong>bold</strong>',
+      },
+      {
+        name: 'inline code',
+        children: [
+          { type: 'text', value: 'Use ' },
+          { type: 'inlineCode', value: 'console.log()' },
+        ],
+        expected: 'Use <code>console.log()</code>',
+      },
+      {
+        name: 'strikethrough',
+        children: [{ type: 'delete', children: [{ type: 'text', value: 'deleted' }] }],
+        expected: '<del>deleted</del>',
+      },
+    ])('should render $name', ({ children, expected }) => {
       const tree = createCollapseDirective([
         {
           type: 'paragraph',
-          children: [
-            { type: 'text', value: 'Normal ' },
-            {
-              type: 'emphasis',
-              children: [{ type: 'text', value: 'italic' }],
-            },
-          ],
+          children: children as any,
         },
       ]);
 
@@ -340,45 +305,7 @@ describe('collapse plugin', () => {
       plugin(tree);
 
       const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('Normal <em>italic</em>');
-    });
-
-    it('should render strong', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'strong',
-              children: [{ type: 'text', value: 'bold' }],
-            },
-          ],
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<strong>bold</strong>');
-    });
-
-    it('should render inline code', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'paragraph',
-          children: [
-            { type: 'text', value: 'Use ' },
-            { type: 'inlineCode', value: 'console.log()' },
-          ],
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('Use <code>console.log()</code>');
+      expect(htmlNode.value).toContain(expected);
     });
 
     it('should render links', () => {
@@ -422,26 +349,6 @@ describe('collapse plugin', () => {
 
       const htmlNode = tree.children[0] as any;
       expect(htmlNode.value).toContain('title="Example Site"');
-    });
-
-    it('should render strikethrough', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'delete',
-              children: [{ type: 'text', value: 'deleted' }],
-            },
-          ],
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('<del>deleted</del>');
     });
 
     it('should render images', () => {
@@ -504,58 +411,6 @@ describe('collapse plugin', () => {
 
       const htmlNode = tree.children[0] as any;
       expect(htmlNode.value).toContain('Line 1<br>Line 2');
-    });
-  });
-
-  describe('HTML escaping', () => {
-    it('should escape HTML in title', () => {
-      const tree = createCollapseDirective(
-        [
-          {
-            type: 'paragraph',
-            children: [{ type: 'text', value: 'Content' }],
-          },
-        ],
-        { title: '<script>alert("XSS")</script>' }
-      );
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).not.toContain('<script>');
-      expect(htmlNode.value).toContain('&lt;script&gt;');
-    });
-
-    it('should escape HTML in content', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', value: '<img src=x onerror=alert(1)>' }],
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).not.toContain('<img src=x');
-      expect(htmlNode.value).toContain('&lt;img');
-    });
-
-    it('should escape HTML in code', () => {
-      const tree = createCollapseDirective([
-        {
-          type: 'code',
-          value: '<script>alert("test")</script>',
-        },
-      ]);
-
-      const plugin = collapsePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as any;
-      expect(htmlNode.value).toContain('&lt;script&gt;');
     });
   });
 

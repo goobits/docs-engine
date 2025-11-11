@@ -73,51 +73,28 @@ describe('katex plugin', () => {
       expect(output).not.toContain('katex-display'); // Should be inline, not display
     });
 
-    it('should handle simple fractions', () => {
-      const tree = createInlineMathTree('\\frac{1}{2}');
+    it.each([
+      { formula: '\\frac{1}{2}', description: 'fractions', expectedContent: 'frac' },
+      { formula: '\\sqrt{x}', description: 'square roots', expectedContent: 'sqrt' },
+      {
+        formula: '\\alpha + \\beta = \\gamma',
+        description: 'Greek letters',
+        expectedContent: 'katex',
+      },
+      {
+        formula: 'x^2 + y_1',
+        description: 'subscripts and superscripts',
+        expectedContent: 'katex',
+      },
+      { formula: '2 + 2 = 4', description: 'basic arithmetic', expectedContent: 'katex' },
+    ])('should handle $description', ({ formula, expectedContent }) => {
+      const tree = createInlineMathTree(formula);
       const plugin = katexPlugin();
       plugin(tree);
 
       const output = getHtmlOutput(tree);
       expect(output).toContain('katex');
-      expect(output).toContain('frac');
-    });
-
-    it('should handle square roots', () => {
-      const tree = createInlineMathTree('\\sqrt{x}');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-      expect(output).toContain('sqrt');
-    });
-
-    it('should handle Greek letters', () => {
-      const tree = createInlineMathTree('\\alpha + \\beta = \\gamma');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle subscripts and superscripts', () => {
-      const tree = createInlineMathTree('x^2 + y_1');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle basic arithmetic', () => {
-      const tree = createInlineMathTree('2 + 2 = 4');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
+      expect(output).toContain(expectedContent);
     });
   });
 
@@ -132,76 +109,23 @@ describe('katex plugin', () => {
       expect(output).toContain('katex-display');
     });
 
-    it('should handle integrals', () => {
-      const tree = createDisplayMathTree('\\int_{-\\infty}^{\\infty} e^{-x^2} dx');
+    it.each([
+      { formula: '\\int_{-\\infty}^{\\infty} e^{-x^2} dx', description: 'integrals' },
+      { formula: '\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}', description: 'summations' },
+      { formula: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}', description: 'matrices' },
+      { formula: '\\frac{\\frac{a}{b}}{\\frac{c}{d}}', description: 'complex fractions' },
+      { formula: '\\lim_{x \\to \\infty} f(x) = L', description: 'limits' },
+      { formula: '\\frac{d}{dx} x^2 = 2x', description: 'derivatives' },
+      { formula: '\\prod_{i=1}^{n} x_i', description: 'products' },
+      { formula: '\\binom{n}{k} = \\frac{n!}{k!(n-k)!}', description: 'binomial coefficients' },
+    ])('should handle $description', ({ formula }) => {
+      const tree = createDisplayMathTree(formula);
       const plugin = katexPlugin();
       plugin(tree);
 
       const output = getHtmlOutput(tree);
       expect(output).toContain('katex');
-    });
-
-    it('should handle summations', () => {
-      const tree = createDisplayMathTree('\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle matrices', () => {
-      const tree = createDisplayMathTree('\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle complex fractions', () => {
-      const tree = createDisplayMathTree('\\frac{\\frac{a}{b}}{\\frac{c}{d}}');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle limits', () => {
-      const tree = createDisplayMathTree('\\lim_{x \\to \\infty} f(x) = L');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle derivatives', () => {
-      const tree = createDisplayMathTree('\\frac{d}{dx} x^2 = 2x');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle products', () => {
-      const tree = createDisplayMathTree('\\prod_{i=1}^{n} x_i');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
-    });
-
-    it('should handle binomial coefficients', () => {
-      const tree = createDisplayMathTree('\\binom{n}{k} = \\frac{n!}{k!(n-k)!}');
-      const plugin = katexPlugin();
-      plugin(tree);
-
-      const output = getHtmlOutput(tree);
-      expect(output).toContain('katex');
+      expect(output).toContain('katex-display');
     });
   });
 
