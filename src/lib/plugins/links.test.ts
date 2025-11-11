@@ -62,19 +62,19 @@ describe('links plugin', () => {
     expect(result).toBe('/docs/guide');
   });
 
-  it('should handle top-level README links', () => {
-    const result = processTree('../README.md');
-    expect(result).toBe('/README');
-  });
+  // Test top-level files (README, LICENSE, etc.)
+  const topLevelFiles = [
+    { name: 'README', input: '../README.md', expected: '/README' },
+    { name: 'LICENSE', input: '../LICENSE.md', expected: '/LICENSE' },
+    { name: 'CONTRIBUTING', input: '../CONTRIBUTING.md', expected: '/CONTRIBUTING' },
+    { name: 'CHANGELOG', input: '../CHANGELOG.md', expected: '/CHANGELOG' },
+    { name: 'CODE_OF_CONDUCT', input: '../CODE_OF_CONDUCT.md', expected: '/CODE_OF_CONDUCT' },
+    { name: 'SECURITY', input: '../SECURITY.md', expected: '/SECURITY' },
+  ];
 
-  it('should handle top-level LICENSE links', () => {
-    const result = processTree('../LICENSE.md');
-    expect(result).toBe('/LICENSE');
-  });
-
-  it('should handle CONTRIBUTING links', () => {
-    const result = processTree('../CONTRIBUTING.md');
-    expect(result).toBe('/CONTRIBUTING');
+  it.each(topLevelFiles)('should handle top-level $name links', ({ input, expected }) => {
+    const result = processTree(input);
+    expect(result).toBe(expected);
   });
 
   it('should handle custom top-level files', () => {
@@ -87,14 +87,17 @@ describe('links plugin', () => {
     expect(result).toBe('/docs/guide');
   });
 
-  it('should handle protocol-relative URLs', () => {
-    const result = processTree('//cdn.example.com/file.js');
-    expect(result).toBe('//cdn.example.com/file.js');
-  });
+  // Test external/protocol links that should be preserved
+  const externalLinks = [
+    { name: 'protocol-relative URLs', input: '//cdn.example.com/file.js' },
+    { name: 'ftp:// links', input: 'ftp://example.com/file' },
+    { name: 'http:// links', input: 'http://example.com' },
+    { name: 'data: URIs', input: 'data:text/plain;base64,SGVsbG8=' },
+  ];
 
-  it('should handle ftp:// links', () => {
-    const result = processTree('ftp://example.com/file');
-    expect(result).toBe('ftp://example.com/file');
+  it.each(externalLinks)('should preserve $name', ({ input }) => {
+    const result = processTree(input);
+    expect(result).toBe(input);
   });
 
   it('should handle nested paths', () => {
@@ -115,30 +118,5 @@ describe('links plugin', () => {
   it('should normalize paths with ./', () => {
     const result = processTree('./guide.md');
     expect(result).toBe('/docs/guide');
-  });
-
-  it('should handle CHANGELOG links', () => {
-    const result = processTree('../CHANGELOG.md');
-    expect(result).toBe('/CHANGELOG');
-  });
-
-  it('should handle CODE_OF_CONDUCT links', () => {
-    const result = processTree('../CODE_OF_CONDUCT.md');
-    expect(result).toBe('/CODE_OF_CONDUCT');
-  });
-
-  it('should handle SECURITY links', () => {
-    const result = processTree('../SECURITY.md');
-    expect(result).toBe('/SECURITY');
-  });
-
-  it('should handle http:// links', () => {
-    const result = processTree('http://example.com');
-    expect(result).toBe('http://example.com');
-  });
-
-  it('should handle data: URIs', () => {
-    const result = processTree('data:text/plain;base64,SGVsbG8=');
-    expect(result).toBe('data:text/plain;base64,SGVsbG8=');
   });
 });
