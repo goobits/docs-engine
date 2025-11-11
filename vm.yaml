@@ -1,0 +1,33 @@
+version: '2.0'
+provider: docker
+project:
+  hostname: dev.docs-engine.local
+  name: docs-engine
+  workspace_path: /workspace
+vm:
+  box: '@vibe-base'
+  cpus: 6
+  gui: false
+  memory: 8192
+  port_binding: 127.0.0.1
+  swap: 2048
+  swappiness: 60
+  timezone: auto
+  user: developer
+ports:
+  _range: [3390, 3399]
+services:
+  postgresql:
+    database: '{{ project.name }}_dev'
+    enabled: true
+    password: postgres
+    port: 3399
+    user: postgres
+    version: '15'
+terminal:
+  emoji: 🚀
+  show_git_branch: true
+  show_timestamp: false
+  theme: dracula
+  username: docs-engine-dev
+preset: vibe
