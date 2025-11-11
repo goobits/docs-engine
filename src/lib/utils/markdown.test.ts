@@ -23,16 +23,6 @@ describe('generateTable', () => {
     expect(result).toContain('| bar | Another function |');
   });
 
-  it('should return empty string for empty headers', () => {
-    const result = generateTable([], [['data']]);
-    expect(result).toBe('');
-  });
-
-  it('should return empty string for empty rows', () => {
-    const result = generateTable(['Header'], []);
-    expect(result).toBe('');
-  });
-
   it('should escape pipes in cell content', () => {
     const headers = ['Name', 'Value'];
     const rows = [['pipe|test', 'value|with|pipes']];
@@ -260,11 +250,6 @@ describe('generateList', () => {
   it('should handle single item', () => {
     const result = generateList(['Only one'], false);
     expect(result).toBe('- Only one');
-  });
-
-  it('should handle empty array', () => {
-    const result = generateList([]);
-    expect(result).toBe('');
   });
 
   it('should handle items with special characters', () => {

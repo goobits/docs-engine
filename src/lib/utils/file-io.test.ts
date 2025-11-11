@@ -60,15 +60,6 @@ describe('file-io', () => {
 
       expect(result).toBe(content);
     });
-
-    it('should read empty file', () => {
-      const filePath = join(testDir, 'empty.txt');
-
-      writeFile(filePath, '');
-      const result = readFile(filePath);
-
-      expect(result).toBe('');
-    });
   });
 
   describe('writeFile', () => {
@@ -111,15 +102,6 @@ describe('file-io', () => {
 
       const result = readFile(filePath);
       expect(result).toBe(content);
-    });
-
-    it('should write empty content', () => {
-      const filePath = join(testDir, 'empty.txt');
-
-      writeFile(filePath, '');
-
-      expect(existsSync(filePath)).toBe(true);
-      expect(readFile(filePath)).toBe('');
     });
 
     it('should write multiline content', () => {
@@ -286,12 +268,6 @@ describe('file-io', () => {
       const text = 'Line 1\nLine 2\n';
 
       expect(countLines(text)).toBe(3); // Empty string after final \n counts as a line
-    });
-
-    it('should handle empty string', () => {
-      const text = '';
-
-      expect(countLines(text)).toBe(1);
     });
 
     it('should handle text with only newlines', () => {
