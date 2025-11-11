@@ -66,5 +66,9 @@ lerna-debug.log*
 *.bak
 *.orig
 
+# Package manager locks (keep pnpm-lock.yaml for reproducibility)
+package-lock.json
+yarn.lock
+
 # pnpm
 .pnpm-store/
