@@ -1,0 +1,74 @@
+# Source files (we ship dist/ only)
+src/
+tests/
+__tests__/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Documentation
+docs/
+site/
+proposals/
+examples/
+
+# Build configuration
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+.eslintrc*
+eslint.config.*
+.prettierrc*
+prettier.config.*
+
+# Development files
+.husky/
+.vscode/
+.idea/
+*.log
+*.tmp
+*.temp
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Environment files
+.env
+.env.*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Package manager files
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+.pnpm-store/
+
+# Temporary and cache files
+.cache/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# PR and changelog drafts
+PR-*.md
+CHANGELOG-DRAFT.md
+
+# VM and local config
+vm.yaml
+
+# Build artifacts we don't need to publish
+*.tsbuildinfo
+.svelte-kit/
+test-results/
+
+# Documentation that's not part of the package
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
