@@ -8,6 +8,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    pool: 'vmThreads',
+    poolOptions: {
+      vmThreads: {
+        memoryLimit: '512MB',
+      },
+    },
     include: ['src/**/*.{test,spec}.{js,ts}'],
     coverage: {
       provider: 'v8',

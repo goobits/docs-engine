@@ -3,8 +3,6 @@
  * Works in both Node.js and browser environments
  */
 
-/* global atob, btoa, TextEncoder, TextDecoder */
-
 /**
  * Decode base64 string to UTF-8 text
  * @param encoded - Base64 encoded string

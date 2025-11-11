@@ -28,6 +28,10 @@ export default [
         AbortController: 'readonly',
         require: 'readonly',
         NodeJS: 'readonly',
+        atob: 'readonly',
+        btoa: 'readonly',
+        TextEncoder: 'readonly',
+        TextDecoder: 'readonly',
       },
     },
     plugins: {
@@ -159,6 +163,8 @@ export default [
       'site/.svelte-kit/**',
       'packages/**/site/**',
       'packages/**/workspace/**',
+      'packages/**/dist/**',
+      '**/dist/**',
     ],
   },
 ];

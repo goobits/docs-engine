@@ -8,7 +8,6 @@
  * Decode a base64-encoded JSON string
  */
 export function decodeJsonBase64<T = unknown>(encoded: string): T {
-  // eslint-disable-next-line no-undef
   const decoded =
     typeof atob !== 'undefined' ? atob(encoded) : Buffer.from(encoded, 'base64').toString('utf-8');
   return JSON.parse(decoded);
@@ -19,6 +18,5 @@ export function decodeJsonBase64<T = unknown>(encoded: string): T {
  */
 export function encodeJsonBase64(data: unknown): string {
   const json = JSON.stringify(data);
-  // eslint-disable-next-line no-undef
   return typeof btoa !== 'undefined' ? btoa(json) : Buffer.from(json, 'utf-8').toString('base64');
 }
