@@ -99,6 +99,9 @@
   ],
   "license": "MIT",
   "author": "GooBits",
+  "publishConfig": {
+    "access": "public"
+  },
   "lint-staged": {
     "*.{ts,js}": [
       "eslint --fix",
