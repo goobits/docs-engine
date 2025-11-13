@@ -527,4 +527,4 @@ Inspect the rendered HTML:
 - [Frontmatter Parser](../utilities/frontmatter.md) - Parse metadata from markdown
 
 **Related:**
-- [Navigation Builder](./navigation.md) - Auto-generate navigation from files
+- [Navigation Builder](../utilities/navigation.md) - Auto-generate navigation from files

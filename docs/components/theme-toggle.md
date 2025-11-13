@@ -89,9 +89,10 @@ Clear localStorage (`localStorage.removeItem('theme')`) to re-detect.
 
 ## Related
 
-- [W3C Design Tokens](../guides/architecture.md#design-tokens) - Theme customization
+- [Architecture Guide](../guides/architecture.md) - System design and philosophy
 <!-- Coming soon: DocsLayout Component docs (Phase 3) -->
 <!-- - [DocsLayout Component](./docs-layout.md) -->
-- [CSS Architecture](../guides/architecture.md#css-architecture) - Styling system
+<!-- Coming soon: CSS Architecture section -->
+<!-- - [CSS Architecture](../guides/architecture.md#css-architecture) - Styling system -->
 <!-- Coming soon: Accessibility Guidelines (Phase 3) -->
 <!-- - [Accessibility Guidelines](../guides/accessibility.md) -->

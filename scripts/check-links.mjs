@@ -79,9 +79,27 @@ function extractLinksFromFile(filePath) {
   const content = readFileSync(filePath, 'utf-8');
   const links = [];
   const lines = content.split('\n');
+  let inCodeBlock = false;
+  let inInlineCode = false;
 
   lines.forEach((line, index) => {
     const lineNumber = index + 1;
+
+    // Track code block boundaries
+    if (line.trim().startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      return; // Skip the code fence line itself
+    }
+
+    // Skip links inside code blocks
+    if (inCodeBlock) {
+      return;
+    }
+
+    // Skip HTML comments (<!-- ... -->)
+    if (line.trim().startsWith('<!--') || line.includes('<!--')) {
+      return;
+    }
 
     // Markdown links: [text](url)
     const markdownLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -89,6 +107,14 @@ function extractLinksFromFile(filePath) {
     while ((match = markdownLinkRegex.exec(line)) !== null) {
       const url = match[2];
       const text = match[1];
+
+      // Skip if this link is inside inline code (backticks)
+      const beforeLink = line.substring(0, match.index);
+      const backticksBefore = (beforeLink.match(/`/g) || []).length;
+      if (backticksBefore % 2 === 1) {
+        continue; // Inside inline code
+      }
+
       links.push({
         url,
         text,
@@ -105,6 +131,14 @@ function extractLinksFromFile(filePath) {
     while ((match = imageRegex.exec(line)) !== null) {
       const url = match[2];
       const text = match[1];
+
+      // Skip if this image is inside inline code (backticks)
+      const beforeImage = line.substring(0, match.index);
+      const backticksBefore = (beforeImage.match(/`/g) || []).length;
+      if (backticksBefore % 2 === 1) {
+        continue; // Inside inline code
+      }
+
       links.push({
         url,
         text,
@@ -120,6 +154,14 @@ function extractLinksFromFile(filePath) {
     const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["']/gi;
     while ((match = htmlLinkRegex.exec(line)) !== null) {
       const url = match[1];
+
+      // Skip if this link is inside inline code (backticks)
+      const beforeLink = line.substring(0, match.index);
+      const backticksBefore = (beforeLink.match(/`/g) || []).length;
+      if (backticksBefore % 2 === 1) {
+        continue; // Inside inline code
+      }
+
       links.push({
         url,
         text: '',
@@ -162,7 +204,14 @@ function resolveLinkPath(link, sourceFile, baseDir) {
   const [pathPart] = link.split('#');
 
   if (pathPart.startsWith('/')) {
-    // Absolute path from docs root
+    // Check if this is a static asset path (e.g., /screenshots/, /images/)
+    // These are served from the static/ directory at runtime
+    const staticPath = resolve(projectRoot, 'static', pathPart.slice(1));
+    if (existsSync(staticPath)) {
+      return staticPath;
+    }
+
+    // Otherwise, treat as absolute path from docs root
     return resolve(baseDir, pathPart.slice(1));
   }
 

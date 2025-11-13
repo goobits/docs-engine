@@ -428,7 +428,6 @@ Checking 220 internal link(s)...
 
 ## See Also
 
-- [Build Process](./build-process.md)
-- [CI/CD Integration](./ci-cd.md)
-- [Configuration Guide](./configuration.md)
-- [CLI Tools](/packages/docs-engine-cli)
+- [Architecture Guide](./architecture.md) - System design and philosophy
+- [Migration Guide](./migration.md) - Migrating from v1.x to v2.x
+- [Examples](./examples.md) - Code examples and recipes

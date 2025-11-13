@@ -133,6 +133,6 @@ Verify viewport meta tag in app.html.
 ## Related
 
 - [ThemeToggle](./theme-toggle.md) - Included theme switcher
-- [Navigation Builder](../utilities/navigation-builder.md) - Generate navigation structure
-- [CSS Architecture](../guides/architecture.md#css-architecture) - Layout styling
+- [Navigation Builder](../utilities/navigation.md) - Generate navigation structure
+- [Architecture Guide](../guides/architecture.md) - System design and philosophy
 

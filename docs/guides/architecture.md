@@ -1016,10 +1016,10 @@ Ensure TypeScript can resolve package exports. Add to `tsconfig.json`:
 
 ## Next Steps
 
-- **[View Examples](./EXAMPLES.md)** - Code examples and recipes
-- **[Symbol Reference Guide](./SYMBOL-REFERENCES.md)** - Complete reference for using symbol references
-- **[Architecture Diagrams](./DIAGRAMS.md)** - Visual flowcharts and system diagrams
-- **[Check README](../README.md)** - Installation and quick start
+- **[View Examples](./examples.md)** - Code examples and recipes
+- **[Symbol References](../plugins/symbol-references.md)** - Complete guide for using symbol references
+- **[Architecture Diagrams](./diagrams.md)** - Visual flowcharts and system diagrams
+- **[Check README](../../README.md)** - Installation and quick start
 
 ---
 

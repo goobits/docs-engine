@@ -782,8 +782,7 @@ export const load = async () => {
 
 **Next Steps:**
 - [Frontmatter Parser](./frontmatter.md) - Parse YAML frontmatter
-- [DocsSidebar Component](../components/docs-sidebar.md) - Display navigation
+- [DocsLayout Component](../components/docs-layout.md) - Layout with navigation
 
 **Related:**
 - [Getting Started](../getting-started.md) - Quick start guide
-- [File I/O Utilities](../reference/file-io.md) - Filesystem operations

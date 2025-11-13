@@ -901,8 +901,8 @@ Returns {@WorkflowState}.
 ## Next Steps
 
 - [Architecture Guide](./architecture.md) - Understand the package/consumer split
-- [Plugin Docs](../README.md) - Learn about other available plugins
-- [Troubleshooting](./architecture.md#troubleshooting) - Common issues and solutions
+- [Getting Started](../getting-started.md) - Quick start guide
+- [Plugin Order](./plugin-order.md) - Understanding plugin execution order
 
 ---
 
