@@ -37,6 +37,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'testFunc',
+      signature: 'function testFunc(): void',
       description: 'A test function',
       parameters: [],
       returnType: 'void',
@@ -57,6 +58,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'add',
+      signature: 'function add(a: number, b: number): number',
       description: 'Adds two numbers',
       parameters: [
         { name: 'a', type: 'number', optional: false },
@@ -80,6 +82,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'greet',
+      signature: 'function greet(name: string, title?: string): string',
       description: 'Greets a person',
       parameters: [
         { name: 'name', type: 'string', optional: false },
@@ -102,6 +105,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'multiply',
+      signature: 'function multiply(value: number, factor?: number): number',
       description: 'Multiplies a number',
       parameters: [
         { name: 'value', type: 'number', optional: false },
@@ -123,6 +127,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'identity',
+      signature: 'function identity<T>(value: T): T',
       description: 'Returns input value',
       typeParameters: ['T'],
       parameters: [{ name: 'value', type: 'T', optional: false }],
@@ -141,6 +146,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'sum',
+      signature: 'function sum(): number',
       description: 'Calculates sum',
       parameters: [],
       returnType: 'number',
@@ -164,6 +170,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'calculate',
+      signature: 'function calculate(): number',
       description: 'Performs calculation',
       parameters: [],
       returnType: 'number',

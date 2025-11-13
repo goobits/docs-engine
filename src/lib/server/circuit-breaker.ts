@@ -14,6 +14,7 @@
  */
 
 import { createLogger } from './logger.js';
+import { CIRCUIT_BREAKER } from '../constants.js';
 
 const logger = createLogger('circuit-breaker');
 
@@ -87,10 +88,10 @@ export class CircuitBreaker {
 
   constructor(config: Partial<CircuitBreakerConfig> & { name: string }) {
     this.config = {
-      failureThreshold: config.failureThreshold ?? 5,
-      recoveryTimeout: config.recoveryTimeout ?? 30000,
-      successThreshold: config.successThreshold ?? 2,
-      requestTimeout: config.requestTimeout ?? 10000,
+      failureThreshold: config.failureThreshold ?? CIRCUIT_BREAKER.FAILURE_THRESHOLD,
+      recoveryTimeout: config.recoveryTimeout ?? CIRCUIT_BREAKER.RECOVERY_TIMEOUT,
+      successThreshold: config.successThreshold ?? CIRCUIT_BREAKER.SUCCESS_THRESHOLD,
+      requestTimeout: config.requestTimeout ?? CIRCUIT_BREAKER.REQUEST_TIMEOUT,
       name: config.name,
     };
   }

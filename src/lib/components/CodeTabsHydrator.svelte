@@ -10,6 +10,9 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import CodeTabs from './CodeTabs.svelte';
+  import { createBrowserLogger } from '../utils/logger.js';
+
+  const logger = createBrowserLogger('CodeTabsHydrator');
 
   interface Props {
     /** Theme for syntax highlighting */
@@ -39,7 +42,7 @@
           const tabsId = element.getAttribute('data-tabs-id');
 
           if (!tabs || !tabsId) {
-            console.warn('[CodeTabsHydrator] Element missing data-tabs or data-tabs-id');
+            logger.warn('Element missing data-tabs or data-tabs-id');
             continue;
           }
 
@@ -53,7 +56,7 @@
 
             element.removeAttribute('data-tabs');
           } catch (err) {
-            console.error(`[CodeTabsHydrator] Failed to mount tabs ${tabsId}:`, err);
+            logger.error(err, tabsId);
             const errorMsg = err instanceof Error ? err.message : String(err);
             element.innerHTML = `<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
 							<strong>Code Tabs Error</strong>
@@ -62,7 +65,7 @@
           }
         }
       } catch (err) {
-        console.error('[CodeTabsHydrator] Fatal error:', err);
+        logger.error(err);
       }
     });
   }

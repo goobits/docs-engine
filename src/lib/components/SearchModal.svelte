@@ -159,17 +159,28 @@
 <!-- Modal -->
 {#if isOpen}
   <div class="search-modal-overlay" onclick={closeModal}></div>
-  <div class="search-modal">
+  <div
+    class="search-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="search-modal-title"
+    aria-describedby="search-modal-description"
+  >
     <!-- Search Input -->
     <div class="search-modal-header">
-      <Search size={20} class="search-modal-icon" />
+      <Search size={20} class="search-modal-icon" aria-hidden="true" />
+      <label for="search-modal-input" class="visually-hidden" id="search-modal-title"
+        >Search documentation</label
+      >
       <input
+        id="search-modal-input"
         bind:value={query}
         class="search-modal-input"
         type="text"
         {placeholder}
         autocomplete="off"
         spellcheck="false"
+        aria-describedby="search-modal-description"
       />
       <button
         class="search-modal-close"
@@ -177,12 +188,17 @@
         type="button"
         aria-label="Close search"
       >
-        <X size={20} />
+        <X size={20} aria-hidden="true" />
       </button>
     </div>
 
+    <!-- Hidden description for screen readers -->
+    <span id="search-modal-description" class="visually-hidden"
+      >Use arrow keys to navigate results, enter to select, escape to close</span
+    >
+
     <!-- Results -->
-    <div class="search-modal-results">
+    <div class="search-modal-results" role="region" aria-live="polite" aria-atomic="false">
       {#if isLoading}
         <div class="search-modal-loading">Loading search index...</div>
       {:else if query.trim() && results.length === 0}
@@ -196,6 +212,9 @@
             class="search-result {index === selectedIndex ? 'selected' : ''}"
             onclick={() => handleResultClick(result)}
             type="button"
+            role="option"
+            aria-selected={index === selectedIndex}
+            aria-label="{result.title} in {result.section}"
           >
             <div class="search-result-content">
               <div class="search-result-section">{result.section}</div>
@@ -209,7 +228,7 @@
               {/if}
             </div>
             {#if index === selectedIndex}
-              <CornerDownLeft size={16} class="search-result-enter-icon" />
+              <CornerDownLeft size={16} class="search-result-enter-icon" aria-hidden="true" />
             {/if}
           </button>
         {/each}
@@ -236,6 +255,19 @@
 {/if}
 
 <style>
+  /* Visually hidden but accessible to screen readers */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   /* Trigger Button */
   .search-trigger {
     display: flex;

@@ -242,7 +242,7 @@ function renderParams(params: Array<{ name: string; description: string; type: s
   `;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 function _symbolToDocUrl(symbol: SymbolDefinition): string {
   const relativePath = symbol.path
     .replace(/^src\/lib\/server\//, '')
@@ -250,6 +250,7 @@ function _symbolToDocUrl(symbol: SymbolDefinition): string {
 
   return `/docs/api/${relativePath.replace(/\.ts$/, '')}#${symbol.name}`;
 }
+*/
 
 export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
   const repoPath = symbol.path.startsWith('../')

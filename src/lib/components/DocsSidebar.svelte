@@ -173,8 +173,10 @@
   <!-- Search -->
   <div class="v2-docs-sidebar__search">
     <div class="v2-docs-sidebar__search-wrapper">
-      <Search size={16} class="v2-docs-sidebar__search-icon" />
+      <Search size={16} class="v2-docs-sidebar__search-icon" aria-hidden="true" />
+      <label for="sidebar-search-input" class="visually-hidden">Search documentation</label>
       <input
+        id="sidebar-search-input"
         type="text"
         placeholder="Search docs..."
         bind:value={searchQuery}
@@ -187,14 +189,19 @@
           type="button"
           aria-label="Clear search"
         >
-          <X size={14} />
+          <X size={14} aria-hidden="true" />
         </button>
       {/if}
     </div>
 
     <!-- Search Results -->
     {#if searchQuery && searchResults.length > 0}
-      <div class="v2-docs-sidebar__search-results">
+      <div
+        class="v2-docs-sidebar__search-results"
+        role="region"
+        aria-live="polite"
+        aria-label="Search results"
+      >
         {#each searchResults as result (result.href)}
           <a href={result.href} class="v2-docs-sidebar__search-item">
             <div class="v2-docs-sidebar__search-section">{result.section}</div>
@@ -204,7 +211,7 @@
         {/each}
       </div>
     {:else if searchQuery && searchResults.length === 0}
-      <div class="v2-docs-sidebar__search-empty">
+      <div class="v2-docs-sidebar__search-empty" role="status" aria-live="polite">
         <p>No results for "{searchQuery}"</p>
       </div>
     {/if}
@@ -212,16 +219,21 @@
 
   <!-- Navigation (hidden when searching) -->
   {#if !searchQuery}
-    <nav class="v2-docs-sidebar__nav">
+    <nav class="v2-docs-sidebar__nav" aria-label="Documentation navigation">
       {#each filteredNavigation as section (section.title)}
         <div class="v2-docs-sidebar__section">
           <button
             class="v2-docs-sidebar__section-header"
             onclick={() => toggleSection(section.title)}
             type="button"
+            aria-expanded={expandedSections[section.title]}
+            aria-controls="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
+            aria-label="{expandedSections[section.title]
+              ? 'Collapse'
+              : 'Expand'} {section.title} section"
           >
             <div class="v2-docs-sidebar__section-title">
-              <svelte:component this={section.icon} size={16} />
+              <svelte:component this={section.icon} size={16} aria-hidden="true" />
               <span>{section.title}</span>
             </div>
             <ChevronDown
@@ -229,15 +241,20 @@
               class="v2-docs-sidebar__section-chevron {expandedSections[section.title]
                 ? 'expanded'
                 : ''}"
+              aria-hidden="true"
             />
           </button>
 
           {#if expandedSections[section.title]}
-            <div class="v2-docs-sidebar__links">
+            <div
+              class="v2-docs-sidebar__links"
+              id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
+            >
               {#each section.links as link (link.href)}
                 <a
                   href={link.href}
                   class="v2-docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   <span>{link.title}</span>
                 </a>
@@ -274,6 +291,19 @@
 
 <style lang="scss">
   @use '$lib/styles/v2-tokens.scss' as *;
+
+  /* Visually hidden but accessible to screen readers */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
   .v2-docs-sidebar {
     width: 280px;

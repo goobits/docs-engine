@@ -4,6 +4,10 @@
  * Parses and formats OpenAPI 3.0 specifications for documentation generation.
  */
 
+import { createLogger } from './logger.js';
+
+const logger = createLogger('openapi-formatter');
+
 export interface OpenAPIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
@@ -41,7 +45,7 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
     typeof spec.paths !== 'object' ||
     !spec.paths
   ) {
-    console.warn('[OpenAPI] Invalid spec: missing paths');
+    logger.warn('Invalid OpenAPI spec: missing paths');
     return [];
   }
 

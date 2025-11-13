@@ -1,5 +1,8 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
+import { createLogger } from '@goobits/docs-engine/utils';
+
+const logger = createLogger('cli-config');
 
 /**
  * Link checker configuration
@@ -78,7 +81,7 @@ export function loadConfig(cwd: string = process.cwd()): LinkCheckerConfig | und
         const content = readFileSync(configPath, 'utf-8');
         return JSON.parse(content) as LinkCheckerConfig;
       } catch (error) {
-        console.error(`Error loading config from ${configPath}:`, error);
+        logger.error({ error, configPath }, 'Error loading config file');
       }
     }
   }

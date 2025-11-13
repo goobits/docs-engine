@@ -4,6 +4,12 @@ import { tabsPlugin } from './tabs';
 import type { Root, Code } from 'mdast';
 import { decodeJsonBase64 } from '../utils/base64';
 
+interface Tab {
+  label: string;
+  content: string;
+  language?: string;
+}
+
 describe('tabs plugin', () => {
   const createCodeBlock = (lang: string, value: string): Root => ({
     type: 'root',
@@ -90,7 +96,7 @@ const x = 1;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs).toHaveLength(1);
       expect(tabs[0].label).toBe('JavaScript');
@@ -119,7 +125,7 @@ const x: number = 1;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs).toHaveLength(2);
       expect(tabs[0].label).toBe('JavaScript');
@@ -147,7 +153,7 @@ more code;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].label).toBe('My Custom Label');
       expect(tabs[1].label).toBe('Another Label');
@@ -170,7 +176,7 @@ console.log(json);
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].content).toContain('const data = await fetch');
       expect(tabs[0].content).toContain('const json = await data.json()');
@@ -198,7 +204,7 @@ puts "Hello"
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].language).toBe('python');
       expect(tabs[1].language).toBe('ruby');
@@ -219,7 +225,7 @@ plain text
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].language).toBeUndefined();
       expect(tabs[0].content).toBe('plain text');
@@ -246,7 +252,7 @@ second;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs).toHaveLength(2);
       expect(tabs[0].content).toBe('first;');
@@ -269,7 +275,7 @@ second;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].label).toBe('Spaced Label');
       // Content should preserve internal spacing but trim overall
@@ -296,7 +302,7 @@ code;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       // Empty tab should be skipped
       expect(tabs).toHaveLength(1);
@@ -322,7 +328,7 @@ valid code;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       // Only the tab with a label should be included
       expect(tabs).toHaveLength(1);
@@ -383,7 +389,7 @@ const x = 1;
 
       // Verify it can be decoded
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
       expect(Array.isArray(tabs)).toBe(true);
       expect(tabs[0].label).toBe('JavaScript');
     });
@@ -496,7 +502,7 @@ const y = 2;
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       // Only the first code block should be captured
       expect(tabs).toHaveLength(1);
@@ -519,7 +525,7 @@ int main() {}
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].label).toBe('C++ & "Quotes" <Tags>');
     });
@@ -543,7 +549,7 @@ function example() {
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].content).toContain('function example()');
       expect(tabs[0].content).toContain('  if (true)');
@@ -573,7 +579,7 @@ tab: Diff
 
       const htmlNode = tree.children[0] as any;
       const dataTabs = htmlNode.value.match(/data-tabs="([^"]+)"/)?.[1];
-      const tabs = decodeJsonBase64(dataTabs);
+      const tabs = decodeJsonBase64<Tab[]>(dataTabs);
 
       expect(tabs[0].language).toBe('bash');
       expect(tabs[1].language).toBe('diff');

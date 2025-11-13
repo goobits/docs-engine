@@ -1,6 +1,9 @@
 import { parse as parseYaml } from 'yaml';
 import type { DocsSection, DocsLink } from './navigation.js';
 import type { ComponentType } from 'svelte';
+import { createLogger } from './logger.js';
+
+const logger = createLogger('navigation-builder');
 
 /**
  * Frontmatter metadata extracted from markdown files
@@ -70,7 +73,7 @@ export function extractFrontmatter(content: string): {
     const body = match[2];
     return { frontmatter, body };
   } catch (err) {
-    console.warn('Failed to parse frontmatter:', err);
+    logger.warn({ error: err }, 'Failed to parse frontmatter');
     return {
       frontmatter: {},
       body: content,

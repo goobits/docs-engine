@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { TIMEOUT, FILE_SIZE } from '../constants.js';
 
 const execAsync = promisify(exec);
 
@@ -25,8 +26,8 @@ export class CliExecutor {
 
   constructor(config: CliExecutorConfig) {
     this.config = {
-      timeout: 10000,
-      maxOutputLength: 50000,
+      timeout: TIMEOUT.VERY_LONG,
+      maxOutputLength: FILE_SIZE.MAX_CLI_OUTPUT,
       workingDirectory: process.cwd(),
       ...config,
     };

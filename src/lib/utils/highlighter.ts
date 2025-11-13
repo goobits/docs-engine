@@ -5,6 +5,9 @@
 
 import { createHighlighter, type Highlighter } from 'shiki';
 import { escapeHtml } from './html.js';
+import { createLogger } from './logger.js';
+
+const logger = createLogger('highlighter');
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 
@@ -69,7 +72,7 @@ export async function highlightCode(
       theme: theme,
     });
   } catch (err) {
-    console.error(`Failed to highlight ${language} code:`, err);
+    logger.error({ error: err, language, theme }, 'Failed to highlight code, using fallback');
     // Fallback to plain code block
     return `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
   }

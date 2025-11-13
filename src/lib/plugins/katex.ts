@@ -59,15 +59,13 @@ export interface KaTeXOptions {
  * Module-private interface - not exported, not accessible outside this module
  * Currently unused but kept for documentation
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 interface _MathNode {
-  /** LaTeX expression to render */
   value: string;
-  /** Display mode (block) vs inline mode */
   displayMode: boolean;
-  /** Node type (always 'math' or 'inlineMath') */
   type: 'math' | 'inlineMath';
 }
+*/
 
 /**
  * Render LaTeX math expression to HTML using KaTeX

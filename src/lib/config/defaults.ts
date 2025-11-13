@@ -1,3 +1,5 @@
+import { TIMEOUT, FILE_SIZE } from '../constants.js';
+
 export interface MarkdownDocsConfig {
   docsRoot: string;
   routePrefix: string;
@@ -64,8 +66,8 @@ export const defaultConfig: MarkdownDocsConfig = {
     basePath: '/screenshots',
     cli: {
       allowedCommands: [],
-      timeout: 10000,
-      maxOutputLength: 50000,
+      timeout: TIMEOUT.VERY_LONG,
+      maxOutputLength: FILE_SIZE.MAX_CLI_OUTPUT,
     },
   },
   markdown: {

@@ -16,6 +16,9 @@ import {
   type ParameterDeclaration,
   type JSDocableNode,
 } from 'ts-morph';
+import { createLogger } from '../utils/logger.js';
+
+const logger = createLogger('api-parser');
 
 /**
  * Represents a parsed parameter from a function or method
@@ -561,7 +564,14 @@ function parseSourceFile(sourceFile: SourceFile): ApiItem[] {
           'getName' in declaration && typeof declaration.getName === 'function'
             ? declaration.getName()
             : 'unknown';
-        console.warn(`Failed to parse ${declaration.getKindName()} "${nodeName}":`, error);
+        logger.warn(
+          {
+            error,
+            nodeKind: declaration.getKindName(),
+            nodeName,
+          },
+          'Failed to parse declaration'
+        );
       }
     }
   }

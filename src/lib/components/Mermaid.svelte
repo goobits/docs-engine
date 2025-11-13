@@ -165,10 +165,11 @@
     role="button"
     tabindex={rendered && !error ? 0 : -1}
     onkeydown={(e) => e.key === 'Enter' && openModal()}
+    aria-label="Interactive diagram, click or press enter to expand and zoom"
   ></div>
 
   {#if rendered && !error}
-    <div class="md-mermaid-hint">Click to expand</div>
+    <div class="md-mermaid-hint" aria-hidden="true">Click to expand</div>
   {/if}
 </div>
 
@@ -181,8 +182,16 @@
     onwheel={handleWheel}
     role="dialog"
     aria-modal="true"
+    aria-labelledby="mermaid-modal-title"
+    aria-describedby="mermaid-modal-description"
     class:dragging={isDragging}
   >
+    <!-- Hidden labels for screen readers -->
+    <h2 id="mermaid-modal-title" class="visually-hidden">Diagram viewer</h2>
+    <p id="mermaid-modal-description" class="visually-hidden">
+      Use mouse wheel or zoom buttons to zoom. Click and drag to pan. Press escape to close.
+    </p>
+
     <button class="md-mermaid-modal-close" onclick={closeModal} aria-label="Close diagram">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -194,6 +203,7 @@
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
+        aria-hidden="true"
       >
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -201,7 +211,7 @@
     </button>
 
     <!-- Zoom Controls -->
-    <div class="md-mermaid-zoom-controls">
+    <div class="md-mermaid-zoom-controls" role="toolbar" aria-label="Diagram zoom controls">
       <button class="md-mermaid-zoom-btn" onclick={zoomIn} aria-label="Zoom in" title="Zoom in">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -213,6 +223,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
+          aria-hidden="true"
         >
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -231,6 +242,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
+          aria-hidden="true"
         >
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="8" y1="11" x2="14" y2="11"></line>
@@ -253,6 +265,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
+          aria-hidden="true"
         >
           <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
           <path d="M21 3v5h-5"></path>
@@ -260,7 +273,9 @@
           <path d="M3 21v-5h5"></path>
         </svg>
       </button>
-      <div class="md-mermaid-zoom-level">{Math.round(zoom * 100)}%</div>
+      <div class="md-mermaid-zoom-level" aria-live="polite" aria-atomic="true">
+        {Math.round(zoom * 100)}%
+      </div>
     </div>
 
     <div
@@ -280,6 +295,19 @@
 {/if}
 
 <style>
+  /* Visually hidden but accessible to screen readers */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .md-mermaid-container {
     margin: var(--md-spacing-xl, 2rem) 0;
     padding: var(--md-spacing-lg, 1.5rem);
