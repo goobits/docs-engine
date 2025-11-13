@@ -1,0 +1,16 @@
+{
+  "baseDir": "docs",
+  "include": ["**/*.md", "**/*.mdx"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.git/**",
+    "**/versioned_docs/**",
+    "**/.generated/**"
+  ],
+  "checkExternal": false,
+  "timeout": 5000,
+  "concurrency": 10,
+  "skipDomains": ["localhost", "127.0.0.1", "example.com"],
+  "validExtensions": [".md", ".mdx"]
+}

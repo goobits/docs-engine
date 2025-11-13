@@ -1,9 +1,10 @@
 import sharp from 'sharp';
-import { createHash } from 'crypto';
+// import { createHash } from 'crypto'; // Unused after _generateCacheKey was commented out
 import { existsSync, mkdirSync, statSync } from 'fs';
 import { dirname, join, extname, basename, resolve } from 'path';
 import pLimit from 'p-limit';
 import os from 'os';
+import { IMAGE_QUALITY, DIMENSIONS } from '../constants.js';
 
 /**
  * Image processing configuration
@@ -64,7 +65,7 @@ export interface ImageVariant {
  * Generate a cache key for an image
  * Module-private helper (currently unused, kept for future use)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 function _generateCacheKey(
   inputPath: string,
   format: string,
@@ -75,6 +76,7 @@ function _generateCacheKey(
   hash.update(`${inputPath}:${format}:${width}:${quality}`);
   return hash.digest('hex');
 }
+*/
 
 /**
  * Check if cached image exists and is up-to-date
@@ -122,14 +124,20 @@ async function processVariant(
   } else if (format === 'jpg' || format === 'jpeg') {
     pipeline = pipeline.jpeg({ quality, mozjpeg: true });
   } else if (format === 'png') {
-    pipeline = pipeline.png({ quality: Math.min(quality, 9), compressionLevel: 9 });
+    pipeline = pipeline.png({
+      quality: Math.min(quality, IMAGE_QUALITY.PNG_COMPRESSION),
+      compressionLevel: IMAGE_QUALITY.PNG_COMPRESSION,
+    });
   } else if (format === 'original') {
     // Keep original format
     const ext = originalFormat.toLowerCase();
     if (ext === 'jpg' || ext === 'jpeg') {
       pipeline = pipeline.jpeg({ quality, mozjpeg: true });
     } else if (ext === 'png') {
-      pipeline = pipeline.png({ quality: Math.min(quality, 9), compressionLevel: 9 });
+      pipeline = pipeline.png({
+        quality: Math.min(quality, IMAGE_QUALITY.PNG_COMPRESSION),
+        compressionLevel: IMAGE_QUALITY.PNG_COMPRESSION,
+      });
     }
   }
 
@@ -248,7 +256,7 @@ export async function processImage(config: ImageProcessorConfig): Promise<ImageP
       }
 
       // Process image
-      const formatQuality = quality[format] || quality[actualFormat] || 85;
+      const formatQuality = quality[format] || quality[actualFormat] || IMAGE_QUALITY.WEBP;
       const variant = await processVariant(
         sharpInstance,
         actualFormat,
@@ -270,8 +278,8 @@ export async function processImage(config: ImageProcessorConfig): Promise<ImageP
     if (!cacheDir || !isCacheValid(inputPath, placeholderPath)) {
       await sharpInstance
         .clone()
-        .resize(40, null, { withoutEnlargement: true, fit: 'inside' })
-        .jpeg({ quality: 50 })
+        .resize(DIMENSIONS.PLACEHOLDER_WIDTH, null, { withoutEnlargement: true, fit: 'inside' })
+        .jpeg({ quality: IMAGE_QUALITY.PLACEHOLDER })
         .toFile(placeholderPath);
     }
 

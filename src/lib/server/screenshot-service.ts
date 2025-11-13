@@ -10,6 +10,13 @@ import { getVersion } from '../utils/version.js';
 import { createLogger } from './logger.js';
 import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.js';
 import { checkRateLimit } from './rate-limiter.js';
+import {
+  HTTP_STATUS,
+  RATE_LIMIT,
+  CIRCUIT_BREAKER,
+  DIMENSIONS,
+  IMAGE_QUALITY,
+} from '../constants.js';
 
 const logger = createLogger('screenshot-service');
 
@@ -59,16 +66,16 @@ function validateUrl(url: string): void {
 // Circuit breakers for web and CLI screenshot generation (prevents cascading failures)
 const webScreenshotBreaker = new CircuitBreaker({
   name: 'web-screenshot',
-  failureThreshold: 5,
-  recoveryTimeout: 30000,
-  requestTimeout: 15000,
+  failureThreshold: CIRCUIT_BREAKER.FAILURE_THRESHOLD,
+  recoveryTimeout: CIRCUIT_BREAKER.RECOVERY_TIMEOUT,
+  requestTimeout: CIRCUIT_BREAKER.WEB_SCREENSHOT_TIMEOUT,
 });
 
 const cliScreenshotBreaker = new CircuitBreaker({
   name: 'cli-screenshot',
-  failureThreshold: 5,
-  recoveryTimeout: 30000,
-  requestTimeout: 20000, // CLI can be slower
+  failureThreshold: CIRCUIT_BREAKER.FAILURE_THRESHOLD,
+  recoveryTimeout: CIRCUIT_BREAKER.RECOVERY_TIMEOUT,
+  requestTimeout: CIRCUIT_BREAKER.CLI_SCREENSHOT_TIMEOUT, // CLI can be slower
 });
 
 /**
@@ -88,7 +95,9 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
     const clientIp = getClientAddress();
 
     // Rate limiting: 100 requests per minute per IP
-    if (!checkRateLimit(clientIp, 100, 60000)) {
+    if (
+      !checkRateLimit(clientIp, RATE_LIMIT.SCREENSHOT_MAX_REQUESTS, RATE_LIMIT.SCREENSHOT_WINDOW_MS)
+    ) {
       logger.warn({ ip: clientIp }, 'Rate limit exceeded for screenshot endpoint');
       return json(
         {
@@ -96,9 +105,9 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           error: 'Too many requests. Please try again later.',
         } as ScreenshotResponse,
         {
-          status: 429,
+          status: HTTP_STATUS.TOO_MANY_REQUESTS,
           headers: {
-            'Retry-After': '60',
+            'Retry-After': String(RATE_LIMIT.RETRY_AFTER_SECONDS),
           },
         }
       );
@@ -117,7 +126,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
             success: false,
             error: 'Missing required parameter: name',
           } as ScreenshotResponse,
-          { status: 400 }
+          { status: HTTP_STATUS.BAD_REQUEST }
         );
       }
 
@@ -166,7 +175,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
             success: false,
             error: 'Screenshot service temporarily unavailable. Please try again later.',
           } as ScreenshotResponse,
-          { status: 503 }
+          { status: HTTP_STATUS.SERVICE_UNAVAILABLE }
         );
       }
 
@@ -177,7 +186,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           success: false,
           error: message,
         } as ScreenshotResponse,
-        { status: 500 }
+        { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
       );
     }
   };
@@ -206,7 +215,7 @@ async function generateCliScreenshot(options: {
         success: false,
         error: 'CLI screenshot requires command parameter',
       } as ScreenshotResponse,
-      { status: 400 }
+      { status: HTTP_STATUS.BAD_REQUEST }
     );
   }
 
@@ -226,7 +235,7 @@ async function generateCliScreenshot(options: {
         success: false,
         error: 'Playwright not installed. Run: bun add -D playwright',
       } as ScreenshotResponse,
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 
@@ -252,7 +261,7 @@ async function generateCliScreenshot(options: {
   // Parse viewport
   const viewportDimensions = screenshotConfig.viewport
     ? screenshotConfig.viewport.split('x').map(Number)
-    : [800, 400];
+    : [DIMENSIONS.CLI_VIEWPORT_WIDTH, DIMENSIONS.CLI_VIEWPORT_HEIGHT];
 
   const [width, height] = viewportDimensions;
 
@@ -261,7 +270,7 @@ async function generateCliScreenshot(options: {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
-    deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
+    deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
     ignoreHTTPSErrors: true, // Allow self-signed certificates in development
   });
   const page = await context.newPage();
@@ -297,40 +306,44 @@ async function generateCliScreenshot(options: {
 
   // Generate 2x WebP (from high-res source)
   const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: 85 }).toFile(webp2xPath);
+  await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webp2xPath);
 
   // Downscale to 1x using bicubic interpolation for better quality
   const webpPath = path.join(outputDir, `${name}.webp`);
   const screenshotPath = path.join(outputDir, `${name}.png`);
 
-  if (metadata.width && metadata.width >= 400) {
+  if (metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X) {
     await sharp(screenshot2xPath)
       .resize({
-        width: Math.floor(metadata.width / 2),
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
         kernel: 'cubic', // Bicubic interpolation for sharp downscaling
       })
-      .webp({ quality: 85 })
+      .webp({ quality: IMAGE_QUALITY.WEBP })
       .toFile(webpPath);
 
     // Also save 1x PNG
     await sharp(screenshot2xPath)
       .resize({
-        width: Math.floor(metadata.width / 2),
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
         kernel: 'cubic',
       })
       .png()
       .toFile(screenshotPath);
   } else {
     // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: 85 }).toFile(webpPath);
+    await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webpPath);
     await sharpImage.clone().png().toFile(screenshotPath);
   }
 
   const publicPath = `${basePath}/${name}.png`;
 
   // Return 1x dimensions for the img element
-  const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
-  const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+  const displayWidth = metadata.width
+    ? Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.width;
+  const displayHeight = metadata.height
+    ? Math.floor(metadata.height / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.height;
 
   logger.info(
     {
@@ -346,7 +359,10 @@ async function generateCliScreenshot(options: {
     success: true,
     path: publicPath,
     webpPath: `${basePath}/${name}.webp`,
-    webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
+    webp2xPath:
+      metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X
+        ? `${basePath}/${name}@2x.webp`
+        : undefined,
     width: displayWidth,
     height: displayHeight,
   } as ScreenshotResponse);
@@ -367,7 +383,7 @@ async function generateWebScreenshot(options: {
         success: false,
         error: 'Web screenshot requires url parameter',
       } as ScreenshotResponse,
-      { status: 400 }
+      { status: HTTP_STATUS.BAD_REQUEST }
     );
   }
 
@@ -385,7 +401,7 @@ async function generateWebScreenshot(options: {
         success: false,
         error: err instanceof Error ? err.message : 'Invalid URL',
       } as ScreenshotResponse,
-      { status: 403 }
+      { status: HTTP_STATUS.FORBIDDEN }
     );
   }
 
@@ -399,14 +415,14 @@ async function generateWebScreenshot(options: {
         success: false,
         error: 'Playwright not installed. Run: bun add -D playwright',
       } as ScreenshotResponse,
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 
   // Parse viewport dimensions
   const viewportDimensions = screenshotConfig?.viewport
     ? screenshotConfig.viewport.split('x').map(Number)
-    : [1280, 720];
+    : [DIMENSIONS.WEB_VIEWPORT_WIDTH, DIMENSIONS.WEB_VIEWPORT_HEIGHT];
 
   const [width, height] = viewportDimensions;
 
@@ -415,7 +431,7 @@ async function generateWebScreenshot(options: {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width, height },
-    deviceScaleFactor: 2, // Capture at 2x resolution for retina displays
+    deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
     ignoreHTTPSErrors: true, // Allow self-signed certificates in development
   });
   const page = await context.newPage();
@@ -427,7 +443,9 @@ async function generateWebScreenshot(options: {
   // Wait for selector if specified
   if (screenshotConfig?.waitFor) {
     logger.debug({ selector: screenshotConfig.waitFor }, 'Waiting for selector');
-    await page.waitForSelector(screenshotConfig.waitFor, { timeout: 10000 });
+    await page.waitForSelector(screenshotConfig.waitFor, {
+      timeout: CIRCUIT_BREAKER.REQUEST_TIMEOUT,
+    });
   }
 
   // Determine screenshot target
@@ -465,40 +483,44 @@ async function generateWebScreenshot(options: {
 
   // Generate 2x WebP (from high-res source)
   const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: 85 }).toFile(webp2xPath);
+  await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webp2xPath);
 
   // Downscale to 1x using bicubic interpolation for better quality
   const webpPath = path.join(outputDir, `${name}.webp`);
   const screenshotPath = path.join(outputDir, `${name}.png`);
 
-  if (metadata.width && metadata.width >= 400) {
+  if (metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X) {
     await sharp(screenshot2xPath)
       .resize({
-        width: Math.floor(metadata.width / 2),
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
         kernel: 'cubic', // Bicubic interpolation for sharp downscaling
       })
-      .webp({ quality: 85 })
+      .webp({ quality: IMAGE_QUALITY.WEBP })
       .toFile(webpPath);
 
     // Also save 1x PNG
     await sharp(screenshot2xPath)
       .resize({
-        width: Math.floor(metadata.width / 2),
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
         kernel: 'cubic',
       })
       .png()
       .toFile(screenshotPath);
   } else {
     // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: 85 }).toFile(webpPath);
+    await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webpPath);
     await sharpImage.clone().png().toFile(screenshotPath);
   }
 
   const publicPath = `${basePath}/${name}.png`;
 
   // Return 1x dimensions for the img element
-  const displayWidth = metadata.width ? Math.floor(metadata.width / 2) : metadata.width;
-  const displayHeight = metadata.height ? Math.floor(metadata.height / 2) : metadata.height;
+  const displayWidth = metadata.width
+    ? Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.width;
+  const displayHeight = metadata.height
+    ? Math.floor(metadata.height / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.height;
 
   logger.info(
     {
@@ -515,7 +537,10 @@ async function generateWebScreenshot(options: {
     success: true,
     path: publicPath,
     webpPath: `${basePath}/${name}.webp`,
-    webp2xPath: metadata.width && metadata.width >= 400 ? `${basePath}/${name}@2x.webp` : undefined,
+    webp2xPath:
+      metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X
+        ? `${basePath}/${name}@2x.webp`
+        : undefined,
     width: displayWidth,
     height: displayHeight,
   } as ScreenshotResponse);

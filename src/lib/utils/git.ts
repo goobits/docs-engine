@@ -8,6 +8,7 @@
 import { execSync } from 'child_process';
 import { LRUCache } from 'lru-cache';
 import pRetry from 'p-retry';
+import { CACHE, GIT } from '../constants.js';
 
 /**
  * Git configuration for repository integration
@@ -49,8 +50,8 @@ export type GitProvider = 'github' | 'gitlab' | 'gitea' | 'unknown';
  * Uses LRU cache to prevent memory leaks on large sites
  */
 const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
-  max: 1000, // Maximum 1000 entries
-  ttl: 60000, // 60 second TTL
+  max: CACHE.MAX_ENTRIES, // Maximum 1000 entries
+  ttl: CACHE.TTL, // 60 second TTL
   updateAgeOnGet: true, // Refresh TTL on access
   updateAgeOnHas: false,
 });
@@ -62,7 +63,7 @@ const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
 async function execGitCommand(
   command: string,
   cacheKey: string,
-  _ttl = 60000
+  _ttl = CACHE.TTL
 ): Promise<string | null> {
   // Check cache first (LRUCache handles TTL automatically)
   const cached = gitCache.get(cacheKey);
@@ -76,12 +77,12 @@ async function execGitCommand(
         return execSync(command, {
           encoding: 'utf-8',
           stdio: ['pipe', 'pipe', 'pipe'],
-          timeout: 10000,
+          timeout: GIT.COMMAND_TIMEOUT,
         }).trim();
       },
       {
-        retries: 2,
-        minTimeout: 500,
+        retries: GIT.MAX_RETRIES,
+        minTimeout: GIT.MIN_RETRY_TIMEOUT,
         onFailedAttempt: ({ error, attemptNumber }) => {
           // Only retry on git lock errors
           if (error.message.includes('lock') || error.message.includes('index.lock')) {
@@ -146,7 +147,10 @@ export async function getLastUpdated(filePath: string): Promise<Date | null> {
  *
  * @public
  */
-export async function getContributors(filePath: string, limit = 10): Promise<Contributor[]> {
+export async function getContributors(
+  filePath: string,
+  limit = CACHE.DEFAULT_CONTRIBUTOR_LIMIT
+): Promise<Contributor[]> {
   const cacheKey = `contributors:${filePath}:${limit}`;
   const cached = gitCache.get(cacheKey);
 
@@ -258,7 +262,7 @@ function generateGravatarUrl(email: string): string {
   // Simple MD5 alternative for browser compatibility
   // In production, you might want to use a proper crypto library
   const hash = simpleHash(email.toLowerCase().trim());
-  return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=40`;
+  return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=${CACHE.GRAVATAR_SIZE}`;
 }
 
 /**

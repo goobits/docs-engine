@@ -1,3 +1,5 @@
+import { RATE_LIMIT } from '../constants.js';
+
 /**
  * Rate limit entry tracking request count and reset time
  */
@@ -32,7 +34,7 @@ function startCleanupTimer(): void {
         limiter.delete(key);
       }
     }
-  }, 60000);
+  }, RATE_LIMIT.CLEANUP_INTERVAL);
 
   // Unref the timer so it doesn't prevent process exit
   cleanupTimer.unref();
@@ -48,7 +50,7 @@ function startCleanupTimer(): void {
  *
  * @example
  * ```typescript
- * if (!checkRateLimit(req.ip, 100, 60000)) {
+ * if (!checkRateLimit(req.ip, RATE_LIMIT.SCREENSHOT_MAX_REQUESTS, RATE_LIMIT.SCREENSHOT_WINDOW_MS)) {
  *   return new Response('Too many requests', { status: 429 });
  * }
  * ```
@@ -57,8 +59,8 @@ function startCleanupTimer(): void {
  */
 export function checkRateLimit(
   identifier: string,
-  maxRequests: number = 10,
-  windowMs: number = 60000
+  maxRequests: number = RATE_LIMIT.DEFAULT_MAX_REQUESTS,
+  windowMs: number = RATE_LIMIT.DEFAULT_WINDOW_MS
 ): boolean {
   // Start cleanup timer on first use (lazy initialization)
   startCleanupTimer();

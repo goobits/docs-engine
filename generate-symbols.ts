@@ -4,6 +4,9 @@
  */
 
 import { createSymbolMapGenerator } from './src/lib/utils/symbol-generation.js';
+import { createLogger } from './src/lib/utils/logger.js';
+
+const logger = createLogger('generate-symbols');
 
 const generator = createSymbolMapGenerator({
   sourcePatterns: ['src/lib/**/*.ts'],
@@ -14,13 +17,13 @@ const generator = createSymbolMapGenerator({
   baseDir: process.cwd(),
 });
 
-console.log('🚀 Generating symbol map for docs-engine...\n');
+logger.info('Generating symbol map for docs-engine');
 
 try {
   await generator.generate();
-  console.log('\n✅ Symbol map generation complete!');
+  logger.info('Symbol map generation complete');
   process.exit(0);
 } catch (error) {
-  console.error('\n❌ Symbol map generation failed:', error);
+  logger.error({ error }, 'Symbol map generation failed');
   process.exit(1);
 }

@@ -132,6 +132,7 @@
       class="md-code-tabs__copy-btn"
       onclick={() => copyCode(tabs[activeIndex].content)}
       title="Copy code"
+      aria-label="Copy code from {tabs[activeIndex].label} tab"
     >
       <svg
         width="16"
@@ -139,6 +140,7 @@
         viewBox="0 0 16 16"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         <path
           d="M5.5 2.5h7a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z"
@@ -151,7 +153,7 @@
           stroke-width="1.5"
         />
       </svg>
-      Copy
+      <span>Copy</span>
     </button>
   </div>
 

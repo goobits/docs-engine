@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { codeHighlightPlugin, type CodeBlockMetadata } from './code-highlight';
-import type { Root } from 'mdast';
+import type { Root, Html } from 'mdast';
 
 /**
  * Tests for code-highlight plugin
@@ -43,14 +43,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin({ theme: 'dracula' });
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.type).toBe('html');
       expect(transformed.value).toContain('shiki');
     });
@@ -67,14 +67,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.type).toBe('html');
       expect(transformed.value).toContain('shiki');
     });
@@ -91,14 +91,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const node = tree.children[0] as unknown;
+      const node = tree.children[0] as any;
       // Should not transform filetree blocks
       expect(node.type).toBe('code');
       expect(node.lang).toBe('filetree');
@@ -118,14 +118,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.value).toContain('code-block-title');
       expect(transformed.value).toContain('app.ts');
     });
@@ -142,14 +142,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 4, column: 4, offset: 30 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.value).toContain('code-block-line-numbers');
       expect(transformed.value).toContain('line-number');
     });
@@ -166,14 +166,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 4, column: 4, offset: 30 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.value).toContain('diff-add');
       expect(transformed.value).toContain('diff-remove');
     });
@@ -192,14 +192,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin({ showLineNumbers: true });
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.value).toContain('code-block-line-numbers');
     });
 
@@ -215,14 +215,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin({ theme: 'dracula' });
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       expect(transformed.value).toContain('shiki');
     });
   });
@@ -240,14 +240,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as unknown,
+          } as any,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const transformed = tree.children[0] as unknown;
+      const transformed = tree.children[0] as Html;
       // Should still transform to HTML, even if highlighting fails
       expect(transformed.type).toBe('html');
     });

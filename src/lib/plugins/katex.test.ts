@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { katexPlugin, type KaTeXOptions } from './katex';
-import type { Root } from 'mdast';
+import type { Root, Paragraph, Html } from 'mdast';
 
 /**
  * Tests for KaTeX math rendering plugin
@@ -25,7 +25,7 @@ function createInlineMathTree(latex: string): Root {
             type: 'inlineMath',
             value: latex,
             data: {},
-          } as unknown,
+          } as any,
         ],
       },
     ],
@@ -43,7 +43,7 @@ function createDisplayMathTree(latex: string): Root {
         type: 'math',
         value: latex,
         data: {},
-      } as unknown,
+      } as any,
     ],
   };
 }
@@ -52,11 +52,14 @@ function createDisplayMathTree(latex: string): Root {
  * Helper to get the HTML output from a transformed tree
  */
 function getHtmlOutput(tree: Root, index = 0): string {
-  const node = tree.children[index] as unknown;
+  const node = tree.children[index];
   if (node.type === 'paragraph') {
-    return (node.children[0] as unknown).value;
+    const paragraph = node as Paragraph;
+    const htmlNode = paragraph.children[0] as Html;
+    return htmlNode.value;
   }
-  return node.value;
+  const htmlNode = node as Html;
+  return htmlNode.value;
 }
 
 describe('katex plugin', () => {
@@ -209,17 +212,17 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown,
+          } as any,
           {
             type: 'math',
             value: 'y = mx + b',
             data: {},
-          } as unknown,
+          } as any,
           {
             type: 'inlineMath',
             value: 'z^3',
             data: {},
-          } as unknown,
+          } as any,
         ],
       };
 
@@ -249,7 +252,7 @@ describe('katex plugin', () => {
                 type: 'inlineMath',
                 value: 'x^2',
                 data: {},
-              } as unknown,
+              } as any,
               {
                 type: 'text',
                 value: ' more text',
@@ -262,8 +265,8 @@ describe('katex plugin', () => {
       const plugin = katexPlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as unknown;
-      const mathNode = paragraph.children[1];
+      const paragraph = tree.children[0] as Paragraph;
+      const mathNode = paragraph.children[1] as any;
 
       expect(mathNode.type).toBe('html');
       expect(mathNode.value).toContain('katex');
@@ -310,7 +313,7 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown,
+          } as any,
         ],
       };
 
@@ -318,13 +321,13 @@ describe('katex plugin', () => {
       plugin(tree);
 
       // Text node should remain unchanged
-      const paragraph = tree.children[0] as unknown;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.type).toBe('paragraph');
       expect(paragraph.children[0].type).toBe('text');
-      expect(paragraph.children[0].value).toBe('Plain text');
+      expect((paragraph.children[0] as any).value).toBe('Plain text');
 
       // Math node should be transformed
-      const mathNode = tree.children[1] as unknown;
+      const mathNode = tree.children[1] as Html;
       expect(mathNode.type).toBe('html');
     });
   });

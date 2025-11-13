@@ -526,7 +526,7 @@ static/
 
 **Next Steps:**
 - [Screenshots Plugin](./screenshots.md) - Automated screenshot generation
-- [Performance Guide](../guides/performance.md) - Optimization strategies
+- [Architecture Guide](../guides/architecture.md) - System design and philosophy
 
 **Related:**
 - [Sharp Documentation](https://sharp.pixelplumbing.com/) - Image processing library

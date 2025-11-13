@@ -6,6 +6,9 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
+  import { createBrowserLogger } from '../utils/logger.js';
+
+  const logger = createBrowserLogger('CollapseHydrator');
 
   function hydrate() {
     requestAnimationFrame(() => {
@@ -31,7 +34,7 @@
           details.setAttribute('data-hydrated', 'true');
         }
       } catch (err) {
-        console.error('[CollapseHydrator] Fatal error:', err);
+        logger.error(err);
       }
     });
   }

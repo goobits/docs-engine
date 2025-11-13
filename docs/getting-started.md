@@ -119,7 +119,7 @@ Navigate to `http://localhost:5173/docs/hello`
 
 Add more plugins:
 
-- **[Navigation Builder](./plugins/navigation.md)** - Auto-generate sidebar navigation
+- **[Navigation Builder](./utilities/navigation.md)** - Auto-generate sidebar navigation
 - **[Callouts](./plugins/callouts.md)** - Add note/warning/tip boxes
 - **[Mermaid](./plugins/mermaid.md)** - Render diagrams
 - **[Code Tabs](./plugins/code-tabs.md)** - Show code in multiple languages

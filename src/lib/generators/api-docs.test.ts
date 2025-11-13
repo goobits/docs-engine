@@ -22,10 +22,7 @@ import {
 } from './api-docs.js';
 
 // Test helpers
-const defaultMetadata: ApiMetadata = {
-  isPublic: true,
-  tags: {},
-};
+const defaultMetadata: ApiMetadata = {};
 
 const defaultSource = {
   file: 'src/example.ts',
@@ -37,6 +34,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'testFunc',
+      signature: 'function testFunc(): void',
       description: 'A test function',
       parameters: [],
       returnType: 'void',
@@ -57,6 +55,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'add',
+      signature: 'function add(a: number, b: number): number',
       description: 'Adds two numbers',
       parameters: [
         { name: 'a', type: 'number', optional: false },
@@ -80,6 +79,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'greet',
+      signature: 'function greet(name: string, title?: string): string',
       description: 'Greets a person',
       parameters: [
         { name: 'name', type: 'string', optional: false },
@@ -102,6 +102,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'multiply',
+      signature: 'function multiply(value: number, factor?: number): number',
       description: 'Multiplies a number',
       parameters: [
         { name: 'value', type: 'number', optional: false },
@@ -123,6 +124,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'identity',
+      signature: 'function identity<T>(value: T): T',
       description: 'Returns input value',
       typeParameters: ['T'],
       parameters: [{ name: 'value', type: 'T', optional: false }],
@@ -141,6 +143,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'sum',
+      signature: 'function sum(): number',
       description: 'Calculates sum',
       parameters: [],
       returnType: 'number',
@@ -164,6 +167,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'calculate',
+      signature: 'function calculate(): number',
       description: 'Performs calculation',
       parameters: [],
       returnType: 'number',
@@ -182,6 +186,7 @@ describe('generateMarkdown - Functions', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'logMessage',
+      signature: 'function logMessage(msg: string): void',
       description: 'Logs a message',
       parameters: [{ name: 'msg', type: 'string', optional: false }],
       returnType: 'void',
@@ -201,6 +206,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'TestClass',
+      signature: 'class TestClass',
       description: 'A test class',
       properties: [],
       methods: [],
@@ -221,6 +227,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Person',
+      signature: 'class Person',
       description: 'Represents a person',
       properties: [
         { name: 'name', type: 'string', optional: false, readonly: false },
@@ -251,6 +258,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Config',
+      signature: 'class Config',
       description: 'Configuration class',
       properties: [
         { name: 'id', type: 'string', optional: false, readonly: true },
@@ -272,11 +280,13 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Calculator',
+      signature: 'class Calculator',
       description: 'A calculator',
       properties: [],
       methods: [
         {
           name: 'add',
+          signature: 'add(a: number, b: number): number',
           description: 'Adds numbers',
           parameters: [
             { name: 'a', type: 'number', optional: false },
@@ -303,6 +313,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Database',
+      signature: 'class Database',
       description: 'Database connection',
       properties: [],
       methods: [],
@@ -328,6 +339,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'SpecialList',
+      signature: 'class SpecialList extends Array implements Iterable, Serializable',
       description: 'A special list',
       extends: 'Array',
       implements: ['Iterable', 'Serializable'],
@@ -347,6 +359,7 @@ describe('generateMarkdown - Classes', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Container',
+      signature: 'class Container<T>',
       description: 'Generic container',
       typeParameters: ['T'],
       properties: [],
@@ -367,6 +380,7 @@ describe('generateMarkdown - Interfaces', () => {
     const iface: ApiInterface = {
       kind: 'interface',
       name: 'User',
+      signature: 'interface User',
       description: 'User interface',
       properties: [
         { name: 'id', type: 'string', optional: false, readonly: false },
@@ -392,6 +406,7 @@ describe('generateMarkdown - Interfaces', () => {
     const iface: ApiInterface = {
       kind: 'interface',
       name: 'Employee',
+      signature: 'interface Employee extends Person, Identifiable',
       description: 'Employee interface',
       extends: ['Person', 'Identifiable'],
       properties: [],
@@ -410,6 +425,7 @@ describe('generateMarkdown - Interfaces', () => {
     const iface: ApiInterface = {
       kind: 'interface',
       name: 'Result',
+      signature: 'interface Result<T, E>',
       description: 'Result wrapper',
       typeParameters: ['T', 'E'],
       properties: [],
@@ -428,11 +444,13 @@ describe('generateMarkdown - Interfaces', () => {
     const iface: ApiInterface = {
       kind: 'interface',
       name: 'Repository',
+      signature: 'interface Repository',
       description: 'Data repository',
       properties: [],
       methods: [
         {
           name: 'save',
+          signature: 'save(item: T): Promise<void>',
           description: 'Saves an item',
           parameters: [{ name: 'item', type: 'T', optional: false }],
           returnType: 'Promise<void>',
@@ -457,6 +475,7 @@ describe('generateMarkdown - Type Aliases', () => {
     const type: ApiTypeAlias = {
       kind: 'type',
       name: 'ID',
+      signature: 'type ID = string | number',
       description: 'Unique identifier',
       definition: 'string | number',
       metadata: defaultMetadata,
@@ -475,6 +494,7 @@ describe('generateMarkdown - Type Aliases', () => {
     const type: ApiTypeAlias = {
       kind: 'type',
       name: 'Callback',
+      signature: 'type Callback<T> = (value: T) => void',
       description: 'Callback function type',
       typeParameters: ['T'],
       definition: '(value: T) => void',
@@ -492,6 +512,7 @@ describe('generateMarkdown - Type Aliases', () => {
     const type: ApiTypeAlias = {
       kind: 'type',
       name: 'ComplexType',
+      signature: 'type ComplexType = { foo: string; bar: number } & { baz: boolean }',
       description: 'A complex type',
       definition: '{ foo: string; bar: number } & { baz: boolean }',
       metadata: defaultMetadata,
@@ -575,6 +596,7 @@ describe('Metadata - Badges and Tags', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'oldFunc',
+      signature: 'function oldFunc(): void',
       description: 'An old function',
       parameters: [],
       returnType: 'void',
@@ -596,6 +618,7 @@ describe('Metadata - Badges and Tags', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'betaFunc',
+      signature: 'function betaFunc(): void',
       description: 'A beta function',
       parameters: [],
       returnType: 'void',
@@ -616,6 +639,7 @@ describe('Metadata - Badges and Tags', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'newFunc',
+      signature: 'function newFunc(): void',
       description: 'A new function',
       parameters: [],
       returnType: 'void',
@@ -636,6 +660,7 @@ describe('Metadata - Badges and Tags', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'testFunc',
+      signature: 'function testFunc(): void',
       description: 'Test function',
       parameters: [],
       returnType: 'void',
@@ -663,6 +688,8 @@ describe('Type Linking', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature:
+        'function test(str: string, num: number, bool: boolean, any: any, unknown: unknown): void',
       description: 'Test',
       parameters: [
         { name: 'str', type: 'string', optional: false },
@@ -690,6 +717,7 @@ describe('Type Linking', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(user: User): void',
       description: 'Test',
       parameters: [{ name: 'user', type: 'User', optional: false }],
       returnType: 'void',
@@ -711,6 +739,7 @@ describe('Type Linking', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(config: Config): void',
       description: 'Test',
       parameters: [{ name: 'config', type: 'Config', optional: false }],
       returnType: 'void',
@@ -734,6 +763,8 @@ describe('Type Linking', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature:
+        'function test(generic: Array<string>, union: string | number, intersection: A & B, array: string[]): void',
       description: 'Test',
       parameters: [
         { name: 'generic', type: 'Array<string>', optional: false },
@@ -759,6 +790,7 @@ describe('Type Linking', () => {
     const type: ApiTypeAlias = {
       kind: 'type',
       name: 'Handler',
+      signature: 'type Handler = Map<string, Set<Listener>>',
       description: 'Event handler',
       definition: 'Map<string, Set<Listener>>',
       metadata: defaultMetadata,
@@ -778,6 +810,7 @@ describe('Source Links', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: 'Test',
       parameters: [],
       returnType: 'void',
@@ -795,6 +828,7 @@ describe('Source Links', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: 'Test',
       parameters: [],
       returnType: 'void',
@@ -820,6 +854,7 @@ describe('Source Links', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: 'Test',
       parameters: [],
       returnType: 'void',
@@ -843,6 +878,7 @@ describe('Source Links', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: 'Test',
       parameters: [],
       returnType: 'void',
@@ -868,6 +904,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: '',
       parameters: [],
       returnType: 'void',
@@ -886,6 +923,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       parameters: [],
       returnType: 'void',
       metadata: defaultMetadata,
@@ -902,6 +940,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: '$special_name',
+      signature: 'function $special_name(): void',
       description: 'Special function',
       parameters: [],
       returnType: 'void',
@@ -920,6 +959,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(param: string): void',
       description: 'Test',
       parameters: [{ name: 'param', type: 'string', optional: false }],
       returnType: 'void',
@@ -938,6 +978,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: longDesc,
       parameters: [],
       returnType: 'void',
@@ -955,6 +996,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): string',
       description: 'Test',
       parameters: [],
       returnType: 'string',
@@ -973,6 +1015,7 @@ describe('Edge Cases', () => {
     const func: ApiFunction = {
       kind: 'function',
       name: 'test',
+      signature: 'function test(): void',
       description: 'Test',
       parameters: [],
       returnType: 'void',
@@ -990,6 +1033,7 @@ describe('Edge Cases', () => {
     const cls: ApiClass = {
       kind: 'class',
       name: 'Empty',
+      signature: 'class Empty',
       description: 'Empty class',
       properties: [],
       methods: [],
@@ -1009,6 +1053,7 @@ describe('Edge Cases', () => {
     const iface: ApiInterface = {
       kind: 'interface',
       name: 'Empty',
+      signature: 'interface Empty',
       description: 'Empty interface',
       properties: [],
       methods: [],
@@ -1031,6 +1076,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'funcA',
+        signature: 'function funcA(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Utils' },
@@ -1040,6 +1086,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'funcB',
+        signature: 'function funcB(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Utils' },
@@ -1049,6 +1096,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'funcC',
+        signature: 'function funcC(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Core' },
@@ -1069,6 +1117,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'func',
+        signature: 'function func(): void',
         parameters: [],
         returnType: 'void',
         metadata: defaultMetadata,
@@ -1088,6 +1137,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'zebra',
+        signature: 'function zebra(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Utils' },
@@ -1097,6 +1147,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'apple',
+        signature: 'function apple(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Utils' },
@@ -1106,6 +1157,7 @@ describe('groupByCategory', () => {
       {
         kind: 'function',
         name: 'mango',
+        signature: 'function mango(): void',
         parameters: [],
         returnType: 'void',
         metadata: { ...defaultMetadata, category: 'Utils' },
@@ -1131,6 +1183,7 @@ describe('generateApiDocFile', () => {
         {
           kind: 'function',
           name: 'testFunc',
+          signature: 'function testFunc(): void',
           description: 'Test function',
           parameters: [],
           returnType: 'void',
@@ -1161,6 +1214,7 @@ describe('generateApiDocFile', () => {
         {
           kind: 'function',
           name: 'utilA',
+          signature: 'function utilA(): void',
           parameters: [],
           returnType: 'void',
           metadata: defaultMetadata,
@@ -1207,6 +1261,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'function' as const,
             name: 'helper',
+            signature: 'function helper(): void',
             parameters: [],
             returnType: 'void',
             metadata: defaultMetadata,
@@ -1234,6 +1289,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'function' as const,
             name: 'func1',
+            signature: 'function func1(): void',
             parameters: [],
             returnType: 'void',
             metadata: defaultMetadata,
@@ -1243,6 +1299,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'class' as const,
             name: 'Class1',
+            signature: 'class Class1',
             properties: [],
             methods: [],
             metadata: defaultMetadata,
@@ -1252,6 +1309,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'interface' as const,
             name: 'Interface1',
+            signature: 'interface Interface1',
             properties: [],
             methods: [],
             metadata: defaultMetadata,
@@ -1261,6 +1319,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'type' as const,
             name: 'Type1',
+            signature: 'type Type1 = string',
             definition: 'string',
             metadata: defaultMetadata,
             source: defaultSource,
@@ -1295,6 +1354,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'function' as const,
             name: 'funcA',
+            signature: 'function funcA(): void',
             parameters: [],
             returnType: 'void',
             metadata: defaultMetadata,
@@ -1304,6 +1364,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'function' as const,
             name: 'funcB',
+            signature: 'function funcB(): void',
             parameters: [],
             returnType: 'void',
             metadata: defaultMetadata,
@@ -1327,6 +1388,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'function' as const,
             name: 'func1',
+            signature: 'function func1(): void',
             parameters: [],
             returnType: 'void',
             metadata: defaultMetadata,
@@ -1341,6 +1403,7 @@ describe('generateIndexFile', () => {
           {
             kind: 'class' as const,
             name: 'Class2',
+            signature: 'class Class2',
             properties: [],
             methods: [],
             metadata: defaultMetadata,

@@ -81,25 +81,37 @@
         <span
           class="version-switcher-label"
           style="color: {getLabelColor(currentVersionObj.label)}"
+          aria-hidden="true"
         >
           {currentVersionObj.label}
         </span>
       {/if}
     </span>
-    <ChevronDown size={16} class="version-switcher-icon {isOpen ? 'open' : ''}" />
+    <ChevronDown
+      size={16}
+      class="version-switcher-icon {isOpen ? 'open' : ''}"
+      aria-hidden="true"
+    />
   </button>
 
   {#if isOpen}
-    <div class="version-switcher-dropdown">
+    <div class="version-switcher-dropdown" role="menu" aria-label="Select documentation version">
       {#each versions as version (version.version)}
         <button
           class="version-switcher-option {version.version === currentVersion ? 'active' : ''}"
           onclick={() => selectVersion(version.version)}
           type="button"
+          role="menuitem"
+          aria-label="Version {version.version}{version.label ? ` (${version.label})` : ''}"
+          aria-current={version.version === currentVersion ? 'true' : undefined}
         >
           <span class="version-switcher-version">v{version.version}</span>
           {#if version.label}
-            <span class="version-switcher-label" style="color: {getLabelColor(version.label)}">
+            <span
+              class="version-switcher-label"
+              style="color: {getLabelColor(version.label)}"
+              aria-hidden="true"
+            >
               {version.label}
             </span>
           {/if}

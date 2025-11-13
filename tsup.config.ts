@@ -1,6 +1,9 @@
 import { defineConfig } from 'tsup';
 import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join, dirname, relative } from 'path';
+import { createLogger } from './src/lib/utils/logger.js';
+
+const logger = createLogger('tsup-build');
 
 /**
  * Recursively copy files matching a pattern from src to dist
@@ -19,7 +22,7 @@ function copyFiles(srcDir: string, destDir: string, pattern: RegExp): void {
     } else if (pattern.test(item)) {
       mkdirSync(dirname(destPath), { recursive: true });
       copyFileSync(srcPath, destPath);
-      console.log(`Copied: ${relative(process.cwd(), destPath)}`);
+      logger.debug({ file: relative(process.cwd(), destPath) }, 'Copied file');
     }
   }
 }
@@ -85,7 +88,7 @@ export default defineConfig({
 
   // Post-build: Copy .svelte, .css, and .json files to dist/
   onSuccess: async () => {
-    console.log('\nCopying .svelte, .css, and .json files to dist/...');
+    logger.info('Copying .svelte, .css, and .json files to dist/');
 
     const srcLib = join(process.cwd(), 'src/lib');
     const distLib = join(process.cwd(), 'dist');
@@ -99,6 +102,6 @@ export default defineConfig({
     // Copy .json files (for grammars, etc.)
     copyFiles(srcLib, distLib, /\.json$/);
 
-    console.log('Non-TS files copied successfully!\n');
+    logger.info('Non-TS files copied successfully');
   },
 });

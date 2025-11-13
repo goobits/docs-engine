@@ -2,6 +2,9 @@ import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import { encodeJsonBase64 } from '../utils/base64.js';
 import { getVersion } from '../utils/version.js';
+import { createLogger } from '../utils/logger.js';
+
+const logger = createLogger('screenshot-plugin');
 
 export interface ScreenshotPluginOptions {
   basePath?: string;
@@ -46,7 +49,7 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: 
 
       const name = node.lang.slice('screenshot:'.length);
       if (!name) {
-        console.error('Screenshot code block missing name (use: ```screenshot:name)');
+        logger.error('Screenshot code block missing name (use: ```screenshot:name)');
         return;
       }
 
@@ -79,11 +82,11 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: 
       // Validate based on type
       const type = config.type || 'web';
       if (type === 'cli' && !config.command) {
-        console.error(`CLI screenshot "${name}" missing required "command" field`);
+        logger.error({ name, type: 'cli' }, 'CLI screenshot missing required "command" field');
         return;
       }
       if (type === 'web' && !config.url) {
-        console.error(`Web screenshot "${name}" missing required "url" field`);
+        logger.error({ name, type: 'web' }, 'Web screenshot missing required "url" field');
         return;
       }
 

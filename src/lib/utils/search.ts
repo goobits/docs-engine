@@ -121,10 +121,11 @@ export function searchDocs(
  * Escape special regex characters
  * Module-private helper (currently unused but kept for future use)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 function _escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+*/
 
 /**
  * Get search suggestions based on partial query

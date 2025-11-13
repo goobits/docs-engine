@@ -571,7 +571,7 @@ Use this checklist to track your migration progress:
 - **Documentation:** https://github.com/goobits/docs-engine
 - **Issues:** https://github.com/goobits/docs-engine/issues
 - **Discussions:** https://github.com/goobits/docs-engine/discussions
-- **Changelog:** [CHANGELOG.md](../CHANGELOG.md)
+- **Architecture Guide:** [View Architecture](./architecture.md)
 
 **Estimated Time Investment:**
 - Small projects (< 5 custom styles): ~15 minutes

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite dev --port 3390 --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-links": "node ../scripts/check-links.mjs",
+    "prebuild": "npm run check-links"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",
@@ -19,7 +21,7 @@
   },
   "dependencies": {
     "@lucide/svelte": "^0.553.0",
-    "dist": "link:../dist",
+    "dist": "file:../dist",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.25",
     "mdsvex": "^0.12.6",

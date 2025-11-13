@@ -2,7 +2,7 @@ import path from 'path';
 import { error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { scanDocumentation } from 'dist/server/index.js';
-import { buildNavigation } from 'dist/utils/index.js';
+import { buildNavigation, createSearchIndex } from 'dist/utils/index.js';
 import { logError, createDevError } from '$lib/utils/error-logger';
 import type { LayoutServerLoad } from './$types';
 
@@ -25,6 +25,20 @@ export const load: LayoutServerLoad = async () => {
     // Build navigation structure from scanned files
     const navigation = buildNavigation(docFiles);
 
+    // Build content map for search indexing (href -> markdown content)
+    const contentMap = new Map<string, string>();
+    docFiles.forEach((docFile) => {
+      contentMap.set(docFile.href, docFile.content);
+    });
+
+    // Build search index
+    console.log('[Search] Building search index from', docFiles.length, 'documents...');
+    const searchIndexStart = Date.now();
+    const searchIndex = createSearchIndex(navigation, contentMap);
+    const searchIndexTime = Date.now() - searchIndexStart;
+    console.log('[Search] Search index built in', searchIndexTime, 'ms');
+    console.log('[Search] Index size:', Math.round(searchIndex.length / 1024), 'KB');
+
     // Remove icon functions (they can't be serialized for SSR)
     const serializableNavigation = navigation.map((section) => ({
       ...section,
@@ -37,6 +51,7 @@ export const load: LayoutServerLoad = async () => {
 
     return {
       navigation: serializableNavigation,
+      searchIndex,
     };
   } catch (err) {
     // Log navigation generation errors
@@ -56,8 +71,20 @@ export const load: LayoutServerLoad = async () => {
     }
 
     // In production, return empty navigation (graceful degradation)
+
     return {
       navigation: [],
+      searchIndex: JSON.stringify({
+        documentCount: 0,
+        documentIds: [],
+        fieldIds: {},
+        fieldLength: {},
+        averageFieldLength: {},
+        storedFields: {},
+        dirtCount: 0,
+        nextId: 0,
+        serializationVersion: 2,
+      }),
     };
   }
 };

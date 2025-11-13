@@ -1,12 +1,13 @@
 import type { Handle } from '@sveltejs/kit';
-import { checkRateLimit } from '$lib/server/rate-limiter';
+import { checkRateLimit } from './lib/server/rate-limiter.js';
+import { RATE_LIMIT, HTTP_STATUS } from './lib/constants.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Rate limit screenshot endpoint
   if (event.url.pathname.startsWith('/api/screenshots')) {
     const ip = event.getClientAddress();
-    if (!checkRateLimit(ip, 10, 60000)) {
-      return new Response('Rate limit exceeded', { status: 429 });
+    if (!checkRateLimit(ip, RATE_LIMIT.DEFAULT_MAX_REQUESTS, RATE_LIMIT.DEFAULT_WINDOW_MS)) {
+      return new Response('Rate limit exceeded', { status: HTTP_STATUS.TOO_MANY_REQUESTS });
     }
   }
 

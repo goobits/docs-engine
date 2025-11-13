@@ -43,7 +43,9 @@
   class:md-filetree__item--file={!isFolder}
   class:md-filetree__item--hovered={isHovered}
   role="treeitem"
+  aria-level={node.depth + 1}
   aria-expanded={isFolder ? isExpanded : undefined}
+  aria-label="{isFolder ? 'Folder' : 'File'}: {node.name}"
   style="--depth: {node.depth}; --file-color: {fileType.color}"
 >
   <div
@@ -74,6 +76,9 @@
       class:md-filetree__name--copied={isCopied}
       on:click={() => allowCopy && copyPath(node.path)}
       title={allowCopy ? `Click to copy: ${node.path}` : node.path}
+      aria-label={allowCopy
+        ? `Copy path: ${node.path}`
+        : `${isFolder ? 'Folder' : 'File'}: ${node.name}`}
       disabled={!allowCopy}
     >
       {node.name}{isFolder ? '/' : ''}
@@ -88,8 +93,9 @@
         class="md-filetree__github"
         on:click={() => openInGithub(node.path)}
         title="Open in GitHub"
+        aria-label="Open {node.name} in GitHub"
       >
-        ↗
+        <span aria-hidden="true">↗</span>
       </button>
     {/if}
   </div>

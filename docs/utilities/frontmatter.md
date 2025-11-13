@@ -189,7 +189,7 @@ Content`);
 
 **Next Steps:**
 - [Navigation Builder](./navigation.md) - Auto-generate navigation from frontmatter
-- [Table of Contents](./toc.md) - Generate TOC from headings
+- [Table of Contents](../plugins/toc.md) - Generate TOC from headings
 
 **Related:**
 - [Getting Started](../getting-started.md) - Quick start guide

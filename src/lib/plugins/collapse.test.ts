@@ -12,7 +12,7 @@ describe('collapse plugin', () => {
         name: 'collapse',
         attributes,
         children: content,
-      },
+      } as any,
     ],
   });
 
@@ -462,9 +462,9 @@ describe('collapse plugin', () => {
               {
                 type: 'paragraph',
                 children: [{ type: 'text', value: 'Content' }],
-              },
+              } as any,
             ],
-          },
+          } as any,
         ],
       };
 
@@ -487,9 +487,9 @@ describe('collapse plugin', () => {
               {
                 type: 'paragraph',
                 children: [{ type: 'text', value: 'Valid' }, null as any, undefined as any],
-              },
+              } as any,
             ],
-          },
+          } as any,
         ],
       };
 

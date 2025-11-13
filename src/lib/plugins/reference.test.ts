@@ -11,35 +11,32 @@ describe('reference plugin', () => {
     vi.restoreAllMocks();
   });
 
-  const mockSymbolMap = new Map([
-    [
-      'MyFunction',
+  const mockSymbolMap: symbolResolver.SymbolMap = {
+    MyFunction: [
       {
-        id: 'MyFunction',
         name: 'MyFunction',
         kind: 'function' as const,
         signature: 'function MyFunction(): void',
-        filePath: 'src/utils.ts',
+        path: 'src/utils.ts',
         line: 10,
+        exported: true,
         jsDoc: {
           description: 'A test function',
-          tags: [],
           params: [],
         },
       },
     ],
-    [
-      'MyType',
+    MyType: [
       {
-        id: 'MyType',
         name: 'MyType',
         kind: 'type' as const,
         signature: 'type MyType = string',
-        filePath: 'src/types.ts',
+        path: 'src/types.ts',
         line: 5,
+        exported: true,
       },
     ],
-  ]);
+  };
 
   // Helper to create a simple text node in a paragraph
   const createTextNode = (value: string): Root => ({
@@ -64,9 +61,9 @@ describe('reference plugin', () => {
           {
             type: 'paragraph',
             children: [{ type: 'text', value: symbolName }],
-          },
+          } as any,
         ],
-      },
+      } as any,
     ],
   });
 
@@ -74,9 +71,9 @@ describe('reference plugin', () => {
     it('should transform {@SymbolName} to a link node', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue(
         'https://github.com/user/repo/blob/main/src/utils.ts#L10'
@@ -100,9 +97,9 @@ describe('reference plugin', () => {
     it('should handle multiple inline references in one text node', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
 
@@ -181,9 +178,9 @@ describe('reference plugin', () => {
     it('should transform :::reference block to HTML', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'renderBlock').mockReturnValue(
         '<div class="symbol-block">MyFunction docs</div>'
@@ -204,9 +201,9 @@ describe('reference plugin', () => {
     it('should pass render options from attributes', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
 
       const renderBlockSpy = vi
@@ -328,7 +325,7 @@ describe('reference plugin', () => {
             type: 'containerDirective' as any,
             name: 'reference',
             children: [],
-          },
+          } as any,
         ],
       };
 
@@ -351,9 +348,9 @@ describe('reference plugin', () => {
               {
                 type: 'paragraph',
                 children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
-              },
+              } as any,
             ],
-          },
+          } as any,
         ],
       };
 
@@ -366,9 +363,9 @@ describe('reference plugin', () => {
     it('should use JSDoc description for tooltip', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
 
@@ -384,9 +381,9 @@ describe('reference plugin', () => {
     it('should fallback to signature for tooltip when no JSDoc', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
 
@@ -402,9 +399,9 @@ describe('reference plugin', () => {
     it('should handle consecutive inline references', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
       vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbol = map.get(ref);
-        if (!symbol) throw new Error(`Symbol ${ref} not found`);
-        return symbol;
+        const symbols = map[ref];
+        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
+        return symbols[0];
       });
       vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
 

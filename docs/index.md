@@ -124,7 +124,7 @@ Learn the fundamentals:
 
 ### Navigation
 
-- **[Navigation Builder](./plugins/navigation.md)** - Auto-generate navigation structure
+- **[Navigation Builder](./utilities/navigation.md)** - Auto-generate navigation structure
 - **[File Tree](./plugins/filetree.md)** - Interactive file trees
 
 ### Media
@@ -155,7 +155,7 @@ Learn the fundamentals:
 ### Intermediate Path
 
 1. [Plugin Order](./guides/plugin-order.md)
-2. [Navigation Builder](./plugins/navigation.md)
+2. [Navigation Builder](./utilities/navigation.md)
 3. [Image Optimization](./plugins/image-optimization.md)
 4. [Screenshots](./plugins/screenshots.md)
 
