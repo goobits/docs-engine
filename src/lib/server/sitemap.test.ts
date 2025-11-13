@@ -6,7 +6,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Getting Started',
     description: 'Get started',
-    icon: () => null,
+    icon: (() => null) as any,
     links: [
       { title: 'Installation', href: '/docs/installation', description: 'Install' },
       { title: 'Quick Start', href: '/docs/quick-start', description: 'Quick start' },
@@ -15,7 +15,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Features',
     description: 'Features',
-    icon: () => null,
+    icon: (() => null) as any,
     links: [{ title: 'Search', href: '/docs/features/search', description: 'Search' }],
   },
 ];
@@ -76,7 +76,7 @@ describe('sitemap utilities', () => {
         {
           title: 'Test',
           description: 'Test',
-          icon: () => null,
+          icon: (() => null) as any,
           links: [
             {
               title: 'Test & Debug',

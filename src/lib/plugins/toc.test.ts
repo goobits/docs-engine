@@ -235,7 +235,7 @@ describe('toc plugin', () => {
 
       const heading = tree.children[2] as Heading;
       expect(heading.data).toBeDefined();
-      expect(heading.data?.hProperties).toEqual({ id: 'section-1' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'section-1' });
     });
 
     it('should respect depth limit (e.g., TOC:2 only includes h2)', () => {
@@ -322,7 +322,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: 'uppercase-heading' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'uppercase-heading' });
     });
 
     it('should replace spaces with hyphens', () => {
@@ -332,7 +332,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: 'multiple-word-heading' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'multiple-word-heading' });
     });
 
     it('should remove special characters', () => {
@@ -345,7 +345,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: 'section-1-hello-world' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'section-1-hello-world' });
     });
 
     it('should handle multiple spaces/hyphens', () => {
@@ -358,7 +358,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: 'multiple-spaces-here' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'multiple-spaces-here' });
     });
 
     it('should trim leading/trailing hyphens', () => {
@@ -371,7 +371,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      const id = heading.data?.hProperties?.id as string;
+      const id = (heading.data as any)?.hProperties?.id as string;
       expect(id).not.toMatch(/^-/);
       expect(id).not.toMatch(/-$/);
       expect(id).toBe('leading-and-trailing');
@@ -384,7 +384,7 @@ describe('toc plugin', () => {
       plugin(tree);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: 'caf-o-o' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: 'caf-o-o' });
     });
   });
 
@@ -456,7 +456,7 @@ describe('toc plugin', () => {
       // All should have the same ID (plugin doesn't handle uniqueness)
       const headings = [tree.children[2], tree.children[3], tree.children[4]] as Heading[];
       headings.forEach((heading) => {
-        expect(heading.data?.hProperties).toEqual({ id: 'section' });
+        expect((heading.data as any)?.hProperties).toEqual({ id: 'section' });
       });
     });
 
@@ -470,7 +470,7 @@ describe('toc plugin', () => {
       expect(list.children).toHaveLength(1);
 
       const heading = tree.children[2] as Heading;
-      expect(heading.data?.hProperties).toEqual({ id: '' });
+      expect((heading.data as any)?.hProperties).toEqual({ id: '' });
     });
 
     it('should handle very deep nesting', () => {

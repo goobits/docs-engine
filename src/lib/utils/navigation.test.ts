@@ -11,7 +11,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Getting Started',
     description: 'Get started with docs-engine',
-    icon: () => null,
+    icon: (() => null) as any,
     links: [
       { title: 'Installation', href: '/docs/installation', description: 'Install docs-engine' },
       {
@@ -24,7 +24,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Features',
     description: 'Core features',
-    icon: () => null,
+    icon: (() => null) as any,
     links: [
       { title: 'Search', href: '/docs/features/search', description: 'Search functionality' },
       {

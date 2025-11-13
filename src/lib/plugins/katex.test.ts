@@ -25,7 +25,7 @@ function createInlineMathTree(latex: string): Root {
             type: 'inlineMath',
             value: latex,
             data: {},
-          } as unknown,
+          } as any,
         ],
       },
     ],
@@ -43,7 +43,7 @@ function createDisplayMathTree(latex: string): Root {
         type: 'math',
         value: latex,
         data: {},
-      } as unknown,
+      } as any,
     ],
   };
 }
@@ -212,17 +212,17 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown,
+          } as any,
           {
             type: 'math',
             value: 'y = mx + b',
             data: {},
-          } as unknown,
+          } as any,
           {
             type: 'inlineMath',
             value: 'z^3',
             data: {},
-          } as unknown,
+          } as any,
         ],
       };
 
@@ -252,7 +252,7 @@ describe('katex plugin', () => {
                 type: 'inlineMath',
                 value: 'x^2',
                 data: {},
-              } as unknown,
+              } as any,
               {
                 type: 'text',
                 value: ' more text',
@@ -266,7 +266,7 @@ describe('katex plugin', () => {
       plugin(tree);
 
       const paragraph = tree.children[0] as Paragraph;
-      const mathNode = paragraph.children[1];
+      const mathNode = paragraph.children[1] as any;
 
       expect(mathNode.type).toBe('html');
       expect(mathNode.value).toContain('katex');
@@ -313,7 +313,7 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown,
+          } as any,
         ],
       };
 
@@ -324,7 +324,7 @@ describe('katex plugin', () => {
       const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.type).toBe('paragraph');
       expect(paragraph.children[0].type).toBe('text');
-      expect(paragraph.children[0].value).toBe('Plain text');
+      expect((paragraph.children[0] as any).value).toBe('Plain text');
 
       // Math node should be transformed
       const mathNode = tree.children[1] as Html;

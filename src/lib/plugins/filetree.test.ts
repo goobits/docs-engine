@@ -22,9 +22,9 @@ describe('filetree plugin', () => {
       name: 'src',
       type: 'directory',
       children: [{ name: 'main.ts', type: 'file' }],
-    };
+    } as any;
 
-    vi.spyOn(treeParser, 'parseTree').mockReturnValue(mockTreeData);
+    vi.spyOn(treeParser, 'parseTree').mockReturnValue([mockTreeData]);
     vi.spyOn(base64, 'encodeJsonBase64').mockReturnValue('encoded');
 
     const tree = createCodeBlock('filetree', 'src/\n└── main.ts');
@@ -39,9 +39,9 @@ describe('filetree plugin', () => {
 
   it('should parse tree structure', () => {
     const treeString = 'src/\n└── main.ts';
-    const mockTreeData = { name: 'src', type: 'directory', children: [] };
+    const mockTreeData = { name: 'src', type: 'directory', children: [] } as any;
 
-    const parseTreeSpy = vi.spyOn(treeParser, 'parseTree').mockReturnValue(mockTreeData);
+    const parseTreeSpy = vi.spyOn(treeParser, 'parseTree').mockReturnValue([mockTreeData]);
     vi.spyOn(base64, 'encodeJsonBase64').mockReturnValue('encoded');
 
     const tree = createCodeBlock('filetree', treeString);
@@ -52,16 +52,16 @@ describe('filetree plugin', () => {
   });
 
   it('should encode tree data as base64', () => {
-    const mockTreeData = { name: 'root', type: 'directory', children: [] };
+    const mockTreeData = { name: 'root', type: 'directory', children: [] } as any;
 
-    vi.spyOn(treeParser, 'parseTree').mockReturnValue(mockTreeData);
+    vi.spyOn(treeParser, 'parseTree').mockReturnValue([mockTreeData]);
     const encodeJsonBase64Spy = vi.spyOn(base64, 'encodeJsonBase64').mockReturnValue('encoded');
 
     const tree = createCodeBlock('filetree', 'root/');
     const plugin = filetreePlugin();
     plugin(tree);
 
-    expect(encodeJsonBase64Spy).toHaveBeenCalledWith(mockTreeData);
+    expect(encodeJsonBase64Spy).toHaveBeenCalledWith([mockTreeData]);
   });
 
   it('should not transform non-filetree code blocks', () => {
@@ -130,9 +130,9 @@ describe('filetree plugin', () => {
         },
         { name: 'README.md', type: 'file' },
       ],
-    };
+    } as any;
 
-    vi.spyOn(treeParser, 'parseTree').mockReturnValue(complexTree);
+    vi.spyOn(treeParser, 'parseTree').mockReturnValue([complexTree]);
     vi.spyOn(base64, 'encodeJsonBase64').mockReturnValue('complex');
 
     const tree = createCodeBlock('filetree', 'project/\n├── src/\n└── README.md');
@@ -145,10 +145,12 @@ describe('filetree plugin', () => {
   });
 
   it('should handle multiple filetree blocks', () => {
-    const mockTree1 = { name: 'tree1', type: 'directory', children: [] };
-    const mockTree2 = { name: 'tree2', type: 'directory', children: [] };
+    const mockTree1 = { name: 'tree1', type: 'directory', children: [] } as any;
+    const mockTree2 = { name: 'tree2', type: 'directory', children: [] } as any;
 
-    vi.spyOn(treeParser, 'parseTree').mockReturnValueOnce(mockTree1).mockReturnValueOnce(mockTree2);
+    vi.spyOn(treeParser, 'parseTree')
+      .mockReturnValueOnce([mockTree1])
+      .mockReturnValueOnce([mockTree2]);
     vi.spyOn(base64, 'encodeJsonBase64').mockReturnValueOnce('first').mockReturnValueOnce('second');
 
     const tree: Root = {
