@@ -50,6 +50,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check-links": "node scripts/check-links.mjs",
+    "prebuild": "npm run check-links",
     "prepublishOnly": "npm run build",
     "prepare": "husky || true"
   },

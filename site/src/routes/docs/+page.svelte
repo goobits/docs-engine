@@ -17,8 +17,9 @@
 
   let { data }: Props = $props();
 
-  // Get navigation from parent layout
+  // Get navigation and search index from parent layout
   const navigation = $derived($page.data.navigation || []);
+  const searchIndex = $derived($page.data.searchIndex);
 
   // Configure breadcrumbs
   const breadcrumbs = [
@@ -56,4 +57,5 @@
   {breadcrumbs}
   {footer}
   theme="dracula"
+  {searchIndex}
 />
