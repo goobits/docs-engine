@@ -3,11 +3,16 @@ import { escapeHtml } from './html.js';
 
 /**
  * Repository configuration for symbol source links
+ * @public
  */
 export interface RepoConfig {
+  /** GitHub repository owner (user or organization) */
   owner: string;
+  /** GitHub repository name */
   repo: string;
+  /** Git branch name for source links */
   branch: string;
+  /** Base URL for the git provider (default: 'https://github.com') */
   baseUrl?: string;
 }
 
@@ -22,6 +27,22 @@ let repoConfig: RepoConfig = DEFAULT_REPO_CONFIG;
 
 /**
  * Configure the repository for symbol source links
+ *
+ * Call this at application startup to configure source links for your repository.
+ * Settings persist for the lifetime of the process.
+ *
+ * @param config - Partial configuration to merge with defaults
+ *
+ * @example
+ * ```typescript
+ * configureRepo({
+ *   owner: 'myorg',
+ *   repo: 'myproject',
+ *   branch: 'develop'
+ * });
+ * ```
+ *
+ * @public
  */
 export function configureRepo(config: Partial<RepoConfig>): void {
   repoConfig = { ...DEFAULT_REPO_CONFIG, ...config };
@@ -83,6 +104,21 @@ function generateHierarchyDiagram(symbol: SymbolDefinition): string | null {
 
 /**
  * Render inline symbol reference as a link with tooltip
+ *
+ * Creates an HTML anchor element linking to the symbol's GitHub source location.
+ * The link includes a tooltip showing the JSDoc description or signature.
+ *
+ * @param symbol - The resolved symbol definition to render
+ * @returns HTML string containing an anchor element with appropriate classes
+ *
+ * @example
+ * ```typescript
+ * const symbol = resolveSymbol('MyInterface', symbolMap);
+ * const html = renderInline(symbol);
+ * // Returns: <a href="..." class="symbol symbol--interface" ...>MyInterface</a>
+ * ```
+ *
+ * @public
  */
 export function renderInline(symbol: SymbolDefinition): string {
   // Link directly to GitHub source since we don't have per-symbol doc pages
@@ -142,6 +178,22 @@ function shouldShow(
 
 /**
  * Render block symbol reference as full API documentation
+ *
+ * Creates a complete HTML documentation block including signature, description,
+ * parameters, return value, examples, type hierarchy diagram, and source link.
+ * Uses smart defaults based on symbol kind if no options are provided.
+ *
+ * @param symbol - The resolved symbol definition to render
+ * @param options - Optional render configuration to control which sections appear
+ * @returns HTML string containing the full documentation block
+ *
+ * @example
+ * ```typescript
+ * const symbol = resolveSymbol('createServer', symbolMap);
+ * const html = renderBlock(symbol, { show: ['signature', 'description', 'params'] });
+ * ```
+ *
+ * @public
  */
 export function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): string {
   // Apply smart defaults based on symbol kind if no explicit options provided
@@ -239,7 +291,22 @@ export function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): 
   return `<div class="symbol-doc">${sections.join('\n')}</div>`;
 }
 
+/**
+ * Options for controlling which sections appear in rendered symbol documentation
+ * @public
+ */
 export interface RenderOptions {
+  /**
+   * Array of section names to include in the rendered output.
+   * If not specified, smart defaults are applied based on symbol kind.
+   *
+   * Available sections:
+   * - `signature` - TypeScript type/function signature
+   * - `description` - JSDoc description text
+   * - `params` - Function parameter table
+   * - `returns` - Return value description
+   * - `example` - Code example from JSDoc
+   */
   show?: Array<'signature' | 'description' | 'params' | 'returns' | 'example'>;
 }
 
@@ -269,6 +336,23 @@ function renderParams(params: Array<{ name: string; description: string; type: s
   `;
 }
 
+/**
+ * Generate a GitHub URL pointing to a symbol's source location
+ *
+ * Constructs a URL using the configured repository settings that links
+ * directly to the line where the symbol is defined.
+ *
+ * @param symbol - The symbol definition containing path and line information
+ * @returns Full GitHub URL with line anchor (e.g., `https://github.com/owner/repo/blob/main/src/file.ts#L42`)
+ *
+ * @example
+ * ```typescript
+ * const url = symbolToGitHubUrl(symbol);
+ * // Returns: https://github.com/goobits/spacebase/blob/main/web/src/lib/types.ts#L15
+ * ```
+ *
+ * @public
+ */
 export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
   const repoPath = symbol.path.startsWith('../')
     ? symbol.path.replace(/^\.\.\//, '')

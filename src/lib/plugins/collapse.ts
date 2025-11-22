@@ -11,6 +11,7 @@ import type {
 } from 'mdast';
 import type { PhrasingContent } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
+import { sanitizeTree } from '../utils/ast.js';
 
 /**
  * Remark plugin to transform :::collapse directives to HTML <details> elements
@@ -173,20 +174,4 @@ function renderInlineContent(children: PhrasingContent[]): string {
       return '';
     })
     .join('');
-}
-
-/**
- * Recursively remove undefined/null nodes from the AST tree
- */
-function sanitizeTree(node: unknown): void {
-  if (!node || typeof node !== 'object') return;
-
-  const obj = node as Record<string, unknown>;
-  if (Array.isArray(obj.children)) {
-    // Filter out undefined/null children and cast to array
-    const children = obj.children.filter((child: unknown) => child != null);
-    obj.children = children;
-    // Recursively sanitize remaining children
-    children.forEach((child: unknown) => sanitizeTree(child));
-  }
 }

@@ -9,26 +9,14 @@ import {
 } from '../utils/symbol-resolver.js';
 import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.js';
 import type { RenderOptions } from '../utils/symbol-renderer.js';
+import { escapeHtml } from '../utils/html.js';
+import { sanitizeTree } from '../utils/ast.js';
 
 const INLINE_REFERENCE_REGEX = /{@([\w/<>.,[\]]+(?:#[\w.<>]+)?)}/g;
 
 // ============================================================================
 // Helper Functions (defined first to avoid hoisting issues)
 // ============================================================================
-
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, (char) => map[char]);
-}
 
 /**
  * Create an inline warning node for unresolved symbol references
@@ -270,20 +258,4 @@ function extractRenderOptions(node: unknown): RenderOptions {
       .map((value) => value.trim())
       .filter(Boolean) as RenderOptions['show'],
   };
-}
-
-/**
- * Recursively remove undefined/null nodes from the AST tree
- */
-function sanitizeTree(node: unknown): void {
-  if (!node || typeof node !== 'object') return;
-
-  const obj = node as Record<string, unknown>;
-  if (Array.isArray(obj.children)) {
-    // Filter out undefined/null children and cast to array
-    const children = obj.children.filter((child: unknown) => child != null);
-    obj.children = children;
-    // Recursively sanitize remaining children
-    children.forEach((child: unknown) => sanitizeTree(child));
-  }
 }

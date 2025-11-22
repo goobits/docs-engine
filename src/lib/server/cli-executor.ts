@@ -4,22 +4,58 @@ import { TIMEOUT, FILE_SIZE } from '../constants.js';
 
 const execAsync = promisify(exec);
 
+/**
+ * Result from executing a CLI command
+ * @public
+ */
 export interface CommandExecutionResult {
+  /** Standard output from the command */
   stdout: string;
+  /** Standard error output from the command */
   stderr: string;
+  /** Process exit code (0 = success, non-zero = error) */
   exitCode: number;
+  /** Execution duration in milliseconds */
   duration: number;
 }
 
+/**
+ * Configuration for the CLI executor
+ * @public
+ */
 export interface CliExecutorConfig {
+  /** List of allowed command prefixes (e.g., ['git', 'npm', 'pnpm']) */
   allowedCommands: string[];
+  /** Command execution timeout in milliseconds (default: TIMEOUT.VERY_LONG) */
   timeout?: number;
+  /** Maximum output length in bytes before truncation (default: FILE_SIZE.MAX_CLI_OUTPUT) */
   maxOutputLength?: number;
+  /** Working directory for command execution (default: process.cwd()) */
   workingDirectory?: string;
 }
 
 /**
  * Secure CLI command executor with allowlist validation
+ *
+ * Provides safe command execution with:
+ * - Allowlist-based command validation
+ * - Shell metacharacter blocking to prevent injection attacks
+ * - Configurable timeouts and output limits
+ * - Forced color output for supported commands
+ *
+ * @example
+ * ```typescript
+ * const executor = new CliExecutor({
+ *   allowedCommands: ['git', 'npm', 'pnpm'],
+ *   timeout: 30000,
+ *   workingDirectory: '/path/to/project'
+ * });
+ *
+ * const result = await executor.execute('git status');
+ * console.log(result.stdout);
+ * ```
+ *
+ * @public
  */
 export class CliExecutor {
   private config: Required<CliExecutorConfig>;
