@@ -47,7 +47,10 @@ export function loadSymbolMap(): SymbolMap {
   ];
 
   let mapPath: string | null = null;
+  const searchedPaths: string[] = [];
+
   for (const p of possiblePaths) {
+    searchedPaths.push(p);
     if (fs.existsSync(p)) {
       mapPath = p;
       break;
@@ -55,7 +58,10 @@ export function loadSymbolMap(): SymbolMap {
   }
 
   if (!mapPath) {
-    throw new Error('Symbol map not found. Run `pnpm docs:symbols` to generate it.');
+    throw new Error(
+      `Symbol map not found. Run \`pnpm docs:symbols\` to generate it.\n\n` +
+        `Searched paths:\n${searchedPaths.map((p) => `  - ${p}`).join('\n')}`
+    );
   }
 
   cachedMap = JSON.parse(fs.readFileSync(mapPath, 'utf-8')) as SymbolMap;

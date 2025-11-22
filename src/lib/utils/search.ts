@@ -118,16 +118,6 @@ export function searchDocs(
 }
 
 /**
- * Escape special regex characters
- * Module-private helper (currently unused but kept for future use)
- */
-/*
-function _escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-*/
-
-/**
  * Get search suggestions based on partial query
  * @param navigation - Array of documentation sections
  * @param query - Partial search query

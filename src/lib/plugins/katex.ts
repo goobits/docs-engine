@@ -55,19 +55,6 @@ export interface KaTeXOptions {
 // ============================================================================
 
 /**
- * Math node metadata extracted from markdown
- * Module-private interface - not exported, not accessible outside this module
- * Currently unused but kept for documentation
- */
-/*
-interface _MathNode {
-  value: string;
-  displayMode: boolean;
-  type: 'math' | 'inlineMath';
-}
-*/
-
-/**
  * Render LaTeX math expression to HTML using KaTeX
  * Module-private helper - not exported, not accessible outside this module
  *

@@ -1,4 +1,31 @@
 import type { SymbolDefinition } from './symbol-resolver';
+import { escapeHtml } from './html.js';
+
+/**
+ * Repository configuration for symbol source links
+ */
+export interface RepoConfig {
+  owner: string;
+  repo: string;
+  branch: string;
+  baseUrl?: string;
+}
+
+const DEFAULT_REPO_CONFIG: RepoConfig = {
+  owner: 'goobits',
+  repo: 'spacebase',
+  branch: 'main',
+  baseUrl: 'https://github.com',
+};
+
+let repoConfig: RepoConfig = DEFAULT_REPO_CONFIG;
+
+/**
+ * Configure the repository for symbol source links
+ */
+export function configureRepo(config: Partial<RepoConfig>): void {
+  repoConfig = { ...DEFAULT_REPO_CONFIG, ...config };
+}
 
 /**
  * Generate Mermaid class diagram showing type hierarchy
@@ -242,35 +269,24 @@ function renderParams(params: Array<{ name: string; description: string; type: s
   `;
 }
 
-/*
-function _symbolToDocUrl(symbol: SymbolDefinition): string {
-  const relativePath = symbol.path
-    .replace(/^src\/lib\/server\//, '')
-    .replace(/^\.\.\/packages\/shared\/src\//, 'shared/');
-
-  return `/docs/api/${relativePath.replace(/\.ts$/, '')}#${symbol.name}`;
-}
-*/
-
 export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
   const repoPath = symbol.path.startsWith('../')
     ? symbol.path.replace(/^\.\.\//, '')
     : `web/${symbol.path}`;
 
-  return `https://github.com/goobits/spacebase/blob/main/${repoPath}#L${symbol.line}`;
+  const { baseUrl, owner, repo, branch } = repoConfig;
+  return `${baseUrl}/${owner}/${repo}/blob/${branch}/${repoPath}#L${symbol.line}`;
 }
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
+/**
+ * Convert simple markdown to HTML safely
+ * Escapes HTML first to prevent XSS, then applies markdown formatting
+ */
 function markdownToHtml(markdown: string): string {
-  return markdown
+  // Escape HTML first to prevent XSS from JSDoc content
+  const escaped = escapeHtml(markdown);
+
+  return escaped
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')

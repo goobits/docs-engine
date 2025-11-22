@@ -34,14 +34,32 @@ export class CliExecutor {
   }
 
   /**
-   * Validate command against allowlist
-   * Only allows commands that start with an allowed prefix
+   * Pattern to detect shell metacharacters that could enable command injection
+   */
+  private static readonly DANGEROUS_CHARS = /[;&|`$(){}[\]<>\\]/;
+
+  /**
+   * Validate command against allowlist and check for injection attempts
+   * Only allows commands that start with an allowed prefix and contain no shell metacharacters
    */
   private validateCommand(command: string): boolean {
     const baseCommand = command.trim().split(' ')[0];
-    return this.config.allowedCommands.some(
+
+    // Check allowlist first
+    const isAllowed = this.config.allowedCommands.some(
       (allowed) => baseCommand === allowed || baseCommand.startsWith(allowed + '/')
     );
+
+    if (!isAllowed) {
+      return false;
+    }
+
+    // Block shell metacharacters to prevent command injection
+    if (CliExecutor.DANGEROUS_CHARS.test(command)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**

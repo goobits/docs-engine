@@ -137,16 +137,20 @@ export class CircuitBreaker {
 
   /**
    * Wrap promise with timeout
+   * Properly cleans up timer to prevent memory leaks
    */
   private withTimeout<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race([
-      promise,
-      new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`Request timeout after ${this.config.requestTimeout}ms`));
-        }, this.config.requestTimeout);
-      }),
-    ]);
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`Request timeout after ${this.config.requestTimeout}ms`));
+      }, this.config.requestTimeout);
+    });
+
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+      clearTimeout(timeoutId);
+    });
   }
 
   /**
