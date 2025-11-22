@@ -353,7 +353,7 @@ remarkPlugins: [
 :::collapse{title="Styles not applied?" open=false}
 
 **Solutions:**
-1. Import base styles: `@import '@goobits/docs-engine/styles/base.scss'`
+1. Import base styles: `@import '@goobits/docs-engine/styles'`
 2. Check CSS specificity (use browser devtools)
 3. Verify CSS classes in rendered HTML
 

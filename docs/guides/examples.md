@@ -42,9 +42,9 @@ Use {@WorkflowEventType} to filter event subscriptions.
 
 ```html
 <p>
-  The <a href="..." class="symbol-ref symbol-ref--type" title="type RequestState = ...">RequestState</a> type represents the current request context.
-  Call <a href="..." class="symbol-ref symbol-ref--function" title="function createWorkflow(...)">createWorkflow</a> to start a new workflow instance.
-  Use <a href="..." class="symbol-ref symbol-ref--enum" title="enum WorkflowEventType">WorkflowEventType</a> to filter event subscriptions.
+  The <a href="..." class="symbol symbol--type" title="type RequestState = ...">RequestState</a> type represents the current request context.
+  Call <a href="..." class="symbol symbol--function" title="function createWorkflow(...)">createWorkflow</a> to start a new workflow instance.
+  Use <a href="..." class="symbol symbol--enum" title="enum WorkflowEventType">WorkflowEventType</a> to filter event subscriptions.
 </p>
 ```
 

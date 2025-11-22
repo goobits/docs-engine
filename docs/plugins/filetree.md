@@ -41,8 +41,8 @@ export default {
 
 ### Import Styles
 
-```scss
-@import '@goobits/docs-engine/styles/base.scss';
+```css
+@import '@goobits/docs-engine/styles';
 ```
 
 ---
@@ -224,8 +224,8 @@ The plugin automatically detects 25+ file types with appropriate icons and color
    ```
 
 3. **Styles** - Import base styles:
-   ```scss
-   @import '@goobits/docs-engine/styles/base.scss';
+   ```css
+   @import '@goobits/docs-engine/styles';
    ```
 
 :::

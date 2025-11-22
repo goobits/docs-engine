@@ -29,14 +29,15 @@ docs/
 │   ├── katex.md
 │   ├── links.md
 │   ├── mermaid.md
-│   ├── navigation.md
 │   ├── screenshots.md
 │   ├── symbol-references.md
 │   └── toc.md
 ├── components/
+│   ├── docs-layout.md
 │   └── theme-toggle.md
 └── utilities/
-    └── frontmatter.md
+    ├── frontmatter.md
+    └── navigation.md
 ```
 
 ## Quick Start

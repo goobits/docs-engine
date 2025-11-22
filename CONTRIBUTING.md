@@ -132,9 +132,11 @@ order: 1  # Sort order within section
 docs/
 ├── index.md                 # Documentation home
 ├── getting-started.md       # Quick start guide
-├── ARCHITECTURE.md          # System architecture
-├── MIGRATION.md             # Upgrade guides
 ├── guides/                  # Topic-specific guides
+│   ├── architecture.md      # System architecture
+│   ├── migration.md         # Upgrade guides
+│   ├── examples.md          # Code examples
+│   └── plugin-order.md      # Plugin configuration
 ├── plugins/                 # Plugin documentation
 ├── components/              # Component documentation
 ├── utilities/               # Utility documentation

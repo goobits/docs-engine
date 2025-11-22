@@ -1,19 +1,19 @@
-# 📚 @goobits/docs-engine
+# @goobits/docs-engine
 
 Documentation system for SvelteKit with markdown rendering, symbol references, and automated tooling.
 
-## ✨ Key Features
+## Key Features
 
-- **🎨 Enhanced Code Blocks** - Syntax highlighting, line numbers, diff syntax, copy-to-clipboard
-- **🔗 Symbol References** - Link to TypeScript types/functions with `{@Symbol}` syntax
-- **🖼️ Image Optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox modal
-- **📐 Math Rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
-- **🤖 API Documentation** - Auto-generate API docs from TypeScript with JSDoc
-- **🔍 Link Validation** - CLI tool to check internal and external links
-- **📸 Automated Screenshots** - Web and CLI screenshot generation
-- **🧩 MDsveX Plugins** - Callouts, mermaid, tabs, filetree, TOC, and more
+- **Enhanced Code Blocks** - Syntax highlighting, line numbers, diff syntax, copy-to-clipboard
+- **Symbol References** - Link to TypeScript types/functions with `{@Symbol}` syntax
+- **Image Optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox modal
+- **Math Rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
+- **API Documentation** - Auto-generate API docs from TypeScript with JSDoc
+- **Link Validation** - CLI tool to check internal and external links
+- **Automated Screenshots** - Web and CLI screenshot generation
+- **MDsveX Plugins** - Callouts, mermaid, tabs, filetree, TOC, and more
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Installation
@@ -95,7 +95,7 @@ In your layout component:
 @import '@goobits/docs-engine/styles';
 ```
 
-## 🛠️ CLI Tools
+## CLI Tools
 
 ### Link Checking
 
@@ -121,15 +121,15 @@ Validates internal links (files and anchors), external links with HTTP requests,
 
 See [CLI documentation](./packages/docs-engine-cli/README.md) for details.
 
-## 📖 Documentation
+## Documentation
 
-**[📚 Complete Documentation Index](./docs/index.md)** - Full documentation with learning paths
+**[Complete Documentation Index](./docs/index.md)** - Full documentation with learning paths
 
 ### Getting Started
 
 - **[Getting Started](./docs/getting-started.md)** - 5-minute setup guide
 - **[Plugin Order Guide](./docs/guides/plugin-order.md)** - Plugin execution order and configuration
-- **[Architecture](./docs/ARCHITECTURE.md)** - Package/consumer split and design decisions
+- **[Architecture](./docs/guides/architecture.md)** - Package/consumer split and design decisions
 - **[Examples](./docs/guides/examples.md)** - Code examples and common patterns
 
 ### Plugin Guides
@@ -162,7 +162,7 @@ const symbolMap = loadSymbolMap();
 const symbol = resolveSymbol('RequestState', symbolMap);
 ```
 
-## 🎯 Example: Symbol References
+## Example: Symbol References
 
 **1. Generate symbol map (in your project):**
 
@@ -188,7 +188,7 @@ Links to GitHub source with hover tooltips showing type signatures.
 
 See **[docs/guides/examples.md](./docs/guides/examples.md)** for more examples.
 
-## 🏗️ Architecture
+## Architecture
 
 The symbol reference system separates reusable package functionality from consumer-specific implementation:
 
@@ -202,8 +202,8 @@ The symbol reference system separates reusable package functionality from consum
 - Build pipeline integration
 - Pre-commit hooks and CI validation
 
-See **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** for integration guide and design decisions.
+See **[Architecture Guide](./docs/guides/architecture.md)** for integration guide and design decisions.
 
-## 📝 License
+## License
 
 MIT - see [LICENSE](LICENSE) for details
