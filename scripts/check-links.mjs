@@ -12,7 +12,7 @@
  */
 
 import { glob } from 'glob';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { resolve, join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -80,7 +80,6 @@ function extractLinksFromFile(filePath) {
   const links = [];
   const lines = content.split('\n');
   let inCodeBlock = false;
-  let inInlineCode = false;
 
   lines.forEach((line, index) => {
     const lineNumber = index + 1;
@@ -284,7 +283,7 @@ function validateInternalLink(link, config) {
     // Check if it's a directory with index file
     if (!fileExists && existsSync(targetPath)) {
       try {
-        const stat = require('fs').statSync(targetPath);
+        const stat = statSync(targetPath);
         if (stat.isDirectory()) {
           for (const ext of validExtensions) {
             const indexPath = join(targetPath, `index${ext}`);
@@ -295,7 +294,9 @@ function validateInternalLink(link, config) {
             }
           }
         }
-      } catch {}
+      } catch {
+        // statSync failed - path doesn't exist or isn't accessible
+      }
     }
 
     if (!fileExists) {
