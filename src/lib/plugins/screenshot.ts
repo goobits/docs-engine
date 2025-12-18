@@ -2,9 +2,9 @@ import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import { encodeJsonBase64 } from '../utils/base64.js';
 import { getVersion } from '../utils/version.js';
-import { createLogger } from '../utils/logger.js';
+import { createBrowserLogger } from '../utils/browser-logger.js';
 
-const logger = createLogger('screenshot-plugin');
+const logger = createBrowserLogger('screenshot-plugin');
 
 export interface ScreenshotPluginOptions {
   basePath?: string;

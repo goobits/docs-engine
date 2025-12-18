@@ -1,9 +1,9 @@
 import { parse as parseYaml } from 'yaml';
 import type { DocsSection, DocsLink } from './navigation.js';
 import type { ComponentType } from 'svelte';
-import { createLogger } from './logger.js';
+import { createBrowserLogger } from './browser-logger.js';
 
-const logger = createLogger('navigation-builder');
+const logger = createBrowserLogger('navigation-builder');
 
 /**
  * Frontmatter metadata extracted from markdown files
