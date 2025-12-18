@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
-  import { createBrowserLogger } from '../utils/logger.js';
+  import { createBrowserLogger } from '@goobits/docs-engine/utils';
 
   const logger = createBrowserLogger('CollapseHydrator');
 

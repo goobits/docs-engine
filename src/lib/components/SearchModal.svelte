@@ -7,6 +7,7 @@
    */
 
   import { onMount, onDestroy } from 'svelte';
+  import { browser } from '$app/environment';
   import { Search, Command, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
   import type MiniSearch from 'minisearch';
   import { loadSearchIndex, performSearch, highlightMatches } from '../utils';
@@ -139,7 +140,9 @@
   });
 
   onDestroy(() => {
-    document.removeEventListener('keydown', handleKeyDown);
+    if (browser) {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }

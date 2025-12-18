@@ -45,6 +45,9 @@ export * from './html';
 // Sanitize utilities
 export * from './sanitize';
 
+// Logger utilities (browser-safe)
+export { createBrowserLogger } from './browser-logger';
+
 // NOTE: Git utilities moved to server/index.ts (requires Node.js child_process)
 // Import from '@goobits/docs-engine/server' instead
 

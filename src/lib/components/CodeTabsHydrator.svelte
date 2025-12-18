@@ -10,7 +10,7 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import CodeTabs from './CodeTabs.svelte';
-  import { createBrowserLogger } from '../utils/logger.js';
+  import { createBrowserLogger } from '@goobits/docs-engine/utils';
 
   const logger = createBrowserLogger('CodeTabsHydrator');
 
