@@ -5,9 +5,9 @@
 
 import { createHighlighter, type Highlighter } from 'shiki';
 import { escapeHtml } from './html.js';
-import { createLogger } from './logger.js';
+import { createBrowserLogger } from './browser-logger.js';
 
-const logger = createLogger('highlighter');
+const logger = createBrowserLogger('highlighter');
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 

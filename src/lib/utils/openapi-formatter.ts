@@ -4,9 +4,9 @@
  * Parses and formats OpenAPI 3.0 specifications for documentation generation.
  */
 
-import { createLogger } from './logger.js';
+import { createBrowserLogger } from './browser-logger.js';
 
-const logger = createLogger('openapi-formatter');
+const logger = createBrowserLogger('openapi-formatter');
 
 export interface OpenAPIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
