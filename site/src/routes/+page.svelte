@@ -1,10 +1,10 @@
 <script>
-  import { goto } from '$app/navigation'
-  import { onMount } from 'svelte'
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
   onMount(() => {
-    goto('/docs')
-  })
+    goto('/docs');
+  });
 </script>
 
 <div style="padding: 2rem; text-align: center;">

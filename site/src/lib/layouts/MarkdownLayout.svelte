@@ -1,5 +1,5 @@
 <script>
-  export let title = 'Docs'
+  export let title = 'Docs';
 </script>
 
 <div class="markdown-layout">
@@ -105,7 +105,8 @@
     line-height: 1.7;
   }
 
-  .prose :global(ul), .prose :global(ol) {
+  .prose :global(ul),
+  .prose :global(ol) {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
   }

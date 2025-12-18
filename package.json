@@ -51,6 +51,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-links": "node scripts/check-links.mjs",
+    "jscpd": "jscpd src",
     "prebuild": "npm run check-links",
     "prepublishOnly": "npm run build",
     "prepare": "husky || true"
@@ -134,6 +135,7 @@
     "eslint-plugin-svelte": "^3.13.0",
     "happy-dom": "^20.0.10",
     "husky": "^9.1.7",
+    "jscpd": "^4.0.5",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0",

@@ -1,5 +1,6 @@
 version: '2.0'
 provider: docker
+os: auto
 project:
   hostname: dev.docs-engine.local
   name: docs-engine
@@ -30,4 +31,9 @@ terminal:
   show_timestamp: false
   theme: dracula
   username: docs-engine-dev
-preset: vibe
+host_sync:
+  git_config: true
+  ai_tools: true
+networking:
+  networks:
+    - spacebase

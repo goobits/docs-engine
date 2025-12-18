@@ -1,56 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="%sveltekit.theme%">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<script>
-			// Blocking script to prevent theme flash (FOUC)
-			// This must run synchronously before CSS loads
-			(function() {
-				// Parse cookies
-				function getCookie(name) {
-					const cookies = document.cookie.split('; ');
-					for (const cookie of cookies) {
-						const [key, value] = cookie.split('=');
-						if (key === name) return value;
-					}
-					return null;
-				}
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Blocking script to prevent theme flash (FOUC)
+      // This must run synchronously before CSS loads
+      (function () {
+        // Parse cookies
+        function getCookie(name) {
+          const cookies = document.cookie.split('; ');
+          for (const cookie of cookies) {
+            const [key, value] = cookie.split('=');
+            if (key === name) return value;
+          }
+          return null;
+        }
 
-				// Get preferences from cookies
-				const theme = getCookie('theme') || 'system';
-				const scheme = getCookie('themeScheme') || 'default';
+        // Get preferences from cookies
+        const theme = getCookie('theme') || 'system';
+        const scheme = getCookie('themeScheme') || 'default';
 
-				// Determine actual theme mode
-				let effectiveMode = theme;
-				if (theme === 'system') {
-					// Detect system preference
-					const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-					effectiveMode = prefersDark ? 'dark' : 'light';
-				}
+        // Determine actual theme mode
+        let effectiveMode = theme;
+        if (theme === 'system') {
+          // Detect system preference
+          const prefersDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          effectiveMode = prefersDark ? 'dark' : 'light';
+        }
 
-				// Build class list
-				const classes = ['theme-' + theme];
+        // Build class list
+        const classes = ['theme-' + theme];
 
-				// Add system-specific class if using system theme
-				if (theme === 'system') {
-					classes.push('theme-system-' + effectiveMode);
-				}
+        // Add system-specific class if using system theme
+        if (theme === 'system') {
+          classes.push('theme-system-' + effectiveMode);
+        }
 
-				// Add scheme class
-				const schemeValue = scheme === 'default' ? '0' : scheme === 'spells' ? '1' : '0';
-				classes.push('scheme-' + schemeValue);
+        // Add scheme class
+        const schemeValue = scheme === 'default' ? '0' : scheme === 'spells' ? '1' : '0';
+        classes.push('scheme-' + schemeValue);
 
-				// Apply to html element immediately (merge with existing classes)
-				const htmlEl = document.documentElement;
-				const existingClasses = htmlEl.className.split(' ').filter(c => !c.startsWith('theme-') && !c.startsWith('scheme-'));
-				htmlEl.className = [...existingClasses, ...classes].join(' ');
-			})();
-		</script>
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
-	</body>
+        // Apply to html element immediately (merge with existing classes)
+        const htmlEl = document.documentElement;
+        const existingClasses = htmlEl.className
+          .split(' ')
+          .filter((c) => !c.startsWith('theme-') && !c.startsWith('scheme-'));
+        htmlEl.className = [...existingClasses, ...classes].join(' ');
+      })();
+    </script>
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
 </html>

@@ -32,24 +32,20 @@ const DEFAULT_CONFIG = {
     '**/dist/**',
     '**/.git/**',
     '**/versioned_docs/**',
-    '**/.generated/**'
+    '**/.generated/**',
   ],
   checkExternal: false,
   timeout: 5000,
   concurrency: 10,
   skipDomains: ['localhost', '127.0.0.1', 'example.com'],
-  validExtensions: ['.md', '.mdx']
+  validExtensions: ['.md', '.mdx'],
 };
 
 /**
  * Load configuration from file or use defaults
  */
 function loadConfig() {
-  const configFiles = [
-    '.linkcheckerrc.json',
-    '.linkcheckerrc',
-    'linkchecker.config.json'
-  ];
+  const configFiles = ['.linkcheckerrc.json', '.linkcheckerrc', 'linkchecker.config.json'];
 
   for (const configFile of configFiles) {
     const configPath = resolve(projectRoot, configFile);
@@ -121,7 +117,7 @@ function extractLinksFromFile(filePath) {
         line: lineNumber,
         type: 'link',
         isExternal: /^https?:\/\//i.test(url),
-        isAnchor: url.startsWith('#')
+        isAnchor: url.startsWith('#'),
       });
     }
 
@@ -145,7 +141,7 @@ function extractLinksFromFile(filePath) {
         line: lineNumber,
         type: 'image',
         isExternal: /^https?:\/\//i.test(url),
-        isAnchor: url.startsWith('#')
+        isAnchor: url.startsWith('#'),
       });
     }
 
@@ -168,7 +164,7 @@ function extractLinksFromFile(filePath) {
         line: lineNumber,
         type: 'html',
         isExternal: /^https?:\/\//i.test(url),
-        isAnchor: url.startsWith('#')
+        isAnchor: url.startsWith('#'),
       });
     }
   });
@@ -303,7 +299,7 @@ function validateInternalLink(link, config) {
       return {
         link,
         isValid: false,
-        error: `File not found: ${targetPath}`
+        error: `File not found: ${targetPath}`,
       };
     }
 
@@ -315,7 +311,7 @@ function validateInternalLink(link, config) {
         return {
           link,
           isValid: false,
-          error: `Anchor #${anchor} not found in ${targetPath}`
+          error: `Anchor #${anchor} not found in ${targetPath}`,
         };
       }
     }
@@ -325,7 +321,7 @@ function validateInternalLink(link, config) {
     return {
       link,
       isValid: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -335,7 +331,7 @@ function validateInternalLink(link, config) {
  */
 function validateLinks(links, config) {
   const results = [];
-  const internalLinks = links.filter(l => !l.isExternal);
+  const internalLinks = links.filter((l) => !l.isExternal);
 
   for (const link of internalLinks) {
     results.push(validateInternalLink(link, config));
@@ -354,17 +350,17 @@ function validateLinks(links, config) {
 function printResults(results) {
   const stats = {
     total: results.length,
-    valid: results.filter(r => r.isValid).length,
-    broken: results.filter(r => !r.isValid).length
+    valid: results.filter((r) => r.isValid).length,
+    broken: results.filter((r) => !r.isValid).length,
   };
 
   console.log('\n🔍 Link Validation Results\n');
 
   // Print broken links
-  const broken = results.filter(r => !r.isValid);
+  const broken = results.filter((r) => !r.isValid);
   if (broken.length > 0) {
     console.log(`❌ Broken Links (${broken.length}):\n`);
-    broken.forEach(result => {
+    broken.forEach((result) => {
       const location = `${result.link.file}:${result.link.line}`;
       console.log(`  ${location}`);
       console.log(`    Link: ${result.link.url}`);
@@ -411,7 +407,7 @@ async function main() {
   const files = await glob(config.include, {
     cwd: docsDir,
     absolute: true,
-    ignore: config.exclude
+    ignore: config.exclude,
   });
 
   if (files.length === 0) {
@@ -426,7 +422,7 @@ async function main() {
   console.log(`Extracted ${links.length} link(s)`);
 
   // Filter to internal links only (for speed)
-  const internalLinks = links.filter(l => !l.isExternal && !l.isAnchor);
+  const internalLinks = links.filter((l) => !l.isExternal && !l.isAnchor);
   console.log(`Checking ${internalLinks.length} internal link(s)...`);
 
   // Validate links
@@ -439,7 +435,7 @@ async function main() {
 }
 
 // Run
-main().catch(error => {
+main().catch((error) => {
   console.error('❌ Link checking failed:', error);
   process.exit(1);
 });
