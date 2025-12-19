@@ -273,6 +273,9 @@
 
   /* Trigger Button */
   .search-trigger {
+    position: fixed;
+    top: 20px;
+    right: 20px;
     display: flex;
     align-items: center;
     gap: var(--docs-spacing-sm, 0.5rem);
@@ -285,6 +288,7 @@
     transition: all 0.2s ease;
     font-size: 0.875rem;
     min-width: 240px;
+    z-index: 100;
   }
 
   .search-trigger:hover {
