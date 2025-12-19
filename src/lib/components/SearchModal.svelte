@@ -149,115 +149,135 @@
   });
 </script>
 
-<!-- Trigger Button -->
-<button class="search-trigger" onclick={openModal} type="button" aria-label="Search documentation">
-  <Search size={18} />
-  <span class="search-trigger-text">Search...</span>
-  <kbd class="search-trigger-kbd">
-    <Command size={12} />
-    <span>K</span>
-  </kbd>
-</button>
-
-<!-- Modal -->
-{#if isOpen}
-  <div class="search-modal-overlay" onclick={closeModal}></div>
-  <div
-    class="search-modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="search-modal-title"
-    aria-describedby="search-modal-description"
+<div class="search-container">
+  <!-- Trigger Button -->
+  <button
+    class="search-trigger"
+    onclick={openModal}
+    type="button"
+    aria-label="Search documentation"
   >
-    <!-- Search Input -->
-    <div class="search-modal-header">
-      <Search size={20} class="search-modal-icon" aria-hidden="true" />
-      <label for="search-modal-input" class="visually-hidden" id="search-modal-title"
-        >Search documentation</label
-      >
-      <input
-        id="search-modal-input"
-        bind:value={query}
-        class="search-modal-input"
-        type="text"
-        {placeholder}
-        autocomplete="off"
-        spellcheck="false"
-        aria-describedby="search-modal-description"
-      />
-      <button
-        class="search-modal-close"
-        onclick={closeModal}
-        type="button"
-        aria-label="Close search"
-      >
-        <X size={20} aria-hidden="true" />
-      </button>
-    </div>
+    <Search size={18} />
+    <span class="search-trigger-text">Search...</span>
+    <kbd class="search-trigger-kbd">
+      <Command size={12} />
+      <span>K</span>
+    </kbd>
+  </button>
 
-    <!-- Hidden description for screen readers -->
-    <span id="search-modal-description" class="visually-hidden"
-      >Use arrow keys to navigate results, enter to select, escape to close</span
+  <!-- Modal -->
+  {#if isOpen}
+    <div class="search-modal-overlay" onclick={closeModal}></div>
+    <div
+      class="search-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="search-modal-title"
+      aria-describedby="search-modal-description"
     >
+      <!-- Search Input -->
+      <div class="search-modal-header">
+        <Search size={20} class="search-modal-icon" aria-hidden="true" />
+        <label for="search-modal-input" class="visually-hidden" id="search-modal-title"
+          >Search documentation</label
+        >
+        <input
+          id="search-modal-input"
+          bind:value={query}
+          class="search-modal-input"
+          type="text"
+          {placeholder}
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="search-modal-description"
+        />
+        <button
+          class="search-modal-close"
+          onclick={closeModal}
+          type="button"
+          aria-label="Close search"
+        >
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
 
-    <!-- Results -->
-    <div class="search-modal-results" role="region" aria-live="polite" aria-atomic="false">
-      {#if isLoading}
-        <div class="search-modal-loading">Loading search index...</div>
-      {:else if query.trim() && results.length === 0}
-        <div class="search-modal-empty">
-          <p>No results found for "{query}"</p>
-          <p class="search-modal-empty-hint">Try a different search term</p>
-        </div>
-      {:else if results.length > 0}
-        {#each results as result, index (result.id)}
-          <button
-            class="search-result {index === selectedIndex ? 'selected' : ''}"
-            onclick={() => handleResultClick(result)}
-            type="button"
-            role="option"
-            aria-selected={index === selectedIndex}
-            aria-label="{result.title} in {result.section}"
-          >
-            <div class="search-result-content">
-              <div class="search-result-section">{result.section}</div>
-              <div class="search-result-title">
-                {@html highlightMatches(result.title, query)}
-              </div>
-              {#if result.match.excerpt}
-                <div class="search-result-excerpt">
-                  {@html highlightMatches(result.match.excerpt, query)}
+      <!-- Hidden description for screen readers -->
+      <span id="search-modal-description" class="visually-hidden"
+        >Use arrow keys to navigate results, enter to select, escape to close</span
+      >
+
+      <!-- Results -->
+      <div class="search-modal-results" role="region" aria-live="polite" aria-atomic="false">
+        {#if isLoading}
+          <div class="search-modal-loading">Loading search index...</div>
+        {:else if query.trim() && results.length === 0}
+          <div class="search-modal-empty">
+            <p>No results found for "{query}"</p>
+            <p class="search-modal-empty-hint">Try a different search term</p>
+          </div>
+        {:else if results.length > 0}
+          {#each results as result, index (result.id)}
+            <button
+              class="search-result {index === selectedIndex ? 'selected' : ''}"
+              onclick={() => handleResultClick(result)}
+              type="button"
+              role="option"
+              aria-selected={index === selectedIndex}
+              aria-label="{result.title} in {result.section}"
+            >
+              <div class="search-result-content">
+                <div class="search-result-section">{result.section}</div>
+                <div class="search-result-title">
+                  {@html highlightMatches(result.title, query)}
                 </div>
+                {#if result.match.excerpt}
+                  <div class="search-result-excerpt">
+                    {@html highlightMatches(result.match.excerpt, query)}
+                  </div>
+                {/if}
+              </div>
+              {#if index === selectedIndex}
+                <CornerDownLeft size={16} class="search-result-enter-icon" aria-hidden="true" />
               {/if}
-            </div>
-            {#if index === selectedIndex}
-              <CornerDownLeft size={16} class="search-result-enter-icon" aria-hidden="true" />
-            {/if}
-          </button>
-        {/each}
-      {/if}
-    </div>
+            </button>
+          {/each}
+        {/if}
+      </div>
 
-    <!-- Footer with keyboard hints -->
-    <div class="search-modal-footer">
-      <div class="search-modal-hint">
-        <kbd><ArrowUp size={12} /></kbd>
-        <kbd><ArrowDown size={12} /></kbd>
-        <span>Navigate</span>
-      </div>
-      <div class="search-modal-hint">
-        <kbd><CornerDownLeft size={12} /></kbd>
-        <span>Select</span>
-      </div>
-      <div class="search-modal-hint">
-        <kbd>ESC</kbd>
-        <span>Close</span>
+      <!-- Footer with keyboard hints -->
+      <div class="search-modal-footer">
+        <div class="search-modal-hint">
+          <kbd><ArrowUp size={12} /></kbd>
+          <kbd><ArrowDown size={12} /></kbd>
+          <span>Navigate</span>
+        </div>
+        <div class="search-modal-hint">
+          <kbd><CornerDownLeft size={12} /></kbd>
+          <span>Select</span>
+        </div>
+        <div class="search-modal-hint">
+          <kbd>ESC</kbd>
+          <span>Close</span>
+        </div>
       </div>
     </div>
-  </div>
-{/if}
+  {/if}
+</div>
 
 <style>
+  /* Container - doesn't affect layout */
+  .search-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .search-container > * {
+    pointer-events: auto;
+  }
+
   /* Visually hidden but accessible to screen readers */
   .visually-hidden {
     position: absolute;
@@ -273,9 +293,10 @@
 
   /* Trigger Button */
   .search-trigger {
-    position: fixed;
+    position: relative;
     top: 20px;
     right: 20px;
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: var(--docs-spacing-sm, 0.5rem);
@@ -288,7 +309,6 @@
     transition: all 0.2s ease;
     font-size: 0.875rem;
     min-width: 240px;
-    z-index: 100;
   }
 
   .search-trigger:hover {
