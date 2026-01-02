@@ -8,7 +8,7 @@
 
   import { page } from '$app/stores';
   import { Home } from '@lucide/svelte';
-  import { DocsLayout } from 'dist/components/index.js';
+  import { DocsLayout } from '@goobits/docs-engine/components';
   import type { PageData } from './$types';
 
   interface Props {

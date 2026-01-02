@@ -8,22 +8,13 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { afterNavigate } from '$app/navigation';
+  import { escapeHtml } from '../utils/html.js';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';
   }
 
   let { theme = 'dark' }: Props = $props();
-
-  // Simple HTML escape for error messages
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 
   let mermaidApi: typeof import('mermaid').default | undefined;
   let initialized = false;

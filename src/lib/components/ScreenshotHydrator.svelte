@@ -10,16 +10,7 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import ScreenshotImage from './ScreenshotImage.svelte';
-
-  // Simple HTML escape for error messages
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  import { escapeHtml } from '../utils/html.js';
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered

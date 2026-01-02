@@ -10,7 +10,7 @@
   import { mount } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import CodeTabs from './CodeTabs.svelte';
-  import { createBrowserLogger } from '@goobits/docs-engine/utils';
+  import { createBrowserLogger, escapeHtml } from '@goobits/docs-engine/utils';
 
   const logger = createBrowserLogger('CodeTabsHydrator');
 
@@ -20,16 +20,6 @@
   }
 
   let { theme = 'dracula' }: Props = $props();
-
-  // Simple HTML escape for error messages
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered

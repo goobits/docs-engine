@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-import { remarkTableOfContents, linksPlugin } from 'dist/plugins/index.js';
+import { remarkTableOfContents, linksPlugin } from '@goobits/docs-engine/plugins';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {

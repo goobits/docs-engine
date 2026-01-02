@@ -1,8 +1,8 @@
 import path from 'path';
 import { error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { scanDocumentation } from 'dist/server/index.js';
-import { buildNavigation, createSearchIndex } from 'dist/utils/index.js';
+import { scanDocumentation } from '@goobits/docs-engine/server';
+import { buildNavigation, createSearchIndex } from '@goobits/docs-engine/utils';
 import { logError, createDevError } from '$lib/utils/error-logger';
 import type { LayoutServerLoad } from './$types';
 

@@ -10,6 +10,7 @@
   import { afterNavigate } from '$app/navigation';
   import FileTree from './FileTree.svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
+  import { escapeHtml } from '../utils/html.js';
 
   interface Props {
     githubUrl?: string;
@@ -17,16 +18,6 @@
   }
 
   let { githubUrl, allowCopy = true }: Props = $props();
-
-  // Simple HTML escape for error messages
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 
   function hydrate() {
     requestAnimationFrame(() => {
