@@ -5,10 +5,7 @@
    * Finds all .md-mermaid divs and renders them
    * Use this in your layout or page to hydrate static HTML
    */
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
-  import { afterNavigate } from '$app/navigation';
-  import { escapeHtml } from '../utils/html.js';
+  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';
@@ -225,19 +222,7 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(hydrate);
-    });
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
+  useHydrator(hydrate);
 </script>
 
 <!-- Fullscreen Modal -->

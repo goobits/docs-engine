@@ -5,12 +5,10 @@
    * Finds all .md-filetree divs and renders them with FileTree component
    * Use this in your layout or page to hydrate static HTML
    */
-  import { onMount, mount } from 'svelte';
-  import { browser } from '$app/environment';
-  import { afterNavigate } from '$app/navigation';
+  import { mount } from 'svelte';
   import FileTree from './FileTree.svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { escapeHtml } from '../utils/html.js';
+  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
 
   interface Props {
     githubUrl?: string;
@@ -66,17 +64,5 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(hydrate);
-    });
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
+  useHydrator(hydrate);
 </script>

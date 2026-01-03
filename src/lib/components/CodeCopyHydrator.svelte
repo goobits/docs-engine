@@ -5,11 +5,9 @@
    * Finds all code blocks with data-copy-code attribute and mounts copy buttons
    * Use this in your layout or page to hydrate static HTML
    */
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
   import { mount } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
   import CodeCopyButton from './CodeCopyButton.svelte';
+  import { useHydrator } from '@goobits/docs-engine/utils';
 
   interface Props {
     /** Theme for styling */
@@ -71,17 +69,5 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(hydrate);
-    });
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
+  useHydrator(hydrate);
 </script>
