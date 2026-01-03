@@ -103,8 +103,9 @@ describe('CliExecutor', () => {
       });
 
       it('should allow safe arguments with hyphens and equals', async () => {
-        const result = await executor.execute('echo --help');
+        const result = await executor.execute('echo --my-flag=value');
         expect(result.exitCode).toBe(0);
+        expect(result.stdout.trim()).toBe('--my-flag=value');
       });
 
       it('should allow safe arguments with dots and slashes in paths', async () => {
