@@ -5,21 +5,9 @@
    * Finds all .md-screenshot divs and hydrates them into interactive screenshot components
    * Handles both web and CLI screenshots with lazy loading and generation
    */
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
   import { mount } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
   import ScreenshotImage from './ScreenshotImage.svelte';
-
-  // Simple HTML escape for error messages
-  function escapeHtml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered
@@ -84,55 +72,8 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(() => {
-        hydrate();
-
-        // Set up MutationObserver AFTER initial hydration completes
-        // This prevents the observer from triggering during initial DOM modifications
-        // eslint-disable-next-line no-undef
-        const observer = new MutationObserver((mutations) => {
-          let shouldHydrate = false;
-          for (const mutation of mutations) {
-            if (mutation.type === 'childList') {
-              for (const node of mutation.addedNodes) {
-                // eslint-disable-next-line no-undef
-                if (node instanceof Element) {
-                  if (
-                    node.matches('.md-screenshot[data-name][data-path][data-version]') ||
-                    node.querySelector('.md-screenshot[data-name][data-path][data-version]')
-                  ) {
-                    shouldHydrate = true;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-          if (shouldHydrate) {
-            hydrate();
-          }
-        });
-
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-
-        // Store observer for cleanup
-        return observer;
-      });
-    });
-
-    return () => {
-      unsubscribe?.();
-      // Observer will be cleaned up when component unmounts
-    };
+  // Use the hydrator composable with MutationObserver for dynamic content
+  useHydrator(hydrate, {
+    observeSelector: '.md-screenshot[data-name][data-path][data-version]',
   });
 </script>

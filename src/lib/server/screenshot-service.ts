@@ -21,6 +21,83 @@ import {
 const logger = createLogger('screenshot-service');
 
 /**
+ * Result from processing screenshot images into multiple formats
+ */
+interface ProcessedImageResult {
+  publicPath: string;
+  webpPath: string;
+  webp2xPath?: string;
+  displayWidth?: number;
+  displayHeight?: number;
+}
+
+/**
+ * Processes a screenshot into multiple formats and resolutions
+ * Shared logic between CLI and web screenshot generation
+ */
+async function processScreenshotImage(options: {
+  screenshot2xPath: string;
+  outputDir: string;
+  name: string;
+  basePath: string;
+}): Promise<ProcessedImageResult> {
+  const { screenshot2xPath, outputDir, name, basePath } = options;
+
+  const sharpImage = sharp(screenshot2xPath);
+  const metadata = await sharpImage.metadata();
+
+  // Generate 2x WebP (from high-res source)
+  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
+  await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webp2xPath);
+
+  // Downscale to 1x using bicubic interpolation for better quality
+  const webpPath = path.join(outputDir, `${name}.webp`);
+  const screenshotPath = path.join(outputDir, `${name}.png`);
+
+  if (metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X) {
+    await sharp(screenshot2xPath)
+      .resize({
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
+        kernel: 'cubic', // Bicubic interpolation for sharp downscaling
+      })
+      .webp({ quality: IMAGE_QUALITY.WEBP })
+      .toFile(webpPath);
+
+    // Also save 1x PNG
+    await sharp(screenshot2xPath)
+      .resize({
+        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
+        kernel: 'cubic',
+      })
+      .png()
+      .toFile(screenshotPath);
+  } else {
+    // If too small, just use the 2x as-is
+    await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webpPath);
+    await sharpImage.clone().png().toFile(screenshotPath);
+  }
+
+  // Return 1x dimensions for the img element
+  const displayWidth = metadata.width
+    ? Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.width;
+  const displayHeight = metadata.height
+    ? Math.floor(metadata.height / DIMENSIONS.DEVICE_SCALE_FACTOR)
+    : metadata.height;
+
+  return {
+    publicPath: `${basePath}/${name}.png`,
+    webpPath: `${basePath}/${name}.webp`,
+    webp2xPath:
+      metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X
+        ? `${basePath}/${name}@2x.webp`
+        : undefined,
+    displayWidth,
+    displayHeight,
+  };
+}
+
+/**
  * Allowed domains for screenshot generation (SSRF protection)
  * Add your production domains here
  */
@@ -299,72 +376,32 @@ async function generateCliScreenshot(options: {
   await browser.close();
   logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
-  // Generate multiple formats and resolutions
+  // Process image into multiple formats using shared function
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
-  const sharpImage = sharp(screenshot2xPath);
-  const metadata = await sharpImage.metadata();
-
-  // Generate 2x WebP (from high-res source)
-  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webp2xPath);
-
-  // Downscale to 1x using bicubic interpolation for better quality
-  const webpPath = path.join(outputDir, `${name}.webp`);
-  const screenshotPath = path.join(outputDir, `${name}.png`);
-
-  if (metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X) {
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
-        kernel: 'cubic', // Bicubic interpolation for sharp downscaling
-      })
-      .webp({ quality: IMAGE_QUALITY.WEBP })
-      .toFile(webpPath);
-
-    // Also save 1x PNG
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
-        kernel: 'cubic',
-      })
-      .png()
-      .toFile(screenshotPath);
-  } else {
-    // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webpPath);
-    await sharpImage.clone().png().toFile(screenshotPath);
-  }
-
-  const publicPath = `${basePath}/${name}.png`;
-
-  // Return 1x dimensions for the img element
-  const displayWidth = metadata.width
-    ? Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR)
-    : metadata.width;
-  const displayHeight = metadata.height
-    ? Math.floor(metadata.height / DIMENSIONS.DEVICE_SCALE_FACTOR)
-    : metadata.height;
+  const imageResult = await processScreenshotImage({
+    screenshot2xPath,
+    outputDir,
+    name,
+    basePath,
+  });
 
   logger.info(
     {
       name,
-      publicPath,
-      width: displayWidth,
-      height: displayHeight,
+      publicPath: imageResult.publicPath,
+      width: imageResult.displayWidth,
+      height: imageResult.displayHeight,
     },
     'CLI screenshot generated successfully'
   );
 
   return json({
     success: true,
-    path: publicPath,
-    webpPath: `${basePath}/${name}.webp`,
-    webp2xPath:
-      metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X
-        ? `${basePath}/${name}@2x.webp`
-        : undefined,
-    width: displayWidth,
-    height: displayHeight,
+    path: imageResult.publicPath,
+    webpPath: imageResult.webpPath,
+    webp2xPath: imageResult.webp2xPath,
+    width: imageResult.displayWidth,
+    height: imageResult.displayHeight,
   } as ScreenshotResponse);
 }
 
@@ -476,72 +513,32 @@ async function generateWebScreenshot(options: {
   await browser.close();
   logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
-  // Generate multiple formats and resolutions
+  // Process image into multiple formats using shared function
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
-  const sharpImage = sharp(screenshot2xPath);
-  const metadata = await sharpImage.metadata();
-
-  // Generate 2x WebP (from high-res source)
-  const webp2xPath = path.join(outputDir, `${name}@2x.webp`);
-  await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webp2xPath);
-
-  // Downscale to 1x using bicubic interpolation for better quality
-  const webpPath = path.join(outputDir, `${name}.webp`);
-  const screenshotPath = path.join(outputDir, `${name}.png`);
-
-  if (metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X) {
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
-        kernel: 'cubic', // Bicubic interpolation for sharp downscaling
-      })
-      .webp({ quality: IMAGE_QUALITY.WEBP })
-      .toFile(webpPath);
-
-    // Also save 1x PNG
-    await sharp(screenshot2xPath)
-      .resize({
-        width: Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR),
-        kernel: 'cubic',
-      })
-      .png()
-      .toFile(screenshotPath);
-  } else {
-    // If too small, just use the 2x as-is
-    await sharpImage.clone().webp({ quality: IMAGE_QUALITY.WEBP }).toFile(webpPath);
-    await sharpImage.clone().png().toFile(screenshotPath);
-  }
-
-  const publicPath = `${basePath}/${name}.png`;
-
-  // Return 1x dimensions for the img element
-  const displayWidth = metadata.width
-    ? Math.floor(metadata.width / DIMENSIONS.DEVICE_SCALE_FACTOR)
-    : metadata.width;
-  const displayHeight = metadata.height
-    ? Math.floor(metadata.height / DIMENSIONS.DEVICE_SCALE_FACTOR)
-    : metadata.height;
+  const imageResult = await processScreenshotImage({
+    screenshot2xPath,
+    outputDir,
+    name,
+    basePath,
+  });
 
   logger.info(
     {
       name,
       url,
-      publicPath,
-      width: displayWidth,
-      height: displayHeight,
+      publicPath: imageResult.publicPath,
+      width: imageResult.displayWidth,
+      height: imageResult.displayHeight,
     },
     'Web screenshot generated successfully'
   );
 
   return json({
     success: true,
-    path: publicPath,
-    webpPath: `${basePath}/${name}.webp`,
-    webp2xPath:
-      metadata.width && metadata.width >= DIMENSIONS.MIN_WIDTH_FOR_2X
-        ? `${basePath}/${name}@2x.webp`
-        : undefined,
-    width: displayWidth,
-    height: displayHeight,
+    path: imageResult.publicPath,
+    webpPath: imageResult.webpPath,
+    webp2xPath: imageResult.webp2xPath,
+    width: imageResult.displayWidth,
+    height: imageResult.displayHeight,
   } as ScreenshotResponse);
 }

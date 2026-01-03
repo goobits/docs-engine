@@ -3,10 +3,7 @@
    * Client-side hydrator for collapsible sections
    * Adds animations and accessibility to native <details> elements
    */
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
-  import { afterNavigate } from '$app/navigation';
-  import { createBrowserLogger } from '@goobits/docs-engine/utils';
+  import { createBrowserLogger, useHydrator } from '@goobits/docs-engine/utils';
 
   const logger = createBrowserLogger('CollapseHydrator');
 
@@ -39,19 +36,7 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(hydrate);
-    });
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
+  useHydrator(hydrate);
 </script>
 
 <style>

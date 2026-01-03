@@ -20,8 +20,8 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@goobits/docs-engine": "workspace:*",
     "@lucide/svelte": "^0.553.0",
-    "dist": "file:../dist",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.25",
     "mdsvex": "^0.12.6",

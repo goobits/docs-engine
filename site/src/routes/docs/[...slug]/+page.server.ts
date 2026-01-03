@@ -21,7 +21,7 @@ import {
   collapsePlugin,
   referencePlugin,
   katexPlugin,
-} from 'dist/plugins/index.js';
+} from '@goobits/docs-engine/plugins';
 import { logError, createDevError } from '$lib/utils/error-logger';
 import type { PageServerLoad } from './$types';
 

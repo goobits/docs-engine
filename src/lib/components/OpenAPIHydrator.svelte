@@ -5,12 +5,9 @@
    * Finds all OpenAPI doc elements and mounts OpenAPIDoc components
    * Use this in your layout or page to hydrate static HTML
    */
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
   import { mount } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
   import OpenAPIDoc from './OpenAPIDoc.svelte';
-  import { parseOpenAPISpec, filterEndpointsByPath } from '../utils';
+  import { parseOpenAPISpec, filterEndpointsByPath, useHydrator } from '../utils';
   import { sanitizeHtml } from '../utils/index.js';
 
   interface Props {
@@ -91,19 +88,7 @@
     });
   }
 
-  onMount(() => {
-    if (!browser) return;
-
-    const unsubscribe = afterNavigate(() => hydrate());
-    // Defer hydration to avoid conflicts with Svelte's hydration phase
-    queueMicrotask(() => {
-      requestAnimationFrame(hydrate);
-    });
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
+  useHydrator(hydrate);
 </script>
 
 <style>

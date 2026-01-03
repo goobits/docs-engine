@@ -48,6 +48,10 @@ export * from './sanitize';
 // Logger utilities (browser-safe)
 export { createBrowserLogger } from './browser-logger';
 
+// Hydrator lifecycle composable (browser-only, requires Svelte)
+export { useHydrator } from './use-hydrator';
+export type { HydratorOptions } from './use-hydrator';
+
 // NOTE: Git utilities moved to server/index.ts (requires Node.js child_process)
 // Import from '@goobits/docs-engine/server' instead
 
