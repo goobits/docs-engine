@@ -7,17 +7,10 @@
 
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import { execSync } from 'child_process';
 import type { GeneratorConfig, GeneratorResult, GeneratorStats, CategoryRule } from './types';
+import { parseJSON, parseEnv, parseSQL, parseGrep, type ParsedItem } from './parsers/index';
 
 const readFileAsync = promisify(readFile);
-
-/**
- * Generic parsed item - represents any parsed data structure
- * The actual shape depends on the parser type (JSON, ENV, SQL, etc.)
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParsedItem = any;
 
 /**
  * Generic documentation generator
@@ -60,218 +53,22 @@ export class GenericGenerator {
 
     switch (parser.type) {
       case 'json':
-        return this.parseJSON(content, parser.path);
+        return parseJSON(content, parser.path);
 
       case 'env':
-        return this.parseEnv(content, parser.categoryPrefix);
+        return parseEnv(content, parser.categoryPrefix);
 
       case 'sql':
-        return this.parseSQL(content, parser.tablePattern);
+        return parseSQL(content, parser.tablePattern);
 
       case 'grep':
-        return this.parseGrep(parser.command, parser.extractPattern);
+        return parseGrep(parser.command, parser.extractPattern);
 
       case 'custom':
         return parser.parse(content, this.config);
 
       default:
         throw new Error(`Unknown parser type: ${(parser as { type?: string }).type}`);
-    }
-  }
-
-  /**
-   * Parse JSON file
-   */
-  private parseJSON(content: string, path?: string): ParsedItem[] {
-    const data = JSON.parse(content);
-
-    if (!path) {
-      // If no path, assume data is array or convert object to entries
-      return Array.isArray(data)
-        ? data
-        : Object.entries(data).map(([key, value]) => ({ key, value }));
-    }
-
-    // Extract from path (e.g., "scripts" -> data.scripts)
-    const extracted = path.split('.').reduce((obj, key) => obj?.[key], data);
-
-    if (!extracted) {
-      throw new Error(`Path "${path}" not found in JSON`);
-    }
-
-    // Convert to array of items
-    if (Array.isArray(extracted)) {
-      return extracted;
-    }
-
-    // Convert object to array with key-value pairs
-    return Object.entries(extracted).map(([key, value]) => ({
-      name: key,
-      value: typeof value === 'string' ? value : JSON.stringify(value),
-    }));
-  }
-
-  /**
-   * Parse .env file
-   */
-  private parseEnv(content: string, categoryPrefix = '#'): ParsedItem[] {
-    const lines = content.split('\n');
-    const variables: ParsedItem[] = [];
-    let currentCategory = 'General';
-    let currentComments: string[] = [];
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
-
-      // Empty line
-      if (!trimmed) {
-        currentComments = [];
-        continue;
-      }
-
-      // Category detection
-      if (trimmed.startsWith(categoryPrefix)) {
-        const categoryMatch = trimmed.match(/^#\s*---\s*(.+?)\s*---/);
-        if (categoryMatch) {
-          currentCategory = categoryMatch[1].trim();
-          currentComments = [];
-          continue;
-        }
-
-        // Multi-line category format
-        if (trimmed === '# ---') {
-          const nextLine = lines[i + 1]?.trim();
-          if (nextLine?.startsWith('#')) {
-            const categoryName = nextLine.replace(/^#\s*/, '').trim();
-            if (categoryName && !categoryName.match(/^[-=]+$/)) {
-              currentCategory = categoryName;
-              i += 2; // Skip category lines
-              currentComments = [];
-              continue;
-            }
-          }
-        }
-      }
-
-      // Variable line
-      const varMatch = line.match(/^\s*(#\s*)?([A-Z][A-Z0-9_]*)\s*=\s*(.*)$/);
-      if (varMatch) {
-        const name = varMatch[2];
-        let value = varMatch[3].trim();
-
-        // Remove inline comments
-        value = value.replace(/\s*#.*$/, '');
-
-        // Remove quotes
-        if (
-          (value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))
-        ) {
-          value = value.slice(1, -1);
-        }
-
-        variables.push({
-          category: currentCategory,
-          name,
-          value: value || '(not set)',
-          description: currentComments.join(' ').trim() || 'No description',
-          isCommented: !!varMatch[1],
-        });
-
-        currentComments = [];
-        continue;
-      }
-
-      // Comment line
-      if (trimmed.startsWith(categoryPrefix)) {
-        const comment = trimmed.replace(/^#\s*/, '').trim();
-        if (comment && !comment.match(/^[-=]+$/)) {
-          currentComments.push(comment);
-        }
-      }
-    }
-
-    return variables;
-  }
-
-  /**
-   * Parse SQL schema
-   */
-  private parseSQL(content: string, _tablePattern?: RegExp): ParsedItem[] {
-    const tables: ParsedItem[] = [];
-    const lines = content.split('\n');
-    let currentTable: ParsedItem | null = null;
-    let inTableDef = false;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      // Table start
-      const tableMatch = trimmed.match(/CREATE TABLE (?:IF NOT EXISTS )?(\w+)\s*\(/);
-      if (tableMatch) {
-        currentTable = {
-          name: tableMatch[1],
-          columns: [],
-          constraints: [],
-        };
-        inTableDef = true;
-        continue;
-      }
-
-      // Table end
-      if (inTableDef && trimmed === ');') {
-        inTableDef = false;
-        if (currentTable) {
-          tables.push(currentTable);
-          currentTable = null;
-        }
-        continue;
-      }
-
-      // Column definition
-      if (inTableDef && currentTable && !trimmed.startsWith('--')) {
-        if (trimmed.startsWith('CONSTRAINT') || trimmed.startsWith('PRIMARY KEY')) {
-          currentTable.constraints.push(trimmed);
-        } else if (trimmed) {
-          const columnMatch = trimmed.match(/^(\w+)\s+([A-Z]+[^,]*)/);
-          if (columnMatch) {
-            currentTable.columns.push({
-              name: columnMatch[1],
-              type: columnMatch[2].split(/\s+/)[0],
-            });
-          }
-        }
-      }
-    }
-
-    return tables;
-  }
-
-  /**
-   * Parse grep output
-   */
-  private parseGrep(command: string, extractPattern?: RegExp): ParsedItem[] {
-    try {
-      const output = execSync(command, { encoding: 'utf-8' });
-      const lines = output.split('\n').filter(Boolean);
-
-      if (!extractPattern) {
-        return lines.map((line) => ({ value: line.trim() }));
-      }
-
-      const items: ParsedItem[] = [];
-      for (const line of lines) {
-        const match = line.match(extractPattern);
-        if (match) {
-          items.push({ value: match[1] || match[0] });
-        }
-      }
-
-      return items;
-    } catch {
-      console.warn(`Grep command failed: ${command}`);
-      return [];
     }
   }
 
