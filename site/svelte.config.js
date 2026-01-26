@@ -11,7 +11,7 @@ import {
   linksPlugin,
   collapsePlugin,
   referencePlugin,
-} from 'dist/plugins/index.js';
+} from '@goobits/docs-engine/plugins';
 
 /** @type {import("@sveltejs/kit").Config} */
 const config = {

@@ -1,6 +1,6 @@
 {
   "name": "@goobits/docs-engine",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
   "type": "module",
   "main": "./dist/index.js",
@@ -110,6 +110,11 @@
   "author": "GooBits",
   "publishConfig": {
     "access": "public"
+  },
+  "pnpm": {
+    "overrides": {
+      "unist-util-visit": "^5.0.0"
+    }
   },
   "lint-staged": {
     "*.{ts,js}": [
