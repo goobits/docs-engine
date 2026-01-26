@@ -370,16 +370,19 @@ program
 
       // Normal generation mode
       const spinner = ora('Generating symbol map...').start();
+      const startTime = Date.now();
       const { createSymbolMapGenerator } = await import('@goobits/docs-engine/server');
 
       const generator = createSymbolMapGenerator(config);
-      const stats = await generator.generate();
+      const symbolMap = await generator.generate();
+      const duration = Date.now() - startTime;
+      const symbolCount = Object.values(symbolMap).flat().length;
 
       spinner.succeed('Symbol map generated successfully!');
       console.log(chalk.cyan('\nGenerated:'));
       console.log(chalk.gray(`  Output: ${options.output}`));
-      console.log(chalk.gray(`  Symbols: ${stats.symbolCount}`));
-      console.log(chalk.gray(`  Duration: ${(stats.duration / 1000).toFixed(2)}s`));
+      console.log(chalk.gray(`  Symbols: ${symbolCount}`));
+      console.log(chalk.gray(`  Duration: ${(duration / 1000).toFixed(2)}s`));
     } catch (error) {
       console.error(chalk.red('Symbol generation failed'));
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));

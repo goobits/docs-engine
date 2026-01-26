@@ -101,7 +101,7 @@ async function main(): Promise<void> {
       ],
     },
     {
-      type: (prev: unknown, values: { features: string[] }): string | null =>
+      type: (_prev: unknown, values: { features: string[] }): prompts.PromptType | null =>
         values.features.includes('git') ? 'text' : null,
       name: 'gitRepo',
       message: 'Git repository URL (optional):',

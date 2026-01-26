@@ -67,6 +67,8 @@ export default defineConfig({
   external: [
     'svelte',
     '@sveltejs/kit',
+    '$app/environment',
+    '$app/navigation',
     'mermaid',
     '@lucide/svelte',
     'playwright',

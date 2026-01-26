@@ -68,7 +68,7 @@ export function useHydrator(hydrate: () => void, options: HydratorOptions = {}):
     const wrappedHydrate = wrapInRaf ? () => requestAnimationFrame(hydrate) : hydrate;
 
     // Subscribe to navigation events for SPA navigation
-    const unsubscribe = afterNavigate(() => wrappedHydrate());
+    afterNavigate(() => wrappedHydrate());
 
     // Defer initial hydration to avoid conflicts with Svelte's hydration phase
     queueMicrotask(() => {
@@ -83,7 +83,6 @@ export function useHydrator(hydrate: () => void, options: HydratorOptions = {}):
     });
 
     return () => {
-      unsubscribe?.();
       // Note: MutationObserver cleanup is handled by the component unmounting
       // and the observer going out of scope
     };
@@ -100,7 +99,7 @@ function setupMutationObserver(selector: string, hydrate: () => void): MutationO
 
     for (const mutation of mutations) {
       if (mutation.type === 'childList') {
-        for (const node of mutation.addedNodes) {
+        for (const node of Array.from(mutation.addedNodes)) {
           if (node instanceof Element) {
             if (node.matches(selector) || node.querySelector(selector)) {
               shouldHydrate = true;

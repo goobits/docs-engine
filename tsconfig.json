@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext", "DOM"],
-    "types": ["node"],
+    "types": ["node", "@sveltejs/kit"],
     // Strict type-checking options
     "strict": true,
     "noImplicitAny": true,
