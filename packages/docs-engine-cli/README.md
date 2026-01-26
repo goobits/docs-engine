@@ -24,6 +24,16 @@ npm install --save-dev @goobits/docs-engine-cli
 
 ## Commands
 
+### Create a New Docs Site
+
+Scaffold a new docs-engine project:
+
+```bash
+pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
+# or
+npx -y @goobits/docs-engine-cli create-docs-engine my-docs
+```
+
 ### Link Checker
 
 Check all links in your markdown documentation for broken internal references and optionally validate external URLs.

@@ -20,6 +20,19 @@ Get docs-engine running in your SvelteKit project in 5 minutes.
 - SvelteKit project
 - Basic markdown knowledge
 
+## Option A: Scaffold a New Project (Recommended)
+
+```bash
+pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
+```
+
+Then:
+
+```bash
+cd my-docs
+pnpm dev
+```
+
 ## Step 1: Install
 
 ```bash

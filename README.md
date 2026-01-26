@@ -16,10 +16,13 @@ Documentation system for SvelteKit with markdown rendering, symbol references, a
 ## Quick Start
 
 ```bash
-# Installation
+# Scaffold a new docs site (recommended)
+pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
+
+# Installation (existing project)
 pnpm add @goobits/docs-engine
 
-# CLI tools (optional)
+# CLI tools (includes scaffolder)
 pnpm add -D @goobits/docs-engine-cli
 ```
 
@@ -96,6 +99,14 @@ In your layout component:
 ```
 
 ## CLI Tools
+
+### Create a New Docs Site
+
+```bash
+pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
+# or
+npx -y @goobits/docs-engine-cli create-docs-engine my-docs
+```
 
 ### Link Checking
 
