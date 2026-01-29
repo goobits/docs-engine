@@ -7,7 +7,14 @@
    */
 
   import { onMount } from 'svelte';
-  import type { ScreenshotImageProps } from './types.js';
+
+  export interface ScreenshotImageProps {
+    name: string;
+    url: string;
+    path: string;
+    version: string;
+    config?: unknown;
+  }
 
   interface Props extends ScreenshotImageProps {}
 

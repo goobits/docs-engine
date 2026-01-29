@@ -4,7 +4,7 @@
  * Parses JSON files and extracts items from a specified path.
  */
 
-import type { ParsedItem } from './types';
+import type { ParsedItem } from './index';
 
 /**
  * Parse JSON content and extract items from a path

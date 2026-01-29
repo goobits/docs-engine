@@ -7,8 +7,130 @@
 
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import type { GeneratorConfig, GeneratorResult, GeneratorStats, CategoryRule } from './types';
 import { parseJSON, parseEnv, parseSQL, parseGrep, type ParsedItem } from './parsers/index';
+
+/**
+ * Category matching rule
+ */
+export interface CategoryRule {
+  /** Category name */
+  name: string;
+  /** Display order priority (lower = first) */
+  order?: number;
+  /** Match condition */
+  match:
+    | string // Regex pattern as string
+    | ((item: unknown) => boolean); // Custom function
+  /** Optional category description */
+  description?: string;
+}
+
+/**
+ * Enrichment rule for adding metadata
+ */
+export interface EnrichmentRule {
+  /** Field name to add */
+  field: string;
+  /** Value mapping or function */
+  value:
+    | Record<string, unknown> // Static mapping
+    | ((item: unknown) => unknown); // Dynamic function
+}
+
+/**
+ * Markdown template configuration
+ */
+export interface MarkdownTemplate {
+  /** Document title */
+  title: string;
+  /** Source file description */
+  source?: string;
+  /** Overview section content */
+  overview?: string | ((stats: unknown) => string);
+  /** Table columns configuration */
+  columns: Array<{
+    header: string;
+    field: string | ((item: unknown) => string);
+    format?: (value: unknown) => string;
+  }>;
+  /** Additional sections to append */
+  footer?: string | string[];
+  /** Show table of contents */
+  showTOC?: boolean;
+  /** Show statistics */
+  showStats?: boolean;
+}
+
+/**
+ * Parser configuration
+ */
+export type ParserConfig =
+  | {
+      type: 'json';
+      /** JSONPath to extract items (e.g., "scripts" for package.json) */
+      path?: string;
+    }
+  | {
+      type: 'env';
+      /** Comment prefix for categories */
+      categoryPrefix?: string;
+    }
+  | {
+      type: 'sql';
+      /** Table pattern to match */
+      tablePattern?: RegExp;
+    }
+  | {
+      type: 'grep';
+      /** Grep command to execute */
+      command: string;
+      /** Pattern to extract from matches */
+      extractPattern?: RegExp;
+    }
+  | {
+      type: 'custom';
+      /** Custom parser function */
+      parse: (content: string, config: unknown) => ParsedItem[];
+    };
+
+/**
+ * Complete generator configuration
+ */
+export interface GeneratorConfig {
+  /** Input file path */
+  input: string;
+  /** Output file path */
+  output: string;
+  /** Parser configuration */
+  parser: ParserConfig;
+  /** Categorization rules (applied in order) */
+  categories: CategoryRule[];
+  /** Enrichment rules (add metadata to items) */
+  enrichments?: EnrichmentRule[];
+  /** Description mappings */
+  descriptions?: Record<string, string>;
+  /** Markdown template */
+  template: MarkdownTemplate;
+}
+
+/**
+ * Generator statistics
+ */
+export interface GeneratorStats {
+  totalItems: number;
+  categoryCount: number;
+  itemsByCategory: Record<string, number>;
+  uncategorized: number;
+}
+
+/**
+ * Generator result
+ */
+export interface GeneratorResult {
+  markdown: string;
+  stats: GeneratorStats;
+  lineCount: number;
+}
 
 const readFileAsync = promisify(readFile);
 
@@ -121,7 +243,7 @@ export class GenericGenerator {
 
     // Regex pattern
     const pattern = new RegExp(rule.match);
-    const testValue = item.name || item.value || item.key || String(item);
+    const testValue = String(item.name ?? item.value ?? item.key ?? item);
     return pattern.test(testValue);
   }
 
@@ -157,15 +279,15 @@ export class GenericGenerator {
         if (typeof rule.value === 'function') {
           enriched[rule.field] = rule.value(item);
         } else {
-          const key = item.name || item.key;
-          enriched[rule.field] = rule.value[key] || enriched[rule.field];
+          const key = String(item.name ?? item.key ?? '');
+          enriched[rule.field] = rule.value[key] ?? enriched[rule.field];
         }
       }
     }
 
     // Apply descriptions
     if (this.config.descriptions) {
-      const key = item.name || item.key || item.value;
+      const key = String(item.name ?? item.key ?? item.value ?? '');
       if (key && this.config.descriptions[key]) {
         enriched.description = this.config.descriptions[key];
       }

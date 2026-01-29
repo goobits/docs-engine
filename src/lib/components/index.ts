@@ -37,5 +37,5 @@ export { default as ThemeToggle } from './ThemeToggle.svelte';
 export { default as OptimizedImage } from './OptimizedImage.svelte';
 export { default as OptimizedImageHydrator } from './OptimizedImageHydrator.svelte';
 
-// Types
-export type * from './types';
+// Types - re-exported from navigation utilities
+export type { DocsLink, DocsSection } from '../utils/navigation';
