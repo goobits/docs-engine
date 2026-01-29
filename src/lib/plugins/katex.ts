@@ -4,6 +4,16 @@ import katex from 'katex';
 import { escapeHtml } from '../utils/html.js';
 
 /**
+ * Interface for math nodes (from remark-math)
+ * Represents both inline math and display math nodes
+ */
+interface MathNode {
+  type: string;
+  value: string;
+  data?: unknown;
+}
+
+/**
  * Configuration options for math rendering with KaTeX
  *
  * @public
@@ -168,7 +178,7 @@ export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
     // Transform each math node to HTML
     mathNodes.forEach(({ node }) => {
       // Type assertion needed for accessing node properties
-      const n = node as any;
+      const n = node as MathNode;
       const latex = n.value;
       const displayMode = n.type === 'math'; // 'math' = display (block), 'inlineMath' = inline
 

@@ -90,14 +90,14 @@ export class GenericGenerator {
 
       for (const rule of this.config.categories) {
         if (this.matchesRule(item, rule)) {
-          categorized.get(rule.name)!.push({ ...item, category: rule.name });
+          categorized.get(rule.name)?.push({ ...item, category: rule.name });
           assigned = true;
           break; // First match wins
         }
       }
 
       if (!assigned) {
-        categorized.get('__uncategorized__')!.push({ ...item, category: 'Other' });
+        categorized.get('__uncategorized__')?.push({ ...item, category: 'Other' });
       }
     }
 

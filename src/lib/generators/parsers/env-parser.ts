@@ -53,7 +53,8 @@ export function parseEnv(content: string, categoryPrefix = '#'): ParsedItem[] {
     }
 
     // Variable line
-    const varMatch = line.match(/^\s*(#\s*)?([A-Z][A-Z0-9_]*)\s*=\s*(.*)$/);
+    // Use single \s instead of \s* inside optional group to avoid nested quantifiers
+    const varMatch = line.match(/^[ \t]*(#[ \t])?([A-Z][A-Z0-9_]*)[ \t]*=[ \t]*(.*)$/);
     if (varMatch) {
       const name = varMatch[2];
       let value = varMatch[3].trim();

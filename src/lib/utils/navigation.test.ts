@@ -6,12 +6,16 @@ import {
   getAdjacentLinks,
   type DocsSection,
 } from './navigation';
+import type { ComponentType } from 'svelte';
+
+/** Mock icon component for testing */
+const MockIcon = (() => null) as unknown as ComponentType;
 
 const mockNavigation: DocsSection[] = [
   {
     title: 'Getting Started',
     description: 'Get started with docs-engine',
-    icon: (() => null) as any,
+    icon: MockIcon,
     links: [
       { title: 'Installation', href: '/docs/installation', description: 'Install docs-engine' },
       {
@@ -24,7 +28,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Features',
     description: 'Core features',
-    icon: (() => null) as any,
+    icon: MockIcon,
     links: [
       { title: 'Search', href: '/docs/features/search', description: 'Search functionality' },
       {

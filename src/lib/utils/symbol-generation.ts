@@ -21,6 +21,45 @@ import { createLogger } from './logger.js';
 const logger = createLogger('symbol-generation');
 
 /**
+ * TypeScript JSDoc comment part (text or link)
+ */
+interface JSDocCommentPart {
+  text?: string;
+}
+
+/**
+ * JSDoc comment type - can be string or array of comment parts
+ */
+type JSDocComment = string | JSDocCommentPart[];
+
+/**
+ * TypeScript JSDoc tag structure
+ */
+interface JSDocTag {
+  tagName: { text: string };
+  name?: { text: string };
+  comment?: JSDocComment;
+  typeExpression?: {
+    type?: ts.TypeNode;
+  };
+}
+
+/**
+ * TypeScript JSDoc structure
+ */
+interface JSDocNode {
+  comment?: JSDocComment;
+  tags?: JSDocTag[];
+}
+
+/**
+ * Node with JSDoc comments attached
+ */
+interface NodeWithJSDoc extends ts.Node {
+  jsDoc?: JSDocNode[];
+}
+
+/**
  * Configuration for symbol map generation
  */
 export interface SymbolGeneratorConfig {
@@ -224,7 +263,7 @@ export class SymbolMapGenerator {
 
     const symbols: SymbolDefinition[] = [];
 
-    const visit = (node: ts.Node) => {
+    const visit = (node: ts.Node): void => {
       // Only process exported declarations
       const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
       const hasExportModifier = modifiers?.some(
@@ -383,7 +422,7 @@ export class SymbolMapGenerator {
   private extractRelatedSymbols(node: ts.Node, sourceFile: ts.SourceFile): string[] {
     const related = new Set<string>();
 
-    const visitType = (typeNode: ts.Node) => {
+    const visitType = (typeNode: ts.Node): void => {
       // Type reference: Foo, Bar<T>, etc.
       if (ts.isTypeReferenceNode(typeNode)) {
         const typeName = typeNode.typeName.getText(sourceFile);
@@ -441,41 +480,41 @@ export class SymbolMapGenerator {
    * Extract JSDoc comments from a node
    */
   private extractJSDoc(node: ts.Node, sourceFile: ts.SourceFile): SymbolDefinition['jsDoc'] {
-    const jsDocComments = (node as any).jsDoc;
+    const jsDocComments = (node as NodeWithJSDoc).jsDoc;
     if (!jsDocComments || jsDocComments.length === 0) return undefined;
 
     const jsDoc = jsDocComments[0];
     const description = jsDoc.comment || '';
 
     // Helper to normalize comment text
-    const normalizeComment = (comment: any): string => {
+    const normalizeComment = (comment: JSDocComment | undefined): string => {
       if (!comment) return '';
       if (typeof comment === 'string') return comment;
       if (Array.isArray(comment)) {
-        return comment.map((c: any) => c.text || '').join('');
+        return comment.map((c: JSDocCommentPart) => c.text || '').join('');
       }
       return String(comment);
     };
 
     // Collect all @example tags
-    const exampleTags = jsDoc.tags?.filter((t: any) => t.tagName.text === 'example') || [];
-    const examples = exampleTags.map((t: any) => normalizeComment(t.comment)).filter(Boolean);
+    const exampleTags = jsDoc.tags?.filter((t: JSDocTag) => t.tagName.text === 'example') || [];
+    const examples = exampleTags.map((t: JSDocTag) => normalizeComment(t.comment)).filter(Boolean);
 
     // Collect all @see tags
-    const seeTags = jsDoc.tags?.filter((t: any) => t.tagName.text === 'see') || [];
-    const seeReferences = seeTags.map((t: any) => normalizeComment(t.comment)).filter(Boolean);
+    const seeTags = jsDoc.tags?.filter((t: JSDocTag) => t.tagName.text === 'see') || [];
+    const seeReferences = seeTags.map((t: JSDocTag) => normalizeComment(t.comment)).filter(Boolean);
 
     return {
       description: normalizeComment(description),
       params: jsDoc.tags
-        ?.filter((t: any) => t.tagName.text === 'param')
-        .map((t: any) => ({
+        ?.filter((t: JSDocTag) => t.tagName.text === 'param')
+        .map((t: JSDocTag) => ({
           name: t.name?.text || '',
           description: normalizeComment(t.comment),
           type: t.typeExpression?.type?.getText(sourceFile) || 'unknown',
         })),
       returns: normalizeComment(
-        jsDoc.tags?.find((t: any) => t.tagName.text === 'returns')?.comment
+        jsDoc.tags?.find((t: JSDocTag) => t.tagName.text === 'returns')?.comment
       ),
       example: examples.length > 0 ? examples.join('\n\n') : undefined,
       see: seeReferences.length > 0 ? seeReferences : undefined,
@@ -627,7 +666,7 @@ export class SymbolMapGenerator {
     let isRegenerating = false;
     const pendingFiles = new Set<string>();
 
-    const regenerate = async () => {
+    const regenerate = async (): Promise<void> => {
       if (isRegenerating) {
         logger.debug('Regeneration already in progress, queuing...');
         return;
@@ -675,7 +714,7 @@ export class SymbolMapGenerator {
       logger.info('Watching TypeScript files for changes...');
     };
 
-    const handleFileChange = (filePath: string) => {
+    const handleFileChange = (filePath: string): void => {
       // Only process TypeScript files, skip test files
       if (
         !filePath.endsWith('.ts') ||
@@ -761,7 +800,7 @@ export class SymbolMapGenerator {
       });
 
     return {
-      close: async () => {
+      close: async (): Promise<void> => {
         logger.info('Stopping file watcher...');
         await watcher.close();
         logger.info('File watcher stopped');

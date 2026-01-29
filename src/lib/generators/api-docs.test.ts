@@ -1167,7 +1167,7 @@ describe('groupByCategory', () => {
     ];
 
     const groups = groupByCategory(items);
-    const utilsGroup = groups.get('Utils')!;
+    const utilsGroup = groups.get('Utils') ?? [];
 
     expect(utilsGroup[0].name).toBe('apple');
     expect(utilsGroup[1].name).toBe('mango');

@@ -45,7 +45,7 @@ docs/
 New to docs-engine? Start here:
 
 - **[Getting Started](./getting-started.md)** - 5-minute setup guide
-- **[Installation](../README.md#installation)** - Package installation
+- **[Quick Start](../README.md#quick-start)** - Package installation
 
 ## Architecture Overview
 

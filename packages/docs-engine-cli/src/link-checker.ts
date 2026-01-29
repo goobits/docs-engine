@@ -282,8 +282,8 @@ async function checkExternalLink(
   cache: Map<string, LinkCheckResult>
 ): Promise<LinkCheckResult> {
   // Check cache first
-  if (cache.has(link.url)) {
-    const cached = cache.get(link.url)!;
+  const cached = cache.get(link.url);
+  if (cached) {
     return { ...cached, link };
   }
 

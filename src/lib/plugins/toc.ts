@@ -20,7 +20,8 @@ export function remarkTableOfContents(): (tree: Root) => void {
         const headingText = firstChild && 'value' in firstChild ? (firstChild.value as string) : '';
 
         // Check for new TOC format (## TOC:2)
-        const tocMatch = headingText.match(/^TOC(?::(\d+))?$/);
+        // Use alternation to avoid nested optional quantifiers
+        const tocMatch = headingText.match(/^(?:TOC:(\d+)|TOC)$/);
         if (tocMatch) {
           tocIndex = index;
           tocLevel = node.depth;

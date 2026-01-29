@@ -66,7 +66,7 @@ export const load: LayoutServerLoad = async () => {
           'Failed to generate documentation navigation',
           err instanceof Error ? err.message : String(err),
           'Check that the docs folder exists and contains valid markdown files with frontmatter.'
-        ) as any
+        ) as { message: string }
       );
     }
 

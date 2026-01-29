@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { codeHighlightPlugin, type CodeBlockMetadata } from './code-highlight';
-import type { Root, Html } from 'mdast';
+import type { Root, Html, Code } from 'mdast';
 
 /**
  * Tests for code-highlight plugin
@@ -43,7 +43,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -67,7 +67,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -91,14 +91,14 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
       const plugin = codeHighlightPlugin();
       await plugin(tree);
 
-      const node = tree.children[0] as any;
+      const node = tree.children[0] as Code;
       // Should not transform filetree blocks
       expect(node.type).toBe('code');
       expect(node.lang).toBe('filetree');
@@ -118,7 +118,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -142,7 +142,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 4, column: 4, offset: 30 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -166,7 +166,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 4, column: 4, offset: 30 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -192,7 +192,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -215,7 +215,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 
@@ -240,7 +240,7 @@ describe('code-highlight plugin', () => {
               start: { line: 1, column: 1, offset: 0 },
               end: { line: 3, column: 4, offset: 20 },
             },
-          } as any,
+          } as Code,
         ],
       };
 

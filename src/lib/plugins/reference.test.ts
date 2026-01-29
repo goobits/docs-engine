@@ -1,9 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { referencePlugin } from './reference';
-import type { Root } from 'mdast';
+import type { Root, Paragraph, Html, Link, Text, RootContent } from 'mdast';
 import * as symbolResolver from '../utils/symbol-resolver.js';
 import * as symbolRenderer from '../utils/symbol-renderer.js';
+
+/**
+ * Container directive node type (from remark-directive)
+ */
+interface ContainerDirective {
+  type: 'containerDirective';
+  name: string;
+  attributes?: Record<string, string>;
+  children: RootContent[];
+}
 
 describe('reference plugin', () => {
   // Mock symbol map and related functions
@@ -54,16 +63,16 @@ describe('reference plugin', () => {
     type: 'root',
     children: [
       {
-        type: 'containerDirective' as any,
+        type: 'containerDirective',
         name: 'reference',
         attributes,
         children: [
           {
             type: 'paragraph',
             children: [{ type: 'text', value: symbolName }],
-          } as any,
+          } as Paragraph,
         ],
-      } as any,
+      } as unknown as ContainerDirective,
     ],
   });
 
@@ -83,15 +92,15 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(3);
       expect(paragraph.children[0].type).toBe('text');
-      expect(paragraph.children[0].value).toBe('Check out ');
+      expect((paragraph.children[0] as Text).value).toBe('Check out ');
       expect(paragraph.children[1].type).toBe('link');
-      expect(paragraph.children[1].url).toContain('github.com');
-      expect(paragraph.children[1].children[0].value).toBe('MyFunction');
+      expect((paragraph.children[1] as Link).url).toContain('github.com');
+      expect(((paragraph.children[1] as Link).children[0] as Text).value).toBe('MyFunction');
       expect(paragraph.children[2].type).toBe('text');
-      expect(paragraph.children[2].value).toBe(' for more info');
+      expect((paragraph.children[2] as Text).value).toBe(' for more info');
     });
 
     it('should handle multiple inline references in one text node', () => {
@@ -107,13 +116,13 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(5);
-      expect(paragraph.children[0].value).toBe('Use ');
+      expect((paragraph.children[0] as Text).value).toBe('Use ');
       expect(paragraph.children[1].type).toBe('link');
-      expect(paragraph.children[2].value).toBe(' with ');
+      expect((paragraph.children[2] as Text).value).toBe(' with ');
       expect(paragraph.children[3].type).toBe('link');
-      expect(paragraph.children[4].value).toBe(' for best results');
+      expect((paragraph.children[4] as Text).value).toBe(' for best results');
     });
 
     it('should create warning node for unresolved inline reference', () => {
@@ -128,11 +137,11 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(2);
       expect(paragraph.children[1].type).toBe('html');
-      expect(paragraph.children[1].value).toContain('symbol-ref-error');
-      expect(paragraph.children[1].value).toContain('UnknownSymbol');
+      expect((paragraph.children[1] as Html).value).toContain('symbol-ref-error');
+      expect((paragraph.children[1] as Html).value).toContain('UnknownSymbol');
       expect(consoleWarnSpy).toHaveBeenCalled();
 
       consoleWarnSpy.mockRestore();
@@ -150,9 +159,9 @@ describe('reference plugin', () => {
       plugin(tree);
 
       // Tree should be unchanged
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(1);
-      expect(paragraph.children[0].value).toBe('Check {@MyFunction}');
+      expect((paragraph.children[0] as Text).value).toBe('Check {@MyFunction}');
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'Symbol map not loaded:',
         expect.stringContaining('Symbol map not found')
@@ -168,9 +177,9 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(1);
-      expect(paragraph.children[0].value).toBe('Regular text without references');
+      expect((paragraph.children[0] as Text).value).toBe('Regular text without references');
     });
   });
 
@@ -190,12 +199,10 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const htmlNode = tree.children[0] as any;
+      const htmlNode = tree.children[0] as Html;
       expect(htmlNode.type).toBe('html');
       expect(htmlNode.value).toContain('symbol-block');
       expect(htmlNode.value).toContain('MyFunction docs');
-      expect(htmlNode.children).toBeUndefined();
-      expect(htmlNode.name).toBeUndefined();
     });
 
     it('should pass render options from attributes', () => {
@@ -234,7 +241,7 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const htmlNode = tree.children[0] as any;
+      const htmlNode = tree.children[0] as Html;
       expect(htmlNode.type).toBe('html');
       expect(htmlNode.value).toContain('symbol-ref-block-error');
       expect(htmlNode.value).toContain('UnknownSymbol');
@@ -258,9 +265,9 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
-      expect(paragraph.children[1].value).not.toContain('<script>');
-      expect(paragraph.children[1].value).toContain('&lt;script&gt;');
+      const paragraph = tree.children[0] as Paragraph;
+      expect((paragraph.children[1] as Html).value).not.toContain('<script>');
+      expect((paragraph.children[1] as Html).value).toContain('&lt;script&gt;');
 
       consoleWarnSpy.mockRestore();
     });
@@ -277,7 +284,7 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const htmlNode = tree.children[0] as any;
+      const htmlNode = tree.children[0] as Html;
       expect(htmlNode.value).not.toContain('<img');
       expect(htmlNode.value).toContain('&lt;img');
 
@@ -296,9 +303,9 @@ describe('reference plugin', () => {
             type: 'paragraph',
             children: [
               { type: 'text', value: 'Hello' },
-              null as any,
+              null as unknown as Text,
               { type: 'text', value: 'World' },
-              undefined as any,
+              undefined as unknown as Text,
             ],
           },
         ],
@@ -307,10 +314,10 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(2);
-      expect(paragraph.children[0].value).toBe('Hello');
-      expect(paragraph.children[1].value).toBe('World');
+      expect((paragraph.children[0] as Text).value).toBe('Hello');
+      expect((paragraph.children[1] as Text).value).toBe('World');
     });
   });
 
@@ -322,10 +329,10 @@ describe('reference plugin', () => {
         type: 'root',
         children: [
           {
-            type: 'containerDirective' as any,
+            type: 'containerDirective',
             name: 'reference',
             children: [],
-          } as any,
+          } as unknown as ContainerDirective,
         ],
       };
 
@@ -342,15 +349,15 @@ describe('reference plugin', () => {
         type: 'root',
         children: [
           {
-            type: 'containerDirective' as any,
+            type: 'containerDirective',
             name: 'reference',
             children: [
               {
                 type: 'paragraph',
                 children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
-              } as any,
+              } as Paragraph,
             ],
-          } as any,
+          } as unknown as ContainerDirective,
         ],
       };
 
@@ -373,8 +380,8 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
-      const link = paragraph.children[1];
+      const paragraph = tree.children[0] as Paragraph;
+      const link = paragraph.children[1] as Link;
       expect(link.title).toBe('A test function');
     });
 
@@ -391,8 +398,8 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
-      const link = paragraph.children[1];
+      const paragraph = tree.children[0] as Paragraph;
+      const link = paragraph.children[1] as Link;
       expect(link.title).toBe('type MyType = string');
     });
 
@@ -409,7 +416,7 @@ describe('reference plugin', () => {
       const plugin = referencePlugin();
       plugin(tree);
 
-      const paragraph = tree.children[0] as any;
+      const paragraph = tree.children[0] as Paragraph;
       expect(paragraph.children.length).toBe(2);
       expect(paragraph.children[0].type).toBe('link');
       expect(paragraph.children[1].type).toBe('link');

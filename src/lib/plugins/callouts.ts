@@ -13,6 +13,16 @@ import type { PhrasingContent } from 'mdast';
 import { escapeHtml } from '../utils/html.js';
 
 /**
+ * Interface for mutating AST nodes during transformation
+ * Used when transforming one node type (e.g., Blockquote) to another (e.g., Html)
+ */
+interface MutableAstNode {
+  type: string;
+  value?: string;
+  children?: unknown[];
+}
+
+/**
  * Callout configuration
  */
 interface CalloutConfig {
@@ -62,8 +72,9 @@ export function calloutsPlugin(): (tree: Root) => void {
       if (!firstText || firstText.type !== 'text') return;
 
       // Match [!TYPE] or [!TYPE Custom Title] syntax (case insensitive)
+      // Capture everything after ] and trim in code to avoid nested quantifiers
       const match = firstText.value.match(
-        /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|SUCCESS|DANGER|INFO|QUESTION)\](?:\s+(.+?))?$/i
+        /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|SUCCESS|DANGER|INFO|QUESTION)\](.*)$/i
       );
       if (!match) return;
 
@@ -81,9 +92,9 @@ export function calloutsPlugin(): (tree: Root) => void {
       const contentHtml = renderCalloutContent(node.children as BlockContent[]);
 
       // Transform node to HTML - type assertions needed for node type transformation
-      (node as any).type = 'html';
-      (node as any).value =
-        `<div class="md-callout md-callout--${config.color}" role="note" aria-label="${displayTitle}">
+      const mutableNode = node as MutableAstNode;
+      mutableNode.type = 'html';
+      mutableNode.value = `<div class="md-callout md-callout--${config.color}" role="note" aria-label="${displayTitle}">
   <div class="md-callout__header">
     <span class="md-callout__icon" aria-hidden="true">${config.icon}</span>
     <span class="md-callout__label">${displayTitle}</span>
@@ -92,7 +103,7 @@ export function calloutsPlugin(): (tree: Root) => void {
 ${contentHtml}
   </div>
 </div>`;
-      delete (node as any).children;
+      delete mutableNode.children;
     });
   };
 }

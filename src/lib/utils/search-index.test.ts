@@ -6,13 +6,17 @@ import {
   highlightMatches,
 } from './search-index';
 import type { DocsSection as NavSection } from './navigation';
+import type { ComponentType } from 'svelte';
+
+/** Mock icon component for testing */
+const MockIcon = (() => null) as unknown as ComponentType;
 
 describe('search-index utilities', () => {
   const mockNavigation: NavSection[] = [
     {
       title: 'Getting Started',
       description: 'Get started docs',
-      icon: (() => null) as any,
+      icon: MockIcon,
       links: [
         {
           title: 'Installation Guide',
@@ -29,7 +33,7 @@ describe('search-index utilities', () => {
     {
       title: 'Features',
       description: 'Core features',
-      icon: (() => null) as any,
+      icon: MockIcon,
       links: [
         {
           title: 'Search Functionality',

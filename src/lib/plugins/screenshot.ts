@@ -4,6 +4,15 @@ import { encodeJsonBase64 } from '../utils/base64.js';
 import { getVersion } from '../utils/version.js';
 import { createBrowserLogger } from '../utils/browser-logger.js';
 
+/**
+ * Interface for mutating AST nodes during transformation
+ * Used when transforming Code nodes to Html nodes
+ */
+interface MutableCodeNode {
+  type: string;
+  value?: string;
+}
+
 const logger = createBrowserLogger('screenshot-plugin');
 
 export interface ScreenshotPluginOptions {
@@ -97,9 +106,9 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: 
       const configEncoded = encodeJsonBase64(config);
 
       // Replace with HTML div for client-side hydration
-      (node as any).type = 'html';
-      (node as any).value =
-        `<div class="md-screenshot" data-name="${name}" data-url="${url}" data-path="${screenshotPath}" data-version="${version}" data-config="${configEncoded}"></div>`;
+      const mutableNode = node as MutableCodeNode;
+      mutableNode.type = 'html';
+      mutableNode.value = `<div class="md-screenshot" data-name="${name}" data-url="${url}" data-path="${screenshotPath}" data-version="${version}" data-config="${configEncoded}"></div>`;
     });
   };
 }

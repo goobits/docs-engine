@@ -114,7 +114,8 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
   });
 
   // Extract HTML links (basic regex for <a href="">)
-  const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["']/gi;
+  // Use [^>]*? without nested \s+ to avoid catastrophic backtracking
+  const htmlLinkRegex = /<a\s[^>]*?href=["']([^"']+)["']/gi;
   const lines = content.split('\n');
 
   lines.forEach((lineContent, index) => {

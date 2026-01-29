@@ -5,6 +5,15 @@ import { escapeHtml } from '../utils/html.js';
 import { encodeJsonBase64 } from '../utils/base64.js';
 
 /**
+ * Interface for mutating AST nodes during transformation
+ * Used when transforming Code nodes to Html nodes
+ */
+interface MutableCodeNode {
+  type: string;
+  value?: string;
+}
+
+/**
  * Remark plugin to transform filetree code blocks into interactive file trees
  *
  * Transforms:
@@ -36,13 +45,15 @@ export function filetreePlugin(): (tree: Root) => void {
         const encoded = encodeJsonBase64(treeData);
 
         // Transform to HTML div that will be hydrated client-side
-        (node as any).type = 'html';
-        (node as any).value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
+        const mutableNode = node as MutableCodeNode;
+        mutableNode.type = 'html';
+        mutableNode.value = `<div class="md-filetree" data-tree="${encoded}"></div>`;
       } catch (error) {
         // If parsing fails, render an error message
         console.error('Failed to parse filetree:', error);
-        (node as any).type = 'html';
-        (node as any).value = `<div class="md-filetree md-filetree--error">
+        const mutableErrorNode = node as MutableCodeNode;
+        mutableErrorNode.type = 'html';
+        mutableErrorNode.value = `<div class="md-filetree md-filetree--error">
   <div class="md-callout md-callout--red">
     <div class="md-callout__header">
       <span class="md-callout__icon">⚠️</span>

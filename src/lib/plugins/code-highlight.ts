@@ -1,9 +1,19 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import type { Parent } from 'unist';
-import { createHighlighter, type Highlighter } from 'shiki';
+import { createHighlighter, type Highlighter, type LanguageRegistration } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
 import { escapeHtml } from '../utils/html.js';
+
+/**
+ * Interface for mutating AST nodes during transformation
+ * Used when transforming Code nodes to Html nodes
+ */
+interface MutableCodeNode {
+  type: string;
+  value?: string;
+  lang?: string;
+}
 
 /**
  * Configuration options for code block highlighting
@@ -265,7 +275,7 @@ export function codeHighlightPlugin(
 
     // Get or create highlighter with enhanced language support
     if (!highlighterPromise) {
-      highlighterPromise = (async () => {
+      highlighterPromise = (async (): Promise<Highlighter> => {
         const h = await createHighlighter({
           themes: [theme],
           langs: [
@@ -292,7 +302,7 @@ export function codeHighlightPlugin(
         });
 
         // Register AgentFlow grammar with aliases
-        const grammar = agentflowGrammar as any;
+        const grammar = agentflowGrammar as unknown as LanguageRegistration;
         await h.loadLanguage({
           ...grammar,
           aliases: ['dsl', 'agentflow'],
@@ -357,9 +367,10 @@ export function codeHighlightPlugin(
 
           // Transform the node to HTML
           // Escape curly braces for Svelte 5 parser compatibility
-          (node as any).type = 'html';
-          (node as any).value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
-          delete node.lang;
+          const mutableNode = node as MutableCodeNode;
+          mutableNode.type = 'html';
+          mutableNode.value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+          delete mutableNode.lang;
         } catch (error) {
           console.error(
             `Failed to highlight code block with language "${metadata.language}":`,
@@ -367,10 +378,11 @@ export function codeHighlightPlugin(
           );
           // Fallback to plain code block
           // Escape curly braces for Svelte 5 parser compatibility
-          (node as any).type = 'html';
+          const mutableFallbackNode = node as MutableCodeNode;
+          mutableFallbackNode.type = 'html';
           const fallbackHtml = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
-          (node as any).value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
-          delete node.lang;
+          mutableFallbackNode.value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+          delete mutableFallbackNode.lang;
         }
       })
     );

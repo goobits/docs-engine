@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { generateSitemap, generateRobotsTxt, type SitemapConfig } from './sitemap';
 import type { DocsSection } from '../utils/navigation';
+import type { ComponentType } from 'svelte';
+
+/** Mock icon component for testing */
+const MockIcon = (() => null) as unknown as ComponentType;
 
 const mockNavigation: DocsSection[] = [
   {
     title: 'Getting Started',
     description: 'Get started',
-    icon: (() => null) as any,
+    icon: MockIcon,
     links: [
       { title: 'Installation', href: '/docs/installation', description: 'Install' },
       { title: 'Quick Start', href: '/docs/quick-start', description: 'Quick start' },
@@ -15,7 +19,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Features',
     description: 'Features',
-    icon: (() => null) as any,
+    icon: MockIcon,
     links: [{ title: 'Search', href: '/docs/features/search', description: 'Search' }],
   },
 ];
@@ -76,7 +80,7 @@ describe('sitemap utilities', () => {
         {
           title: 'Test',
           description: 'Test',
-          icon: (() => null) as any,
+          icon: MockIcon,
           links: [
             {
               title: 'Test & Debug',

@@ -483,7 +483,7 @@ export function groupByCategory(items: ApiItem[]): Map<string, ApiItem[]> {
     if (!groups.has(category)) {
       groups.set(category, []);
     }
-    groups.get(category)!.push(item);
+    groups.get(category)?.push(item);
   }
 
   // Sort items within each group alphabetically
