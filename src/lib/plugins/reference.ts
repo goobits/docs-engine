@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Text, Paragraph, PhrasingContent } from 'mdast';
+import type { Root, Text, Paragraph, PhrasingContent, Html } from 'mdast';
 import type { Parent } from 'unist';
 import {
   resolveSymbol,
@@ -12,7 +12,21 @@ import type { RenderOptions } from '../utils/symbol-renderer.js';
 import { escapeHtml } from '../utils/html.js';
 import { sanitizeTree } from '../utils/ast.js';
 
-const INLINE_REFERENCE_REGEX = /{@([\w/<>.,[\]]+(?:#[\w.<>]+)?)}/g;
+/**
+ * Interface for container directive nodes (from remark-directive)
+ * Used for reference directives that get transformed to HTML
+ */
+interface ContainerDirectiveNode {
+  type: string;
+  name?: string;
+  attributes?: Record<string, string>;
+  children?: unknown[];
+  value?: string;
+  data?: unknown;
+}
+
+// Use [^}]+ to match reference content - simpler and avoids overlapping character classes
+const INLINE_REFERENCE_REGEX = /{@([^}]+)}/g;
 
 // ============================================================================
 // Helper Functions (defined first to avoid hoisting issues)
@@ -28,7 +42,7 @@ function createWarningNode(reference: string, message: string): PhrasingContent 
   return {
     type: 'html',
     value: `<span class="symbol-ref-error" title="${escapeHtml(message)}" style="color: #e74c3c; background: #fee; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 0.9em; cursor: help; border: 1px solid #fcc;">⚠️${escapeHtml(reference)}</span>`,
-  } as any;
+  } as Html as PhrasingContent;
 }
 
 /**
@@ -63,7 +77,7 @@ function createWarningBlockHtml(reference: string, message: string): string {
  * @public
  */
 export function referencePlugin() {
-  return (tree: Root) => {
+  return (tree: Root): void => {
     // Lazy load symbol map during transform phase (not during plugin init)
     let symbolMap: SymbolMap;
     try {
@@ -116,7 +130,7 @@ export function referencePlugin() {
 
     referenceBlocks.forEach((node) => {
       // Type assertion needed for node transformation
-      const n = node as any;
+      const n = node as ContainerDirectiveNode;
 
       const symbolRef = extractSymbolReference(node);
       if (!symbolRef) {

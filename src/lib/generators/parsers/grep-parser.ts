@@ -5,7 +5,7 @@
  */
 
 import { execSync } from 'child_process';
-import type { ParsedItem } from './types';
+import type { ParsedItem } from './index';
 
 /**
  * Execute grep command and parse output

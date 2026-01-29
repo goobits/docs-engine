@@ -265,7 +265,7 @@ describe('CircuitBreaker', () => {
         requestTimeout: 5000,
       });
 
-      const slowFn = () =>
+      const slowFn = (): Promise<string> =>
         new Promise((resolve) => {
           setTimeout(() => resolve('success'), 10000);
         });
@@ -430,11 +430,11 @@ describe('CircuitBreaker', () => {
       });
 
       // Function that throws synchronously
-      const throwingFn = () => {
+      const throwingFn = (): Promise<string> => {
         throw new Error('sync error');
       };
 
-      await expect(breaker.execute(throwingFn as any)).rejects.toThrow('sync error');
+      await expect(breaker.execute(throwingFn)).rejects.toThrow('sync error');
     });
 
     it('should handle multiple concurrent requests in CLOSED state', async () => {

@@ -25,7 +25,7 @@
   import ScreenshotHydrator from './ScreenshotHydrator.svelte';
   import OpenAPIHydrator from './OpenAPIHydrator.svelte';
   import CollapseHydrator from './CollapseHydrator.svelte';
-  import type { DocsSection } from './types';
+  import type { DocsSection } from '../utils/navigation';
   import { getAdjacentLinks } from '../utils';
   import type { Contributor } from '../utils';
 

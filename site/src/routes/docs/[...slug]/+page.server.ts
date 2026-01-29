@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ params }) => {
             'Invalid frontmatter in markdown file',
             err instanceof Error ? err.message : String(err),
             'Check that your YAML frontmatter is properly formatted with --- delimiters.'
-          ) as any
+          ) as { message: string }
         );
       }
       throw error(404, 'Documentation page not found');
@@ -136,7 +136,7 @@ export const load: PageServerLoad = async ({ params }) => {
             'Markdown processing failed',
             err instanceof Error ? err.message : String(err),
             'Check for syntax errors in your markdown or plugin configuration.'
-          ) as any
+          ) as { message: string }
         );
       }
       throw error(404, 'Documentation page not found');
@@ -152,7 +152,7 @@ export const load: PageServerLoad = async ({ params }) => {
     const errorMessage = err instanceof Error ? err.message : String(err);
 
     // Re-throw SvelteKit errors (they're already formatted)
-    if ('status' in (err as any)) {
+    if (typeof err === 'object' && err !== null && 'status' in err) {
       throw err;
     }
 
@@ -168,7 +168,7 @@ export const load: PageServerLoad = async ({ params }) => {
           `Failed to render documentation page: ${slug}`,
           errorMessage,
           'Check the server logs above for the full stack trace.'
-        ) as any
+        ) as { message: string }
       );
     }
 

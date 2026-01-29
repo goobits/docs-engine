@@ -8,6 +8,58 @@ import { createBrowserLogger } from './browser-logger.js';
 
 const logger = createBrowserLogger('openapi-formatter');
 
+/**
+ * OpenAPI operation object structure
+ */
+interface OpenAPIOperation {
+  summary?: string;
+  description?: string;
+  tags?: string[];
+  requestBody?: {
+    required?: boolean;
+    content?: Record<string, { schema?: unknown }>;
+  };
+  parameters?: unknown[];
+  responses?: Record<string, unknown>;
+}
+
+/**
+ * OpenAPI schema object structure
+ */
+interface OpenAPISchema {
+  $ref?: string;
+  type?: string;
+  items?: OpenAPISchema;
+  properties?: Record<string, OpenAPISchema>;
+  required?: string[];
+  enum?: unknown[];
+  oneOf?: OpenAPISchema[];
+  anyOf?: OpenAPISchema[];
+  example?: unknown;
+  format?: string;
+  description?: string;
+}
+
+/**
+ * OpenAPI content object structure
+ */
+interface OpenAPIContent {
+  'application/json'?: {
+    schema?: unknown;
+  };
+}
+
+/**
+ * OpenAPI parameter object structure
+ */
+interface OpenAPIParameter {
+  name: string;
+  in: 'query' | 'path' | 'header' | 'cookie';
+  required?: boolean;
+  description?: string;
+  schema?: unknown;
+}
+
 export interface OpenAPIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
@@ -59,7 +111,7 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
       if (!operation) continue;
 
       // Type assertion needed for OpenAPI operation object
-      const op = operation as any;
+      const op = operation as OpenAPIOperation;
 
       const endpoint: OpenAPIEndpoint = {
         method: method.toUpperCase() as OpenAPIEndpoint['method'],
@@ -83,13 +135,16 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
 
       // Parse parameters (query, path, header)
       if (op.parameters) {
-        endpoint.parameters = op.parameters.map((param: unknown) => ({
-          name: (param as Record<string, unknown>).name,
-          in: (param as Record<string, unknown>).in,
-          required: (param as Record<string, unknown>).required,
-          description: (param as Record<string, unknown>).description,
-          schema: (param as Record<string, unknown>).schema,
-        }));
+        endpoint.parameters = op.parameters.map((param: unknown) => {
+          const p = param as OpenAPIParameter;
+          return {
+            name: p.name,
+            in: p.in,
+            required: p.required,
+            description: p.description,
+            schema: p.schema,
+          };
+        });
       }
 
       // Parse responses
@@ -98,7 +153,8 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
           const responseObj = response as Record<string, unknown>;
           endpoint.responses[statusCode] = {
             description: (responseObj.description as string) || '',
-            schema: (responseObj.content as any)?.['application/json']?.schema,
+            schema: (responseObj.content as OpenAPIContent | undefined)?.['application/json']
+              ?.schema,
           };
         }
       }
@@ -152,7 +208,7 @@ export function formatSchema(schema: unknown, indent: number = 0): string {
   if (!schema) return 'any';
 
   // Type assertion needed for OpenAPI schema objects
-  const s = schema as any;
+  const s = schema as OpenAPISchema;
 
   const indentStr = '  '.repeat(indent);
   const nextIndent = '  '.repeat(indent + 1);
@@ -205,8 +261,8 @@ export function formatSchema(schema: unknown, indent: number = 0): string {
 
   // Handle union types (oneOf, anyOf)
   if (s.oneOf || s.anyOf) {
-    const variants = s.oneOf || s.anyOf;
-    return variants.map((s: unknown) => formatSchema(s, indent)).join(' | ');
+    const variants = s.oneOf ?? s.anyOf ?? [];
+    return variants.map((schema: unknown) => formatSchema(schema, indent)).join(' | ');
   }
 
   // Handle primitive types
@@ -335,7 +391,7 @@ function generateExampleBody(schema: unknown): unknown {
  */
 function generateExampleValue(schema: unknown): unknown {
   // Type assertion needed for OpenAPI schema objects
-  const s = schema as any;
+  const s = schema as OpenAPISchema;
 
   if (s.example !== undefined) {
     return s.example;

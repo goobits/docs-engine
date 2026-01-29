@@ -47,10 +47,19 @@ export default [
       'no-implied-eval': 'error',
       'no-new-func': 'error',
 
-      // Code quality
-      '@typescript-eslint/explicit-function-return-type': 'warn',
+      // Code quality - STRICT mode
+      '@typescript-eslint/explicit-function-return-type': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+
+      // Security rules - adjust for intentional patterns
+      // Object injection is safe when using typed objects with validated keys
+      'security/detect-object-injection': 'off',
+      // Non-literal regexp is intentional for search functionality
+      'security/detect-non-literal-regexp': 'off',
+      // Unsafe regex - we'll fix specific cases manually
+      'security/detect-unsafe-regex': 'warn',
     },
   },
   {

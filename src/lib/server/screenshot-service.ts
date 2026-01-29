@@ -4,7 +4,6 @@ import { mkdir } from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 import type { MarkdownDocsConfig } from '../config/index.js';
-import type { ScreenshotRequest, ScreenshotResponse } from './types.js';
 import { CliExecutor } from './cli-executor.js';
 import { getVersion } from '../utils/version.js';
 import { createLogger } from './logger.js';
@@ -17,6 +16,37 @@ import {
   DIMENSIONS,
   IMAGE_QUALITY,
 } from '../constants.js';
+
+/**
+ * Screenshot generation request payload
+ */
+export interface ScreenshotRequest {
+  name: string;
+  url?: string;
+  version?: string;
+  config?: {
+    type?: 'web' | 'cli';
+    // Web screenshot config
+    viewport?: string;
+    waitFor?: string;
+    selector?: string;
+    fullPage?: boolean;
+    // CLI screenshot config
+    command?: string;
+    theme?: 'dracula' | 'monokai' | 'solarized' | 'nord';
+    showPrompt?: boolean;
+    promptText?: string;
+  };
+}
+
+/**
+ * Screenshot generation response
+ */
+export interface ScreenshotResponse {
+  success: boolean;
+  path?: string;
+  error?: string;
+}
 
 const logger = createLogger('screenshot-service');
 

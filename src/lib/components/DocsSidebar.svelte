@@ -9,7 +9,7 @@
   import { Search, ChevronDown, X } from '@lucide/svelte';
   import { getAllDocsLinks, type DocsLink } from '$lib/config/docs-navigation';
   import { SvelteSet } from 'svelte/reactivity';
-  import type { DocsSection } from './types';
+  import type { DocsSection } from '../utils/navigation';
 
   // Audience filter state
   const AUDIENCE_TYPES = [

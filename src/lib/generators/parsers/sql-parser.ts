@@ -4,7 +4,20 @@
  * Parses SQL schema files and extracts table definitions.
  */
 
-import type { ParsedItem } from './types';
+import type { ParsedItem } from './index';
+
+/** Column definition structure */
+interface SqlColumn {
+  name: string;
+  type: string;
+}
+
+/** Internal table structure used during parsing */
+interface SqlTable {
+  name: string;
+  columns: SqlColumn[];
+  constraints: string[];
+}
 
 /**
  * Parse SQL schema content
@@ -13,9 +26,9 @@ import type { ParsedItem } from './types';
  * @returns Array of parsed table definitions
  */
 export function parseSQL(content: string, _tablePattern?: RegExp): ParsedItem[] {
-  const tables: ParsedItem[] = [];
+  const tables: SqlTable[] = [];
   const lines = content.split('\n');
-  let currentTable: ParsedItem | null = null;
+  let currentTable: SqlTable | null = null;
   let inTableDef = false;
 
   for (const line of lines) {
@@ -59,5 +72,6 @@ export function parseSQL(content: string, _tablePattern?: RegExp): ParsedItem[] 
     }
   }
 
-  return tables;
+  // Convert SqlTable[] to ParsedItem[] (spreading preserves structure)
+  return tables.map((table) => ({ ...table }));
 }

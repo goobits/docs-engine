@@ -1,5 +1,28 @@
 export { createScreenshotEndpoint } from './screenshot-service';
-export type * from './types';
+export type { ScreenshotRequest, ScreenshotResponse } from './screenshot-service';
+
+/**
+ * Represents a documentation page loaded from a markdown file
+ */
+export interface DocPage {
+  markdown: string;
+  title: string;
+  slug: string;
+}
+
+/**
+ * Document loader interface for loading markdown files
+ */
+export interface DocsLoader {
+  load(slug: string): Promise<DocPage>;
+}
+
+/**
+ * Markdown renderer interface for converting markdown to HTML
+ */
+export interface MarkdownRenderer {
+  render(markdown: string): Promise<string>;
+}
 
 // Structured logging
 export * from './logger';
@@ -55,7 +78,7 @@ export type {
   EnrichmentRule,
   MarkdownTemplate,
   ParserConfig,
-} from '../generators/types';
+} from '../generators/generic-generator';
 
 // Navigation scanner utilities - Server-side only (requires Node.js fs/promises)
 export * from '../utils/navigation-scanner';

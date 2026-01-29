@@ -132,9 +132,10 @@ describe('parseSQL', () => {
   created_at TIMESTAMP
 );`;
     const result = parseSQL(content);
-    expect(result[0].columns[0]).toEqual({ name: 'id', type: 'INTEGER' });
-    expect(result[0].columns[1]).toEqual({ name: 'price', type: 'REAL' });
-    expect(result[0].columns[2]).toEqual({ name: 'created_at', type: 'TIMESTAMP' });
+    const columns = result[0].columns as Array<{ name: string; type: string }>;
+    expect(columns[0]).toEqual({ name: 'id', type: 'INTEGER' });
+    expect(columns[1]).toEqual({ name: 'price', type: 'REAL' });
+    expect(columns[2]).toEqual({ name: 'created_at', type: 'TIMESTAMP' });
   });
 
   it('should handle CREATE TABLE IF NOT EXISTS', () => {
@@ -152,8 +153,9 @@ describe('parseSQL', () => {
   CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );`;
     const result = parseSQL(content);
-    expect(result[0].constraints).toHaveLength(1);
-    expect(result[0].constraints[0]).toContain('CONSTRAINT fk_user');
+    const constraints = result[0].constraints as string[];
+    expect(constraints).toHaveLength(1);
+    expect(constraints[0]).toContain('CONSTRAINT fk_user');
   });
 
   it('should handle PRIMARY KEY constraints', () => {
@@ -163,8 +165,9 @@ describe('parseSQL', () => {
   PRIMARY KEY (a, b)
 );`;
     const result = parseSQL(content);
-    expect(result[0].constraints).toHaveLength(1);
-    expect(result[0].constraints[0]).toContain('PRIMARY KEY');
+    const constraints = result[0].constraints as string[];
+    expect(constraints).toHaveLength(1);
+    expect(constraints[0]).toContain('PRIMARY KEY');
   });
 
   it('should parse multiple tables', () => {
@@ -187,7 +190,8 @@ CREATE TABLE posts (
   id INTEGER
 );`;
     const result = parseSQL(content);
-    expect(result[0].columns).toHaveLength(1);
-    expect(result[0].columns[0].name).toBe('id');
+    const columns = result[0].columns as Array<{ name: string; type: string }>;
+    expect(columns).toHaveLength(1);
+    expect(columns[0].name).toBe('id');
   });
 });

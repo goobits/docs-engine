@@ -71,7 +71,7 @@ export function writeFile(filePath: string, content: string): void {
  * console.log(pkg.name);
  * ```
  */
-export function readJSON<T = any>(filePath: string): T {
+export function readJSON<T = unknown>(filePath: string): T {
   try {
     const content = readFile(filePath);
     return JSON.parse(content) as T;
@@ -94,7 +94,7 @@ export function readJSON<T = any>(filePath: string): T {
  * writeJSON('./data.json', { foo: 'bar' }, 2);
  * ```
  */
-export function writeJSON<T = any>(filePath: string, data: T, indent: number = 2): void {
+export function writeJSON<T = unknown>(filePath: string, data: T, indent: number = 2): void {
   const content = JSON.stringify(data, null, indent);
   writeFile(filePath, content);
 }

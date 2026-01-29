@@ -14,6 +14,18 @@ import { escapeHtml } from '../utils/html.js';
 import { sanitizeTree } from '../utils/ast.js';
 
 /**
+ * Interface for container directive nodes (from remark-directive)
+ * Used for collapse directives that get transformed to HTML
+ */
+interface ContainerDirectiveNode {
+  type: string;
+  name: string;
+  attributes?: Record<string, string>;
+  children?: BlockContent[];
+  value?: string;
+}
+
+/**
  * Remark plugin to transform :::collapse directives to HTML <details> elements
  *
  * Transforms directives like:
@@ -42,7 +54,7 @@ export function collapsePlugin(): (tree: Root) => void {
       visit(tree, 'containerDirective', (node: unknown) => {
         // Extra defensive checks
         if (!node) return;
-        const n = node as any;
+        const n = node as ContainerDirectiveNode;
         if (typeof n.name !== 'string') return;
         if (n.name !== 'collapse') return;
 

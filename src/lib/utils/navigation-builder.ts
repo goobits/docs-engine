@@ -186,7 +186,7 @@ export function buildNavigation(
       sectionMap.set(doc.section, []);
     }
 
-    sectionMap.get(doc.section)!.push({
+    sectionMap.get(doc.section)?.push({
       title: doc.title,
       description: doc.description,
       href: doc.href,
@@ -214,7 +214,7 @@ export function buildNavigation(
         sectionTitle === defaultSection
           ? defaultSectionDescription
           : `${sectionTitle} documentation`,
-      icon: icons[sectionTitle] || defaultIcon || (() => null),
+      icon: icons[sectionTitle] || defaultIcon || ((): null => null),
       links: sortedLinks,
     });
   }

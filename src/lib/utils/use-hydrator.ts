@@ -65,7 +65,7 @@ export function useHydrator(hydrate: () => void, options: HydratorOptions = {}):
   onMount(() => {
     if (!browser) return;
 
-    const wrappedHydrate = wrapInRaf ? () => requestAnimationFrame(hydrate) : hydrate;
+    const wrappedHydrate = wrapInRaf ? (): number => requestAnimationFrame(hydrate) : hydrate;
 
     // Subscribe to navigation events for SPA navigation
     afterNavigate(() => wrappedHydrate());
@@ -82,7 +82,7 @@ export function useHydrator(hydrate: () => void, options: HydratorOptions = {}):
       });
     });
 
-    return () => {
+    return (): void => {
       // Note: MutationObserver cleanup is handled by the component unmounting
       // and the observer going out of scope
     };

@@ -60,7 +60,8 @@ interface OptimizedImageConfig extends ImageMetadata {
  * Module-private helper
  */
 function isExternalUrl(url: string): boolean {
-  return /^(https?:)?\/\//.test(url);
+  // Use explicit alternation to avoid nested optional quantifiers
+  return /^(?:https:\/\/|http:\/\/|\/\/)/.test(url);
 }
 
 /**
@@ -144,7 +145,7 @@ export function imageOptimizationPlugin(options: ImageOptimizationOptions = {}) 
   const placeholder = options.placeholder || 'blur';
   const skipExternal = options.skipExternal !== false;
 
-  return (tree: Root) => {
+  return (tree: Root): void => {
     visit(tree, 'image', (node: Image) => {
       const src = node.url;
       const alt = node.alt || '';

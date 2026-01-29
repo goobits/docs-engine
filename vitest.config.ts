@@ -9,10 +9,9 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     pool: 'vmThreads',
-    poolOptions: {
-      vmThreads: {
-        memoryLimit: '512MB',
-      },
+    // Vitest 4: poolOptions moved to top-level vmThreads
+    vmThreads: {
+      memoryLimit: '512MB',
     },
     include: ['src/**/*.{test,spec}.{js,ts}'],
     coverage: {
