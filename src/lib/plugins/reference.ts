@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Paragraph, PhrasingContent, Html } from 'mdast';
 import type { Parent } from 'unist';
+import type { ContainerDirective } from '../mdast.d.ts';
 import {
   resolveSymbol,
   loadSymbolMap,
@@ -11,19 +12,6 @@ import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.js';
 import type { RenderOptions } from '../utils/symbol-renderer.js';
 import { escapeHtml } from '../utils/html.js';
 import { sanitizeTree } from '../utils/ast.js';
-
-/**
- * Interface for container directive nodes (from remark-directive)
- * Used for reference directives that get transformed to HTML
- */
-interface ContainerDirectiveNode {
-  type: string;
-  name?: string;
-  attributes?: Record<string, string>;
-  children?: unknown[];
-  value?: string;
-  data?: unknown;
-}
 
 // Use [^}]+ to match reference content - simpler and avoids overlapping character classes
 const INLINE_REFERENCE_REGEX = /{@([^}]+)}/g;
@@ -129,37 +117,43 @@ export function referencePlugin() {
     });
 
     referenceBlocks.forEach((node) => {
-      // Type assertion needed for node transformation
-      const n = node as ContainerDirectiveNode;
-
-      const symbolRef = extractSymbolReference(node);
+      const directive = node as ContainerDirective;
+      const symbolRef = extractSymbolReference(directive);
       if (!symbolRef) {
         throw new Error(':::reference directive requires a symbol name');
       }
 
-      const options = extractRenderOptions(node);
+      const options = extractRenderOptions(directive);
+
+      // Mutable reference for in-place transformation to HTML node
+      const mutable = node as {
+        type: string;
+        value?: string;
+        children?: unknown;
+        name?: string;
+        attributes?: unknown;
+        data?: unknown;
+      };
 
       try {
         const symbol = resolveSymbol(symbolRef, symbolMap);
-
-        n.type = 'html';
-        n.value = renderBlock(symbol, options);
-        delete n.children;
-        delete n.name;
-        delete n.attributes;
-        delete n.data;
+        mutable.type = 'html';
+        mutable.value = renderBlock(symbol, options);
+        delete mutable.children;
+        delete mutable.name;
+        delete mutable.attributes;
+        delete mutable.data;
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(
           `[ReferencePlugin] Failed to resolve symbol in :::reference ${symbolRef}: ${message}`
         );
-        // Instead of throwing, render a warning block
-        n.type = 'html';
-        n.value = createWarningBlockHtml(`:::reference ${symbolRef}`, message);
-        delete n.children;
-        delete n.name;
-        delete n.attributes;
-        delete n.data;
+        mutable.type = 'html';
+        mutable.value = createWarningBlockHtml(`:::reference ${symbolRef}`, message);
+        delete mutable.children;
+        delete mutable.name;
+        delete mutable.attributes;
+        delete mutable.data;
       }
     });
   };
@@ -242,16 +236,9 @@ function createInlineReferenceNode(symbol: SymbolDefinition): PhrasingContent {
   };
 }
 
-function extractSymbolReference(node: unknown): string | undefined {
-  if (!node || typeof node !== 'object' || !('children' in node)) return undefined;
-  const nodeObj = node as Record<string, unknown>;
-  const firstChild = Array.isArray(nodeObj.children) ? nodeObj.children[0] : undefined;
-  if (
-    firstChild &&
-    typeof firstChild === 'object' &&
-    'type' in firstChild &&
-    firstChild.type === 'paragraph'
-  ) {
+function extractSymbolReference(directive: ContainerDirective): string | undefined {
+  const firstChild = directive.children[0];
+  if (firstChild?.type === 'paragraph') {
     const textNode = (firstChild as Paragraph).children?.[0];
     if (textNode?.type === 'text') {
       return textNode.value.trim();
@@ -260,14 +247,12 @@ function extractSymbolReference(node: unknown): string | undefined {
   return undefined;
 }
 
-function extractRenderOptions(node: unknown): RenderOptions {
-  if (!node || typeof node !== 'object' || !('attributes' in node)) return {};
-  const nodeObj = node as Record<string, unknown>;
-  const showAttr = (nodeObj.attributes as Record<string, unknown> | undefined)?.show;
+function extractRenderOptions(directive: ContainerDirective): RenderOptions {
+  const showAttr = directive.attributes?.show;
   if (!showAttr) return {};
 
   return {
-    show: String(showAttr)
+    show: showAttr
       .split(',')
       .map((value) => value.trim())
       .filter(Boolean) as RenderOptions['show'],

@@ -1,18 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { referencePlugin } from './reference';
-import type { Root, Paragraph, Html, Link, Text, RootContent } from 'mdast';
+import type { Root, Paragraph, Html, Link, Text } from 'mdast';
+import type { ContainerDirective } from '../mdast.d.ts';
 import * as symbolResolver from '../utils/symbol-resolver.js';
 import * as symbolRenderer from '../utils/symbol-renderer.js';
-
-/**
- * Container directive node type (from remark-directive)
- */
-interface ContainerDirective {
-  type: 'containerDirective';
-  name: string;
-  attributes?: Record<string, string>;
-  children: RootContent[];
-}
 
 describe('reference plugin', () => {
   // Mock symbol map and related functions
@@ -59,22 +50,23 @@ describe('reference plugin', () => {
   });
 
   // Helper to create a reference block directive
-  const createReferenceBlock = (symbolName: string, attributes?: Record<string, string>): Root => ({
-    type: 'root',
-    children: [
-      {
-        type: 'containerDirective',
-        name: 'reference',
-        attributes,
-        children: [
-          {
-            type: 'paragraph',
-            children: [{ type: 'text', value: symbolName }],
-          } as Paragraph,
-        ],
-      } as unknown as ContainerDirective,
-    ],
-  });
+  const createReferenceBlock = (symbolName: string, attributes?: Record<string, string>): Root => {
+    const directive: ContainerDirective = {
+      type: 'containerDirective',
+      name: 'reference',
+      attributes,
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', value: symbolName }],
+        },
+      ],
+    };
+    return {
+      type: 'root',
+      children: [directive],
+    };
+  };
 
   describe('inline references', () => {
     it('should transform {@SymbolName} to a link node', () => {
@@ -325,15 +317,14 @@ describe('reference plugin', () => {
     it('should handle empty reference block', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
 
+      const emptyDirective: ContainerDirective = {
+        type: 'containerDirective',
+        name: 'reference',
+        children: [],
+      };
       const tree: Root = {
         type: 'root',
-        children: [
-          {
-            type: 'containerDirective',
-            name: 'reference',
-            children: [],
-          } as unknown as ContainerDirective,
-        ],
+        children: [emptyDirective],
       };
 
       const plugin = referencePlugin();
@@ -345,20 +336,19 @@ describe('reference plugin', () => {
     it('should handle reference block with non-text content', () => {
       vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
 
-      const tree: Root = {
-        type: 'root',
+      const directiveWithEmphasis: ContainerDirective = {
+        type: 'containerDirective',
+        name: 'reference',
         children: [
           {
-            type: 'containerDirective',
-            name: 'reference',
-            children: [
-              {
-                type: 'paragraph',
-                children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
-              } as Paragraph,
-            ],
-          } as unknown as ContainerDirective,
+            type: 'paragraph',
+            children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
+          },
         ],
+      };
+      const tree: Root = {
+        type: 'root',
+        children: [directiveWithEmphasis],
       };
 
       const plugin = referencePlugin();

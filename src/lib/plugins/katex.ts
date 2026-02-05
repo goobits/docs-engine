@@ -1,17 +1,13 @@
 import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
+import type { InlineMath, Math } from '../mdast.d.ts';
 import katex from 'katex';
 import { escapeHtml } from '../utils/html.js';
 
 /**
- * Interface for math nodes (from remark-math)
- * Represents both inline math and display math nodes
+ * Union type for math nodes (from remark-math)
  */
-interface MathNode {
-  type: string;
-  value: string;
-  data?: unknown;
-}
+type MathNode = InlineMath | Math;
 
 /**
  * Configuration options for math rendering with KaTeX
@@ -177,7 +173,6 @@ export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
 
     // Transform each math node to HTML
     mathNodes.forEach(({ node }) => {
-      // Type assertion needed for accessing node properties
       const n = node as MathNode;
       const latex = n.value;
       const displayMode = n.type === 'math'; // 'math' = display (block), 'inlineMath' = inline
@@ -185,10 +180,11 @@ export function katexPlugin(options: KaTeXOptions = {}): (tree: Root) => void {
       // Render with KaTeX
       const html = renderMath(latex, displayMode, options);
 
-      // Transform node to HTML
-      n.type = 'html';
-      n.value = html;
-      delete n.data;
+      // Transform node to HTML (mutate in place)
+      const mutable = node as { type: string; value: string; data?: unknown };
+      mutable.type = 'html';
+      mutable.value = html;
+      delete mutable.data;
     });
   };
 }

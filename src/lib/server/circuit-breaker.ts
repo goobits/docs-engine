@@ -80,14 +80,14 @@ export class CircuitBreakerError extends Error {
  * @public
  */
 export class CircuitBreaker {
-  private state: CircuitState = CircuitState.CLOSED;
-  private failureCount = 0;
-  private successCount = 0;
-  private nextAttempt = Date.now();
-  private readonly config: CircuitBreakerConfig;
+  #state: CircuitState = CircuitState.CLOSED;
+  #failureCount = 0;
+  #successCount = 0;
+  #nextAttempt = Date.now();
+  readonly #config: CircuitBreakerConfig;
 
   constructor(config: Partial<CircuitBreakerConfig> & { name: string }) {
-    this.config = {
+    this.#config = {
       failureThreshold: config.failureThreshold ?? CIRCUIT_BREAKER.FAILURE_THRESHOLD,
       recoveryTimeout: config.recoveryTimeout ?? CIRCUIT_BREAKER.RECOVERY_TIMEOUT,
       successThreshold: config.successThreshold ?? CIRCUIT_BREAKER.SUCCESS_THRESHOLD,
@@ -104,33 +104,33 @@ export class CircuitBreaker {
    * @throws CircuitBreakerError if circuit is open
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.state === CircuitState.OPEN) {
-      if (Date.now() < this.nextAttempt) {
+    if (this.#state === CircuitState.OPEN) {
+      if (Date.now() < this.#nextAttempt) {
         logger.warn(
           {
-            breaker: this.config.name,
-            state: this.state,
-            nextAttempt: new Date(this.nextAttempt).toISOString(),
+            breaker: this.#config.name,
+            state: this.#state,
+            nextAttempt: new Date(this.#nextAttempt).toISOString(),
           },
           'Circuit breaker is OPEN'
         );
-        throw new CircuitBreakerError(this.config.name);
+        throw new CircuitBreakerError(this.#config.name);
       }
 
       // Try recovery
-      this.state = CircuitState.HALF_OPEN;
-      this.successCount = 0;
-      logger.info({ breaker: this.config.name }, 'Circuit breaker entering HALF_OPEN state');
+      this.#state = CircuitState.HALF_OPEN;
+      this.#successCount = 0;
+      logger.info({ breaker: this.#config.name }, 'Circuit breaker entering HALF_OPEN state');
     }
 
     try {
       // Add timeout to prevent hanging
-      const result = await this.withTimeout(fn());
+      const result = await this.#withTimeout(fn());
 
-      this.onSuccess();
+      this.#onSuccess();
       return result;
     } catch (error) {
-      this.onFailure(error);
+      this.#onFailure(error);
       throw error;
     }
   }
@@ -139,13 +139,13 @@ export class CircuitBreaker {
    * Wrap promise with timeout
    * Properly cleans up timer to prevent memory leaks
    */
-  private withTimeout<T>(promise: Promise<T>): Promise<T> {
+  #withTimeout<T>(promise: Promise<T>): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
-        reject(new Error(`Request timeout after ${this.config.requestTimeout}ms`));
-      }, this.config.requestTimeout);
+        reject(new Error(`Request timeout after ${this.#config.requestTimeout}ms`));
+      }, this.#config.requestTimeout);
     });
 
     return Promise.race([promise, timeoutPromise]).finally(() => {
@@ -156,15 +156,15 @@ export class CircuitBreaker {
   /**
    * Handle successful request
    */
-  private onSuccess(): void {
-    this.failureCount = 0;
+  #onSuccess(): void {
+    this.#failureCount = 0;
 
-    if (this.state === CircuitState.HALF_OPEN) {
-      this.successCount++;
+    if (this.#state === CircuitState.HALF_OPEN) {
+      this.#successCount++;
 
-      if (this.successCount >= this.config.successThreshold) {
-        this.state = CircuitState.CLOSED;
-        logger.info({ breaker: this.config.name }, 'Circuit breaker CLOSED - service recovered');
+      if (this.#successCount >= this.#config.successThreshold) {
+        this.#state = CircuitState.CLOSED;
+        logger.info({ breaker: this.#config.name }, 'Circuit breaker CLOSED - service recovered');
       }
     }
   }
@@ -172,31 +172,31 @@ export class CircuitBreaker {
   /**
    * Handle failed request
    */
-  private onFailure(error: unknown): void {
-    this.failureCount++;
-    this.successCount = 0;
+  #onFailure(error: unknown): void {
+    this.#failureCount++;
+    this.#successCount = 0;
 
     logger.warn(
       {
-        breaker: this.config.name,
-        failureCount: this.failureCount,
-        threshold: this.config.failureThreshold,
+        breaker: this.#config.name,
+        failureCount: this.#failureCount,
+        threshold: this.#config.failureThreshold,
         error: error instanceof Error ? error.message : String(error),
       },
       'Circuit breaker request failed'
     );
 
     if (
-      this.failureCount >= this.config.failureThreshold ||
-      this.state === CircuitState.HALF_OPEN
+      this.#failureCount >= this.#config.failureThreshold ||
+      this.#state === CircuitState.HALF_OPEN
     ) {
-      this.state = CircuitState.OPEN;
-      this.nextAttempt = Date.now() + this.config.recoveryTimeout;
+      this.#state = CircuitState.OPEN;
+      this.#nextAttempt = Date.now() + this.#config.recoveryTimeout;
 
       logger.error(
         {
-          breaker: this.config.name,
-          nextAttempt: new Date(this.nextAttempt).toISOString(),
+          breaker: this.#config.name,
+          nextAttempt: new Date(this.#nextAttempt).toISOString(),
         },
         'Circuit breaker OPEN - too many failures'
       );
@@ -207,18 +207,18 @@ export class CircuitBreaker {
    * Get current circuit state
    */
   getState(): CircuitState {
-    return this.state;
+    return this.#state;
   }
 
   /**
    * Manually reset circuit breaker to CLOSED state
    */
   reset(): void {
-    this.state = CircuitState.CLOSED;
-    this.failureCount = 0;
-    this.successCount = 0;
-    this.nextAttempt = Date.now();
+    this.#state = CircuitState.CLOSED;
+    this.#failureCount = 0;
+    this.#successCount = 0;
+    this.#nextAttempt = Date.now();
 
-    logger.info({ breaker: this.config.name }, 'Circuit breaker manually reset to CLOSED');
+    logger.info({ breaker: this.#config.name }, 'Circuit breaker manually reset to CLOSED');
   }
 }

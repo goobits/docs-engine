@@ -925,13 +925,13 @@ export class SymbolMapGenerator {
  *
  * @example
  * ```typescript
- * import { createSymbolMapGenerator } from '@goobits/docs-engine/utils';
+ * import { createSymbolMapGenerator, getVersion } from '@goobits/docs-engine/utils';
  *
  * const generator = createSymbolMapGenerator({
  *   sourcePatterns: ['src/**\/*.ts'],
  *   excludePatterns: ['**\/*.test.ts'],
  *   cacheDir: '.dev/tmp',
- *   cacheVersion: '1.0',
+ *   cacheVersion: getVersion(), // Use package.json version for cache invalidation
  *   outputPath: 'docs/.generated/symbol-map.json'
  * });
  *
