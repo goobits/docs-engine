@@ -5,14 +5,9 @@ import * as symbolResolver from '../utils/symbol-resolver.js';
 import * as symbolRenderer from '../utils/symbol-renderer.js';
 
 /**
- * Container directive node type (from remark-directive)
+ * Note: ContainerDirective (type: 'containerDirective') is a custom mdast node
+ * from remark-directive. We cast to RootContent when adding to Root.children.
  */
-interface ContainerDirective {
-  type: 'containerDirective';
-  name: string;
-  attributes?: Record<string, string>;
-  children: RootContent[];
-}
 
 describe('reference plugin', () => {
   // Mock symbol map and related functions
@@ -72,7 +67,7 @@ describe('reference plugin', () => {
             children: [{ type: 'text', value: symbolName }],
           } as Paragraph,
         ],
-      } as unknown as ContainerDirective,
+      } as unknown as RootContent,
     ],
   });
 
@@ -332,7 +327,7 @@ describe('reference plugin', () => {
             type: 'containerDirective',
             name: 'reference',
             children: [],
-          } as unknown as ContainerDirective,
+          } as unknown as RootContent,
         ],
       };
 
@@ -357,7 +352,7 @@ describe('reference plugin', () => {
                 children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
               } as Paragraph,
             ],
-          } as unknown as ContainerDirective,
+          } as unknown as RootContent,
         ],
       };
 

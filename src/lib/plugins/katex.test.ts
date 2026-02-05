@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { katexPlugin, type KaTeXOptions } from './katex';
-import type { Root, Paragraph, Html, Text } from 'mdast';
+import type { Root, Paragraph, Html, Text, PhrasingContent, RootContent } from 'mdast';
 
 /**
  * Tests for KaTeX math rendering plugin
@@ -9,25 +9,11 @@ import type { Root, Paragraph, Html, Text } from 'mdast';
  * - Tests focus on public API (katexPlugin) behavior
  * - Does NOT test private renderMath() function
  * - Tests actual user-facing functionality
+ *
+ * Note: InlineMath (type: 'inlineMath') and DisplayMath (type: 'math') are
+ * custom mdast nodes from remark-math. We cast them to PhrasingContent or
+ * RootContent as appropriate since they extend the standard mdast types.
  */
-
-/**
- * Inline math node type (custom mdast node from remark-math)
- */
-interface InlineMath {
-  type: 'inlineMath';
-  value: string;
-  data?: Record<string, unknown>;
-}
-
-/**
- * Display math node type (custom mdast node from remark-math)
- */
-interface DisplayMath {
-  type: 'math';
-  value: string;
-  data?: Record<string, unknown>;
-}
 
 /**
  * Helper to create a test tree with inline math
@@ -43,7 +29,7 @@ function createInlineMathTree(latex: string): Root {
             type: 'inlineMath',
             value: latex,
             data: {},
-          } as unknown as InlineMath,
+          } as unknown as PhrasingContent,
         ],
       },
     ],
@@ -61,7 +47,7 @@ function createDisplayMathTree(latex: string): Root {
         type: 'math',
         value: latex,
         data: {},
-      } as unknown as DisplayMath,
+      } as unknown as RootContent,
     ],
   };
 }
@@ -230,17 +216,17 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown as InlineMath,
+          } as unknown as RootContent,
           {
             type: 'math',
             value: 'y = mx + b',
             data: {},
-          } as unknown as DisplayMath,
+          } as unknown as RootContent,
           {
             type: 'inlineMath',
             value: 'z^3',
             data: {},
-          } as unknown as InlineMath,
+          } as unknown as RootContent,
         ],
       };
 
@@ -270,7 +256,7 @@ describe('katex plugin', () => {
                 type: 'inlineMath',
                 value: 'x^2',
                 data: {},
-              } as unknown as InlineMath,
+              } as unknown as PhrasingContent,
               {
                 type: 'text',
                 value: ' more text',
@@ -331,7 +317,7 @@ describe('katex plugin', () => {
             type: 'inlineMath',
             value: 'x^2',
             data: {},
-          } as unknown as InlineMath,
+          } as unknown as RootContent,
         ],
       };
 

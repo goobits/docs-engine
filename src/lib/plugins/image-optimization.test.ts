@@ -156,8 +156,7 @@ describe('imageOptimizationPlugin', () => {
     // Config should be base64 encoded, so we can't easily inspect it
     // But we can verify it exists and has the right structure
     const configMatch = transformed.value.match(/data-config="([^"]+)"/);
-    expect(configMatch).toBeTruthy();
-    expect(configMatch[1].length).toBeGreaterThan(0);
+    expect(configMatch?.[1]).toBeTruthy();
   });
 
   it('should preserve alt text', async () => {
