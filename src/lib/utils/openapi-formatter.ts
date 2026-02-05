@@ -371,8 +371,7 @@ function generateExampleBody(schema: unknown): unknown {
   }
 
   if (schemaObj.type === 'object' || schemaObj.properties) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const example: any = {};
+    const example: Record<string, unknown> = {};
 
     if (schemaObj.properties) {
       for (const [key, prop] of Object.entries(schemaObj.properties)) {

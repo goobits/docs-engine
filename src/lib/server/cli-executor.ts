@@ -58,10 +58,13 @@ export interface CliExecutorConfig {
  * @public
  */
 export class CliExecutor {
-  private config: Required<CliExecutorConfig>;
+  readonly #config: Required<CliExecutorConfig>;
+
+  /** Pattern to detect shell metacharacters that could enable command injection */
+  static readonly #DANGEROUS_CHARS = /[;&|`$(){}[\]<>\\]/;
 
   constructor(config: CliExecutorConfig) {
-    this.config = {
+    this.#config = {
       timeout: TIMEOUT.VERY_LONG,
       maxOutputLength: FILE_SIZE.MAX_CLI_OUTPUT,
       workingDirectory: process.cwd(),
@@ -69,17 +72,7 @@ export class CliExecutor {
     };
   }
 
-  /**
-   * Pattern to detect shell metacharacters that could enable command injection
-   * Note: Quotes are allowed for argument grouping but will be handled by parseCommand
-   */
-  private static readonly DANGEROUS_CHARS = /[;&|`$(){}[\]<>\\]/;
-
-  /**
-   * Parse command string into executable and arguments
-   * Handles quoted strings (single and double quotes) for proper argument grouping
-   */
-  private parseCommand(command: string): { executable: string; args: string[] } {
+  #parseCommand(command: string): { executable: string; args: string[] } {
     const tokens: string[] = [];
     let current = '';
     let inQuote: string | null = null;
@@ -88,20 +81,15 @@ export class CliExecutor {
       const char = command[i];
 
       if (inQuote) {
-        // Inside a quoted string
         if (char === inQuote) {
-          // End of quote
           inQuote = null;
         } else {
           current += char;
         }
       } else {
-        // Outside quotes
         if (char === '"' || char === "'") {
-          // Start of quote
           inQuote = char;
         } else if (char === ' ' || char === '\t') {
-          // Whitespace separator
           if (current) {
             tokens.push(current);
             current = '';
@@ -112,7 +100,6 @@ export class CliExecutor {
       }
     }
 
-    // Push any remaining token
     if (current) {
       tokens.push(current);
     }
@@ -123,15 +110,10 @@ export class CliExecutor {
     };
   }
 
-  /**
-   * Validate command against allowlist and check for injection attempts
-   * Only allows commands that start with an allowed prefix and contain no shell metacharacters
-   */
-  private validateCommand(command: string): boolean {
+  #validateCommand(command: string): boolean {
     const baseCommand = command.trim().split(' ')[0];
 
-    // Check allowlist first
-    const isAllowed = this.config.allowedCommands.some(
+    const isAllowed = this.#config.allowedCommands.some(
       (allowed) => baseCommand === allowed || baseCommand.startsWith(allowed + '/')
     );
 
@@ -139,8 +121,7 @@ export class CliExecutor {
       return false;
     }
 
-    // Block shell metacharacters to prevent command injection
-    if (CliExecutor.DANGEROUS_CHARS.test(command)) {
+    if (CliExecutor.#DANGEROUS_CHARS.test(command)) {
       return false;
     }
 
@@ -160,36 +141,33 @@ export class CliExecutor {
    * @throws Error if command is not allowed
    */
   async execute(command: string): Promise<CommandExecutionResult> {
-    if (!this.validateCommand(command)) {
+    if (!this.#validateCommand(command)) {
       throw new Error(`Command not allowed: ${command.split(' ')[0]}`);
     }
 
-    const { executable, args } = this.parseCommand(command);
+    const { executable, args } = this.#parseCommand(command);
     const startTime = Date.now();
 
     try {
       const { stdout, stderr } = await execFileAsync(executable, args, {
-        timeout: this.config.timeout,
-        maxBuffer: this.config.maxOutputLength,
-        cwd: this.config.workingDirectory,
+        timeout: this.#config.timeout,
+        maxBuffer: this.#config.maxOutputLength,
+        cwd: this.#config.workingDirectory,
         env: {
           ...process.env,
-          // Force color output for commands that support it
           FORCE_COLOR: '1',
           CLICOLOR_FORCE: '1',
         },
       });
 
       return {
-        stdout: stdout.slice(0, this.config.maxOutputLength),
-        stderr: stderr.slice(0, this.config.maxOutputLength),
+        stdout: stdout.slice(0, this.#config.maxOutputLength),
+        stderr: stderr.slice(0, this.#config.maxOutputLength),
         exitCode: 0,
         duration: Date.now() - startTime,
       };
     } catch (error: unknown) {
       const err = error as Record<string, unknown>;
-      // Node.js error codes can be strings (e.g., 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER')
-      // Process exit codes are numbers. Use 1 as default for Node.js errors.
       const exitCode = typeof err.code === 'number' ? err.code : 1;
       return {
         stdout: (err.stdout as string) || '',

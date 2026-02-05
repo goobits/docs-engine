@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { katexPlugin, type KaTeXOptions } from './katex';
-import type { Root, Paragraph, Html, Text, PhrasingContent, RootContent } from 'mdast';
+import type { Root, Paragraph, Html, Text } from 'mdast';
+import type { InlineMath, Math } from '../mdast.d.ts';
 
 /**
  * Tests for KaTeX math rendering plugin
@@ -9,28 +10,22 @@ import type { Root, Paragraph, Html, Text, PhrasingContent, RootContent } from '
  * - Tests focus on public API (katexPlugin) behavior
  * - Does NOT test private renderMath() function
  * - Tests actual user-facing functionality
- *
- * Note: InlineMath (type: 'inlineMath') and DisplayMath (type: 'math') are
- * custom mdast nodes from remark-math. We cast them to PhrasingContent or
- * RootContent as appropriate since they extend the standard mdast types.
  */
 
 /**
  * Helper to create a test tree with inline math
  */
 function createInlineMathTree(latex: string): Root {
+  const mathNode: InlineMath = {
+    type: 'inlineMath',
+    value: latex,
+  };
   return {
     type: 'root',
     children: [
       {
         type: 'paragraph',
-        children: [
-          {
-            type: 'inlineMath',
-            value: latex,
-            data: {},
-          } as unknown as PhrasingContent,
-        ],
+        children: [mathNode],
       },
     ],
   };
@@ -40,15 +35,13 @@ function createInlineMathTree(latex: string): Root {
  * Helper to create a test tree with display math
  */
 function createDisplayMathTree(latex: string): Root {
+  const mathNode: Math = {
+    type: 'math',
+    value: latex,
+  };
   return {
     type: 'root',
-    children: [
-      {
-        type: 'math',
-        value: latex,
-        data: {},
-      } as unknown as RootContent,
-    ],
+    children: [mathNode],
   };
 }
 
@@ -209,25 +202,12 @@ describe('katex plugin', () => {
 
   describe('multiple math nodes', () => {
     it('should handle multiple math nodes in a tree', () => {
+      const inline1: InlineMath = { type: 'inlineMath', value: 'x^2' };
+      const display: Math = { type: 'math', value: 'y = mx + b' };
+      const inline2: InlineMath = { type: 'inlineMath', value: 'z^3' };
       const tree: Root = {
         type: 'root',
-        children: [
-          {
-            type: 'inlineMath',
-            value: 'x^2',
-            data: {},
-          } as unknown as RootContent,
-          {
-            type: 'math',
-            value: 'y = mx + b',
-            data: {},
-          } as unknown as RootContent,
-          {
-            type: 'inlineMath',
-            value: 'z^3',
-            data: {},
-          } as unknown as RootContent,
-        ],
+        children: [inline1, display, inline2],
       };
 
       const plugin = katexPlugin();
@@ -242,25 +222,16 @@ describe('katex plugin', () => {
     });
 
     it('should handle mixed content (text and math)', () => {
+      const inlineMath: InlineMath = { type: 'inlineMath', value: 'x^2' };
       const tree: Root = {
         type: 'root',
         children: [
           {
             type: 'paragraph',
             children: [
-              {
-                type: 'text',
-                value: 'Some text ',
-              },
-              {
-                type: 'inlineMath',
-                value: 'x^2',
-                data: {},
-              } as unknown as PhrasingContent,
-              {
-                type: 'text',
-                value: ' more text',
-              },
+              { type: 'text', value: 'Some text ' },
+              inlineMath,
+              { type: 'text', value: ' more text' },
             ],
           },
         ],
@@ -270,11 +241,11 @@ describe('katex plugin', () => {
       plugin(tree);
 
       const paragraph = tree.children[0] as Paragraph;
-      const mathNode = paragraph.children[1] as Html;
+      const transformed = paragraph.children[1] as Html;
 
-      expect(mathNode.type).toBe('html');
-      expect(mathNode.value).toContain('katex');
-      expect(mathNode.value).toContain('x');
+      expect(transformed.type).toBe('html');
+      expect(transformed.value).toContain('katex');
+      expect(transformed.value).toContain('x');
     });
   });
 
@@ -301,23 +272,15 @@ describe('katex plugin', () => {
     });
 
     it('should not modify non-math nodes', () => {
+      const inlineMath: InlineMath = { type: 'inlineMath', value: 'x^2' };
       const tree: Root = {
         type: 'root',
         children: [
           {
             type: 'paragraph',
-            children: [
-              {
-                type: 'text',
-                value: 'Plain text',
-              },
-            ],
+            children: [{ type: 'text', value: 'Plain text' }],
           },
-          {
-            type: 'inlineMath',
-            value: 'x^2',
-            data: {},
-          } as unknown as RootContent,
+          inlineMath,
         ],
       };
 
@@ -331,8 +294,8 @@ describe('katex plugin', () => {
       expect((paragraph.children[0] as Text).value).toBe('Plain text');
 
       // Math node should be transformed
-      const mathNode = tree.children[1] as Html;
-      expect(mathNode.type).toBe('html');
+      const transformed = tree.children[1] as Html;
+      expect(transformed.type).toBe('html');
     });
   });
 });
