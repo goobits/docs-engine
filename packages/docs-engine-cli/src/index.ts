@@ -300,7 +300,7 @@ program
   .option('-o, --output <path>', 'Output path for symbol map', 'docs/symbol-map.json')
   .option('-e, --exclude <patterns...>', 'Patterns to exclude')
   .option('--cache-dir <path>', 'Cache directory', '.cache')
-  .option('--cache-version <version>', 'Cache version', '1.0')
+  .option('--cache-version <version>', 'Cache version', getVersion())
   .option('-w, --watch', 'Watch files and regenerate on changes')
   .option('-b, --benchmark', 'Run performance benchmark')
   .option('--debounce <ms>', 'Debounce delay for watch mode in ms', '500')

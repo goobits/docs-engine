@@ -5,6 +5,7 @@
 
 import { createSymbolMapGenerator } from './src/lib/utils/symbol-generation.js';
 import { createLogger } from './src/lib/utils/logger.js';
+import { getVersion } from './src/lib/utils/version.js';
 
 const logger = createLogger('generate-symbols');
 
@@ -12,7 +13,7 @@ const generator = createSymbolMapGenerator({
   sourcePatterns: ['src/lib/**/*.ts'],
   excludePatterns: ['**/*.test.ts', '**/*.spec.ts', '**/node_modules/**', '**/dist/**'],
   cacheDir: '.dev/tmp',
-  cacheVersion: '1.0.0',
+  cacheVersion: getVersion(),
   outputPath: 'docs/.generated/symbol-map.json',
   baseDir: process.cwd(),
 });
