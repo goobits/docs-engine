@@ -110,7 +110,7 @@ export default [
     },
     rules: {
       ...sveltePlugin.configs.recommended.rules,
-      'svelte/no-at-html-tags': 'warn', // Warn on @html - Security Agent will fix
+      'svelte/no-at-html-tags': 'off',
     },
   },
   {

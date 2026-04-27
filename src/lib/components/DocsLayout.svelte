@@ -182,7 +182,7 @@
           {/if}
           <a href={crumb.href} class="docs-breadcrumb">
             {#if crumb.icon}
-              <svelte:component this={crumb.icon} size={16} />
+              <crumb.icon size={16} />
             {/if}
             {crumb.label}
           </a>
@@ -193,6 +193,7 @@
     <!-- Content -->
     <div class="docs-content">
       <article class="docs-prose">
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html content}
       </article>
 

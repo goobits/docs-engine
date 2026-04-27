@@ -165,10 +165,10 @@
     };
   });
 
-  const placeholderUrl = getPlaceholder();
-  const mainFormat = formats[0] || 'original';
-  const mainSrc = getOptimizedUrl(mainFormat);
-  const srcSet = generateSrcSet(mainFormat);
+  const placeholderUrl = $derived.by(() => getPlaceholder());
+  const mainFormat = $derived(formats[0] || 'original');
+  const mainSrc = $derived.by(() => getOptimizedUrl(mainFormat));
+  const srcSet = $derived.by(() => generateSrcSet(mainFormat));
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -189,24 +189,50 @@
     {/if}
 
     <!-- Main image element -->
-    <img
-      bind:this={imageElement}
-      src={lazy && placeholderUrl ? placeholderUrl : mainSrc}
-      data-src={lazy && placeholderUrl ? mainSrc : undefined}
-      {alt}
-      {title}
-      {width}
-      {height}
-      srcset={lazy ? undefined : srcSet}
-      loading={lazy ? 'lazy' : 'eager'}
-      class="optimized-image"
-      class:loaded
-      class:error
-      class:zoomable={zoom}
-      onload={handleLoad}
-      onerror={handleError}
-      onclick={handleClick}
-    />
+    {#if zoom}
+      <button
+        class="optimized-image-button"
+        onclick={handleClick}
+        type="button"
+        aria-label="Open image viewer for {alt}"
+      >
+        <img
+          bind:this={imageElement}
+          src={lazy && placeholderUrl ? placeholderUrl : mainSrc}
+          data-src={lazy && placeholderUrl ? mainSrc : undefined}
+          {alt}
+          {title}
+          {width}
+          {height}
+          srcset={lazy ? undefined : srcSet}
+          loading={lazy ? 'lazy' : 'eager'}
+          class="optimized-image"
+          class:loaded
+          class:error
+          class:zoomable={zoom}
+          onload={handleLoad}
+          onerror={handleError}
+        />
+      </button>
+    {:else}
+      <img
+        bind:this={imageElement}
+        src={lazy && placeholderUrl ? placeholderUrl : mainSrc}
+        data-src={lazy && placeholderUrl ? mainSrc : undefined}
+        {alt}
+        {title}
+        {width}
+        {height}
+        srcset={lazy ? undefined : srcSet}
+        loading={lazy ? 'lazy' : 'eager'}
+        class="optimized-image"
+        class:loaded
+        class:error
+        class:zoomable={zoom}
+        onload={handleLoad}
+        onerror={handleError}
+      />
+    {/if}
   </picture>
 
   {#if title}
@@ -216,7 +242,14 @@
 
 <!-- Lightbox Modal -->
 {#if showLightbox}
-  <div class="image-lightbox" onclick={closeLightbox} role="dialog" aria-label="Image viewer">
+  <div
+    class="image-lightbox"
+    onclick={closeLightbox}
+    onkeydown={handleKeydown}
+    role="dialog"
+    tabindex="-1"
+    aria-label="Image viewer"
+  >
     <div class="lightbox-backdrop"></div>
     <div class="lightbox-content">
       <button class="lightbox-close" onclick={closeLightbox} aria-label="Close">
@@ -241,6 +274,13 @@
 
   picture {
     display: block;
+  }
+
+  .optimized-image-button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: inline-block;
   }
 
   .optimized-image {

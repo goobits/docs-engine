@@ -63,11 +63,9 @@ export type {
   SearchIndexConfig,
 } from './search-index';
 
-// Symbol reference utilities
-export * from './symbol-resolver';
-export type { SymbolDefinition, SymbolMap } from './symbol-resolver';
-export * from './symbol-renderer';
-export type { RenderOptions } from './symbol-renderer';
+// NOTE: Symbol reference utilities moved to server/index.ts
+// because symbol resolution loads generated files from disk.
+// Import from '@goobits/docs-engine/server' instead.
 
 // NOTE: Markdown generation utilities moved to server/index.ts (requires Node.js)
 // NOTE: File I/O utilities moved to server/index.ts (requires Node.js fs)

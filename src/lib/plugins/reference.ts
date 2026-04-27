@@ -25,8 +25,8 @@ const INLINE_REFERENCE_REGEX = /{@([^}]+)}/g;
  * Includes client-side console.error that will show in browser console
  */
 function createWarningNode(reference: string, message: string): PhrasingContent {
-  // For now, return a simple text node to test if the issue is with HTML nodes
-  // TODO: Add back visual styling and console errors once we verify text nodes work
+  // Render unresolved references inline so docs continue to build while still
+  // exposing the failure clearly in the page output.
   return {
     type: 'html',
     value: `<span class="symbol-ref-error" title="${escapeHtml(message)}" style="color: #e74c3c; background: #fee; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 0.9em; cursor: help; border: 1px solid #fcc;">⚠️${escapeHtml(reference)}</span>`,

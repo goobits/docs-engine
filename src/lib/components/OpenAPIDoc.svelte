@@ -26,9 +26,8 @@
     responses: false,
   });
 
-  // Generate examples
-  const curlExample = generateCurlExample(endpoint, baseUrl);
-  const tsExample = generateTypeScriptExample(endpoint);
+  const curlExample = $derived.by(() => generateCurlExample(endpoint, baseUrl));
+  const tsExample = $derived.by(() => generateTypeScriptExample(endpoint));
 
   function toggleSection(section: string) {
     expandedSections[section] = !expandedSections[section];

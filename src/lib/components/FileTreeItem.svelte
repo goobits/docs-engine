@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FileTreeItem from './FileTreeItem.svelte';
   import type { TreeNode } from '@goobits/docs-engine/utils';
   import { getFileType, FILE_TYPES } from '@goobits/docs-engine/utils';
 
@@ -43,21 +44,21 @@
   class:md-filetree__item--file={!isFolder}
   class:md-filetree__item--hovered={isHovered}
   role="treeitem"
+  tabindex="-1"
   aria-level={node.depth + 1}
   aria-expanded={isFolder ? isExpanded : undefined}
+  aria-selected={!isFolder ? false : undefined}
   aria-label="{isFolder ? 'Folder' : 'File'}: {node.name}"
   style="--depth: {node.depth}; --file-color: {fileType.color}"
+  onmouseenter={() => (hoveredPath = node.path)}
+  onmouseleave={() => (hoveredPath = null)}
 >
-  <div
-    class="md-filetree__row"
-    on:mouseenter={() => (hoveredPath = node.path)}
-    on:mouseleave={() => (hoveredPath = null)}
-  >
+  <div class="md-filetree__row">
     {#if isFolder}
       <button
         class="md-filetree__toggle"
         class:md-filetree__toggle--expanded={isExpanded}
-        on:click={() => toggleFolder(node.path)}
+        onclick={() => toggleFolder(node.path)}
         aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
       >
         ▶
@@ -74,7 +75,7 @@
       class="md-filetree__name"
       class:md-filetree__name--folder={isFolder}
       class:md-filetree__name--copied={isCopied}
-      on:click={() => allowCopy && copyPath(node.path)}
+      onclick={() => allowCopy && copyPath(node.path)}
       title={allowCopy ? `Click to copy: ${node.path}` : node.path}
       aria-label={allowCopy
         ? `Copy path: ${node.path}`
@@ -91,7 +92,7 @@
     {#if githubUrl && isHovered}
       <button
         class="md-filetree__github"
-        on:click={() => openInGithub(node.path)}
+        onclick={() => openInGithub(node.path)}
         title="Open in GitHub"
         aria-label="Open {node.name} in GitHub"
       >
@@ -103,7 +104,7 @@
   {#if isFolder && isExpanded && node.children}
     <div class="md-filetree__children" role="group">
       {#each node.children as child}
-        <svelte:self
+        <FileTreeItem
           node={child}
           {expandedFolders}
           bind:hoveredPath

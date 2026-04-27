@@ -20,18 +20,18 @@
 
   let { tabs: encodedTabs, tabsId, theme = 'dracula' }: Props = $props();
 
-  let tabs = $state<Tab[]>([]);
   let activeIndex = $state(0);
   let highlightedCode = $state<string[]>([]);
   let loaded = $state(false);
-
-  // Parse tabs from base64 (environment-safe)
-  try {
-    const decoded = decodeBase64(encodedTabs);
-    tabs = JSON.parse(decoded);
-  } catch (err) {
-    console.error('Failed to parse tabs data:', err);
-  }
+  let tabs = $derived.by<Tab[]>(() => {
+    try {
+      const decoded = decodeBase64(encodedTabs);
+      return JSON.parse(decoded);
+    } catch (err) {
+      console.error('Failed to parse tabs data:', err);
+      return [];
+    }
+  });
 
   // Handle keyboard navigation
   function handleKeyDown(event: KeyboardEvent, index: number) {
@@ -169,6 +169,7 @@
       >
         {#if loaded && highlightedCode[index]}
           <div class="md-code-tabs__code">
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html highlightedCode[index]}
           </div>
         {:else}

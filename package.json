@@ -14,6 +14,10 @@
       "import": "./dist/server/index.js",
       "types": "./dist/server/index.d.ts"
     },
+    "./server/screenshot-service": {
+      "import": "./dist/server/screenshot-service.js",
+      "types": "./dist/server/screenshot-service.d.ts"
+    },
     "./plugins": {
       "import": "./dist/plugins/index.js",
       "types": "./dist/plugins/index.d.ts"
@@ -63,23 +67,23 @@
   },
   "dependencies": {
     "@goobits/themes": "^1.3.2",
-    "dompurify": "^3.3.1",
-    "glob": "^13.0.0",
-    "katex": "^0.16.28",
-    "lru-cache": "^11.2.5",
+    "dompurify": "^3.4.1",
+    "glob": "^13.0.6",
+    "katex": "^0.16.45",
+    "lru-cache": "^11.3.5",
     "minisearch": "^7.2.0",
-    "p-limit": "^7.2.0",
-    "p-retry": "^7.1.1",
-    "pino": "^10.3.0",
+    "p-limit": "^7.3.0",
+    "p-retry": "^8.0.0",
+    "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
     "rehype-katex": "^7.0.1",
     "remark-directive": "^4.0.0",
     "remark-math": "^6.0.0",
     "sharp": "^0.34.5",
-    "shiki": "^3.21.0",
+    "shiki": "^4.0.2",
     "typescript": "^5.9.3",
     "unist-util-visit": "^5.1.0",
-    "yaml": "^2.8.2"
+    "yaml": "^2.8.3"
   },
   "peerDependencies": {
     "@lucide/svelte": "^0.563.1",
@@ -93,9 +97,9 @@
     }
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-arm64-gnu": "4.57.0",
+    "@rollup/rollup-linux-arm64-gnu": "4.60.2",
     "chokidar": "^5.0.0",
-    "playwright": "^1.58.0"
+    "playwright": "^1.59.1"
   },
   "keywords": [
     "sveltekit",
@@ -111,11 +115,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "pnpm": {
-    "overrides": {
-      "unist-util-visit": "^5.0.0"
-    }
-  },
   "lint-staged": {
     "*.{ts,js}": [
       "eslint --fix",
@@ -130,31 +129,31 @@
     ]
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@testing-library/svelte": "^5.3.1",
     "@types/mdast": "^4.0.4",
-    "@types/node": "^25.1.0",
+    "@types/node": "^25.6.0",
     "@types/unist": "^3.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.54.0",
-    "@typescript-eslint/parser": "^8.54.0",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
-    "eslint": "^9.39.2",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
+    "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-svelte": "^3.14.0",
-    "happy-dom": "^20.4.0",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-svelte": "^3.17.1",
+    "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
-    "jscpd": "^4.0.7",
-    "lint-staged": "^16.2.7",
+    "jscpd": "^4.0.9",
+    "lint-staged": "^16.4.0",
     "madge": "^8.0.0",
-    "prettier": "^3.8.1",
-    "prettier-plugin-svelte": "^3.4.1",
-    "svelte": "^5.48.5",
-    "svelte-eslint-parser": "^1.4.1",
-    "ts-morph": "^27.0.2",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^3.5.1",
+    "svelte": "^5.55.4",
+    "svelte-eslint-parser": "^1.6.0",
+    "ts-morph": "^28.0.0",
     "tsup": "^8.5.1",
     "unified": "^11.0.5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.5"
   }
 }

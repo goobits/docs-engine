@@ -87,11 +87,9 @@
         </span>
       {/if}
     </span>
-    <ChevronDown
-      size={16}
-      class="version-switcher-icon {isOpen ? 'open' : ''}"
-      aria-hidden="true"
-    />
+    <span class="version-switcher-icon" class:open={isOpen}>
+      <ChevronDown size={16} aria-hidden="true" />
+    </span>
   </button>
 
   {#if isOpen}

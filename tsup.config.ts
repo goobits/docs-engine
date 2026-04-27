@@ -32,6 +32,7 @@ export default defineConfig({
   entry: [
     'src/lib/index.ts',
     'src/lib/server/index.ts',
+    'src/lib/server/screenshot-service.ts',
     'src/lib/plugins/index.ts',
     'src/lib/components/index.ts',
     'src/lib/utils/index.ts',
@@ -48,6 +49,7 @@ export default defineConfig({
     entry: [
       'src/lib/index.ts',
       'src/lib/server/index.ts',
+      'src/lib/server/screenshot-service.ts',
       'src/lib/plugins/index.ts',
       'src/lib/utils/index.ts',
       'src/lib/config/index.ts',

@@ -233,6 +233,7 @@
     onkeydown={handleKeydown}
     onwheel={handleWheel}
     role="dialog"
+    tabindex="-1"
     aria-modal="true"
     class:dragging={isDragging}
   >
@@ -316,18 +317,21 @@
       <div class="md-mermaid-zoom-level">{Math.round(zoom * 100)}%</div>
     </div>
 
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
       class="md-mermaid-modal-content"
       onmousedown={handleMouseDown}
       onmousemove={handleMouseMove}
       onmouseup={handleMouseUp}
       onmouseleave={handleMouseUp}
+      role="application"
+      tabindex="-1"
     >
       <div
         class="md-mermaid-modal-diagram"
         style="transform: translate({panX}px, {panY}px) scale({zoom}); transform-origin: center;"
       >
-        <!-- svelte-ignore svelte/no-at-html-tags -->
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html modalSvg}
       </div>
     </div>

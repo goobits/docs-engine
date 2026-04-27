@@ -7,7 +7,6 @@
 
   import { page } from '$app/stores';
   import { Search, ChevronDown, X } from '@lucide/svelte';
-  import { getAllDocsLinks, type DocsLink } from '$lib/config/docs-navigation';
   import { SvelteSet } from 'svelte/reactivity';
   import type { DocsSection } from '../utils/navigation';
 
@@ -43,15 +42,19 @@
 
   // Search state
   let searchQuery = $state('');
-  let searchResults = $state<Array<DocsLink & { section: string }>>([]);
-
-  // Expanded sections state - initialize all sections as open by default (SSR-safe)
-  let expandedSections = $state<Record<string, boolean>>(
+  let searchResults = $state<Array<DocsSection['links'][number] & { section: string }>>([]);
+  const defaultExpandedSections = $derived.by<Record<string, boolean>>(() =>
     Object.fromEntries(navigation.map((section) => [section.title, true]))
   );
-
-  // All links for search
-  const allLinks = getAllDocsLinks();
+  let expandedSections = $state<Record<string, boolean>>({});
+  const allLinks = $derived.by(() =>
+    navigation.flatMap((section) =>
+      section.links.map((link) => ({
+        ...link,
+        section: section.title,
+      }))
+    )
+  );
 
   // Track if we've loaded from localStorage (prevents infinite loops)
   let hasLoadedFromStorage = $state(false);
@@ -77,10 +80,7 @@
       try {
         const parsed = JSON.parse(storedSections);
         // Merge stored state with current navigation to handle new sections
-        const defaultSections = Object.fromEntries(
-          navigation.map((section) => [section.title, true])
-        );
-        const merged = { ...defaultSections };
+        const merged = { ...defaultExpandedSections };
         Object.keys(parsed).forEach((key) => {
           if (key in merged) {
             merged[key] = parsed[key];
@@ -90,6 +90,10 @@
       } catch {
         // Keep SSR defaults on parse error
       }
+    }
+
+    if (Object.keys(expandedSections).length === 0) {
+      expandedSections = defaultExpandedSections;
     }
 
     hasLoadedFromStorage = true;
@@ -233,16 +237,15 @@
               : 'Expand'} {section.title} section"
           >
             <div class="v2-docs-sidebar__section-title">
-              <svelte:component this={section.icon} size={16} aria-hidden="true" />
+              <section.icon size={16} aria-hidden="true" />
               <span>{section.title}</span>
             </div>
-            <ChevronDown
-              size={14}
-              class="v2-docs-sidebar__section-chevron {expandedSections[section.title]
-                ? 'expanded'
-                : ''}"
-              aria-hidden="true"
-            />
+            <span
+              class="v2-docs-sidebar__section-chevron"
+              class:expanded={expandedSections[section.title]}
+            >
+              <ChevronDown size={14} aria-hidden="true" />
+            </span>
           </button>
 
           {#if expandedSections[section.title]}
@@ -290,7 +293,12 @@
 </aside>
 
 <style lang="scss">
-  @use '$lib/styles/v2-tokens.scss' as *;
+  @mixin v2-focus-ring {
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #ff5722);
+      outline-offset: 2px;
+    }
+  }
 
   /* Visually hidden but accessible to screen readers */
   .visually-hidden {
@@ -484,14 +492,14 @@
     }
   }
 
-  :global(.v2-docs-sidebar__section-chevron) {
+  .v2-docs-sidebar__section-chevron {
     color: white !important;
     opacity: 0.5;
     transition: transform var(--v2-duration-fast) var(--v2-ease-out);
+  }
 
-    &.expanded {
-      transform: rotate(180deg);
-    }
+  .v2-docs-sidebar__section-chevron.expanded {
+    transform: rotate(180deg);
   }
 
   .v2-docs-sidebar__links {

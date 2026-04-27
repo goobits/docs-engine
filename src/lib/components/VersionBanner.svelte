@@ -55,7 +55,7 @@
     }
   }
 
-  const defaultMessage = $derived(() => {
+  const defaultMessage = $derived.by(() => {
     if (message) return message;
 
     switch (label) {
@@ -70,27 +70,27 @@
     }
   });
 
-  const bannerType = $derived(() => {
+  const bannerType = $derived.by(() => {
     if (label === 'deprecated') return 'error';
     if (label === 'legacy') return 'warning';
     return 'info';
   });
 
-  const icon = $derived(() => {
-    if (bannerType() === 'error') return AlertTriangle;
-    if (bannerType() === 'warning') return AlertTriangle;
+  const BannerIcon = $derived.by(() => {
+    if (bannerType === 'error') return AlertTriangle;
+    if (bannerType === 'warning') return AlertTriangle;
     return Info;
   });
 </script>
 
 {#if !isDismissed}
-  <div class="version-banner {bannerType()}" role="alert">
+  <div class="version-banner {bannerType}" role="alert">
     <div class="version-banner-content">
       <div class="version-banner-icon">
-        <svelte:component this={icon()} size={20} />
+        <BannerIcon size={20} />
       </div>
       <div class="version-banner-message">
-        <p>{defaultMessage()}</p>
+        <p>{defaultMessage}</p>
         {#if latestUrl}
           <a href={latestUrl} class="version-banner-link"> View latest documentation → </a>
         {/if}

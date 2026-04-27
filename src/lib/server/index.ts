@@ -97,3 +97,9 @@ export type {
   SymbolDefinition as SymbolGenDefinition,
   SymbolMap as SymbolGenMap,
 } from '../utils/symbol-generation';
+
+// Symbol reference utilities - Server-side only (loads generated files from disk)
+export * from '../utils/symbol-resolver';
+export type { SymbolDefinition, SymbolMap } from '../utils/symbol-resolver';
+export * from '../utils/symbol-renderer';
+export type { RenderOptions } from '../utils/symbol-renderer';

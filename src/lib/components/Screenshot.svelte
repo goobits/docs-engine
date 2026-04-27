@@ -51,16 +51,14 @@
     version = '1.0.0',
   }: Props = $props();
 
-  // Build config object
-  const config = {
+  const config = $derived.by(() => ({
     type,
     ...(type === 'web' && { url, selector, waitFor }),
     ...(type === 'cli' && { command, theme, showPrompt, promptText }),
     viewport,
-  };
+  }));
 
-  // Build path
-  const path = `/screenshots/v${version}/${name}.png`;
+  const path = $derived(`/screenshots/v${version}/${name}.png`);
 </script>
 
 <ScreenshotImage {name} {url} {path} {version} {config} />

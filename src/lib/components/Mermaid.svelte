@@ -11,8 +11,8 @@
 
   let { diagram, theme = 'dark' }: Props = $props();
 
-  let container: HTMLDivElement;
-  let modalContainer: HTMLDivElement;
+  let container = $state<HTMLDivElement | undefined>();
+  let modalContainer = $state<HTMLDivElement | undefined>();
   let rendered = $state(false);
   let error = $state('');
   let isModalOpen = $state(false);
@@ -181,6 +181,7 @@
     onkeydown={handleKeydown}
     onwheel={handleWheel}
     role="dialog"
+    tabindex="-1"
     aria-modal="true"
     aria-labelledby="mermaid-modal-title"
     aria-describedby="mermaid-modal-description"
@@ -278,12 +279,15 @@
       </div>
     </div>
 
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
       class="md-mermaid-modal-content"
       onmousedown={handleMouseDown}
       onmousemove={handleMouseMove}
       onmouseup={handleMouseUp}
       onmouseleave={handleMouseUp}
+      role="application"
+      tabindex="-1"
     >
       <div
         bind:this={modalContainer}

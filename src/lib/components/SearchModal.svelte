@@ -161,7 +161,8 @@
 
 <!-- Modal -->
 {#if isOpen}
-  <div class="search-modal-overlay" onclick={closeModal}></div>
+  <button class="search-modal-overlay" onclick={closeModal} type="button" aria-label="Close search"
+  ></button>
   <div
     class="search-modal"
     role="dialog"
@@ -222,10 +223,12 @@
             <div class="search-result-content">
               <div class="search-result-section">{result.section}</div>
               <div class="search-result-title">
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html highlightMatches(result.title, query)}
               </div>
               {#if result.match.excerpt}
                 <div class="search-result-excerpt">
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                   {@html highlightMatches(result.match.excerpt, query)}
                 </div>
               {/if}
