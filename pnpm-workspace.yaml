@@ -2,3 +2,7 @@ packages:
   - '.'
   - 'site'
   - 'packages/*'
+allowBuilds:
+  esbuild: true
+  sharp: true
+  svelte-preprocess: true
