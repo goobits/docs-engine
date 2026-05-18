@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { mkdir } from 'fs/promises';
+import { isIP } from 'net';
 import path from 'path';
 import sharp from 'sharp';
 import type { MarkdownDocsConfig } from '../config/index.js';
@@ -49,6 +50,9 @@ export interface ScreenshotResponse {
 }
 
 const logger = createLogger('screenshot-service');
+const SCREENSHOT_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const SCREENSHOT_VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const PLAYWRIGHT_PACKAGE: string = 'playwright';
 
 /**
  * Result from processing screenshot images into multiple formats
@@ -131,7 +135,36 @@ async function processScreenshotImage(options: {
  * Allowed domains for screenshot generation (SSRF protection)
  * Add your production domains here
  */
-const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'docs.anthropic.com', 'claude.ai'];
+const configuredAllowedDomains = (process.env.DOCS_SCREENSHOT_ALLOWED_DOMAINS || '')
+  .split(',')
+  .map((domain) => domain.trim().toLowerCase())
+  .filter(Boolean);
+const ALLOWED_DOMAINS = configuredAllowedDomains.length
+  ? configuredAllowedDomains
+  : ['beheremeow.app'];
+const allowLocalScreenshots =
+  process.env.DOCS_SCREENSHOTS_ALLOW_LOCALHOST === 'true' ||
+  process.env.NODE_ENV !== 'production';
+
+function validateScreenshotName(name: string): void {
+  if (!SCREENSHOT_NAME_PATTERN.test(name)) {
+    throw new Error('Screenshot name must use only letters, numbers, dots, underscores, and hyphens.');
+  }
+}
+
+function validateScreenshotVersion(version: string): void {
+  if (!SCREENSHOT_VERSION_PATTERN.test(version)) {
+    throw new Error('Screenshot version must use only letters, numbers, dots, underscores, and hyphens.');
+  }
+}
+
+async function loadChromium() {
+  try {
+    return ((await import(PLAYWRIGHT_PACKAGE)) as typeof import('playwright')).chromium;
+  } catch {
+    throw new Error('Playwright is not installed. Run: pnpm add -D playwright');
+  }
+}
 
 /**
  * Validates URL to prevent SSRF attacks
@@ -140,33 +173,55 @@ const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'docs.anthropic.com', 'claude
  */
 function validateUrl(url: string): void {
   const parsed = new URL(url);
+  const hostname = parsed.hostname.toLowerCase();
+  const ipVersion = isIP(hostname);
+
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('Only http and https URLs are allowed');
+  }
 
   // Block private IP ranges (RFC 1918)
-  if (/^(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\./.test(parsed.hostname)) {
+  if (/^(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\./.test(hostname)) {
     throw new Error('Private IP addresses are not allowed');
   }
 
   // Block cloud metadata endpoint
-  if (parsed.hostname === '169.254.169.254') {
+  if (hostname === '169.254.169.254') {
     throw new Error('Cloud metadata endpoint access denied');
+  }
+
+  if (
+    ipVersion === 6 &&
+    (
+      hostname === '::1' ||
+      hostname.startsWith('fc') ||
+      hostname.startsWith('fd') ||
+      hostname.startsWith('fe80:')
+    )
+  ) {
+    throw new Error('Private IPv6 addresses are not allowed');
+  }
+
+  if ((hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') && !allowLocalScreenshots) {
+    throw new Error('Localhost URLs are not allowed');
   }
 
   // Block localhost variants (except explicitly allowed)
   if (
-    parsed.hostname.startsWith('127.') &&
-    parsed.hostname !== '127.0.0.1' &&
-    !ALLOWED_DOMAINS.includes(parsed.hostname)
+    hostname.startsWith('127.') &&
+    hostname !== '127.0.0.1' &&
+    !ALLOWED_DOMAINS.includes(hostname)
   ) {
     throw new Error('Localhost variants not allowed');
   }
 
   // Allowlist check
   const isAllowed = ALLOWED_DOMAINS.some(
-    (domain) => parsed.hostname === domain || parsed.hostname.endsWith(`.${domain}`)
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
   );
 
   if (!isAllowed) {
-    throw new Error(`Domain ${parsed.hostname} is not in allowlist`);
+    throw new Error(`Domain ${hostname} is not in allowlist`);
   }
 }
 
@@ -236,8 +291,10 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
           { status: HTTP_STATUS.BAD_REQUEST }
         );
       }
+      validateScreenshotName(name);
 
       const version = requestVersion || config.screenshots.version || getVersion();
+      validateScreenshotVersion(version);
 
       // Determine screenshot type
       const type = screenshotConfig?.type || 'web';
@@ -332,19 +389,7 @@ async function generateCliScreenshot(options: {
   const output = result.stdout + (result.stderr ? '\n' + result.stderr : '');
   logger.debug({ outputLength: output.length }, 'CLI command executed successfully');
 
-  // Import playwright
-  let chromium;
-  try {
-    chromium = (await import('playwright')).chromium;
-  } catch {
-    return json(
-      {
-        success: false,
-        error: 'Playwright not installed. Run: bun add -D playwright',
-      } as ScreenshotResponse,
-      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
-    );
-  }
+  const chromium = await loadChromium();
 
   // Get terminal HTML from renderer route
   const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3230';
@@ -374,18 +419,6 @@ async function generateCliScreenshot(options: {
 
   // Launch browser and screenshot the terminal HTML
   logger.debug({ width, height }, 'Launching browser for CLI screenshot');
-  const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width, height },
-    deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
-    ignoreHTTPSErrors: true, // Allow self-signed certificates in development
-  });
-  const page = await context.newPage();
-
-  // Set content directly (faster than navigating)
-  await page.setContent(terminalHtml);
-  logger.debug('Terminal HTML content set, capturing screenshot');
-
   // Create output directory
   const outputDir = path.join(
     process.cwd(),
@@ -397,13 +430,28 @@ async function generateCliScreenshot(options: {
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
   const screenshot2xPath = path.join(outputDir, `${name}@2x.png`);
-  await page.screenshot({
-    path: screenshot2xPath,
-    fullPage: false,
-    scale: 'device', // Use device pixel ratio
-  });
 
-  await browser.close();
+  const browser = await chromium.launch();
+  try {
+    const context = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
+      ignoreHTTPSErrors: true, // Allow self-signed certificates in development
+    });
+    const page = await context.newPage();
+
+    // Set content directly (faster than navigating)
+    await page.setContent(terminalHtml);
+    logger.debug('Terminal HTML content set, capturing screenshot');
+
+    await page.screenshot({
+      path: screenshot2xPath,
+      fullPage: false,
+      scale: 'device', // Use device pixel ratio
+    });
+  } finally {
+    await browser.close();
+  }
   logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
   // Process image into multiple formats using shared function
@@ -472,19 +520,7 @@ async function generateWebScreenshot(options: {
     );
   }
 
-  // Import playwright dynamically (it's optional)
-  let chromium;
-  try {
-    chromium = (await import('playwright')).chromium;
-  } catch {
-    return json(
-      {
-        success: false,
-        error: 'Playwright not installed. Run: bun add -D playwright',
-      } as ScreenshotResponse,
-      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
-    );
-  }
+  const chromium = await loadChromium();
 
   // Parse viewport dimensions
   const viewportDimensions = screenshotConfig?.viewport
@@ -495,29 +531,6 @@ async function generateWebScreenshot(options: {
 
   // Launch browser
   logger.debug({ width, height, url }, 'Launching browser for web screenshot');
-  const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width, height },
-    deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
-    ignoreHTTPSErrors: true, // Allow self-signed certificates in development
-  });
-  const page = await context.newPage();
-
-  // Navigate to URL
-  logger.debug({ url }, 'Navigating to URL');
-  await page.goto(url, { waitUntil: 'networkidle' });
-
-  // Wait for selector if specified
-  if (screenshotConfig?.waitFor) {
-    logger.debug({ selector: screenshotConfig.waitFor }, 'Waiting for selector');
-    await page.waitForSelector(screenshotConfig.waitFor, {
-      timeout: CIRCUIT_BREAKER.REQUEST_TIMEOUT,
-    });
-  }
-
-  // Determine screenshot target
-  const element = screenshotConfig?.selector ? await page.locator(screenshotConfig.selector) : page;
-
   // Create output directory
   const outputDir = path.join(
     process.cwd(),
@@ -529,18 +542,43 @@ async function generateWebScreenshot(options: {
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
   const screenshot2xPath = path.join(outputDir, `${name}@2x.png`);
-  logger.debug(
-    { selector: screenshotConfig?.selector, fullPage: screenshotConfig?.fullPage },
-    'Capturing screenshot'
-  );
-  await element.screenshot({
-    path: screenshot2xPath,
-    fullPage: screenshotConfig?.fullPage ?? false,
-    scale: 'device', // Use device pixel ratio
-  });
 
-  // Cleanup
-  await browser.close();
+  const browser = await chromium.launch();
+  try {
+    const context = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: DIMENSIONS.DEVICE_SCALE_FACTOR, // Capture at 2x resolution for retina displays
+      ignoreHTTPSErrors: true, // Allow self-signed certificates in development
+    });
+    const page = await context.newPage();
+
+    // Navigate to URL
+    logger.debug({ url }, 'Navigating to URL');
+    await page.goto(url, { waitUntil: 'networkidle' });
+
+    // Wait for selector if specified
+    if (screenshotConfig?.waitFor) {
+      logger.debug({ selector: screenshotConfig.waitFor }, 'Waiting for selector');
+      await page.waitForSelector(screenshotConfig.waitFor, {
+        timeout: CIRCUIT_BREAKER.REQUEST_TIMEOUT,
+      });
+    }
+
+    // Determine screenshot target
+    const element = screenshotConfig?.selector ? await page.locator(screenshotConfig.selector) : page;
+
+    logger.debug(
+      { selector: screenshotConfig?.selector, fullPage: screenshotConfig?.fullPage },
+      'Capturing screenshot'
+    );
+    await element.screenshot({
+      path: screenshot2xPath,
+      fullPage: screenshotConfig?.fullPage ?? false,
+      scale: 'device', // Use device pixel ratio
+    });
+  } finally {
+    await browser.close();
+  }
   logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
 
   // Process image into multiple formats using shared function
