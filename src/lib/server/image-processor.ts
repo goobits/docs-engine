@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 // import { createHash } from 'crypto'; // Unused after _generateCacheKey was commented out
 import { existsSync, mkdirSync, statSync } from 'fs';
 import { dirname, join, extname, basename, resolve } from 'path';
@@ -103,7 +103,7 @@ function isCacheValid(inputPath: string, cachedPath: string): boolean {
  * Module-private helper
  */
 async function processVariant(
-  sharpInstance: sharp.Sharp,
+  sharpInstance: Sharp,
   format: string,
   width: number,
   quality: number,

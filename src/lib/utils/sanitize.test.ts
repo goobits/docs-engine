@@ -1,3 +1,7 @@
+// @vitest-environment jsdom
+// DOMPurify's SVG/namespace sanitization is unreliable under happy-dom
+// (it drops the <svg> root and fails to strip event handlers), so these
+// tests run in jsdom, which faithfully mirrors real browser DOM behavior.
 import { describe, it, expect } from 'vitest';
 import { sanitizeHtml, sanitizeSvg, sanitizeErrorMessage } from './sanitize';
 

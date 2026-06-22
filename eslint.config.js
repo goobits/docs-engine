@@ -152,6 +152,7 @@ export default [
       'src/lib/utils/symbol-generation.ts',
       'src/lib/utils/navigation-scanner.ts',
       'src/lib/utils/symbol-resolver.ts',
+      'src/lib/utils/version.ts',
       'site/src/routes/**/*.ts',
       'tsup.config.ts',
       '**/*.test.ts', // Test files often use fs for fixtures

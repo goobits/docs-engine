@@ -143,22 +143,25 @@ const ALLOWED_DOMAINS = configuredAllowedDomains.length
   ? configuredAllowedDomains
   : ['beheremeow.app'];
 const allowLocalScreenshots =
-  process.env.DOCS_SCREENSHOTS_ALLOW_LOCALHOST === 'true' ||
-  process.env.NODE_ENV !== 'production';
+  process.env.DOCS_SCREENSHOTS_ALLOW_LOCALHOST === 'true' || process.env.NODE_ENV !== 'production';
 
 function validateScreenshotName(name: string): void {
   if (!SCREENSHOT_NAME_PATTERN.test(name)) {
-    throw new Error('Screenshot name must use only letters, numbers, dots, underscores, and hyphens.');
+    throw new Error(
+      'Screenshot name must use only letters, numbers, dots, underscores, and hyphens.'
+    );
   }
 }
 
 function validateScreenshotVersion(version: string): void {
   if (!SCREENSHOT_VERSION_PATTERN.test(version)) {
-    throw new Error('Screenshot version must use only letters, numbers, dots, underscores, and hyphens.');
+    throw new Error(
+      'Screenshot version must use only letters, numbers, dots, underscores, and hyphens.'
+    );
   }
 }
 
-async function loadChromium() {
+async function loadChromium(): Promise<(typeof import('playwright'))['chromium']> {
   try {
     return ((await import(PLAYWRIGHT_PACKAGE)) as typeof import('playwright')).chromium;
   } catch {
@@ -192,17 +195,18 @@ function validateUrl(url: string): void {
 
   if (
     ipVersion === 6 &&
-    (
-      hostname === '::1' ||
+    (hostname === '::1' ||
       hostname.startsWith('fc') ||
       hostname.startsWith('fd') ||
-      hostname.startsWith('fe80:')
-    )
+      hostname.startsWith('fe80:'))
   ) {
     throw new Error('Private IPv6 addresses are not allowed');
   }
 
-  if ((hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') && !allowLocalScreenshots) {
+  if (
+    (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') &&
+    !allowLocalScreenshots
+  ) {
     throw new Error('Localhost URLs are not allowed');
   }
 
@@ -565,7 +569,9 @@ async function generateWebScreenshot(options: {
     }
 
     // Determine screenshot target
-    const element = screenshotConfig?.selector ? await page.locator(screenshotConfig.selector) : page;
+    const element = screenshotConfig?.selector
+      ? await page.locator(screenshotConfig.selector)
+      : page;
 
     logger.debug(
       { selector: screenshotConfig?.selector, fullPage: screenshotConfig?.fullPage },
