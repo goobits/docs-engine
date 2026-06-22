@@ -145,7 +145,8 @@ const ALLOWED_DOMAINS = configuredAllowedDomains.length
 const allowLocalScreenshots =
   process.env.DOCS_SCREENSHOTS_ALLOW_LOCALHOST === 'true' || process.env.NODE_ENV !== 'production';
 
-function validateScreenshotName(name: string): void {
+// Exported for unit testing of the security-critical validation logic.
+export function validateScreenshotName(name: string): void {
   if (!SCREENSHOT_NAME_PATTERN.test(name)) {
     throw new Error(
       'Screenshot name must use only letters, numbers, dots, underscores, and hyphens.'
@@ -153,7 +154,7 @@ function validateScreenshotName(name: string): void {
   }
 }
 
-function validateScreenshotVersion(version: string): void {
+export function validateScreenshotVersion(version: string): void {
   if (!SCREENSHOT_VERSION_PATTERN.test(version)) {
     throw new Error(
       'Screenshot version must use only letters, numbers, dots, underscores, and hyphens.'
@@ -174,7 +175,7 @@ async function loadChromium(): Promise<(typeof import('playwright'))['chromium']
  * @param url - URL to validate
  * @throws Error if URL is not allowed
  */
-function validateUrl(url: string): void {
+export function validateUrl(url: string): void {
   const parsed = new URL(url);
   const hostname = parsed.hostname.toLowerCase();
   const ipVersion = isIP(hostname);

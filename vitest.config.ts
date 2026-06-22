@@ -27,6 +27,10 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.spec.ts',
         '**/*.svelte',
+        // Browser/SvelteKit-runtime composable: imports $app/* and drives
+        // onMount/afterNavigate, so it requires an integration test rather than
+        // v8 coverage instrumentation (which can't parse it standalone).
+        '**/use-hydrator.ts',
       ],
       thresholds: {
         lines: 40,

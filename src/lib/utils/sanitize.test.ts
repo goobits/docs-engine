@@ -120,6 +120,26 @@ describe('sanitizeSvg', () => {
     // But scripts should still be removed
     expect(result).not.toContain('script');
   });
+
+  it('strips non-allowlisted SVG elements used for XSS (use/animate/a)', () => {
+    // <use>, <animate> and <a> are not on the allowlist and are common SVG
+    // XSS vectors via javascript: hrefs — they must be removed entirely.
+    expect(sanitizeSvg('<svg><use href="javascript:alert(1)" /></svg>')).not.toMatch(
+      /javascript:|<use/i
+    );
+    expect(
+      sanitizeSvg('<svg><animate attributeName="href" values="javascript:alert(1)" /></svg>')
+    ).not.toMatch(/javascript:|<animate/i);
+    expect(
+      sanitizeSvg('<svg><a href="javascript:alert(1)"><circle cx="1" cy="1" r="1" /></a></svg>')
+    ).not.toMatch(/javascript:/i);
+  });
+
+  it('strips event-handler attributes on otherwise-allowed SVG elements', () => {
+    const result = sanitizeSvg('<svg><circle cx="1" cy="1" r="1" onload="alert(1)" /></svg>');
+    expect(result).toContain('circle');
+    expect(result).not.toMatch(/onload/i);
+  });
 });
 
 describe('sanitizeErrorMessage', () => {
