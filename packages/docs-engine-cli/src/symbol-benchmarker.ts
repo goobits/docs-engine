@@ -7,7 +7,7 @@
  */
 
 import { createSymbolMapGenerator } from '@goobits/docs-engine/server';
-import type { SymbolMapGeneratorConfig } from '@goobits/docs-engine/server';
+import type { SymbolGeneratorConfig } from '@goobits/docs-engine/server';
 
 export interface BenchmarkResults {
   /** Cold run time (no cache) in milliseconds */
@@ -20,8 +20,8 @@ export interface BenchmarkResults {
   improvement: number;
   /** Cache file size in bytes */
   cacheSize: number;
-  /** Number of symbols generated */
-  symbolCount: number;
+  /** Number of symbols generated (only present when the generator reports it) */
+  symbolCount?: number;
 }
 
 /**
@@ -49,9 +49,7 @@ export interface BenchmarkResults {
  *
  * @public
  */
-export async function benchmarkSymbols(
-  config: SymbolMapGeneratorConfig
-): Promise<BenchmarkResults> {
+export async function benchmarkSymbols(config: SymbolGeneratorConfig): Promise<BenchmarkResults> {
   const generator = createSymbolMapGenerator(config);
   return await generator.benchmark();
 }
@@ -76,6 +74,8 @@ export function printBenchmarkResults(results: BenchmarkResults): void {
     `Target achieved:      ${results.warm < 1000 ? '✅ Yes' : '❌ No'} (target: <1000ms)`
   );
   console.log(`\n💾 Cache file size:    ${(results.cacheSize / 1024).toFixed(2)} KB`);
-  console.log(`🔤 Symbol count:       ${results.symbolCount}`);
+  if (results.symbolCount !== undefined) {
+    console.log(`🔤 Symbol count:       ${results.symbolCount}`);
+  }
   console.log('='.repeat(50) + '\n');
 }

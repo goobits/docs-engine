@@ -8,7 +8,7 @@
  */
 
 import { createSymbolMapGenerator } from '@goobits/docs-engine/server';
-import type { SymbolMapGeneratorConfig } from '@goobits/docs-engine/server';
+import type { SymbolGeneratorConfig } from '@goobits/docs-engine/server';
 
 export interface WatchOptions {
   /** Debounce delay in milliseconds (default: 500) */
@@ -43,7 +43,7 @@ export interface WatchOptions {
  * @public
  */
 export async function watchSymbols(
-  config: SymbolMapGeneratorConfig,
+  config: SymbolGeneratorConfig,
   options: WatchOptions = {}
 ): Promise<{ close: () => Promise<void> }> {
   const { debounce = 500, onChange, verbose = false } = options;

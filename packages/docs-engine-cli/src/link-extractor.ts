@@ -80,25 +80,26 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
   const tree = unified().use(remarkParse).use(remarkMdx).parse(content);
 
   // Extract markdown links and images
-  visit(tree, ['link', 'image'], (node: Link | Image, _index, _parent) => {
-    const url = node.url;
+  visit(tree, ['link', 'image'], (node, _index, _parent) => {
+    const el = node as Link | Image;
+    const url = el.url;
     if (!url) return;
 
-    const position = node.position;
+    const position = el.position;
     const line = position?.start.line || 0;
 
     // Get link text
     let text = '';
-    if (node.type === 'link') {
-      const linkNode = node as Link;
+    if (el.type === 'link') {
+      const linkNode = el as Link;
       if (linkNode.children && linkNode.children.length > 0) {
         const firstChild = linkNode.children[0];
         if ('value' in firstChild) {
           text = firstChild.value as string;
         }
       }
-    } else if (node.type === 'image') {
-      const imageNode = node as Image;
+    } else if (el.type === 'image') {
+      const imageNode = el as Image;
       text = imageNode.alt || '';
     }
 
@@ -107,7 +108,7 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
       text,
       file: filePath,
       line,
-      type: node.type === 'image' ? 'image' : 'link',
+      type: el.type === 'image' ? 'image' : 'link',
       isExternal: isExternalUrl(url),
       isAnchor: isAnchorOnly(url),
     });

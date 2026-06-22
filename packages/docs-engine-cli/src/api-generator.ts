@@ -39,7 +39,8 @@ export async function generateApiDocs(config: ApiGeneratorConfig): Promise<void>
     mkdirSync(config.outputDir, { recursive: true });
   }
 
-  const generatedFiles: Array<{ fileName: string; items: unknown[] }> = [];
+  const generatedFiles: Array<{ fileName: string; items: (typeof parsedFiles)[number]['items'] }> =
+    [];
 
   // Generate markdown for each file
   for (const parsedFile of parsedFiles) {

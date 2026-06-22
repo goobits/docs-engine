@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { createLogger } from '@goobits/docs-engine/utils';
+import { createBrowserLogger } from '@goobits/docs-engine/utils';
 
-const logger = createLogger('cli-config');
+const logger = createBrowserLogger('cli-config');
 
 /**
  * Link checker configuration
