@@ -164,6 +164,14 @@ export default [
     },
   },
   {
+    // Test files: non-null assertions are idiomatic after an explicit
+    // expect(...).toBeDefined()/known fixture setup and don't reduce safety.
+    files: ['**/*.test.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+    },
+  },
+  {
     ignores: [
       'dist/',
       'build/',

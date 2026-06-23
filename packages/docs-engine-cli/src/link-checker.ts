@@ -220,6 +220,24 @@ async function checkInternalLink(
 }
 
 /**
+ * Collect the full text of a heading, including inline-formatting children
+ * (e.g. `## A **bold** word`), so anchor slugs match the rendered heading
+ * rather than only its first text node.
+ */
+function getHeadingText(node: Heading): string {
+  const collect = (n: { value?: unknown; children?: unknown[] }): string => {
+    if (typeof n.value === 'string') return n.value;
+    if (Array.isArray(n.children)) {
+      return n.children
+        .map((child) => collect(child as { value?: unknown; children?: unknown[] }))
+        .join('');
+    }
+    return '';
+  };
+  return collect(node as unknown as { value?: unknown; children?: unknown[] });
+}
+
+/**
  * Extract anchors from markdown file
  */
 async function extractAnchorsFromFile(filePath: string): Promise<string[]> {
@@ -229,16 +247,13 @@ async function extractAnchorsFromFile(filePath: string): Promise<string[]> {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
 
   visit(tree, 'heading', (node: Heading) => {
-    if (node.children?.[0]) {
-      const firstChild = node.children[0] as unknown as Record<string, unknown>;
-      if (firstChild.value && typeof firstChild.value === 'string') {
-        const text = firstChild.value;
-        const anchor = text
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^\w-]/g, '');
-        anchors.push(anchor);
-      }
+    const text = getHeadingText(node);
+    if (text) {
+      const anchor = text
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]/g, '');
+      anchors.push(anchor);
     }
   });
 

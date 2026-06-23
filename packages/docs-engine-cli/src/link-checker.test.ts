@@ -97,6 +97,21 @@ describe('link-checker', () => {
       join(nested, 'deep.md'),
       ['# Deep Page', '', 'Go [up to the guide](../guide.md).', ''].join('\n')
     );
+
+    // formatted.md: a heading with inline formatting; the anchor slug must be
+    // derived from the heading's FULL text ("install-now-please"), not just its
+    // first text node ("install").
+    writeFileSync(
+      join(docsDir, 'formatted.md'),
+      [
+        '# Formatted',
+        '',
+        '## Install **now** please',
+        '',
+        'Jump to [install](#install-now-please).',
+        '',
+      ].join('\n')
+    );
   });
 
   afterAll(() => {
@@ -180,6 +195,15 @@ describe('link-checker', () => {
       // "## Installation Guide" -> slug "installation-guide", linked from the
       // same file (anchors.md), so it resolves.
       expect(resultForUrl(results, '#installation-guide').status).toBe('valid');
+    });
+
+    it('derives anchor slugs from a heading’s full text, including inline formatting', async () => {
+      const links = await extractLinks(configFor(docsDir));
+      const results = await checkLinks(links, configFor(docsDir));
+
+      // "## Install **now** please" must slug to "install-now-please" (full
+      // heading text), not "install" (first text node only), so this resolves.
+      expect(resultForUrl(results, '#install-now-please').status).toBe('valid');
     });
 
     it('flags a same-file anchor with no matching heading as broken', async () => {
