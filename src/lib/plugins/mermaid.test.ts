@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mermaidPlugin } from './mermaid';
 import type { Root } from 'mdast';
-import * as base64 from '../utils/base64.js';
+import * as base64 from '../utils/base64.ts';
 
 describe('mermaid plugin', () => {
   const createCodeBlock = (lang: string, value: string): Root => ({

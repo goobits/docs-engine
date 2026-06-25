@@ -1,5 +1,5 @@
-import type { SymbolDefinition } from './symbol-resolver';
-import { escapeHtml } from './html.js';
+import type { SymbolDefinition } from './symbol-resolver.ts';
+import { escapeHtml } from './html.ts';
 
 /**
  * Repository configuration for symbol source links

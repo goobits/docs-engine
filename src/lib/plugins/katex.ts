@@ -2,7 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
 import type { InlineMath, Math } from '../mdast.d.ts';
 import katex from 'katex';
-import { escapeHtml } from '../utils/html.js';
+import { escapeHtml } from '../utils/html.ts';
 
 /**
  * Union type for math nodes (from remark-math)

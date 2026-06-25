@@ -4,7 +4,7 @@ import {
   validateUrl,
   validateScreenshotName,
   validateScreenshotVersion,
-} from './screenshot-service.js';
+} from './screenshot-service.ts';
 
 // These cover the security-critical input validation and SSRF protection used by
 // the screenshot endpoint. The allowlist (default: beheremeow.app) is the ultimate
@@ -79,7 +79,7 @@ describe('validateUrl (SSRF protection)', () => {
     vi.stubEnv('DOCS_SCREENSHOT_ALLOWED_DOMAINS', '10.0.0.1,169.254.169.254');
     vi.resetModules();
     try {
-      const fresh = await import('./screenshot-service.js');
+      const fresh = await import('./screenshot-service.ts');
       expect(() => fresh.validateUrl('http://10.0.0.1')).toThrow();
       expect(() => fresh.validateUrl('http://169.254.169.254')).toThrow();
     } finally {

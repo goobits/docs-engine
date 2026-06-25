@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, statSync } from 'fs';
 import { dirname, join, extname, basename, resolve } from 'path';
 import pLimit from 'p-limit';
 import os from 'os';
-import { IMAGE_QUALITY, DIMENSIONS } from '../constants.js';
+import { IMAGE_QUALITY, DIMENSIONS } from '../constants.ts';
 
 /**
  * Image processing configuration

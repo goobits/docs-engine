@@ -1,67 +1,67 @@
 // Navigation utilities
-export * from './navigation';
-export type { DocsLink, DocsSection } from './navigation';
+export * from './navigation.ts';
+export type { DocsLink, DocsSection } from './navigation.ts';
 
 // Navigation builder utilities
-export * from './navigation-builder';
+export * from './navigation-builder.ts';
 export type {
   DocFrontmatter,
   DocFile,
   IconMap,
   NavigationBuilderOptions,
-} from './navigation-builder';
+} from './navigation-builder.ts';
 
 // NOTE: Navigation scanner moved to server/index.ts (requires Node.js fs/promises)
 // Import from '@goobits/docs-engine/server' instead
 
 // Search utilities
-export * from './search';
-export type { SearchResult, SearchOptions } from './search';
+export * from './search.ts';
+export type { SearchResult, SearchOptions } from './search.ts';
 
 // Tree parser utilities
-export * from './tree-parser';
-export type { TreeNode, FileTypeConfig } from './tree-parser';
+export * from './tree-parser.ts';
+export type { TreeNode, FileTypeConfig } from './tree-parser.ts';
 
 // Frontmatter utilities
-export * from './frontmatter';
-export type { Frontmatter, ParsedContent } from './frontmatter';
+export * from './frontmatter.ts';
+export type { Frontmatter, ParsedContent } from './frontmatter.ts';
 
 // Base64 utilities
-export * from './base64';
+export * from './base64.ts';
 
 // Date utilities (browser-safe)
-export * from './date';
+export * from './date.ts';
 
 // Highlighter utilities
-export * from './highlighter';
+export * from './highlighter.ts';
 
 // OpenAPI formatter utilities
-export * from './openapi-formatter';
-export type { OpenAPIEndpoint } from './openapi-formatter';
+export * from './openapi-formatter.ts';
+export type { OpenAPIEndpoint } from './openapi-formatter.ts';
 
 // HTML utilities
-export * from './html';
+export * from './html.ts';
 
 // Sanitize utilities
-export * from './sanitize';
+export * from './sanitize.ts';
 
 // Logger utilities (browser-safe)
-export { createBrowserLogger } from './browser-logger';
+export { createBrowserLogger } from './browser-logger.ts';
 
 // Hydrator lifecycle composable (browser-only, requires Svelte)
-export { useHydrator } from './use-hydrator';
-export type { HydratorOptions } from './use-hydrator';
+export { useHydrator } from './use-hydrator.ts';
+export type { HydratorOptions } from './use-hydrator.ts';
 
 // NOTE: Git utilities moved to server/index.ts (requires Node.js child_process)
 // Import from '@goobits/docs-engine/server' instead
 
 // Search index utilities (Proposal 03)
-export * from './search-index';
+export * from './search-index.ts';
 export type {
   SearchDocument,
   SearchResult as SearchIndexResult,
   SearchIndexConfig,
-} from './search-index';
+} from './search-index.ts';
 
 // NOTE: Symbol reference utilities moved to server/index.ts
 // because symbol resolution loads generated files from disk.

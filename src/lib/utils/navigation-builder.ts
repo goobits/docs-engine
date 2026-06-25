@@ -1,7 +1,7 @@
 import { parse as parseYaml } from 'yaml';
-import type { DocsSection, DocsLink } from './navigation.js';
+import type { DocsSection, DocsLink } from './navigation.ts';
 import type { ComponentType } from 'svelte';
-import { createBrowserLogger } from './browser-logger.js';
+import { createBrowserLogger } from './browser-logger.ts';
 
 const logger = createBrowserLogger('navigation-builder');
 

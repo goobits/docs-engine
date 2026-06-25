@@ -4,19 +4,19 @@ import { mkdir } from 'fs/promises';
 import { isIP } from 'net';
 import path from 'path';
 import sharp from 'sharp';
-import type { MarkdownDocsConfig } from '../config/index.js';
-import { CliExecutor } from './cli-executor.js';
-import { getVersion } from '../utils/version.js';
-import { createLogger } from './logger.js';
-import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.js';
-import { checkRateLimit } from './rate-limiter.js';
+import type { MarkdownDocsConfig } from '../config/index.ts';
+import { CliExecutor } from './cli-executor.ts';
+import { getVersion } from '../utils/version.ts';
+import { createLogger } from './logger.ts';
+import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.ts';
+import { checkRateLimit } from './rate-limiter.ts';
 import {
   HTTP_STATUS,
   RATE_LIMIT,
   CIRCUIT_BREAKER,
   DIMENSIONS,
   IMAGE_QUALITY,
-} from '../constants.js';
+} from '../constants.ts';
 
 /**
  * Screenshot generation request payload

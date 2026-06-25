@@ -5,7 +5,7 @@
  * Supports custom priorities, exclusions, and last modified dates.
  */
 
-import type { DocsSection } from '../utils/navigation.js';
+import type { DocsSection } from '../utils/navigation.ts';
 
 /**
  * Sitemap URL entry

@@ -4,7 +4,7 @@
  * Parses SQL schema files and extracts table definitions.
  */
 
-import type { ParsedItem } from './index';
+import type { ParsedItem } from './index.ts';
 
 /** Column definition structure */
 interface SqlColumn {

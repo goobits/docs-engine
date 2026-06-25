@@ -13,8 +13,8 @@
  * @module
  */
 
-import { createLogger } from './logger.js';
-import { CIRCUIT_BREAKER } from '../constants.js';
+import { createLogger } from './logger.ts';
+import { CIRCUIT_BREAKER } from '../constants.ts';
 
 const logger = createLogger('circuit-breaker');
 

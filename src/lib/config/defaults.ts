@@ -1,4 +1,4 @@
-import { TIMEOUT, FILE_SIZE } from '../constants.js';
+import { TIMEOUT, FILE_SIZE } from '../constants.ts';
 
 export interface MarkdownDocsConfig {
   docsRoot: string;

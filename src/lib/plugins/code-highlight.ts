@@ -3,7 +3,7 @@ import type { Root, Code } from 'mdast';
 import type { Parent } from 'unist';
 import { createHighlighter, type Highlighter, type LanguageRegistration } from 'shiki';
 import agentflowGrammar from '../utils/agentflow-grammar.json';
-import { escapeHtml } from '../utils/html.js';
+import { escapeHtml } from '../utils/html.ts';
 
 /**
  * Interface for mutating AST nodes during transformation

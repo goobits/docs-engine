@@ -7,11 +7,11 @@ import {
   loadSymbolMap,
   type SymbolDefinition,
   type SymbolMap,
-} from '../utils/symbol-resolver.js';
-import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.js';
-import type { RenderOptions } from '../utils/symbol-renderer.js';
-import { escapeHtml } from '../utils/html.js';
-import { sanitizeTree } from '../utils/ast.js';
+} from '../utils/symbol-resolver.ts';
+import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.ts';
+import type { RenderOptions } from '../utils/symbol-renderer.ts';
+import { escapeHtml } from '../utils/html.ts';
+import { sanitizeTree } from '../utils/ast.ts';
 
 // Use [^}]+ to match reference content - simpler and avoids overlapping character classes
 const INLINE_REFERENCE_REGEX = /{@([^}]+)}/g;

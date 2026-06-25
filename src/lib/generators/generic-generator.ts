@@ -7,7 +7,7 @@
 
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import { parseJSON, parseEnv, parseSQL, parseGrep, type ParsedItem } from './parsers/index';
+import { parseJSON, parseEnv, parseSQL, parseGrep, type ParsedItem } from './parsers/index.ts';
 
 /**
  * Category matching rule

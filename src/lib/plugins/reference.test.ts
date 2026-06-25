@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { referencePlugin } from './reference';
 import type { Root, Paragraph, Html, Link, Text } from 'mdast';
 import type { ContainerDirective } from '../mdast.d.ts';
-import * as symbolResolver from '../utils/symbol-resolver.js';
-import * as symbolRenderer from '../utils/symbol-renderer.js';
+import * as symbolResolver from '../utils/symbol-resolver.ts';
+import * as symbolRenderer from '../utils/symbol-renderer.ts';
 
 describe('reference plugin', () => {
   // Mock symbol map and related functions

@@ -11,8 +11,8 @@ import type {
   PhrasingContent,
 } from 'mdast';
 import type { ContainerDirective } from '../mdast.d.ts';
-import { escapeHtml } from '../utils/html.js';
-import { sanitizeTree } from '../utils/ast.js';
+import { escapeHtml } from '../utils/html.ts';
+import { sanitizeTree } from '../utils/ast.ts';
 
 /**
  * Remark plugin to transform :::collapse directives to HTML <details> elements

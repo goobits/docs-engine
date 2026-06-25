@@ -7,7 +7,7 @@
  */
 
 import MiniSearch from 'minisearch';
-import type { DocsSection } from './navigation.js';
+import type { DocsSection } from './navigation.ts';
 
 /**
  * Document for search indexing

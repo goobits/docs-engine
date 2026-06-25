@@ -3,44 +3,66 @@
   "version": "2.0.3",
   "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "source": "./src/lib/index.ts",
+      "import": "./src/lib/index.ts",
+      "types": "./src/lib/index.ts"
     },
     "./server": {
-      "import": "./dist/server/index.js",
-      "types": "./dist/server/index.d.ts"
+      "source": "./src/lib/server/index.ts",
+      "import": "./src/lib/server/index.ts",
+      "types": "./src/lib/server/index.ts"
     },
     "./server/screenshot-service": {
-      "import": "./dist/server/screenshot-service.js",
-      "types": "./dist/server/screenshot-service.d.ts"
+      "source": "./src/lib/server/screenshot-service.ts",
+      "import": "./src/lib/server/screenshot-service.ts",
+      "types": "./src/lib/server/screenshot-service.ts"
+    },
+    "./server/markdownRenderer": {
+      "source": "./src/lib/server/markdownRenderer.ts",
+      "import": "./src/lib/server/markdownRenderer.ts",
+      "types": "./src/lib/server/markdownRenderer.ts"
     },
     "./plugins": {
-      "import": "./dist/plugins/index.js",
-      "types": "./dist/plugins/index.d.ts"
+      "source": "./src/lib/plugins/index.ts",
+      "import": "./src/lib/plugins/index.ts",
+      "types": "./src/lib/plugins/index.ts"
     },
     "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "source": "./src/lib/components/index.ts",
+      "import": "./src/lib/components/index.ts",
+      "types": "./src/lib/components/index.ts"
     },
-    "./components/*": "./dist/components/*.svelte",
+    "./components/*": "./src/lib/components/*",
     "./utils": {
-      "import": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+      "source": "./src/lib/utils/index.ts",
+      "import": "./src/lib/utils/index.ts",
+      "types": "./src/lib/utils/index.ts"
+    },
+    "./utils/openapi-formatter": {
+      "source": "./src/lib/utils/openapi-formatter.ts",
+      "import": "./src/lib/utils/openapi-formatter.ts",
+      "types": "./src/lib/utils/openapi-formatter.ts"
+    },
+    "./navigation-scanner": {
+      "source": "./src/lib/utils/navigation-scanner.ts",
+      "import": "./src/lib/utils/navigation-scanner.ts",
+      "types": "./src/lib/utils/navigation-scanner.ts"
     },
     "./config": {
-      "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
+      "source": "./src/lib/config/index.ts",
+      "import": "./src/lib/config/index.ts",
+      "types": "./src/lib/config/index.ts"
     },
-    "./styles": "./dist/styles/index.css",
-    "./styles/*": "./dist/styles/*"
+    "./styles": "./src/lib/styles/index.css",
+    "./styles/*": "./src/lib/styles/*"
   },
   "files": [
     "dist",
-    "src/lib/styles"
+    "src/lib"
   ],
   "scripts": {
     "build": "tsup",
@@ -77,8 +99,12 @@
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
     "rehype-katex": "^7.0.1",
+    "rehype-stringify": "^10.0.1",
     "remark-directive": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "sharp": "^0.35.2",
     "shiki": "^4.2.0",
     "typescript": "^6.0.3",

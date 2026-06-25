@@ -12,14 +12,14 @@ import type {
   ApiMetadata,
   ParsedApiFile,
   ApiItem,
-} from './api-parser.js';
+} from './api-parser.ts';
 import {
   generateMarkdown,
   groupByCategory,
   generateApiDocFile,
   generateIndexFile,
   type MarkdownGeneratorConfig,
-} from './api-docs.js';
+} from './api-docs.ts';
 
 // Test helpers
 const defaultMetadata: ApiMetadata = {};

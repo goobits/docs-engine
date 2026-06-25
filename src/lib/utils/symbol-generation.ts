@@ -16,7 +16,7 @@ import path from 'path';
 import * as ts from 'typescript';
 import crypto from 'crypto';
 import { glob } from 'glob';
-import { createLogger } from './logger.js';
+import { createLogger } from './logger.ts';
 
 const logger = createLogger('symbol-generation');
 

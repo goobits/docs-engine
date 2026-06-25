@@ -15,9 +15,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { Root, Code, Html } from 'mdast';
-import { filetreePlugin } from './filetree.js';
-import { parseTree, type TreeNode } from '../utils/tree-parser.js';
-import { decodeJsonBase64 } from '../utils/base64.js';
+import { filetreePlugin } from './filetree.ts';
+import { parseTree, type TreeNode } from '../utils/tree-parser.ts';
+import { decodeJsonBase64 } from '../utils/base64.ts';
 
 /** Build a minimal mdast Root wrapping a single code block. */
 function codeRoot(lang: string | null, value: string): Root {

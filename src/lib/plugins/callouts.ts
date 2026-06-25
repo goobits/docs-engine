@@ -10,7 +10,7 @@ import type {
   Heading,
 } from 'mdast';
 import type { PhrasingContent } from 'mdast';
-import { escapeHtml } from '../utils/html.js';
+import { escapeHtml } from '../utils/html.ts';
 
 /**
  * Interface for mutating AST nodes during transformation

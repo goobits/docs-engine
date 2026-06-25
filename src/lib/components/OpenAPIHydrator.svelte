@@ -8,7 +8,7 @@
   import { mount } from 'svelte';
   import OpenAPIDoc from './OpenAPIDoc.svelte';
   import { parseOpenAPISpec, filterEndpointsByPath, useHydrator } from '../utils';
-  import { sanitizeHtml } from '../utils/index.js';
+  import { sanitizeHtml } from '../utils/index.ts';
 
   interface Props {
     /** Theme for styling */

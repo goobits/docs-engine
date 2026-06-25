@@ -15,7 +15,7 @@ import type {
   ApiMethod,
   ApiMetadata,
   ParsedApiFile,
-} from './api-parser.js';
+} from './api-parser.ts';
 
 /**
  * Configuration for markdown generation

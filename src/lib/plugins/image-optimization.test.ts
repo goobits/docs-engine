@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { imageOptimizationPlugin } from './image-optimization.js';
+import { imageOptimizationPlugin } from './image-optimization.ts';
 import type { Root, Image, Paragraph, Html } from 'mdast';
 
 describe('imageOptimizationPlugin', () => {

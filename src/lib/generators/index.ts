@@ -5,6 +5,6 @@
  * from various source formats (JSON, SQL, ENV, etc.)
  */
 
-export * from './generic-generator';
-export * from './api-docs';
-export * from './api-parser';
+export * from './generic-generator.ts';
+export * from './api-docs.ts';
+export * from './api-parser.ts';

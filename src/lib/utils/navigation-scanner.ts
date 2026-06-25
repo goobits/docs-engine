@@ -5,7 +5,7 @@
 
 import { readdir, readFile } from 'fs/promises';
 import { join, relative } from 'path';
-import type { DocFile } from './navigation-builder.js';
+import type { DocFile } from './navigation-builder.ts';
 
 /**
  * Options for scanning documentation files

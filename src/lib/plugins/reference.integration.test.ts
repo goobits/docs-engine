@@ -24,14 +24,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Root, Paragraph, Link, Text, Html } from 'mdast';
 import type { ContainerDirective } from '../mdast.d.ts';
-import { referencePlugin } from './reference.js';
-import * as symbolResolver from '../utils/symbol-resolver.js';
+import { referencePlugin } from './reference.ts';
+import * as symbolResolver from '../utils/symbol-resolver.ts';
 import {
   renderBlock,
   renderInline,
   symbolToGitHubUrl,
   type RenderOptions,
-} from '../utils/symbol-renderer.js';
+} from '../utils/symbol-renderer.ts';
 
 // ---------------------------------------------------------------------------
 // Real fixture symbol map

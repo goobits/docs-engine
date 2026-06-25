@@ -4,8 +4,8 @@
  */
 
 import { createHighlighter, type Highlighter } from 'shiki';
-import { escapeHtml } from './html.js';
-import { createBrowserLogger } from './browser-logger.js';
+import { escapeHtml } from './html.ts';
+import { createBrowserLogger } from './browser-logger.ts';
 
 const logger = createBrowserLogger('highlighter');
 

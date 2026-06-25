@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import sharp from 'sharp';
 import { existsSync, mkdirSync, rmSync, statSync, utimesSync } from 'fs';
 import { join } from 'path';
-import { processImage, batchProcessImages } from './image-processor.js';
+import { processImage, batchProcessImages } from './image-processor.ts';
 
 // Behavior-focused integration tests for the Sharp-backed image processor.
 //

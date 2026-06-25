@@ -1,2 +1,2 @@
-export * from './defaults';
-export type { MarkdownDocsConfig } from './defaults';
+export * from './defaults.ts';
+export type { MarkdownDocsConfig } from './defaults.ts';

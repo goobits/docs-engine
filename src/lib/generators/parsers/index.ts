@@ -4,10 +4,10 @@
  * Central export point for all parsers.
  */
 
-export { parseJSON } from './json-parser';
-export { parseEnv } from './env-parser';
-export { parseSQL } from './sql-parser';
-export { parseGrep } from './grep-parser';
+export { parseJSON } from './json-parser.ts';
+export { parseEnv } from './env-parser.ts';
+export { parseSQL } from './sql-parser.ts';
+export { parseGrep } from './grep-parser.ts';
 
 /**
  * Generic parsed item - represents any parsed data structure.

@@ -38,4 +38,4 @@ export { default as OptimizedImage } from './OptimizedImage.svelte';
 export { default as OptimizedImageHydrator } from './OptimizedImageHydrator.svelte';
 
 // Types - re-exported from navigation utilities
-export type { DocsLink, DocsSection } from '../utils/navigation';
+export type { DocsLink, DocsSection } from '../utils/navigation.ts';

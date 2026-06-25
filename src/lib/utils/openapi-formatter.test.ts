@@ -6,7 +6,7 @@ import {
   generateCurlExample,
   generateTypeScriptExample,
   type OpenAPIEndpoint,
-} from './openapi-formatter.js';
+} from './openapi-formatter.ts';
 
 /**
  * Helper to build a minimal endpoint object for the generator/filter tests.

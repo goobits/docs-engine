@@ -14,7 +14,7 @@
  *
  * @example
  * ```typescript
- * import { sanitizeTree } from '../utils/ast.js';
+ * import { sanitizeTree } from '../utils/ast.ts';
  *
  * export function myPlugin() {
  *   return (tree: Root) => {

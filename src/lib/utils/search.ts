@@ -1,4 +1,4 @@
-import type { DocsLink, DocsSection } from './navigation.js';
+import type { DocsLink, DocsSection } from './navigation.ts';
 
 /**
  * Search result with relevance scoring

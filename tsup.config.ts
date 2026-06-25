@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFile
 import { join, dirname, relative } from 'path';
 import { preprocess } from 'svelte/compiler';
 import { sveltePreprocess } from 'svelte-preprocess';
-import { createLogger } from './src/lib/utils/logger.js';
+import { createLogger } from './src/lib/utils/logger.ts';
 
 const logger = createLogger('tsup-build');
 
@@ -67,6 +67,7 @@ export default defineConfig({
   entry: [
     'src/lib/index.ts',
     'src/lib/server/index.ts',
+    'src/lib/server/markdownRenderer.ts',
     'src/lib/server/screenshot-service.ts',
     'src/lib/plugins/index.ts',
     'src/lib/components/index.ts',
@@ -84,6 +85,7 @@ export default defineConfig({
     entry: [
       'src/lib/index.ts',
       'src/lib/server/index.ts',
+      'src/lib/server/markdownRenderer.ts',
       'src/lib/server/screenshot-service.ts',
       'src/lib/plugins/index.ts',
       'src/lib/utils/index.ts',

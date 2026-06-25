@@ -1,7 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
-import { escapeHtml } from '../utils/html.js';
-import { encodeJsonBase64 } from '../utils/base64.js';
+import { escapeHtml } from '../utils/html.ts';
+import { encodeJsonBase64 } from '../utils/base64.ts';
 
 /**
  * Interface for mutating AST nodes during transformation

@@ -4,7 +4,7 @@
  * Parses and formats OpenAPI 3.0 specifications for documentation generation.
  */
 
-import { createBrowserLogger } from './browser-logger.js';
+import { createBrowserLogger } from './browser-logger.ts';
 
 const logger = createBrowserLogger('openapi-formatter');
 
@@ -12,6 +12,7 @@ const logger = createBrowserLogger('openapi-formatter');
  * OpenAPI operation object structure
  */
 interface OpenAPIOperation {
+  operationId?: string;
   summary?: string;
   description?: string;
   tags?: string[];
@@ -63,6 +64,7 @@ interface OpenAPIParameter {
 export interface OpenAPIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
+  operationId?: string;
   summary: string;
   description?: string;
   requestBody?: {
@@ -116,6 +118,7 @@ export function parseOpenAPISpec(spec: unknown): OpenAPIEndpoint[] {
       const endpoint: OpenAPIEndpoint = {
         method: method.toUpperCase() as OpenAPIEndpoint['method'],
         path,
+        operationId: op.operationId,
         summary: op.summary || '',
         description: op.description,
         responses: {},
@@ -279,6 +282,39 @@ export function formatSchema(schema: unknown, indent: number = 0): string {
     default:
       return 'any';
   }
+}
+
+/**
+ * Format a compact schema summary for generated reference tables.
+ */
+export function summarizeSchema(schema: unknown): string {
+  const formatted = formatSchema(schema).replace(/\s+/g, ' ').trim();
+  return formatted || 'any';
+}
+
+/**
+ * Summarize an OpenAPI request body for generated reference pages.
+ */
+export function summarizeOpenAPIRequestBody(
+  requestBody: OpenAPIEndpoint['requestBody'] | undefined
+): string {
+  if (!requestBody) return '';
+  const required = requestBody.required === false ? 'optional' : 'required';
+  return `${required} ${summarizeSchema(requestBody.schema)}`;
+}
+
+/**
+ * Summarize OpenAPI responses for generated reference pages.
+ */
+export function summarizeOpenAPIResponses(
+  responses: OpenAPIEndpoint['responses'] | undefined
+): string[] {
+  if (!responses) return [];
+
+  return Object.entries(responses).map(([status, response]) => {
+    const schema = response.schema ? `, ${summarizeSchema(response.schema)}` : '';
+    return `\`${status}\` ${response.description}${schema}`;
+  });
 }
 
 /**

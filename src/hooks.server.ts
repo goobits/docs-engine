@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
-import { checkRateLimit } from './lib/server/rate-limiter.js';
-import { RATE_LIMIT, HTTP_STATUS } from './lib/constants.js';
+import { checkRateLimit } from './lib/server/rate-limiter.ts';
+import { RATE_LIMIT, HTTP_STATUS } from './lib/constants.ts';
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Rate limit screenshot endpoint

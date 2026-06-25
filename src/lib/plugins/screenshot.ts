@@ -1,8 +1,8 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
-import { encodeJsonBase64 } from '../utils/base64.js';
-import { getVersion } from '../utils/version.js';
-import { createBrowserLogger } from '../utils/browser-logger.js';
+import { encodeJsonBase64 } from '../utils/base64.ts';
+import { getVersion } from '../utils/version.ts';
+import { createBrowserLogger } from '../utils/browser-logger.ts';
 
 /**
  * Interface for mutating AST nodes during transformation

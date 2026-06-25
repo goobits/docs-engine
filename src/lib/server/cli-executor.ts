@@ -1,6 +1,6 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { TIMEOUT, FILE_SIZE } from '../constants.js';
+import { TIMEOUT, FILE_SIZE } from '../constants.ts';
 
 const execFileAsync = promisify(execFile);
 

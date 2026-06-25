@@ -2,8 +2,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { filetreePlugin } from './filetree';
 import type { Root } from 'mdast';
-import * as treeParser from '../utils/tree-parser.js';
-import * as base64 from '../utils/base64.js';
+import * as treeParser from '../utils/tree-parser.ts';
+import * as base64 from '../utils/base64.ts';
 
 describe('filetree plugin', () => {
   const createCodeBlock = (lang: string, value: string): Root => ({

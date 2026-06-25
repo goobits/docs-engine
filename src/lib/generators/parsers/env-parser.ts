@@ -4,7 +4,7 @@
  * Parses .env files with support for categories, comments, and variable detection.
  */
 
-import type { ParsedItem } from './index';
+import type { ParsedItem } from './index.ts';
 
 /**
  * Parse .env file content

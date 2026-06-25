@@ -3,6 +3,8 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "ignoreDeprecations": "6.0",
     "verbatimModuleSyntax": true,
     "lib": ["ESNext", "DOM"],

@@ -1,6 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Image } from 'mdast';
-import { encodeJsonBase64 } from '../utils/base64.js';
+import { encodeJsonBase64 } from '../utils/base64.ts';
 
 /**
  * Configuration for image optimization plugin

@@ -8,7 +8,7 @@
 import { execSync } from 'child_process';
 import { LRUCache } from 'lru-cache';
 import pRetry from 'p-retry';
-import { CACHE, GIT } from '../constants.js';
+import { CACHE, GIT } from '../constants.ts';
 
 /**
  * Git configuration for repository integration
@@ -301,7 +301,7 @@ export function isGitRepository(): boolean {
  * @public
  * @deprecated Import from '../utils/date' instead for browser compatibility
  */
-export { formatRelativeDate } from './date.js';
+export { formatRelativeDate } from './date.ts';
 
 /**
  * Clear the Git cache (useful for testing)

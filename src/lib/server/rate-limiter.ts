@@ -1,4 +1,4 @@
-import { RATE_LIMIT } from '../constants.js';
+import { RATE_LIMIT } from '../constants.ts';
 
 /**
  * Rate limit entry tracking request count and reset time
