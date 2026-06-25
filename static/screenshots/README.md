@@ -10,7 +10,8 @@ Screenshots are generated using:
 tsx scripts/generateCliScreenshotsSvg.ts
 ```
 
-This creates SVG screenshots with terminal-styled output showing:
+This creates SVG screenshots with terminal-styled output:
+
 - Command prompt with syntax highlighting
 - Actual command output
 - Themed colors (dracula, monokai, solarized, nord)
@@ -27,6 +28,7 @@ This creates SVG screenshots with terminal-styled output showing:
 ## Format
 
 SVG format is used for:
+
 - Vector graphics (scalable at any resolution)
 - Smaller file sizes
 - Easy to edit and customize

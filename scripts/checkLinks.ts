@@ -11,20 +11,53 @@
  *   BUILD_SKIP_LINK_CHECK=1 tsx scripts/checkLinks.ts  # Skip check
  */
 
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { glob } from 'glob';
-import { readFileSync, existsSync, statSync } from 'fs';
-import { resolve, join, dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
 
+type LinkCheckerConfig = {
+  baseDir: string;
+  include: string[];
+  exclude: string[];
+  checkExternal: boolean;
+  timeout: number;
+  concurrency: number;
+  skipDomains: string[];
+  validExtensions: string[];
+};
+
+type DocumentLink = {
+  url: string;
+  text: string;
+  file: string;
+  line: number;
+  type: 'link' | 'image' | 'html';
+  isExternal: boolean;
+  isAnchor: boolean;
+};
+
+type ValidationResult = {
+  link: DocumentLink;
+  isValid: boolean;
+  error?: string;
+};
+
+type LinkStats = {
+  total: number;
+  valid: number;
+  broken: number;
+};
+
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: LinkCheckerConfig = {
   baseDir: 'docs',
   include: ['**/*.md', '**/*.mdx'],
   exclude: [
@@ -44,7 +77,7 @@ const DEFAULT_CONFIG = {
 /**
  * Load configuration from file or use defaults
  */
-function loadConfig() {
+function loadConfig(): LinkCheckerConfig {
   const configFiles = ['.linkcheckerrc.json', '.linkcheckerrc', 'linkchecker.config.json'];
 
   for (const configFile of configFiles) {
@@ -52,10 +85,10 @@ function loadConfig() {
     if (existsSync(configPath)) {
       try {
         const content = readFileSync(configPath, 'utf-8');
-        const fileConfig = JSON.parse(content);
+        const fileConfig = JSON.parse(content) as Partial<LinkCheckerConfig>;
         return { ...DEFAULT_CONFIG, ...fileConfig };
       } catch (error) {
-        console.error(`Error loading config from ${configPath}:`, error.message);
+        console.error(`Error loading config from ${configPath}:`, errorMessage(error));
       }
     }
   }
@@ -71,9 +104,9 @@ function loadConfig() {
  * Extract links from markdown file using regex
  * (Simple alternative to AST parsing for build script)
  */
-function extractLinksFromFile(filePath) {
+function extractLinksFromFile(filePath: string): DocumentLink[] {
   const content = readFileSync(filePath, 'utf-8');
-  const links = [];
+  const links: DocumentLink[] = [];
   const lines = content.split('\n');
   let inCodeBlock = false;
 
@@ -175,14 +208,14 @@ function extractLinksFromFile(filePath) {
 /**
  * Extract links from multiple files
  */
-function extractLinksFromFiles(filePaths) {
-  const allLinks = [];
+function extractLinksFromFiles(filePaths: string[]): DocumentLink[] {
+  const allLinks: DocumentLink[] = [];
   for (const file of filePaths) {
     try {
       const links = extractLinksFromFile(file);
       allLinks.push(...links);
     } catch (error) {
-      console.error(`Error extracting links from ${file}:`, error.message);
+      console.error(`Error extracting links from ${file}:`, errorMessage(error));
     }
   }
   return allLinks;
@@ -195,7 +228,7 @@ function extractLinksFromFiles(filePaths) {
 /**
  * Resolve a link path relative to source file and base directory
  */
-function resolveLinkPath(link, sourceFile, baseDir) {
+function resolveLinkPath(link: string, sourceFile: string, baseDir: string): string {
   const [pathPart] = link.split('#');
 
   if (pathPart.startsWith('/')) {
@@ -218,7 +251,7 @@ function resolveLinkPath(link, sourceFile, baseDir) {
 /**
  * Check if anchor exists in markdown file
  */
-function anchorExistsInFile(filePath, anchor) {
+function anchorExistsInFile(filePath: string, anchor: string): boolean {
   try {
     const content = readFileSync(filePath, 'utf-8');
     const normalizedAnchor = anchor.toLowerCase().replace(/\s+/g, '-');
@@ -255,7 +288,7 @@ function anchorExistsInFile(filePath, anchor) {
 /**
  * Validate an internal link
  */
-function validateInternalLink(link, config) {
+function validateInternalLink(link: DocumentLink, config: LinkCheckerConfig): ValidationResult {
   const { baseDir, validExtensions } = config;
 
   try {
@@ -321,7 +354,7 @@ function validateInternalLink(link, config) {
     return {
       link,
       isValid: false,
-      error: error.message,
+      error: errorMessage(error),
     };
   }
 }
@@ -329,8 +362,8 @@ function validateInternalLink(link, config) {
 /**
  * Validate all links
  */
-function validateLinks(links, config) {
-  const results = [];
+function validateLinks(links: DocumentLink[], config: LinkCheckerConfig): ValidationResult[] {
+  const results: ValidationResult[] = [];
   const internalLinks = links.filter((l) => !l.isExternal);
 
   for (const link of internalLinks) {
@@ -347,8 +380,8 @@ function validateLinks(links, config) {
 /**
  * Print validation results
  */
-function printResults(results) {
-  const stats = {
+function printResults(results: ValidationResult[]): boolean {
+  const stats: LinkStats = {
     total: results.length,
     valid: results.filter((r) => r.isValid).length,
     broken: results.filter((r) => !r.isValid).length,
@@ -381,6 +414,10 @@ function printResults(results) {
   }
 
   return stats.broken === 0;
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 // ============================================================================

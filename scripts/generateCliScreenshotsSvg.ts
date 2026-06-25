@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { execSync } from 'child_process';
-import { mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { execSync } from 'node:child_process';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 // CLI commands to screenshot (safe subset)
 const commands = [
@@ -132,7 +132,7 @@ function createTerminalSVG(command, output, theme = 'dracula', prompt = '$ ') {
 }
 
 function generateScreenshot(cmd) {
-  console.log(`\n📸 Generating screenshot: ${cmd.id}`);
+  console.log(`\nGenerating screenshot: ${cmd.id}`);
 
   // Execute command or use mock output
   let output;
@@ -166,20 +166,19 @@ function generateScreenshot(cmd) {
   const outputPath = join(outputDir, `${cmd.id}.svg`);
   writeFileSync(outputPath, svg, 'utf-8');
 
-  console.log(`   ✓ Saved: ${outputPath}`);
+  console.log(`   Saved: ${outputPath}`);
 }
 
 function main() {
-  console.log('🎬 Starting CLI screenshot generation (SVG)...\n');
+  console.log('Starting CLI screenshot generation (SVG)...\n');
   console.log(`Commands to process: ${commands.length}`);
 
   for (const cmd of commands) {
     generateScreenshot(cmd);
   }
 
-  console.log('\n✅ All screenshots generated successfully!');
+  console.log('\nAll screenshots generated successfully.');
   console.log(`\nScreenshots saved to: static/screenshots/examples/`);
-  console.log('\n💡 Tip: SVG screenshots can be converted to PNG using: convert file.svg file.png');
 }
 
 main();

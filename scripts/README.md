@@ -73,3 +73,17 @@ On a typical documentation site (25 files, 200+ links):
 
 - [Link Checking Documentation](../docs/guides/link-checking.md)
 - [Configuration Example](../.linkcheckerrc.json)
+
+## generateCliScreenshotsSvg.ts
+
+Generates the terminal-style SVG examples under
+`static/screenshots/examples/`.
+
+```bash
+tsx scripts/generateCliScreenshotsSvg.ts
+```
+
+## bumpIfPublished.ts
+
+Checks the npm registry during release and bumps package patch versions when the
+local version would collide with a published version.
