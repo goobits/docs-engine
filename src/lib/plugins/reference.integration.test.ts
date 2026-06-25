@@ -23,7 +23,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Root, Paragraph, Link, Text, Html } from 'mdast';
-import type { ContainerDirective } from '../mdast.d.ts';
+import type { ContainerDirective } from '../mdastTypes.ts';
 import { referencePlugin } from './reference.ts';
 import * as symbolResolver from '../utils/symbol-resolver.ts';
 import {

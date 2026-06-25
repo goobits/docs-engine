@@ -1,6 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
-import type { InlineMath, Math } from '../mdast.d.ts';
+import type { InlineMath, Math } from '../mdastTypes.ts';
 import katex from 'katex';
 import { escapeHtml } from '../utils/html.ts';
 

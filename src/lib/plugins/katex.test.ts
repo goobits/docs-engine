@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { katexPlugin, type KaTeXOptions } from './katex';
 import type { Root, Paragraph, Html, Text } from 'mdast';
-import type { InlineMath, Math } from '../mdast.d.ts';
+import type { InlineMath, Math } from '../mdastTypes.ts';
 
 /**
  * Tests for KaTeX math rendering plugin

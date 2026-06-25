@@ -1,7 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Paragraph, PhrasingContent, Html } from 'mdast';
 import type { Parent } from 'unist';
-import type { ContainerDirective } from '../mdast.d.ts';
+import type { ContainerDirective } from '../mdastTypes.ts';
 import {
   resolveSymbol,
   loadSymbolMap,

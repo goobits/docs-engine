@@ -10,7 +10,7 @@ import type {
   Heading,
   PhrasingContent,
 } from 'mdast';
-import type { ContainerDirective } from '../mdast.d.ts';
+import type { ContainerDirective } from '../mdastTypes.ts';
 import { escapeHtml } from '../utils/html.ts';
 import { sanitizeTree } from '../utils/ast.ts';
 

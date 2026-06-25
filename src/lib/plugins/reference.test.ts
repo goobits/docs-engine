@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { referencePlugin } from './reference';
 import type { Root, Paragraph, Html, Link, Text } from 'mdast';
-import type { ContainerDirective } from '../mdast.d.ts';
+import type { ContainerDirective } from '../mdastTypes.ts';
 import * as symbolResolver from '../utils/symbol-resolver.ts';
 import * as symbolRenderer from '../utils/symbol-renderer.ts';
 
