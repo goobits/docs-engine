@@ -349,7 +349,7 @@ Typical performance on a documentation site with:
 
 **Check:**
 1. Is `prebuild` script configured?
-2. Is `scripts/check-links.mjs` executable?
+2. Is `scripts/checkLinks.ts` executable?
 3. Are dependencies installed?
 
 ```bash
@@ -357,10 +357,10 @@ Typical performance on a documentation site with:
 cat package.json | grep -A 3 '"scripts"'
 
 # Run manually
-node scripts/check-links.mjs
+tsx scripts/checkLinks.ts
 
 # Check file permissions
-ls -la scripts/check-links.mjs
+ls -la scripts/checkLinks.ts
 ```
 
 ### Too many false positives
@@ -383,7 +383,7 @@ ls -la scripts/check-links.mjs
 
 ### Script Location
 
-`/scripts/check-links.mjs`
+`/scripts/checkLinks.ts`
 
 ### Environment Variables
 

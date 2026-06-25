@@ -2,7 +2,7 @@
 
 This directory contains build-time scripts for the docs-engine project.
 
-## check-links.mjs
+## checkLinks.ts
 
 Validates internal and external links in markdown documentation.
 
@@ -10,13 +10,13 @@ Validates internal and external links in markdown documentation.
 
 ```bash
 # Run from project root
-node scripts/check-links.mjs
+tsx scripts/checkLinks.ts
 
 # Run via npm/pnpm
 pnpm check-links
 
 # Skip link checking
-BUILD_SKIP_LINK_CHECK=1 node scripts/check-links.mjs
+BUILD_SKIP_LINK_CHECK=1 tsx scripts/checkLinks.ts
 ```
 
 ### Features
@@ -54,7 +54,7 @@ The script is integrated into the build process via `prebuild` script in `packag
 ```json
 {
   "scripts": {
-    "check-links": "node scripts/check-links.mjs",
+    "check-links": "tsx scripts/checkLinks.ts",
     "prebuild": "npm run check-links",
     "build": "tsup"
   }

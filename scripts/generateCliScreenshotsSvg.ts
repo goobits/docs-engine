@@ -143,7 +143,7 @@ function generateScreenshot(cmd) {
       output = execSync(cmd.command, {
         encoding: 'utf-8',
         maxBuffer: 10 * 1024 * 1024,
-        timeout: 10000
+        timeout: 10000,
       }).trim();
     } catch (error) {
       output = error.stdout || error.message;

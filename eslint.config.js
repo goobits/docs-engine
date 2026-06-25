@@ -114,7 +114,7 @@ export default [
     },
   },
   {
-    files: ['**/*.mjs', '**/*.js'],
+    files: ['**/*.mjs', '**/*.js', 'scripts/**/*.ts'],
     languageOptions: {
       globals: {
         console: 'readonly',
@@ -123,6 +123,11 @@ export default [
         __dirname: 'readonly',
         __filename: 'readonly',
       },
+    },
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-unsafe-regex': 'off',
     },
   },
   {

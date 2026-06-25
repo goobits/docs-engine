@@ -7,8 +7,8 @@
  * Designed to be run as part of the build process.
  *
  * Usage:
- *   node scripts/check-links.mjs
- *   BUILD_SKIP_LINK_CHECK=1 node scripts/check-links.mjs  # Skip check
+ *   tsx scripts/checkLinks.ts
+ *   BUILD_SKIP_LINK_CHECK=1 tsx scripts/checkLinks.ts  # Skip check
  */
 
 import { glob } from 'glob';

@@ -1,28 +1,28 @@
-import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
+import { execSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
 
 const packages = [
   {
-    name: "@goobits/docs-engine",
-    file: "package.json",
+    name: '@goobits/docs-engine',
+    file: 'package.json',
   },
   {
-    name: "@goobits/docs-engine-cli",
-    file: "packages/docs-engine-cli/package.json",
+    name: '@goobits/docs-engine-cli',
+    file: 'packages/docs-engine-cli/package.json',
   },
   {
-    name: "create-docs-engine",
-    file: "packages/create-docs-engine/package.json",
+    name: 'create-docs-engine',
+    file: 'packages/create-docs-engine/package.json',
   },
 ];
 
-const root = path.resolve(".");
+const root = path.resolve('.');
 
 function getRegistryVersion(pkgName) {
   try {
     const output = execSync(`npm view ${pkgName} version --json`, {
-      stdio: ["ignore", "pipe", "ignore"],
+      stdio: ['ignore', 'pipe', 'ignore'],
     })
       .toString()
       .trim();
@@ -34,9 +34,9 @@ function getRegistryVersion(pkgName) {
 }
 
 function parseSemver(version) {
-  const clean = version.replace(/^v/, "");
-  const [core] = clean.split("-");
-  const parts = core.split(".").map((part) => Number(part));
+  const clean = version.replace(/^v/, '');
+  const [core] = clean.split('-');
+  const parts = core.split('.').map((part) => Number(part));
   if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) {
     return null;
   }
@@ -63,11 +63,8 @@ function incrementPatch(version) {
 
 function updateVersion(filePath, nextVersion) {
   const fullPath = path.join(root, filePath);
-  const current = readFileSync(fullPath, "utf8");
-  const replaced = current.replace(
-    /"version":\s*"[^"]+"/,
-    `"version": "${nextVersion}"`
-  );
+  const current = readFileSync(fullPath, 'utf8');
+  const replaced = current.replace(/"version":\s*"[^"]+"/, `"version": "${nextVersion}"`);
   writeFileSync(fullPath, replaced);
 }
 
@@ -78,7 +75,7 @@ for (const pkg of packages) {
   if (!registryVersion) continue;
 
   const fullPath = path.join(root, pkg.file);
-  const json = JSON.parse(readFileSync(fullPath, "utf8"));
+  const json = JSON.parse(readFileSync(fullPath, 'utf8'));
   const localVersion = json.version;
   if (!localVersion) continue;
 
@@ -92,5 +89,5 @@ for (const pkg of packages) {
 }
 
 if (!bumped) {
-  console.log("No published version conflicts detected.");
+  console.log('No published version conflicts detected.');
 }

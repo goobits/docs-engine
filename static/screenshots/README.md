@@ -7,7 +7,7 @@ This directory contains generated CLI screenshot examples used in the documentat
 Screenshots are generated using:
 
 ```bash
-node scripts/generate-cli-screenshots-svg.mjs
+tsx scripts/generateCliScreenshotsSvg.ts
 ```
 
 This creates SVG screenshots with terminal-styled output showing:

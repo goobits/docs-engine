@@ -7,7 +7,7 @@
     "dev": "vite dev --port 3390 --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "check-links": "node ../scripts/check-links.mjs",
+    "check-links": "tsx ../scripts/checkLinks.ts",
     "prebuild": "npm run check-links"
   },
   "devDependencies": {

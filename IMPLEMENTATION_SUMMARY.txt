@@ -23,7 +23,7 @@ CREATED:
     → Controls what to check, what to exclude
     → Internal links only by default (fast)
 
-  ✓ /scripts/check-links.mjs (11 KB, 395 lines)
+  ✓ /scripts/checkLinks.ts (11 KB, 395 lines)
     → Standalone link validation script
     → No external dependencies
     → Validates internal links, anchors, file paths
@@ -124,7 +124,7 @@ KEY SETTINGS:
 ╚══════════════════════════════════════════════════════════════════════════╝
 
 TEST 1: Manual Link Check
-  Command: node scripts/check-links.mjs
+  Command: tsx scripts/checkLinks.ts
   Result: ✅ Successfully detected 115 broken links
   Output: Detailed report with file:line for each error
 

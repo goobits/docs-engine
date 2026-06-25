@@ -50,7 +50,7 @@ Successfully integrated link validation into the build process for the docs-engi
 
 ### 2. Link Checker Script
 
-**File:** `/home/user/docs-engine/scripts/check-links.mjs`
+**File:** `/home/user/docs-engine/scripts/checkLinks.ts`
 
 **Size:** 11KB (standalone, no dependencies on CLI build)
 
@@ -77,7 +77,7 @@ Successfully integrated link validation into the build process for the docs-engi
 ```json
 {
   "scripts": {
-    "check-links": "node scripts/check-links.mjs",
+    "check-links": "tsx scripts/checkLinks.ts",
     "prebuild": "npm run check-links",
     "build": "tsup"
   }
@@ -89,7 +89,7 @@ Successfully integrated link validation into the build process for the docs-engi
 ```json
 {
   "scripts": {
-    "check-links": "node ../scripts/check-links.mjs",
+    "check-links": "tsx ../scripts/checkLinks.ts",
     "prebuild": "npm run check-links",
     "build": "vite build"
   }
@@ -127,7 +127,7 @@ Successfully integrated link validation into the build process for the docs-engi
 pnpm check-links
 
 # From root directory
-node scripts/check-links.mjs
+tsx scripts/checkLinks.ts
 
 # Skip link checking
 BUILD_SKIP_LINK_CHECK=1 pnpm check-links
@@ -191,7 +191,7 @@ Edit `.linkcheckerrc.json` to customize:
 ### Test 1: Manual Link Check
 
 ```bash
-$ node scripts/check-links.mjs
+$ tsx scripts/checkLinks.ts
 ```
 
 **Output:**
@@ -384,7 +384,7 @@ Potential improvements for future iterations:
 /home/user/docs-engine/
 ├── .linkcheckerrc.json                  (359 bytes)
 ├── scripts/
-│   ├── check-links.mjs                  (11 KB)
+│   ├── checkLinks.ts                  (11 KB)
 │   └── README.md                        (1.5 KB)
 └── docs/
     └── guides/
@@ -414,7 +414,7 @@ If needed, rollback is simple:
 ```bash
 # 1. Remove prebuild script from package.json files
 # 2. Delete .linkcheckerrc.json (optional)
-# 3. Delete scripts/check-links.mjs (optional)
+# 3. Delete scripts/checkLinks.ts (optional)
 # 4. Delete documentation (optional)
 
 # Or just bypass permanently:
