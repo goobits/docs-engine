@@ -26,6 +26,9 @@ export type { TreeNode, FileTypeConfig } from './tree-parser.ts';
 export * from './frontmatter.ts';
 export type { Frontmatter, ParsedContent } from './frontmatter.ts';
 
+// Markdown collection utilities
+export * from './markdown-collection.ts';
+
 // Base64 utilities
 export * from './base64.ts';
 
