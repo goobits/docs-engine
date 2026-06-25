@@ -16,7 +16,7 @@ export interface DocsLink {
 export interface DocsSection {
   title: string;
   description: string;
-  icon: ComponentType;
+  icon?: ComponentType;
   links: DocsLink[];
 }
 

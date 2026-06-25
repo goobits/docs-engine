@@ -6,7 +6,7 @@
    */
 
   import { page } from '$app/stores';
-  import { Search, ChevronDown, X } from '@lucide/svelte';
+  import { BookOpen, Search, ChevronDown, X } from '@lucide/svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import type { DocsSection } from '../utils/navigation';
 
@@ -237,7 +237,11 @@
               : 'Expand'} {section.title} section"
           >
             <div class="v2-docs-sidebar__section-title">
-              <section.icon size={16} aria-hidden="true" />
+              {#if section.icon}
+                <section.icon size={16} aria-hidden="true" />
+              {:else}
+                <BookOpen size={16} aria-hidden="true" />
+              {/if}
               <span>{section.title}</span>
             </div>
             <span
