@@ -5,7 +5,7 @@
    * Finds all .md-mermaid divs and renders them
    * Use this in your layout or page to hydrate static HTML
    */
-  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
+  import { escapeHtml, sanitizeSvg, useHydrator } from '@goobits/docs-engine/utils';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';
@@ -29,8 +29,7 @@
   let dragStartPanY = 0;
 
   function openModal(svg: string) {
-    // Mermaid already sanitizes its SVG output
-    modalSvg = svg;
+    modalSvg = sanitizeSvg(svg);
     modalOpen = true;
   }
 
@@ -147,10 +146,10 @@
 
           const { svg } = await mermaidApi.render(id, source);
 
-          // Wrap SVG in clickable container (Mermaid already sanitizes its SVG output)
+          // Sanitize again at the raw HTML boundary even though Mermaid uses strict mode.
           const wrapper = document.createElement('div');
           wrapper.className = 'md-mermaid-clickable';
-          wrapper.innerHTML = svg;
+          wrapper.innerHTML = sanitizeSvg(svg);
           wrapper.style.cursor = 'pointer';
           wrapper.style.transition = 'all 0.2s ease';
           wrapper.setAttribute('role', 'button');
