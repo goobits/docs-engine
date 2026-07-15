@@ -5,7 +5,7 @@
  * for documentation pages. Supports GitHub, GitLab, and Gitea providers.
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { LRUCache } from 'lru-cache';
 import pRetry from 'p-retry';
 import { CACHE, GIT } from '../constants.ts';
@@ -61,7 +61,7 @@ const gitCache = new LRUCache<string, { value: unknown; timestamp: number }>({
  * Now async to support retry on transient git lock errors
  */
 async function execGitCommand(
-  command: string,
+  args: readonly string[],
   cacheKey: string,
   _ttl = CACHE.TTL
 ): Promise<string | null> {
@@ -74,7 +74,7 @@ async function execGitCommand(
   try {
     const result = await pRetry(
       () => {
-        return execSync(command, {
+        return execFileSync('git', args, {
           encoding: 'utf-8',
           stdio: ['pipe', 'pipe', 'pipe'],
           timeout: GIT.COMMAND_TIMEOUT,
@@ -102,7 +102,7 @@ async function execGitCommand(
   } catch (error) {
     // Log warning but don't break the build
     if (process.env.NODE_ENV !== 'test') {
-      console.warn(`Git command failed: ${command}`, error);
+      console.warn(`Git command failed with args: ${JSON.stringify(args)}`, error);
     }
     return null;
   }
@@ -124,7 +124,7 @@ async function execGitCommand(
  */
 export async function getLastUpdated(filePath: string): Promise<Date | null> {
   const cacheKey = `lastUpdated:${filePath}`;
-  const result = await execGitCommand(`git log -1 --format=%ai "${filePath}"`, cacheKey);
+  const result = await execGitCommand(['log', '-1', '--format=%ai', '--', filePath], cacheKey);
 
   if (!result) return null;
 
@@ -160,7 +160,7 @@ export async function getContributors(
   }
 
   const result = await execGitCommand(
-    `git log --format="%an|%ae" "${filePath}"`,
+    ['log', '--format=%an|%ae', '--', filePath],
     `contributors-raw:${filePath}`
   );
 
@@ -286,7 +286,7 @@ function simpleHash(str: string): string {
  */
 export function isGitRepository(): boolean {
   try {
-    execSync('git rev-parse --git-dir', {
+    execFileSync('git', ['rev-parse', '--git-dir'], {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return true;
