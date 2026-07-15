@@ -14,7 +14,8 @@ import path from 'path';
 import prompts from 'prompts';
 import chalk from 'chalk';
 import ora from 'ora';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
+import { resolveProjectPath } from './project-path.ts';
 
 interface ProjectConfig {
   projectName: string;
@@ -53,13 +54,24 @@ async function main(): Promise<void> {
   }
 
   // Check if directory exists
-  const projectPath = path.resolve(process.cwd(), projectName);
+  let projectPath: string;
+  try {
+    projectPath = resolveProjectPath(process.cwd(), projectName);
+  } catch (error) {
+    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    process.exit(1);
+  }
   const dirExists = await fs
     .access(projectPath)
     .then(() => true)
     .catch(() => false);
 
   if (dirExists) {
+    const metadata = await fs.lstat(projectPath);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+      console.error(chalk.red(`Refusing to replace a non-directory project path: ${projectPath}`));
+      process.exit(1);
+    }
     const response = await prompts({
       type: 'confirm',
       name: 'overwrite',
@@ -72,7 +84,7 @@ async function main(): Promise<void> {
       process.exit(0);
     }
 
-    await fs.rm(projectPath, { recursive: true, force: true });
+    await fs.rm(projectPath, { recursive: true });
   }
 
   // Prompt for configuration
@@ -269,13 +281,15 @@ build/
  * Install dependencies
  */
 async function installDependencies(projectPath: string, packageManager: string): Promise<void> {
-  const commands: Record<string, string> = {
-    npm: 'npm install',
-    pnpm: 'pnpm install',
-    yarn: 'yarn',
+  const commands: Record<string, { executable: string; args: string[] }> = {
+    npm: { executable: 'npm', args: ['install'] },
+    pnpm: { executable: 'pnpm', args: ['install'] },
+    yarn: { executable: 'yarn', args: [] },
   };
+  const command = commands[packageManager];
+  if (!command) throw new Error(`Unsupported package manager: ${packageManager}`);
 
-  execSync(commands[packageManager], {
+  execFileSync(command.executable, command.args, {
     cwd: projectPath,
     stdio: 'ignore',
   });

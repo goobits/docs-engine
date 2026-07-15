@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -8,24 +8,32 @@ const commands = [
   {
     id: 'git-status',
     command: 'git status',
+    executable: 'git',
+    args: ['status'],
     theme: 'dracula',
     prompt: '$ ',
   },
   {
     id: 'git-log',
     command: 'git log --oneline -5',
+    executable: 'git',
+    args: ['log', '--oneline', '-5'],
     theme: 'monokai',
     prompt: '$ ',
   },
   {
     id: 'ls-plugins',
     command: 'ls -la src/lib/plugins/',
+    executable: 'ls',
+    args: ['-la', 'src/lib/plugins/'],
     theme: 'solarized',
     prompt: '$ ',
   },
   {
     id: 'package-json',
     command: 'head -20 package.json',
+    executable: 'head',
+    args: ['-20', 'package.json'],
     theme: 'dracula',
     prompt: '$ ',
   },
@@ -140,7 +148,7 @@ function generateScreenshot(cmd) {
     output = cmd.mockOutput.trim();
   } else {
     try {
-      output = execSync(cmd.command, {
+      output = execFileSync(cmd.executable, cmd.args, {
         encoding: 'utf-8',
         maxBuffer: 10 * 1024 * 1024,
         timeout: 10000,

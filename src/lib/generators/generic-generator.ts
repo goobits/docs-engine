@@ -82,8 +82,10 @@ export type ParserConfig =
     }
   | {
       type: 'grep';
-      /** Grep command to execute */
-      command: string;
+      /** Allowed grep-compatible executable */
+      command: 'grep' | 'rg';
+      /** Arguments passed directly to the executable */
+      args: string[];
       /** Pattern to extract from matches */
       extractPattern?: RegExp;
     }
@@ -173,7 +175,7 @@ export class GenericGenerator {
       case 'sql':
         return parseSQL(content, parser.tablePattern);
       case 'grep':
-        return parseGrep(parser.command, parser.extractPattern);
+        return parseGrep(parser.command, parser.args, parser.extractPattern);
       case 'custom':
         return parser.parse(content, this.#config);
       default:

@@ -423,9 +423,8 @@ export default {
 
 2. Clear your build cache:
    ```bash
-   rm -rf .svelte-kit node_modules/.vite
-   npm install
-   npm run dev
+   npx svelte-kit sync
+   npm run dev -- --force
    ```
 
 3. Check browser console for 404 errors on CSS files.

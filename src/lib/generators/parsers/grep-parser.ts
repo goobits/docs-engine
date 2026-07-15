@@ -4,18 +4,29 @@
  * Executes a grep command and parses the output.
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import type { ParsedItem } from './index.ts';
+
+const ALLOWED_GREP_COMMANDS = new Set(['grep', 'rg']);
 
 /**
  * Execute grep command and parse output
- * @param command - Shell command to execute
+ * @param command - Grep-compatible executable to run
+ * @param args - Arguments passed directly to the executable
  * @param extractPattern - Optional regex to extract values from each line
  * @returns Array of parsed items
  */
-export function parseGrep(command: string, extractPattern?: RegExp): ParsedItem[] {
+export function parseGrep(
+  command: string,
+  args: readonly string[],
+  extractPattern?: RegExp
+): ParsedItem[] {
+  if (!ALLOWED_GREP_COMMANDS.has(command)) {
+    console.warn(`Grep command is not allowed: ${command}`);
+    return [];
+  }
   try {
-    const output = execSync(command, { encoding: 'utf-8' });
+    const output = execFileSync(command, args, { encoding: 'utf-8' });
     const lines = output.split('\n').filter(Boolean);
 
     if (!extractPattern) {
@@ -32,7 +43,7 @@ export function parseGrep(command: string, extractPattern?: RegExp): ParsedItem[
 
     return items;
   } catch {
-    console.warn(`Grep command failed: ${command}`);
+    console.warn(`Grep command failed: ${command} ${JSON.stringify(args)}`);
     return [];
   }
 }

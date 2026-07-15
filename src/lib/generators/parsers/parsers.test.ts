@@ -4,9 +4,13 @@
  * Tests for the parser modules extracted from generic-generator.
  */
 
-import { describe, it, expect } from 'vitest';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { describe, it, expect, vi } from 'vitest';
 import { parseJSON } from './json-parser';
 import { parseEnv } from './env-parser';
+import { parseGrep } from './grep-parser';
 import { parseSQL } from './sql-parser';
 
 describe('parseJSON', () => {
@@ -193,5 +197,28 @@ CREATE TABLE posts (
     const columns = result[0].columns as Array<{ name: string; type: string }>;
     expect(columns).toHaveLength(1);
     expect(columns[0].name).toBe('id');
+  });
+});
+
+describe('parseGrep', () => {
+  it('passes command-like file names as arguments without a shell', () => {
+    const root = mkdtempSync(join(tmpdir(), 'docs-engine-grep-'));
+    const source = join(root, 'source;touch injected.txt');
+    writeFileSync(source, 'needle\n');
+    try {
+      expect(parseGrep('grep', ['needle', source])).toEqual([{ value: 'needle' }]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects non-grep executables', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      expect(parseGrep('sh', ['-c', 'exit 0'])).toEqual([]);
+      expect(warning).toHaveBeenCalledWith('Grep command is not allowed: sh');
+    } finally {
+      warning.mockRestore();
+    }
   });
 });
