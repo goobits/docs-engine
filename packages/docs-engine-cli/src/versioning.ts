@@ -8,6 +8,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
+const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
+
 /**
  * Version metadata
  */
@@ -35,19 +37,20 @@ export interface VersionsConfig {
  * @public
  */
 export async function createVersion(version: string, docsDir: string): Promise<void> {
-  const versionedDocsDir = path.join(docsDir, 'versioned_docs');
+  const { versionedDocsDir, versionDir } = resolveVersionDirectory(version, docsDir);
   const currentDocsDir = path.join(docsDir, 'current');
-  const versionDir = path.join(versionedDocsDir, `version-${version}`);
 
-  // Ensure versioned_docs directory exists
-  await fs.mkdir(versionedDocsDir, { recursive: true });
+  await ensureOwnedDirectory(versionedDocsDir);
+  await assertPathDoesNotExist(versionDir);
 
   // Copy current docs to versioned directory
   const sourceDir = await fs
     .access(currentDocsDir)
     .then(() => currentDocsDir)
     .catch(() => docsDir);
-  await copyDirectory(sourceDir, versionDir);
+  const excludedRootEntries =
+    sourceDir === docsDir ? new Set(['versioned_docs', 'versions.json']) : undefined;
+  await copyDirectory(sourceDir, versionDir, excludedRootEntries);
 
   // Update versions.json
   const versionsFile = path.join(docsDir, 'versions.json');
@@ -108,11 +111,11 @@ export async function listVersions(docsDir: string): Promise<VersionMetadata[]> 
  * @public
  */
 export async function deleteVersion(version: string, docsDir: string): Promise<void> {
-  const versionedDocsDir = path.join(docsDir, 'versioned_docs');
-  const versionDir = path.join(versionedDocsDir, `version-${version}`);
+  const { versionedDocsDir, versionDir } = resolveVersionDirectory(version, docsDir);
 
-  // Remove version directory
-  await fs.rm(versionDir, { recursive: true, force: true });
+  await assertOwnedDirectory(versionedDocsDir);
+  await assertOwnedDirectory(versionDir);
+  await fs.rm(versionDir, { recursive: true });
 
   // Update versions.json
   const versionsFile = path.join(docsDir, 'versions.json');
@@ -132,21 +135,89 @@ export async function deleteVersion(version: string, docsDir: string): Promise<v
 /**
  * Copy directory recursively
  */
-async function copyDirectory(src: string, dest: string): Promise<void> {
+async function copyDirectory(
+  src: string,
+  dest: string,
+  excludedEntries: ReadonlySet<string> = new Set()
+): Promise<void> {
   await fs.mkdir(dest, { recursive: true });
 
   const entries = await fs.readdir(src, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (excludedEntries.has(entry.name)) {
+      continue;
+    }
+
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
 
+    if (entry.isSymbolicLink()) {
+      throw new Error(`Refusing to copy symbolic link from documentation source: ${srcPath}`);
+    }
+
     if (entry.isDirectory()) {
       await copyDirectory(srcPath, destPath);
-    } else {
+    } else if (entry.isFile()) {
       await fs.copyFile(srcPath, destPath);
+    } else {
+      throw new Error(`Refusing to copy unsupported documentation entry: ${srcPath}`);
     }
   }
+}
+
+function resolveVersionDirectory(
+  version: string,
+  docsDir: string
+): { versionedDocsDir: string; versionDir: string } {
+  if (!VERSION_PATTERN.test(version)) {
+    throw new Error(
+      'Version must start with a letter or number and contain only letters, numbers, dots, underscores, or hyphens'
+    );
+  }
+
+  const versionedDocsDir = path.resolve(docsDir, 'versioned_docs');
+  const versionDir = path.resolve(versionedDocsDir, `version-${version}`);
+  if (path.dirname(versionDir) !== versionedDocsDir) {
+    throw new Error('Version directory must be directly inside versioned_docs');
+  }
+
+  return { versionedDocsDir, versionDir };
+}
+
+async function ensureOwnedDirectory(directory: string): Promise<void> {
+  try {
+    await assertOwnedDirectory(directory);
+  } catch (error) {
+    if (!isMissingPathError(error)) {
+      throw error;
+    }
+    await fs.mkdir(directory, { recursive: true });
+    await assertOwnedDirectory(directory);
+  }
+}
+
+async function assertOwnedDirectory(directory: string): Promise<void> {
+  const stats = await fs.lstat(directory);
+  if (stats.isSymbolicLink() || !stats.isDirectory()) {
+    throw new Error(`Refusing unsafe documentation directory: ${directory}`);
+  }
+}
+
+async function assertPathDoesNotExist(target: string): Promise<void> {
+  try {
+    await fs.lstat(target);
+  } catch (error) {
+    if (isMissingPathError(error)) {
+      return;
+    }
+    throw error;
+  }
+  throw new Error(`Documentation version already exists: ${target}`);
+}
+
+function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
 }
 
 /**
