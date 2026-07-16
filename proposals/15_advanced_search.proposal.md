@@ -1,3 +1,9 @@
+---
+Status: proposed; unapproved
+Last reviewed: 2026-07-15
+Execution: not authorized
+---
+
 # Advanced Search Integration
 
 ## Problem

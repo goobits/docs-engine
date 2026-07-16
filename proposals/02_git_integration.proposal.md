@@ -1,3 +1,9 @@
+---
+Status: implemented surface present; completion evidence pending
+Last reviewed: 2026-07-15
+Execution: not authorized
+---
+
 # Git Integration Features
 
 ## Problem

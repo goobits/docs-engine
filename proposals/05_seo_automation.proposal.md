@@ -1,3 +1,9 @@
+---
+Status: partial implementation; remaining scope unapproved
+Last reviewed: 2026-07-15
+Execution: not authorized
+---
+
 # SEO Automation
 
 ## Problem

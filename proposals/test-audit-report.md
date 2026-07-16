@@ -1,3 +1,9 @@
+---
+Status: historical snapshot; refresh required
+Date: 2025-11-11
+Last reviewed: 2026-07-15
+---
+
 # 🔍 Comprehensive Test Audit Report
 **docs-engine** | Generated: 2025-11-11
 
