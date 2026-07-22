@@ -2,7 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import type { Parent } from 'unist';
 import { createHighlighter, type Highlighter, type LanguageRegistration } from 'shiki';
-import agentflowGrammar from '../utils/agentflow-grammar.json';
+import agentflowGrammar from '../utils/agentflow-grammar.json' with { type: 'json' };
 import { escapeHtml } from '../utils/html.ts';
 
 /**

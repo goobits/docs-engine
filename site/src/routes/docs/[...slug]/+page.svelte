@@ -35,13 +35,13 @@
   ];
 
   // Configure footer with edit link
-  const footer = {
+  const footer = $derived({
     text: 'Questions or feedback?',
     editLink: {
       text: 'Edit this page on GitHub',
       url: `https://github.com/goobits/docs-engine/edit/main/docs/${data.slug}.md`,
     },
-  };
+  });
 </script>
 
 <svelte:head>

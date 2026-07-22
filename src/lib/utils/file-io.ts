@@ -24,7 +24,7 @@ export function readFile(filePath: string): string {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to read file ${filePath}: ${message}`, {
-      cause: error
+      cause: error,
     });
   }
 }
@@ -53,7 +53,7 @@ export function writeFile(filePath: string, content: string): void {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to write file ${filePath}: ${message}`, {
-      cause: error
+      cause: error,
     });
   }
 }
@@ -82,7 +82,7 @@ export function readJSON<T = unknown>(filePath: string): T {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to parse JSON file ${filePath}: ${message}`, {
-      cause: error
+      cause: error,
     });
   }
 }
