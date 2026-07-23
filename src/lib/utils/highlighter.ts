@@ -3,51 +3,24 @@
  * Reuses the same createHighlighter instance across all components
  */
 
-import { createHighlighter, type Highlighter } from 'shiki';
 import { escapeHtml } from './html.ts';
 import { createBrowserLogger } from './browser-logger.ts';
+import { createDocsHighlighter, loadDocsLanguage, type DocsHighlighter } from './shiki-bundle.ts';
 
 const logger = createBrowserLogger('highlighter');
 
-let highlighterPromise: Promise<Highlighter> | null = null;
+const highlighterPromises = new Map<string, Promise<DocsHighlighter>>();
 
 /**
  * Get or create the shared highlighter instance
  * @param theme - Theme to use (default: 'dracula')
  * @returns Highlighter instance
  */
-export async function getHighlighter(theme: string = 'dracula'): Promise<Highlighter> {
+export async function getHighlighter(theme: string = 'dracula'): Promise<DocsHighlighter> {
+  let highlighterPromise = highlighterPromises.get(theme);
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: [theme],
-      langs: [
-        'typescript',
-        'javascript',
-        'python',
-        'rust',
-        'bash',
-        'sql',
-        'json',
-        'html',
-        'css',
-        'svelte',
-        'tsx',
-        'jsx',
-        'yaml',
-        'toml',
-        'markdown',
-        'shell',
-        'sh',
-        'vue',
-        'go',
-        'java',
-        'c',
-        'cpp',
-        'csharp',
-        'php',
-        'ruby',
-      ],
-    });
+    highlighterPromise = createDocsHighlighter(theme);
+    highlighterPromises.set(theme, highlighterPromise);
   }
 
   return highlighterPromise;
@@ -67,6 +40,7 @@ export async function highlightCode(
 ): Promise<string> {
   try {
     const highlighter = await getHighlighter(theme);
+    await loadDocsLanguage(highlighter, language);
     return highlighter.codeToHtml(code, {
       lang: language,
       theme: theme,

@@ -1,9 +1,14 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import type { Parent } from 'unist';
-import { createHighlighter, type Highlighter, type LanguageRegistration } from 'shiki';
+import type { LanguageRegistration } from 'shiki/core';
 import agentflowGrammar from '../utils/agentflow-grammar.json' with { type: 'json' };
 import { escapeHtml } from '../utils/html.ts';
+import {
+  createDocsHighlighter,
+  type DocsHighlighter,
+  type DocsLanguage,
+} from '../utils/shiki-bundle.ts';
 
 /**
  * Interface for mutating AST nodes during transformation
@@ -64,7 +69,47 @@ export interface CodeBlockMetadata {
  * Cache the highlighter instance at module level
  * This is private to the module - not accessible from outside
  */
-let highlighterPromise: Promise<Highlighter> | null = null;
+const highlighterPromises = new Map<string, Promise<DocsHighlighter>>();
+
+const pluginLanguages = [
+  'typescript',
+  'javascript',
+  'python',
+  'rust',
+  'bash',
+  'sql',
+  'json',
+  'html',
+  'css',
+  'scss',
+  'svelte',
+  'tsx',
+  'jsx',
+  'yaml',
+  'toml',
+  'markdown',
+  'shell',
+  'sh',
+  'diff',
+] satisfies DocsLanguage[];
+
+async function getPluginHighlighter(theme: string): Promise<DocsHighlighter> {
+  let highlighterPromise = highlighterPromises.get(theme);
+  if (!highlighterPromise) {
+    highlighterPromise = (async (): Promise<DocsHighlighter> => {
+      const highlighter = await createDocsHighlighter(theme, pluginLanguages);
+      const grammar = agentflowGrammar as unknown as LanguageRegistration;
+      await highlighter.loadLanguage({
+        ...grammar,
+        aliases: ['dsl', 'agentflow'],
+      });
+      return highlighter;
+    })();
+    highlighterPromises.set(theme, highlighterPromise);
+  }
+
+  return highlighterPromise;
+}
 
 /**
  * Parse metadata from code fence info string
@@ -273,46 +318,7 @@ export function codeHighlightPlugin(
       return;
     }
 
-    // Get or create highlighter with enhanced language support
-    if (!highlighterPromise) {
-      highlighterPromise = (async (): Promise<Highlighter> => {
-        const h = await createHighlighter({
-          themes: [theme],
-          langs: [
-            'typescript',
-            'javascript',
-            'python',
-            'rust',
-            'bash',
-            'sql',
-            'json',
-            'html',
-            'css',
-            'scss',
-            'svelte',
-            'tsx',
-            'jsx',
-            'yaml',
-            'toml',
-            'markdown',
-            'shell',
-            'sh',
-            'diff',
-          ],
-        });
-
-        // Register AgentFlow grammar with aliases
-        const grammar = agentflowGrammar as unknown as LanguageRegistration;
-        await h.loadLanguage({
-          ...grammar,
-          aliases: ['dsl', 'agentflow'],
-        });
-
-        return h;
-      })();
-    }
-
-    const highlighter = await highlighterPromise;
+    const highlighter = await getPluginHighlighter(theme);
 
     // Process each code node asynchronously
     await Promise.all(

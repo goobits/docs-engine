@@ -164,7 +164,8 @@ export function validateScreenshotVersion(version: string): void {
 
 async function loadChromium(): Promise<(typeof import('playwright'))['chromium']> {
   try {
-    return ((await import(PLAYWRIGHT_PACKAGE)) as typeof import('playwright')).chromium;
+    return ((await import(/* @vite-ignore */ PLAYWRIGHT_PACKAGE)) as typeof import('playwright'))
+      .chromium;
   } catch {
     throw new Error('Playwright is not installed. Run: pnpm add -D playwright');
   }
