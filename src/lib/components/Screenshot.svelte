@@ -11,6 +11,7 @@
    * />
    */
   import ScreenshotImage from './ScreenshotImage.svelte';
+  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
 
   interface Props {
     /** Unique name for the screenshot (e.g., "sessions-list") */
@@ -35,6 +36,8 @@
     waitFor?: string;
     /** Screenshot version (defaults to 1.0.0) */
     version?: string;
+    /** Host-provided loading indicator */
+    loadingIndicator?: DocsLoadingIndicator;
   }
 
   let {
@@ -49,6 +52,7 @@
     selector,
     waitFor,
     version = '1.0.0',
+    loadingIndicator,
   }: Props = $props();
 
   const config = $derived.by(() => ({
@@ -61,4 +65,4 @@
   const path = $derived(`/screenshots/v${version}/${name}.png`);
 </script>
 
-<ScreenshotImage {name} {url} {path} {version} {config} />
+<ScreenshotImage {name} {url} {path} {version} {config} {loadingIndicator} />

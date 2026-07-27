@@ -7,7 +7,14 @@
    */
   import { mount } from 'svelte';
   import ScreenshotImage from './ScreenshotImage.svelte';
+  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
   import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
+
+  interface Props {
+    loadingIndicator?: DocsLoadingIndicator;
+  }
+
+  let { loadingIndicator }: Props = $props();
 
   function hydrate() {
     // Use requestAnimationFrame to ensure DOM is fully rendered
@@ -52,7 +59,7 @@
             // Mount the ScreenshotImage component into fresh container
             mount(ScreenshotImage, {
               target: container,
-              props: { name, url, path, version, config },
+              props: { name, url, path, version, config, loadingIndicator },
             });
 
             // Mark as hydrated

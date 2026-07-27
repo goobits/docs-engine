@@ -28,6 +28,7 @@
   import type { DocsSection } from '../utils/navigation';
   import { getAdjacentLinks } from '../utils';
   import type { Contributor } from '../utils';
+  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
 
   interface BreadcrumbItem {
     label: string;
@@ -84,6 +85,9 @@
 
     // Search
     searchIndex?: string;
+
+    // Host UI
+    loadingIndicator?: DocsLoadingIndicator;
   }
 
   let {
@@ -97,6 +101,7 @@
     editLink,
     gitMetadata,
     searchIndex,
+    loadingIndicator,
   }: Props = $props();
 
   // Hydrator defaults
@@ -228,7 +233,7 @@
       <MermaidHydrator theme={theme === 'dracula' ? 'dark' : 'default'} />
     {/if}
     {#if enableScreenshot}
-      <ScreenshotHydrator />
+      <ScreenshotHydrator {loadingIndicator} />
     {/if}
     {#if enableOpenAPI}
       <OpenAPIHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />

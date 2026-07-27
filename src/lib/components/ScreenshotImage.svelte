@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
   /**
    * ScreenshotImage Component
    *
@@ -14,11 +15,19 @@
     path: string;
     version: string;
     config?: unknown;
+    loadingIndicator?: DocsLoadingIndicator;
   }
 
   interface Props extends ScreenshotImageProps {}
 
-  let { name, url, path, version, config = {} }: Props = $props();
+  let {
+    name,
+    url,
+    path,
+    version,
+    config = {},
+    loadingIndicator: LoadingIndicator,
+  }: Props = $props();
 
   let status: 'checking' | 'cached' | 'generating' | 'ready' | 'error' = $state('checking');
   let imageSrc = $state('');
@@ -103,8 +112,10 @@
 
 <div class="md-screenshot" data-status={status}>
   {#if status === 'checking' || status === 'generating'}
-    <div class="md-screenshot__loading">
-      <div class="md-screenshot__spinner"></div>
+    <div class="md-screenshot__loading" role="status" aria-live="polite">
+      {#if LoadingIndicator}
+        <LoadingIndicator size="40px" thickness="3px" ariaHidden />
+      {/if}
       <p class="md-screenshot__loading-text">
         {status === 'checking' ? 'Checking cache...' : 'Generating screenshot...'}
       </p>
@@ -145,6 +156,9 @@
   }
 
   .md-screenshot__loading {
+    --goo-theme-accent: var(--v2-text-accent, rgb(0, 122, 255));
+    --goo-theme-radius-full: 9999px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -152,21 +166,6 @@
     gap: var(--v2-spacing-md, 1rem);
     padding: var(--v2-spacing-xl, 2rem);
     min-height: 400px;
-  }
-
-  .md-screenshot__spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--v2-border-subtle, rgba(255, 255, 255, 0.06));
-    border-top-color: var(--v2-text-accent, rgb(0, 122, 255));
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .md-screenshot__loading-text {

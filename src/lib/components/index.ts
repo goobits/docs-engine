@@ -22,6 +22,7 @@ export { default as CodeCopyHydrator } from './CodeCopyHydrator.svelte';
 export { default as OpenAPIDoc } from './OpenAPIDoc.svelte';
 export { default as OpenAPIHydrator } from './OpenAPIHydrator.svelte';
 export { default as CollapseHydrator } from './CollapseHydrator.svelte';
+export type { DocsLoadingIndicator, DocsLoadingIndicatorProps } from './loadingIndicator.ts';
 
 // New Components (Proposals 01-08)
 export { default as DocsPrevNext } from './DocsPrevNext.svelte';

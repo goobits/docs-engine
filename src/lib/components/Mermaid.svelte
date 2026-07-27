@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
   import { sanitizeSvg } from '../utils/index.ts';
 
   interface Props {
@@ -7,9 +8,11 @@
     diagram: string;
     /** Optional theme (default, dark, forest, neutral) */
     theme?: 'default' | 'dark' | 'forest' | 'neutral';
+    /** Host-provided loading indicator */
+    loadingIndicator?: DocsLoadingIndicator;
   }
 
-  let { diagram, theme = 'dark' }: Props = $props();
+  let { diagram, theme = 'dark', loadingIndicator: LoadingIndicator }: Props = $props();
 
   let container = $state<HTMLDivElement | undefined>();
   let modalContainer = $state<HTMLDivElement | undefined>();
@@ -151,8 +154,10 @@
       </details>
     </div>
   {:else if !rendered}
-    <div class="md-mermaid-loading">
-      <div class="md-mermaid-spinner"></div>
+    <div class="md-mermaid-loading" role="status" aria-live="polite">
+      {#if LoadingIndicator}
+        <LoadingIndicator size="40px" thickness="3px" ariaHidden />
+      {/if}
       <p>Rendering diagram...</p>
     </div>
   {/if}
@@ -367,27 +372,15 @@
   }
 
   .md-mermaid-loading {
+    --goo-theme-accent: var(--md-text-accent, rgb(0, 122, 255));
+    --goo-theme-radius-full: 9999px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--md-spacing-md, 1rem);
     padding: var(--md-spacing-2xl, 3rem);
     color: var(--md-text-secondary, rgba(255, 255, 255, 0.7));
-  }
-
-  .md-mermaid-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--md-border-subtle, rgba(255, 255, 255, 0.1));
-    border-top-color: var(--md-text-accent, rgb(0, 122, 255));
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .md-mermaid-error {
