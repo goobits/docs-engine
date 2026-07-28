@@ -163,7 +163,7 @@ describe('reference plugin (integration, real resolver + renderer)', () => {
       expect(hProps.href).toBe(link.url);
       expect(hProps.className).toEqual(['symbol', 'symbol--function']);
       expect(hProps.target).toBe('_blank');
-      expect(hProps.rel).toBe('noopener');
+      expect(hProps.rel).toEqual(['noopener']);
 
       // Tooltip prefers the first line of the JSDoc description.
       expect(link.title).toBe('Creates a **server** instance configured with `options`.');
