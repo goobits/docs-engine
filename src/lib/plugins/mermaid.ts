@@ -1,15 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import { encodeBase64 } from '../utils/base64.ts';
-
-/**
- * Interface for mutating AST nodes during transformation
- * Used when transforming Code nodes to Html nodes
- */
-interface MutableCodeNode {
-  type: string;
-  value?: string;
-}
+import type { MutableCodeNode } from '../mdastTypes.ts';
 
 /**
  * MDsveX/Remark plugin to transform Mermaid code blocks into renderable diagrams

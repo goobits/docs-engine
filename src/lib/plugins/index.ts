@@ -5,7 +5,6 @@ export { tabsPlugin } from './tabs.ts';
 export { codeHighlightPlugin } from './code-highlight.ts';
 export type { CodeHighlightOptions } from './code-highlight.ts';
 export { remarkTableOfContents } from './toc.ts';
-export { remarkTableOfContents as tocPlugin } from './toc.ts'; // Alias for consistency
 export { linksPlugin } from './links.ts';
 export type { LinksPluginOptions } from './links.ts';
 export { screenshotPlugin } from './screenshot.ts';

@@ -29,7 +29,7 @@ export interface SearchDocument {
  *
  * @public
  */
-export interface SearchResult {
+export interface SearchIndexResult {
   id: string;
   title: string;
   description: string;
@@ -178,7 +178,7 @@ export function performSearch(
   miniSearch: MiniSearch,
   query: string,
   config: SearchIndexConfig = {}
-): SearchResult[] {
+): SearchIndexResult[] {
   const cfg = { ...defaultConfig, ...config };
 
   if (!query.trim()) {

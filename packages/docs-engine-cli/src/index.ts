@@ -12,7 +12,7 @@ import { extractLinksFromFiles } from './link-extractor.js';
 import { validateLinks } from './link-validator.js';
 import { printResults } from './reporter.js';
 import { loadConfig, mergeConfig } from './config.js';
-import type { LinkCheckerConfig } from './config.js';
+import type { LinkCheckerConfig } from './_linkModels.js';
 import { createVersion, listVersions, deleteVersion } from './versioning.js';
 import { generateApiDocs } from './api-generator.js';
 import { watchSymbols } from './symbol-watcher.js';
@@ -66,6 +66,8 @@ program
   .command('check-links')
   .description('Check all links in markdown documentation')
   .option('-b, --base-dir <path>', 'Base directory for docs (default: current directory)')
+  .option('--public-dir <path>', 'Directory containing root-relative site assets')
+  .option('--route-prefix <path>', 'URL route prefix mounted to the base directory')
   .option('-p, --pattern <glob>', 'Glob pattern for markdown files (default: **/*.md)')
   .option('-e, --external', 'Validate external links (slower)')
   .option('-t, --timeout <ms>', 'Timeout for external requests in ms (default: 5000)', '5000')
@@ -75,6 +77,11 @@ program
   .option('--json', 'Output results as JSON')
   .option('--config <path>', 'Path to config file')
   .action(async (options) => {
+    if (process.env.BUILD_SKIP_LINK_CHECK === '1') {
+      console.log('Link checking skipped (BUILD_SKIP_LINK_CHECK=1)');
+      return;
+    }
+
     const spinner = ora('Initializing link checker...').start();
 
     try {
@@ -94,6 +101,8 @@ program
       const config = mergeConfig({
         ...fileConfig,
         baseDir: options.baseDir || fileConfig?.baseDir,
+        publicDir: options.publicDir || fileConfig?.publicDir,
+        routePrefix: options.routePrefix || fileConfig?.routePrefix,
         checkExternal: options.external || fileConfig?.checkExternal,
         timeout: parseInt(options.timeout, 10),
         concurrency: parseInt(options.concurrency, 10),
@@ -102,8 +111,8 @@ program
       spinner.text = 'Finding markdown files...';
 
       // Find all markdown files
-      const pattern = options.pattern || config.include.join(',');
-      const files = await glob(pattern, {
+      const patterns = options.pattern ? [options.pattern] : config.include;
+      const files = await glob(patterns, {
         cwd: config.baseDir,
         absolute: true,
         ignore: config.exclude,
@@ -128,14 +137,7 @@ program
           : 'Validating internal links...'
       );
 
-      const results = await validateLinks(links, {
-        baseDir: config.baseDir,
-        checkExternal: config.checkExternal,
-        timeout: config.timeout,
-        concurrency: config.concurrency,
-        skipDomains: config.skipDomains,
-        validExtensions: config.validExtensions,
-      });
+      const results = await validateLinks(links, config);
 
       spinner.succeed('Validation complete');
 

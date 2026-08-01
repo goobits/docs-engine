@@ -2,30 +2,10 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { visit } from 'unist-util-visit';
-import type { Link, Image } from 'mdast';
+import type { Html, Image, Link } from 'mdast';
 import { readFileSync } from 'fs';
-
-/**
- * Represents a link found in a markdown file
- *
- * @public
- */
-export interface ExtractedLink {
-  /** Link URL or path */
-  url: string;
-  /** Link text or alt text */
-  text: string;
-  /** Source file path */
-  file: string;
-  /** Line number in source file */
-  line: number;
-  /** Link type */
-  type: 'link' | 'image' | 'html';
-  /** Whether this is an external URL */
-  isExternal: boolean;
-  /** Whether this is an anchor link */
-  isAnchor: boolean;
-}
+import { extname } from 'path';
+import type { ExtractedLink } from './_linkModels.js';
 
 // ============================================================================
 // Module-Private Helpers (True Privacy via ESM)
@@ -76,8 +56,11 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
   const content = readFileSync(filePath, 'utf-8');
   const links: ExtractedLink[] = [];
 
-  // Parse markdown with MDX support
-  const tree = unified().use(remarkParse).use(remarkMdx).parse(content);
+  const parser = unified().use(remarkParse);
+  if (extname(filePath).toLowerCase() === '.mdx') {
+    parser.use(remarkMdx);
+  }
+  const tree = parser.parse(content);
 
   // Extract markdown links and images
   visit(tree, ['link', 'image'], (node, _index, _parent) => {
@@ -114,25 +97,50 @@ export function extractLinksFromFile(filePath: string): ExtractedLink[] {
     });
   });
 
-  // Extract HTML links (basic regex for <a href="">)
-  // Use [^>]*? without nested \s+ to avoid catastrophic backtracking
-  const htmlLinkRegex = /<a\s[^>]*?href=["']([^"']+)["']/gi;
-  const lines = content.split('\n');
-
-  lines.forEach((lineContent, index) => {
+  // Parse links only from real HTML nodes, excluding fenced code examples.
+  visit(tree, 'html', (node) => {
+    const htmlNode = node as Html;
+    const htmlLinkRegex = /<a\s[^>]*?href=["']([^"']+)["']/gi;
     let match;
-    while ((match = htmlLinkRegex.exec(lineContent)) !== null) {
+    while ((match = htmlLinkRegex.exec(htmlNode.value)) !== null) {
       const url = match[1];
+      const precedingLines = htmlNode.value.slice(0, match.index).split('\n').length - 1;
       links.push({
         url,
-        text: '', // Would need HTML parsing to extract text
+        text: '',
         file: filePath,
-        line: index + 1,
+        line: (htmlNode.position?.start.line ?? 0) + precedingLines,
         type: 'html',
         isExternal: isExternalUrl(url),
         isAnchor: isAnchorOnly(url),
       });
     }
+  });
+
+  // In MDX, JSX elements are distinct AST nodes rather than raw HTML nodes.
+  visit(tree, (node) => {
+    if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return;
+
+    const element = node as typeof node & {
+      name?: string | null;
+      attributes?: Array<{ type: string; name?: string; value?: unknown }>;
+    };
+    if (element.name !== 'a') return;
+
+    const href = element.attributes?.find(
+      (attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'href'
+    )?.value;
+    if (typeof href !== 'string') return;
+
+    links.push({
+      url: href,
+      text: '',
+      file: filePath,
+      line: element.position?.start.line ?? 0,
+      type: 'html',
+      isExternal: isExternalUrl(href),
+      isAnchor: isAnchorOnly(href),
+    });
   });
 
   return links;

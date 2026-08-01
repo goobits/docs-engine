@@ -60,11 +60,7 @@ export type { HydratorOptions } from './use-hydrator.ts';
 
 // Search index utilities (Proposal 03)
 export * from './search-index.ts';
-export type {
-  SearchDocument,
-  SearchResult as SearchIndexResult,
-  SearchIndexConfig,
-} from './search-index.ts';
+export type { SearchDocument, SearchIndexResult, SearchIndexConfig } from './search-index.ts';
 
 // NOTE: Symbol reference utilities moved to server/index.ts
 // because symbol resolution loads generated files from disk.

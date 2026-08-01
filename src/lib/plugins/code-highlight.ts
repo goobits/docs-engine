@@ -3,22 +3,13 @@ import type { Root, Code } from 'mdast';
 import type { Parent } from 'unist';
 import type { LanguageRegistration } from 'shiki/core';
 import agentflowGrammar from '../utils/agentflow-grammar.json' with { type: 'json' };
+import type { MutableCodeNode } from '../mdastTypes.ts';
 import { escapeHtml } from '../utils/html.ts';
 import {
   createDocsHighlighter,
   type DocsHighlighter,
   type DocsLanguage,
 } from '../utils/shiki-bundle.ts';
-
-/**
- * Interface for mutating AST nodes during transformation
- * Used when transforming Code nodes to Html nodes
- */
-interface MutableCodeNode {
-  type: string;
-  value?: string;
-  lang?: string;
-}
 
 /**
  * Configuration options for code block highlighting

@@ -16,7 +16,10 @@ import path from 'path';
 import * as ts from 'typescript';
 import crypto from 'crypto';
 import { glob } from 'glob';
-import { createLogger } from './logger.ts';
+import { createLogger } from '../server/logger.ts';
+import type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
+
+export type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
 
 const logger = createLogger('symbol-generation');
 
@@ -75,35 +78,6 @@ export interface SymbolGeneratorConfig {
   outputPath: string;
   /** Base directory for resolving relative paths (default: process.cwd()) */
   baseDir?: string;
-}
-
-/**
- * Symbol definition extracted from TypeScript source
- */
-export interface SymbolDefinition {
-  name: string;
-  path: string;
-  line: number;
-  kind: 'type' | 'interface' | 'class' | 'function' | 'enum' | 'const';
-  exported: boolean;
-  jsDoc?: {
-    description?: string;
-    params?: Array<{ name: string; description: string; type: string }>;
-    returns?: string;
-    example?: string;
-    see?: string[];
-  };
-  signature: string;
-  related?: string[]; // Related symbol names extracted from type signatures
-  extends?: string[]; // Parent types/interfaces this symbol extends
-  implements?: string[]; // Interfaces this class implements
-}
-
-/**
- * Map of symbol names to their definitions
- */
-export interface SymbolMap {
-  [symbolName: string]: SymbolDefinition[];
 }
 
 /**

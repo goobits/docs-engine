@@ -1,39 +1,13 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { createBrowserLogger } from '@goobits/docs-engine/utils';
-
-const logger = createBrowserLogger('cli-config');
-
-/**
- * Link checker configuration
- *
- * @public
- */
-export interface LinkCheckerConfig {
-  /** Base directory for resolving links */
-  baseDir?: string;
-  /** Glob patterns to include */
-  include?: string[];
-  /** Glob patterns to exclude */
-  exclude?: string[];
-  /** Validate external links */
-  checkExternal?: boolean;
-  /** External link timeout (ms) */
-  timeout?: number;
-  /** Maximum concurrent requests */
-  concurrency?: number;
-  /** Domains to skip validation */
-  skipDomains?: string[];
-  /** Valid file extensions */
-  validExtensions?: string[];
-}
+import type { LinkCheckerConfig, ResolvedLinkCheckerConfig } from './_linkModels.js';
 
 /**
  * Default configuration
  *
  * @public
  */
-export const defaultConfig: Required<LinkCheckerConfig> = {
+export const defaultConfig: ResolvedLinkCheckerConfig = {
   baseDir: process.cwd(),
   include: ['**/*.md', '**/*.mdx'],
   exclude: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
@@ -66,12 +40,7 @@ export const defaultConfig: Required<LinkCheckerConfig> = {
  * @public
  */
 export function loadConfig(cwd: string = process.cwd()): LinkCheckerConfig | undefined {
-  const configFiles = [
-    '.linkcheckerrc.json',
-    '.linkcheckerrc',
-    'linkchecker.config.json',
-    'linkchecker.config.js',
-  ];
+  const configFiles = ['.linkcheckerrc.json', '.linkcheckerrc', 'linkchecker.config.json'];
 
   for (const configFile of configFiles) {
     const configPath = resolve(cwd, configFile);
@@ -81,7 +50,7 @@ export function loadConfig(cwd: string = process.cwd()): LinkCheckerConfig | und
         const content = readFileSync(configPath, 'utf-8');
         return JSON.parse(content) as LinkCheckerConfig;
       } catch (error) {
-        logger.error({ error, configPath }, 'Error loading config file');
+        console.error(`Error loading config from ${configPath}:`, error);
       }
     }
   }
@@ -103,7 +72,7 @@ export function loadConfig(cwd: string = process.cwd()): LinkCheckerConfig | und
  *
  * @public
  */
-export function mergeConfig(config: LinkCheckerConfig = {}): Required<LinkCheckerConfig> {
+export function mergeConfig(config: LinkCheckerConfig = {}): ResolvedLinkCheckerConfig {
   return {
     ...defaultConfig,
     ...config,

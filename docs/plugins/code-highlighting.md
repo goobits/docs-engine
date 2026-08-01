@@ -135,7 +135,7 @@ export default {
     mdsvex({                    // This is highlighted
       remarkPlugins: [
         calloutsPlugin(),
-        tocPlugin(),            // These three
+        remarkTableOfContents(), // These three
         linksPlugin(),          // are also
         codeHighlightPlugin(),  // highlighted
       ],

@@ -9,63 +9,29 @@
 html.theme-light,
 html.theme-system-light,
 html:not([class*='theme-']) {
-  /* Background colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --bg-card: #ffffff;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f9fafb;
+  --color-surface-elevated: #f3f4f6;
+  --color-surface-overlay: rgba(0, 0, 0, 0.1);
 
-  /* Text colors */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
 
-  /* Border colors */
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db;
+  --color-border-subtle: #e5e7eb;
+  --color-border-medium: #d1d5db;
 
-  /* Primary brand color */
-  --color-primary: #ff3e00;
-  --color-primary-hover: #cc3200;
-
-  /* Interactive states */
-  --hover-overlay: rgba(0, 0, 0, 0.05);
-  --active-overlay: rgba(0, 0, 0, 0.1);
-  --focus-ring: 0 0 0 3px rgba(255, 62, 0, 0.3);
+  --color-primary-500: #ff3e00;
+  --color-primary-600: #cc3200;
+  --color-text-accent: var(--color-primary-500);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-  /* Code background */
   --color-code-bg: #2e3440;
-
-  /* Compatibility with existing app.css */
-  --color-bg: var(--bg-primary);
-  --color-text: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-
-  /* V2 Design Tokens (for DocsLayout compatibility) */
-  --v2-surface-base: var(--bg-primary);
-  --v2-surface-raised: var(--bg-secondary);
-  --v2-surface-interactive: var(--bg-tertiary);
-  --v2-surface-interactive-hover: rgba(0, 0, 0, 0.1);
-  --v2-text-primary: var(--text-primary);
-  --v2-text-secondary: var(--text-secondary);
-  --v2-text-tertiary: var(--text-tertiary);
-  --v2-text-accent: var(--color-primary);
-  --v2-border-subtle: var(--border-primary);
-  --v2-border-medium: var(--border-secondary);
-  --v2-radius-sm: 6px;
-  --v2-radius-md: 10px;
-  --v2-radius-lg: 14px;
-  --v2-spacing-xs: 0.25rem;
-  --v2-spacing-sm: 0.5rem;
-  --v2-spacing-md: 1rem;
-  --v2-spacing-lg: 1.5rem;
-  --v2-spacing-xl: 2rem;
-  --v2-spacing-2xl: 3rem;
 }
 
 /* ========================================
@@ -73,61 +39,27 @@ html:not([class*='theme-']) {
  * ======================================== */
 html.theme-dark,
 html.theme-system-dark {
-  /* Background colors */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #13131f;
-  --bg-tertiary: #1a1a2e;
-  --bg-card: #13131f;
+  --color-background: #0a0a0f;
+  --color-surface: #13131f;
+  --color-surface-raised: #13131f;
+  --color-surface-elevated: #1a1a2e;
+  --color-surface-overlay: rgba(255, 255, 255, 0.1);
 
-  /* Text colors */
-  --text-primary: #e0e0ff;
-  --text-secondary: #9090b0;
-  --text-tertiary: #6b6b8f;
+  --color-text-primary: #e0e0ff;
+  --color-text-secondary: #9090b0;
+  --color-text-tertiary: #6b6b8f;
 
-  /* Border colors */
-  --border-primary: rgba(255, 255, 255, 0.1);
-  --border-secondary: rgba(255, 255, 255, 0.05);
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-medium: rgba(255, 255, 255, 0.05);
 
-  /* Primary brand color */
-  --color-primary: #ff5722;
-  --color-primary-hover: #ff7043;
-
-  /* Interactive states */
-  --hover-overlay: rgba(255, 255, 255, 0.05);
-  --active-overlay: rgba(255, 255, 255, 0.1);
-  --focus-ring: 0 0 0 3px rgba(255, 87, 34, 0.3);
+  --color-primary-500: #ff5722;
+  --color-primary-600: #ff7043;
+  --color-text-accent: var(--color-primary-500);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 
-  /* Code background - slightly lighter in dark mode for contrast */
   --color-code-bg: #1e2432;
-
-  /* Compatibility with existing app.css */
-  --color-bg: var(--bg-primary);
-  --color-text: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-
-  /* V2 Design Tokens (for DocsLayout compatibility) */
-  --v2-surface-base: var(--bg-primary);
-  --v2-surface-raised: var(--bg-secondary);
-  --v2-surface-interactive: var(--bg-tertiary);
-  --v2-surface-interactive-hover: rgba(255, 255, 255, 0.1);
-  --v2-text-primary: var(--text-primary);
-  --v2-text-secondary: var(--text-secondary);
-  --v2-text-tertiary: var(--text-tertiary);
-  --v2-text-accent: var(--color-primary);
-  --v2-border-subtle: var(--border-primary);
-  --v2-border-medium: var(--border-secondary);
-  --v2-radius-sm: 6px;
-  --v2-radius-md: 10px;
-  --v2-radius-lg: 14px;
-  --v2-spacing-xs: 0.25rem;
-  --v2-spacing-sm: 0.5rem;
-  --v2-spacing-md: 1rem;
-  --v2-spacing-lg: 1.5rem;
-  --v2-spacing-xl: 2rem;
-  --v2-spacing-2xl: 3rem;
 }

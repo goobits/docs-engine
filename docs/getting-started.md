@@ -49,7 +49,7 @@ Add plugins to your `svelte.config.js`:
 import { mdsvex } from 'mdsvex';
 import {
   linksPlugin,
-  tocPlugin,
+  remarkTableOfContents,
   calloutsPlugin,
   codeHighlightPlugin,
 } from '@goobits/docs-engine/plugins';
@@ -60,7 +60,7 @@ export default {
     mdsvex({
       remarkPlugins: [
         calloutsPlugin(),     // ← Start with these 4 plugins
-        tocPlugin(),
+        remarkTableOfContents(),
         linksPlugin(),
         codeHighlightPlugin({
           theme: 'dracula',

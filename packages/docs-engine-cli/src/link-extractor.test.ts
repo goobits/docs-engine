@@ -2,12 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import {
-  extractLinksFromFile,
-  extractLinksFromFiles,
-  groupLinksByType,
-  type ExtractedLink,
-} from './link-extractor';
+import { extractLinksFromFile, extractLinksFromFiles, groupLinksByType } from './link-extractor';
+import type { ExtractedLink } from './_linkModels';
 
 /**
  * Tests exercise the real public API against real markdown files on disk.
@@ -189,6 +185,12 @@ describe('extractLinksFromFile', () => {
     expect(urls).toContain('./mdx-target.md');
   });
 
+  it('parses standard markdown comments without applying MDX grammar', () => {
+    const file = fixture('comment.md', '<!-- ordinary HTML comment -->\n\n[guide](./guide.md)\n');
+
+    expect(extractLinksFromFile(file).map((l) => l.url)).toEqual(['./guide.md']);
+  });
+
   it('extracts raw HTML anchor tags as type "html"', () => {
     const content = 'Some text.\n\n<a href="https://html.example.com">click</a>\n';
     const file = fixture('html.md', content);
@@ -201,6 +203,20 @@ describe('extractLinksFromFile', () => {
     expect(h.url).toBe('https://html.example.com');
     expect(h.isExternal).toBe(true);
     expect(h.line).toBe(3);
+  });
+
+  it('extracts static anchor hrefs from MDX JSX', () => {
+    const file = fixture('anchor.mdx', '<a href="./guide.md">Guide</a>\n');
+
+    expect(extractLinksFromFile(file)).toMatchObject([
+      { url: './guide.md', type: 'html', line: 1 },
+    ]);
+  });
+
+  it('ignores HTML-looking links inside fenced code examples', () => {
+    const file = fixture('example.md', '```html\n<a href="./example.md">Example</a>\n```\n');
+
+    expect(extractLinksFromFile(file)).toEqual([]);
   });
 });
 

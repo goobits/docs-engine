@@ -123,7 +123,7 @@
             mainBkg: '#282a36',
             textColor: '#f8f8f2',
             fontSize: '16px',
-            fontFamily: 'var(--v2-font-mono, ui-monospace, monospace)',
+            fontFamily: 'var(--font-family-mono)',
           },
           securityLevel: 'strict',
           logLevel: 'error',
@@ -485,7 +485,7 @@
     border-radius: 10px;
     color: white;
     font-size: 0.875rem;
-    font-family: var(--v2-font-mono, ui-monospace, monospace);
+    font-family: var(--font-family-mono);
     text-align: center;
     user-select: none;
   }

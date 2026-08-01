@@ -5,7 +5,12 @@ Last reviewed: 2026-07-15
 ---
 
 # 🔍 Comprehensive Test Audit Report
+
 **docs-engine** | Generated: 2025-11-11
+
+> Policy note (2026-07-31): automatic CI recommendations in this historical
+> snapshot are superseded. Repository workflows are manual-only and may expose
+> only `workflow_dispatch`. Normal verification runs locally.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -42,16 +47,21 @@ Coverage Breakdown:
 ## 🎯 Critical Issues Requiring Immediate Action
 
 ### 1. Coverage Below Threshold ⚠️
+
 **Impact:** HIGH | **Effort:** HIGH
+
 ```
 Current:  23.38%
 Target:   40%
 Gap:      -16.62%
 ```
+
 **Recommendation:** Prioritize adding tests for high-risk untested modules
 
 ### 2. Massive Test Duplication 🔴
+
 **Impact:** MEDIUM | **Effort:** LOW
+
 ```
 Location:  src/lib/plugins/callouts.test.ts (lines 49-145)
 Issue:     9 nearly identical tests (96 lines)
@@ -60,7 +70,9 @@ Savings:   ~80 lines of code
 ```
 
 ### 3. Missing Critical Module Tests ⚠️
+
 **Impact:** HIGH | **Effort:** HIGH
+
 ```
 Untested High-Risk Modules:
 • reference.ts         (287 lines) - Symbol reference plugin
@@ -71,12 +83,14 @@ Untested High-Risk Modules:
 • toc.ts              (184 lines) - Table of contents generation
 ```
 
-### 4. No CI/CD Integration ⚠️
+### 4. Historical CI/CD Recommendation (Superseded)
+
 **Impact:** MEDIUM | **Effort:** LOW
+
 ```
-Issue:  No automated testing on push/PR
-Risk:   Breaking changes can reach main branch undetected
-Action: Add GitHub Actions workflow (see recommendations)
+Policy: Normal verification runs locally
+Remote: Manual workflow dispatch after an explicit user request
+Action: Do not add push, pull-request, or scheduled workflow triggers
 ```
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -86,6 +100,7 @@ Action: Add GitHub Actions workflow (see recommendations)
 ### ✅ EXCELLENT QUALITY (Keep as-is)
 
 **sanitize.test.ts**
+
 ```
 Rating:     ⭐⭐⭐⭐⭐ (5/5)
 Coverage:   100%
@@ -98,6 +113,7 @@ Gaps:       None - exemplary test suite
 ```
 
 **markdown.test.ts**
+
 ```
 Rating:     ⭐⭐⭐⭐ (4/5)
 Coverage:   100%
@@ -111,6 +127,7 @@ Action:     Remove 5 redundant tests (lines 101-110, 112-115, 196-199, 220-224)
 ```
 
 **frontmatter.test.ts**
+
 ```
 Rating:     ⭐⭐⭐⭐ (4/5)
 Coverage:   100%
@@ -126,6 +143,7 @@ Action:     Strengthen assertions, add 3 edge case tests
 ### ⚠️ GOOD QUALITY (Minor improvements needed)
 
 **symbol-resolver.test.ts**
+
 ```
 Rating:     ⭐⭐⭐⭐ (4/5)
 Coverage:   84.94%
@@ -139,6 +157,7 @@ Action:     Add 3-5 tests for missing edge cases
 ```
 
 **rate-limiter.test.ts**
+
 ```
 Rating:     ⭐⭐⭐ (3/5)
 Coverage:   66.66%
@@ -153,6 +172,7 @@ Action:     Remove 4 redundant tests, add input validation tests
 ```
 
 **image-optimization.test.ts**
+
 ```
 Rating:     ⭐⭐⭐⭐ (4/5)
 Coverage:   100%
@@ -168,6 +188,7 @@ Action:     Add 5-7 error handling tests
 ### 🔴 NEEDS IMPROVEMENT (Refactoring required)
 
 **callouts.test.ts**
+
 ```
 Rating:     ⭐⭐ (2/5)
 Coverage:   32.53%
@@ -200,6 +221,7 @@ Action:     Refactor to parameterized tests, add 5 edge case tests
 ```
 
 **links.test.ts**
+
 ```
 Rating:     ⭐⭐ (2/5)
 Coverage:   89.79%
@@ -216,6 +238,7 @@ Gaps:       • No tests for URLs with query parameters
 ```
 
 **code-highlight.test.ts**
+
 ```
 Rating:     ⭐⭐ (2/5)
 Coverage:   83.33%
@@ -229,6 +252,7 @@ Savings:    ~30 lines of code
 ```
 
 **file-io.test.ts**
+
 ```
 Rating:     ⭐⭐ (2/5)
 Coverage:   90%
@@ -252,6 +276,7 @@ Savings:    ~80 lines of code
 ### High Priority Removals (No Value)
 
 **1. TypeScript Type Tests (Remove entirely)**
+
 ```
 Location: src/lib/plugins/code-highlight.test.ts:256-265
 Reason:   Tests TypeScript interface at runtime - TypeScript already validates this
@@ -259,6 +284,7 @@ Impact:   No loss of test coverage
 ```
 
 **2. API Shape Tests (Remove entirely)**
+
 ```
 Location: src/lib/plugins/code-highlight.test.ts:18-31
 Reason:   Tests plugin API structure - no runtime value
@@ -266,6 +292,7 @@ Impact:   No loss of test coverage
 ```
 
 **3. Duplicate UTF-8 Tests (Consolidate to 1)**
+
 ```
 Location: src/lib/utils/file-io.test.ts:54-62 and 106-114
 Reason:   Both test identical UTF-8 functionality
@@ -274,6 +301,7 @@ Savings:  8 lines
 ```
 
 **4. Circular Dependency Tests (Refactor)**
+
 ```
 Location: src/lib/utils/file-io.test.ts (multiple)
 Reason:   Use writeFile to test readFile and vice versa
@@ -284,6 +312,7 @@ Risk:     Current approach could hide bugs in both functions
 ### Medium Priority Consolidations
 
 **5. Callouts Type Tests (Parameterize)**
+
 ```
 Location: src/lib/plugins/callouts.test.ts:49-145
 Before:   9 identical tests (96 lines)
@@ -292,6 +321,7 @@ Savings:  81 lines (84% reduction)
 ```
 
 **6. Top-Level File Links (Parameterize)**
+
 ```
 Location: src/lib/plugins/links.test.ts:65-133
 Before:   7 similar tests (~40 lines)
@@ -300,6 +330,7 @@ Savings:  32 lines (80% reduction)
 ```
 
 **7. External Link Protocol Tests (Parameterize)**
+
 ```
 Location: src/lib/plugins/links.test.ts (multiple)
 Before:   5 tests for different protocols (http, https, ftp, mailto, data)
@@ -308,6 +339,7 @@ Savings:  ~20 lines
 ```
 
 **8. Redundant Rate Limiter Tests (Remove)**
+
 ```
 Location: src/lib/server/rate-limiter.test.ts
 Remove:   • Lines 89-101: "concurrent requests" (duplicate of "block exceeding")
@@ -317,6 +349,7 @@ Savings:  ~30 lines
 ```
 
 **9. Over-Granular countLines Tests (Consolidate)**
+
 ```
 Location: src/lib/utils/file-io.test.ts:266-318
 Before:   8 tests for simple line counting utility
@@ -334,6 +367,7 @@ Savings:  ~30 lines
 ### Tier 1: High-Risk Untested Modules (Add immediately)
 
 **1. reference.ts (287 lines) - 0% coverage**
+
 ```
 Risk Level:   🔴 CRITICAL
 Functionality: Symbol reference resolution and transformation
@@ -346,6 +380,7 @@ Priority:      1
 ```
 
 **2. screenshot-service.ts (514 lines) - 0% coverage**
+
 ```
 Risk Level:   🔴 CRITICAL
 Functionality: Screenshot capture with Playwright
@@ -360,6 +395,7 @@ Note:          Consider separating unit tests from integration tests
 ```
 
 **3. circuit-breaker.ts (217 lines) - 0% coverage**
+
 ```
 Risk Level:   🔴 CRITICAL
 Functionality: Fault tolerance and service protection
@@ -372,6 +408,7 @@ Priority:      3
 ```
 
 **4. image-processor.ts (318 lines) - 0% coverage**
+
 ```
 Risk Level:   🔴 CRITICAL
 Functionality: Image optimization pipeline (Sharp)
@@ -387,6 +424,7 @@ Priority:      4
 ### Tier 2: Important Feature Gaps (Add within 2 weeks)
 
 **5. collapse.ts (190 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 HIGH
 Functionality: Collapsible section transformation
@@ -396,6 +434,7 @@ Priority:      5
 ```
 
 **6. toc.ts (184 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 HIGH
 Functionality: Table of contents generation
@@ -405,6 +444,7 @@ Priority:      6
 ```
 
 **7. tabs.ts (135 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 HIGH
 Functionality: Tab container transformation
@@ -414,6 +454,7 @@ Priority:      7
 ```
 
 **8. mermaid.ts (33 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 MEDIUM
 Functionality: Mermaid diagram integration
@@ -423,6 +464,7 @@ Priority:      8
 ```
 
 **9. filetree.ts (45 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 MEDIUM
 Functionality: File tree visualization
@@ -434,6 +476,7 @@ Priority:      9
 ### Tier 3: Utility and Support Functions
 
 **10. symbol-generation.ts (851 lines) - 0% coverage**
+
 ```
 Risk Level:   🟡 HIGH (due to size)
 Functionality: Symbol generation from source code
@@ -443,6 +486,7 @@ Priority:      10
 ```
 
 **11. tree-parser.ts (208 lines) - 0% coverage**
+
 ```
 Risk Level:   🟢 MEDIUM
 Functionality: AST tree parsing utilities
@@ -452,6 +496,7 @@ Priority:      11
 ```
 
 **12. navigation-builder.ts + navigation-scanner.ts (374 lines combined) - 0% coverage**
+
 ```
 Risk Level:   🟢 MEDIUM
 Functionality: Navigation structure building
@@ -461,6 +506,7 @@ Priority:      12
 ```
 
 **13. search.ts (163 lines) - 0% coverage**
+
 ```
 Risk Level:   🟢 MEDIUM
 Functionality: Search implementation
@@ -485,6 +531,7 @@ Note:          search-index.ts has good coverage, but actual search.ts doesn't
 ```
 
 **Estimated Total Effort:**
+
 ```
 New Tests Needed:     ~220-270 tests
 New Test LOC:         ~4,000-5,000 lines
@@ -497,8 +544,10 @@ Coverage Increase:    23% → 60-70%
 ## 🧪 Missing Test Types
 
 ### 1. Integration Tests ❌
+
 **Status:** Not present
-```
+
+````
 Current:  Only unit tests exist
 Need:     • Plugin pipeline integration
           • File I/O + Markdown processing flow
@@ -517,10 +566,12 @@ Example Integration Test:
 Estimated:    15-20 integration tests needed
 LOC:          ~800-1000 lines
 Priority:     HIGH
-```
+````
 
 ### 2. End-to-End Tests ❌
+
 **Status:** Not present
+
 ```
 Current:  No E2E tests
 Need:     • Full documentation site generation
@@ -538,7 +589,9 @@ Note:         Playwright already installed, just needs test setup
 ```
 
 ### 3. Performance Tests ❌
+
 **Status:** Not present
+
 ```
 Current:  No performance benchmarks
 Need:     • Large file processing (10MB+ markdown files)
@@ -560,7 +613,9 @@ Priority:     LOW (add after coverage is above 60%)
 ```
 
 ### 4. Visual Regression Tests ❌
+
 **Status:** Not present
+
 ```
 Current:  No visual testing
 Need:     • Callout rendering consistency
@@ -573,7 +628,9 @@ Priority: LOW (nice-to-have)
 ```
 
 ### 5. Component Tests ❌
+
 **Status:** Not present
+
 ```
 Current:  No component tests (all Svelte components untested)
 Files:    • All files in lib/components/ have 0% coverage
@@ -590,6 +647,7 @@ Priority: MEDIUM (if components contain complex logic)
 ### ❌ Current Issues
 
 **1. Testing Implementation Details**
+
 ```
 Location:  Multiple files
 Examples:  • Checking for specific CSS class names
@@ -602,6 +660,7 @@ Fix:       Test behavior and outcomes, not internal implementation
 ```
 
 **2. Weak Assertions**
+
 ```
 Location:  Multiple files
 Examples:  • expect(result).toBeDefined()
@@ -616,6 +675,7 @@ Fix:       Use specific assertions:
 ```
 
 **3. Magic Numbers and Strings**
+
 ```
 Location:  All test files
 Examples:  • 60000 (milliseconds - what is this?)
@@ -630,6 +690,7 @@ Fix:       Extract to named constants:
 ```
 
 **4. Circular Test Dependencies**
+
 ```
 Location:  src/lib/utils/file-io.test.ts
 Example:   Using writeFile() to test readFile()
@@ -640,6 +701,7 @@ Fix:       Use independent test fixtures or known good data
 ```
 
 **5. No Test Helpers or Fixtures**
+
 ```
 Current:   All mock data is inline in test files
 Problem:   • Code duplication
@@ -653,6 +715,7 @@ Fix:       Create test utilities:
 ```
 
 **6. Inconsistent Test Organization**
+
 ```
 Current:   Tests co-located with source files (*.test.ts)
 Pros:      ✅ Easy to find related tests
@@ -663,18 +726,20 @@ Cons:      ❌ Harder to run only tests
 Recommendation: Keep current approach (co-location is good for this project size)
 ```
 
-**7. No Test Coverage Enforcement on CI**
+**7. Manual Test Coverage Enforcement**
+
 ```
 Current:   Coverage threshold set to 40% in config
-           But no CI to enforce it ❌
+           Run package coverage locally before signoff
 
 Problem:   Coverage can drop without anyone noticing
-Fix:       Add CI workflow with coverage checks (see recommendations)
+Fix:       Run the existing package-local coverage command
 ```
 
 ### ✅ Things Done Well
 
 **1. Good Error Handling Tests**
+
 ```
 Examples:  • Malformed YAML gracefully handled
            • Invalid language in code blocks
@@ -685,6 +750,7 @@ Keep:      Continue this pattern for all new tests
 ```
 
 **2. Security Testing**
+
 ```
 Tests:     • XSS prevention (sanitize.test.ts)
            • HTML injection
@@ -695,6 +761,7 @@ Excellent: This is exemplary - expand to other modules
 ```
 
 **3. Good Use of Test Lifecycle Hooks**
+
 ```
 Pattern:   beforeEach() for setup
            afterEach() for cleanup
@@ -704,6 +771,7 @@ Keep:      Continue this pattern consistently
 ```
 
 **4. Good Test Naming**
+
 ```
 Pattern:   "should [expected behavior]" convention
 Examples:  • "should transform NOTE callout"
@@ -715,29 +783,22 @@ Keep:      Maintain this clear, descriptive naming
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-## 🚀 CI/CD Recommendations
+## 🚀 Hosted Validation Policy
 
-### Current State: No CI/CD ❌
+### Current State: Manual-Only
 
-**Missing:**
-• No GitHub Actions workflows
-• No automated test runs on PR/push
-• No coverage reporting
-• No lint checks
-• No type checking in CI
+Normal linting, typechecking, coverage, and tests run locally. Hosted validation
+is available only through explicit `workflow_dispatch` requests.
 
-### Recommended GitHub Actions Workflow
+### Manual GitHub Actions Workflow
 
-**Create:** `.github/workflows/ci.yml`
+**Owner:** `.github/workflows/manual-validation.yml`
 
 ```yaml
-name: CI
+name: Manual Validation
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -813,13 +874,10 @@ jobs:
 **Additional Workflows:**
 
 ```yaml
-# .github/workflows/nightly.yml
-# Run comprehensive tests nightly (including slow E2E tests)
+# Optional manually dispatched comprehensive validation
 
-name: Nightly Tests
+name: Manual Comprehensive Tests
 on:
-  schedule:
-    - cron: '0 0 * * *'  # Midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -832,7 +890,7 @@ jobs:
       - uses: actions/setup-node@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps
-      - run: pnpm run test:e2e  # When E2E tests exist
+      - run: pnpm run test:e2e # When E2E tests exist
 
   performance:
     name: Performance Tests
@@ -842,7 +900,7 @@ jobs:
       - uses: pnpm/action-setup@v2
       - uses: actions/setup-node@v4
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run test:perf  # When perf tests exist
+      - run: pnpm run test:perf # When perf tests exist
 ```
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -854,6 +912,7 @@ jobs:
 **File:** `vitest.config.ts`
 
 **Current Settings:**
+
 ```typescript
 {
   globals: true,
@@ -899,7 +958,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/{e2e,perf}/**'  // Exclude from default run
+      '**/{e2e,perf}/**', // Exclude from default run
     ],
 
     // NEW: Faster test runs
@@ -907,14 +966,14 @@ export default defineConfig({
     poolOptions: {
       threads: {
         singleThread: false,
-        useAtomics: true
-      }
+        useAtomics: true,
+      },
     },
 
     // NEW: Better error messages
     reporters: ['default', 'html'],
     outputFile: {
-      html: './coverage/test-report.html'
+      html: './coverage/test-report.html',
     },
 
     // NEW: Fail fast for CI
@@ -936,15 +995,15 @@ export default defineConfig({
         '**/types.ts',
         '**/*.test.ts',
         '**/*.spec.ts',
-        '**/*.svelte'  // Keep for now, may change later
+        '**/*.svelte', // Keep for now, may change later
       ],
 
       // CHANGED: Increase thresholds gradually
       thresholds: {
-        lines: 40,      // Current: 23.38% → Target: 40%
-        functions: 40,  // Current: 29.85% → Target: 40%
-        branches: 40,   // Current: 18.11% → Target: 40%
-        statements: 40  // Current: 23.33% → Target: 40%
+        lines: 40, // Current: 23.38% → Target: 40%
+        functions: 40, // Current: 29.85% → Target: 40%
+        branches: 40, // Current: 18.11% → Target: 40%
+        statements: 40, // Current: 23.33% → Target: 40%
 
         // Phase 2 targets (after adding high-risk tests):
         // lines: 60,
@@ -961,10 +1020,10 @@ export default defineConfig({
         lines: [50, 80],
         functions: [50, 80],
         branches: [50, 80],
-        statements: [50, 80]
-      }
-    }
-  }
+        statements: [50, 80],
+      },
+    },
+  },
 });
 ```
 
@@ -1017,8 +1076,8 @@ export default defineConfig({
   ⬜ Remove useless tests (TypeScript types, API shapes) (30 min)
      Impact: -20 lines, cleaner test suite
 
-  ⬜ Add GitHub Actions CI workflow (2 hours)
-     Impact: Automated testing on every PR
+  ⬜ Run the existing local coverage command before signoff (30 minutes)
+     Impact: Enforce the configured threshold without automatic CI
 
   ⬜ Set up Codecov or similar for coverage tracking (1 hour)
      Impact: Visualize coverage trends
@@ -1172,6 +1231,7 @@ Risk Reduction:
 ### Example 1: Refactoring Callouts Tests
 
 **Before (96 lines):**
+
 ```typescript
 test('should transform NOTE callout', () => {
   const tree = createTree('[!NOTE] Note content');
@@ -1191,6 +1251,7 @@ test('should transform TIP callout', () => {
 ```
 
 **After (15 lines):**
+
 ```typescript
 const calloutTypes = [
   { type: 'NOTE', class: 'blue', title: 'Note', role: 'note' },
@@ -1201,7 +1262,7 @@ const calloutTypes = [
   { type: 'SUCCESS', class: 'success', title: 'Success', role: 'status' },
   { type: 'DANGER', class: 'danger', title: 'Danger', role: 'alert' },
   { type: 'INFO', class: 'info', title: 'Info', role: 'note' },
-  { type: 'QUESTION', class: 'question', title: 'Question', role: 'note' }
+  { type: 'QUESTION', class: 'question', title: 'Question', role: 'note' },
 ];
 
 test.each(calloutTypes)(
@@ -1227,6 +1288,7 @@ test.each(calloutTypes)(
 ### Example 2: Adding Error Handling Tests
 
 **Missing (should add):**
+
 ```typescript
 // src/lib/utils/file-io.test.ts
 
@@ -1247,7 +1309,7 @@ describe('error handling', () => {
     const mockWrite = vi.spyOn(fs.promises, 'writeFile');
     mockWrite.mockRejectedValueOnce(
       Object.assign(new Error('ENOSPC: no space left on device'), {
-        code: 'ENOSPC'
+        code: 'ENOSPC',
       })
     );
 
@@ -1272,7 +1334,8 @@ describe('error handling', () => {
 ### Example 3: Integration Test Example
 
 **Should add:**
-```typescript
+
+````typescript
 // src/lib/integration/markdown-pipeline.test.ts
 
 import { describe, it, expect } from 'vitest';
@@ -1320,17 +1383,17 @@ $$
     const html = result.toString();
 
     // Verify all plugins ran
-    expect(html).toContain('callout-blue');        // Callouts
-    expect(html).toContain('/docs/guide');         // Links
-    expect(html).toContain('class="shiki"');       // Code highlight
-    expect(html).toContain('code-block-title');    // Code metadata
-    expect(html).toContain('katex');               // Math rendering
+    expect(html).toContain('callout-blue'); // Callouts
+    expect(html).toContain('/docs/guide'); // Links
+    expect(html).toContain('class="shiki"'); // Code highlight
+    expect(html).toContain('code-block-title'); // Code metadata
+    expect(html).toContain('katex'); // Math rendering
 
     // Verify no plugin corrupted another's output
-    expect(html).not.toContain('[!NOTE]');         // Callout processed
-    expect(html).not.toContain('./guide.md');      // Link processed
-    expect(html).not.toContain('```typescript');   // Code fence processed
-    expect(html).not.toContain('$E = mc^2$');      // Inline math processed
+    expect(html).not.toContain('[!NOTE]'); // Callout processed
+    expect(html).not.toContain('./guide.md'); // Link processed
+    expect(html).not.toContain('```typescript'); // Code fence processed
+    expect(html).not.toContain('$E = mc^2$'); // Inline math processed
   });
 
   it('should handle plugin errors gracefully', async () => {
@@ -1362,7 +1425,7 @@ $\\invalid{latex}$
     expect(html).toContain('/docs/guide');
   });
 });
-```
+````
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1371,6 +1434,7 @@ $\\invalid{latex}$
 ### Test Naming Convention
 
 **❌ Bad:**
+
 ```typescript
 test('test1', () => { ... });
 test('file-io', () => { ... });
@@ -1378,6 +1442,7 @@ test('check read', () => { ... });
 ```
 
 **✅ Good:**
+
 ```typescript
 test('should read UTF-8 file with special characters', () => { ... });
 test('should throw error when file does not exist', () => { ... });
@@ -1389,6 +1454,7 @@ test('should handle empty files gracefully', () => { ... });
 ### Assertion Quality
 
 **❌ Weak Assertions:**
+
 ```typescript
 expect(result).toBeDefined();
 expect(html).toContain('class');
@@ -1396,6 +1462,7 @@ expect(count).toBeGreaterThan(0);
 ```
 
 **✅ Strong Assertions:**
+
 ```typescript
 expect(result).toEqual({ title: 'Title', content: 'Content' });
 expect(html).toMatch(/<div class="callout-blue" role="note">/);
@@ -1405,6 +1472,7 @@ expect(count).toBe(5);
 ### Test Independence
 
 **❌ Dependent Tests:**
+
 ```typescript
 let sharedState;
 
@@ -1419,6 +1487,7 @@ test('test 2', () => {
 ```
 
 **✅ Independent Tests:**
+
 ```typescript
 test('test 1', () => {
   const state = someFunction();
@@ -1434,6 +1503,7 @@ test('test 2', () => {
 ### Avoid Magic Values
 
 **❌ Magic Values:**
+
 ```typescript
 test('rate limiter', () => {
   for (let i = 0; i < 10; i++) {
@@ -1444,6 +1514,7 @@ test('rate limiter', () => {
 ```
 
 **✅ Named Constants:**
+
 ```typescript
 const RATE_LIMIT = 10;
 const ONE_MINUTE_MS = 60_000;
@@ -1459,6 +1530,7 @@ test('rate limiter should allow up to limit', () => {
 ### Test Helpers and Fixtures
 
 **❌ Inline Mock Data Everywhere:**
+
 ```typescript
 test('test 1', () => {
   const tree = { type: 'root', children: [{ type: 'paragraph', ... }] };
@@ -1472,6 +1544,7 @@ test('test 2', () => {
 ```
 
 **✅ Shared Test Helpers:**
+
 ```typescript
 // tests/helpers/fixtures.ts
 export function createMockTree(content: string) {
@@ -1506,6 +1579,7 @@ Phase 4  Week 9      70%+     75%+       60%+      70%+        ✅ Excellent
 ### Module Priority for Coverage
 
 **Tier 1 - Critical (Add First):**
+
 ```
 Module                   Current   Target    Priority
 ─────────────────────    ───────   ──────    ────────
@@ -1516,6 +1590,7 @@ image-processor.ts       0%        80%       ⭐⭐⭐⭐⭐
 ```
 
 **Tier 2 - Important (Add Second):**
+
 ```
 Module                   Current   Target    Priority
 ─────────────────────    ───────   ──────    ────────
@@ -1526,6 +1601,7 @@ symbol-generation.ts     0%        75%       ⭐⭐⭐⭐
 ```
 
 **Tier 3 - Utilities (Add Third):**
+
 ```
 Module                   Current   Target    Priority
 ─────────────────────    ───────   ──────    ────────
@@ -1577,10 +1653,11 @@ Next Week Goals:
 ❌ Coverage well below 40% threshold (currently 23.38%)
 ❌ 57% of source files completely untested
 ❌ 96 lines of duplicate test code identified
-❌ No CI/CD pipeline for automated testing
+❌ Historical snapshot had no repository-wide local signoff command
 ❌ Missing integration and E2E tests
 
 **Risk Level:** 🟡 MEDIUM-HIGH
+
 ```
 High-risk untested modules exist (reference.ts, screenshot-service.ts,
 circuit-breaker.ts, image-processor.ts) but core functionality has tests.
@@ -1589,7 +1666,7 @@ circuit-breaker.ts, image-processor.ts) but core functionality has tests.
 ### Immediate Action Items (This Week)
 
 1. **Refactor duplicate tests** (callouts, links) - 2 hours
-2. **Set up GitHub Actions CI** - 2 hours
+2. **Run package-local coverage signoff** - 30 minutes
 3. **Remove useless tests** (TypeScript types) - 30 minutes
 4. **Start Phase 2: Add reference.ts tests** - Ongoing
 
@@ -1607,7 +1684,7 @@ Weeks 8-9:   Advanced testing (E2E, performance)
 **Phase 2 Complete (Week 4):**
 • Coverage ≥ 40% ✅
 • All Tier 1 modules have tests
-• CI/CD running on all PRs
+• Local coverage signoff passes
 
 **Phase 3 Complete (Week 7):**
 • Coverage ≥ 60%
@@ -1616,7 +1693,7 @@ Weeks 8-9:   Advanced testing (E2E, performance)
 
 **Phase 4 Complete (Week 9):**
 • Coverage ≥ 70%
-• E2E tests running nightly
+• E2E tests available through explicit manual execution
 • Performance benchmarks established
 • Visual regression testing (optional)
 

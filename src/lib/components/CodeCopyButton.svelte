@@ -105,17 +105,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.75rem;
-    font-family: var(
-      --v2-font-sans,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      sans-serif
-    );
+    font-family: var(--font-family-system);
     font-weight: 500;
     z-index: 10;
   }

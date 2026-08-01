@@ -206,7 +206,7 @@ For a basic docs setup:
 ```javascript
 remarkPlugins: [
   calloutsPlugin(),
-  tocPlugin(),
+  remarkTableOfContents(),
   linksPlugin(),
   codeHighlightPlugin(),
 ]

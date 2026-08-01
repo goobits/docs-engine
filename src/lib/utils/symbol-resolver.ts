@@ -1,59 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
 
-/**
- * Symbol definition extracted from TypeScript source via TypeDoc
- *
- * Contains all metadata needed to render documentation and link to source.
- *
- * @public
- */
-export interface SymbolDefinition {
-  /** Symbol name (e.g., 'RequestState', 'createServer') */
-  name: string;
-  /** Relative file path from project root */
-  path: string;
-  /** Line number where symbol is defined (1-indexed) */
-  line: number;
-  /** Kind of TypeScript construct */
-  kind: 'type' | 'interface' | 'class' | 'function' | 'enum' | 'const';
-  /** Whether the symbol is exported from its module */
-  exported: boolean;
-  /** Parsed JSDoc documentation if present */
-  jsDoc?: {
-    /** Main description text */
-    description?: string;
-    /** Function/method parameters */
-    params?: Array<{ name: string; description: string; type: string }>;
-    /** Return value description */
-    returns?: string;
-    /** Code example from @example tag */
-    example?: string;
-    /** Related symbols/URLs from @see tags */
-    see?: string[];
-  };
-  /** Full TypeScript signature */
-  signature: string;
-  /** Related symbol names extracted from type signatures */
-  related?: string[];
-  /** Parent types/interfaces this symbol extends */
-  extends?: string[];
-  /** Interfaces this class implements */
-  implements?: string[];
-}
-
-/**
- * Symbol map indexing all symbols by name
- *
- * Maps symbol names to arrays of definitions (multiple definitions possible
- * for overloaded functions or same-named symbols in different files).
- *
- * @public
- */
-export interface SymbolMap {
-  /** Symbol name maps to array of definitions (handles duplicates across files) */
-  [symbolName: string]: SymbolDefinition[];
-}
+export type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
 
 /**
  * Load symbol map from generated JSON file
