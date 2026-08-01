@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CliExecutor } from './cli-executor';
+import { CliCommandNotAllowedError, CliExecutor } from './cli-executor';
 
 describe('CliExecutor', () => {
   let executor: CliExecutor;
@@ -21,34 +21,38 @@ describe('CliExecutor', () => {
       });
 
       it('should reject commands not in the allowlist', async () => {
-        await expect(executor.execute('rm -rf /')).rejects.toThrow('Command not allowed: rm');
-      });
-
-      it('should reject unknown commands', async () => {
-        await expect(executor.execute('malicious-command')).rejects.toThrow(
-          'Command not allowed: malicious-command'
+        await expect(executor.execute('rm -rf /')).rejects.toBeInstanceOf(
+          CliCommandNotAllowedError
         );
       });
 
-      it('should allow commands with path prefix (e.g., git/something)', async () => {
-        // This tests the startsWith(allowed + '/') logic
+      it('should reject unknown commands', async () => {
+        await expect(executor.execute('malicious-command')).rejects.toThrow('Command not allowed.');
+      });
+
+      it('should reject executable names that merely extend an allowed command', async () => {
         const pathExecutor = new CliExecutor({
           allowedCommands: ['git'],
         });
-        // git/subcommand is allowed by the validator (git + /) but will fail to execute
-        // The validation passes, so the command runs and returns non-zero exit code
-        const result = await pathExecutor.execute('git/subcommand');
-        // Command doesn't exist, so it should fail with non-zero exit code
-        expect(result.exitCode).not.toBe(0);
+        await expect(pathExecutor.execute('git/subcommand')).rejects.toBeInstanceOf(
+          CliCommandNotAllowedError
+        );
+      });
+
+      it('should allow an exact configured executable path', () => {
+        const pathExecutor = new CliExecutor({
+          allowedCommands: ['/opt/tools/example'],
+        });
+        expect(() =>
+          pathExecutor.assertCommandAllowed('/opt/tools/example --version')
+        ).not.toThrow();
       });
 
       it('should handle empty allowlist', async () => {
         const emptyExecutor = new CliExecutor({
           allowedCommands: [],
         });
-        await expect(emptyExecutor.execute('echo test')).rejects.toThrow(
-          'Command not allowed: echo'
-        );
+        await expect(emptyExecutor.execute('echo test')).rejects.toThrow('Command not allowed.');
       });
     });
 

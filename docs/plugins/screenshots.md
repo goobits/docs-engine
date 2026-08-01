@@ -12,7 +12,7 @@ Automated screenshot generation for documentation with version-based caching and
 
 ## Features
 
-- Web screenshots - Capture any URL with Playwright
+- Web screenshots - Capture allowlisted URLs with Playwright
 - CLI screenshots - Execute commands and render terminal output
 - Syntax highlighting - Terminal output with theme support
 - Multiple formats - PNG, WebP, and retina (@2x) versions
@@ -63,12 +63,14 @@ screenshotPlugin({
 
 ```javascript
 // src/routes/api/screenshots/+server.ts
+import { createMarkdownDocs } from '@goobits/docs-engine/config';
 import { createScreenshotEndpoint } from '@goobits/docs-engine/server';
 
-export const POST = createScreenshotEndpoint({
+const docsConfig = createMarkdownDocs({
   screenshots: {
     basePath: '/screenshots',
     version: '1.0.0',
+    allowedDomains: ['docs.example.com'],
     cli: {
       allowedCommands: ['npm', 'git', 'ls', 'cat'],
       timeout: 30000,
@@ -76,7 +78,16 @@ export const POST = createScreenshotEndpoint({
     }
   }
 });
+
+export const POST = createScreenshotEndpoint(docsConfig);
 ```
+
+Web screenshots fail closed unless `allowedDomains` is configured. Set
+`outputDir` when generated files should live outside the app's `static`
+directory; the consumer is then responsible for serving or copying those files.
+`DOCS_SCREENSHOT_ALLOWED_DOMAINS` can override the configured domains for an
+isolated runtime such as CI. Expose this endpoint only to trusted users, and
+allow only the exact CLI executables the application needs.
 
 ### Add Hydrator
 
