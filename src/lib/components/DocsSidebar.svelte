@@ -1,8 +1,8 @@
 <script lang="ts">
   /**
-   * V2 Docs Sidebar
+   * Docs Sidebar
    *
-   * Integrated sidebar matching v2 design system
+   * Integrated sidebar matching the docs design system
    */
 
   import { page } from '$app/stores';
@@ -173,23 +173,23 @@
   }
 </script>
 
-<aside class="v2-docs-sidebar">
+<aside class="docs-sidebar">
   <!-- Search -->
-  <div class="v2-docs-sidebar__search">
-    <div class="v2-docs-sidebar__search-wrapper">
-      <Search size={16} class="v2-docs-sidebar__search-icon" aria-hidden="true" />
+  <div class="docs-sidebar__search">
+    <div class="docs-sidebar__search-wrapper">
+      <Search size={16} class="docs-sidebar__search-icon" aria-hidden="true" />
       <label for="sidebar-search-input" class="visually-hidden">Search documentation</label>
       <input
         id="sidebar-search-input"
         type="text"
         placeholder="Search docs..."
         bind:value={searchQuery}
-        class="v2-docs-sidebar__search-input"
+        class="docs-sidebar__search-input"
       />
       {#if searchQuery}
         <button
           onclick={clearSearch}
-          class="v2-docs-sidebar__search-clear"
+          class="docs-sidebar__search-clear"
           type="button"
           aria-label="Clear search"
         >
@@ -201,21 +201,21 @@
     <!-- Search Results -->
     {#if searchQuery && searchResults.length > 0}
       <div
-        class="v2-docs-sidebar__search-results"
+        class="docs-sidebar__search-results"
         role="region"
         aria-live="polite"
         aria-label="Search results"
       >
         {#each searchResults as result (result.href)}
-          <a href={result.href} class="v2-docs-sidebar__search-item">
-            <div class="v2-docs-sidebar__search-section">{result.section}</div>
-            <div class="v2-docs-sidebar__search-title">{result.title}</div>
-            <div class="v2-docs-sidebar__search-description">{result.description}</div>
+          <a href={result.href} class="docs-sidebar__search-item">
+            <div class="docs-sidebar__search-section">{result.section}</div>
+            <div class="docs-sidebar__search-title">{result.title}</div>
+            <div class="docs-sidebar__search-description">{result.description}</div>
           </a>
         {/each}
       </div>
     {:else if searchQuery && searchResults.length === 0}
-      <div class="v2-docs-sidebar__search-empty" role="status" aria-live="polite">
+      <div class="docs-sidebar__search-empty" role="status" aria-live="polite">
         <p>No results for "{searchQuery}"</p>
       </div>
     {/if}
@@ -223,11 +223,11 @@
 
   <!-- Navigation (hidden when searching) -->
   {#if !searchQuery}
-    <nav class="v2-docs-sidebar__nav" aria-label="Documentation navigation">
+    <nav class="docs-sidebar__nav" aria-label="Documentation navigation">
       {#each filteredNavigation as section (section.title)}
-        <div class="v2-docs-sidebar__section">
+        <div class="docs-sidebar__section">
           <button
-            class="v2-docs-sidebar__section-header"
+            class="docs-sidebar__section-header"
             onclick={() => toggleSection(section.title)}
             type="button"
             aria-expanded={expandedSections[section.title]}
@@ -236,7 +236,7 @@
               ? 'Collapse'
               : 'Expand'} {section.title} section"
           >
-            <div class="v2-docs-sidebar__section-title">
+            <div class="docs-sidebar__section-title">
               {#if section.icon}
                 <section.icon size={16} aria-hidden="true" />
               {:else}
@@ -245,7 +245,7 @@
               <span>{section.title}</span>
             </div>
             <span
-              class="v2-docs-sidebar__section-chevron"
+              class="docs-sidebar__section-chevron"
               class:expanded={expandedSections[section.title]}
             >
               <ChevronDown size={14} aria-hidden="true" />
@@ -254,13 +254,13 @@
 
           {#if expandedSections[section.title]}
             <div
-              class="v2-docs-sidebar__links"
+              class="docs-sidebar__links"
               id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
             >
               {#each section.links as link (link.href)}
                 <a
                   href={link.href}
-                  class="v2-docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
+                  class="docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   <span>{link.title}</span>
@@ -275,11 +275,11 @@
 
   <!-- Audience Filter at bottom (hidden when searching) -->
   {#if !searchQuery}
-    <div class="v2-docs-sidebar__filter">
+    <div class="docs-sidebar__filter">
       {#each AUDIENCE_TYPES as audience (audience)}
         <button
           onclick={() => toggleAudience(audience)}
-          class="v2-docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"
+          class="docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"
           type="button"
           aria-pressed={selectedAudiences.has(audience)}
           title={AUDIENCE_LABELS[audience]}
@@ -288,7 +288,7 @@
         </button>
       {/each}
       {#if selectedAudiences.size > 0}
-        <button onclick={clearFilters} class="v2-docs-sidebar__filter-reset" type="button">
+        <button onclick={clearFilters} class="docs-sidebar__filter-reset" type="button">
           clear
         </button>
       {/if}
@@ -297,9 +297,9 @@
 </aside>
 
 <style lang="scss">
-  @mixin v2-focus-ring {
+  @mixin focus-ring {
     &:focus-visible {
-      outline: 2px solid var(--color-primary, #ff5722);
+      outline: 2px solid var(--color-text-accent);
       outline-offset: 2px;
     }
   }
@@ -317,261 +317,261 @@
     border: 0;
   }
 
-  .v2-docs-sidebar {
+  .docs-sidebar {
     width: 280px;
     height: 100%;
-    background: var(--v2-surface-base);
-    border-right: 1px solid var(--v2-border-subtle);
-    border-radius: var(--v2-radius-lg);
+    background: var(--color-background);
+    border-right: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-2xl);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
   }
 
   /* Search */
-  .v2-docs-sidebar__search {
-    padding: var(--v2-spacing-lg);
-    border-bottom: 1px solid var(--v2-border-subtle);
+  .docs-sidebar__search {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 
-  .v2-docs-sidebar__search-wrapper {
+  .docs-sidebar__search-wrapper {
     position: relative;
     display: flex;
     align-items: center;
   }
 
-  .v2-docs-sidebar__search-wrapper :global(.v2-docs-sidebar__search-icon) {
+  .docs-sidebar__search-wrapper :global(.docs-sidebar__search-icon) {
     position: absolute;
-    left: var(--v2-spacing-sm);
-    color: var(--v2-text-tertiary);
+    left: var(--space-2);
+    color: var(--color-text-tertiary);
     pointer-events: none;
   }
 
-  .v2-docs-sidebar__search-input {
-    @include v2-focus-ring;
+  .docs-sidebar__search-input {
+    @include focus-ring;
 
     width: 100%;
-    padding: var(--v2-spacing-sm) var(--v2-spacing-sm) var(--v2-spacing-sm) var(--v2-spacing-2xl);
-    background: var(--v2-surface-interactive);
-    border: 1px solid var(--v2-border-medium);
-    border-radius: var(--v2-radius-md);
-    color: var(--v2-text-primary);
-    font-family: var(--v2-font-mono);
-    font-size: var(--v2-font-size-sm);
-    transition: all var(--v2-duration-fast) var(--v2-ease-out);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-12);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-xl);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-fast) var(--ease-out);
 
     &:focus {
-      border-color: var(--v2-text-accent);
-      background: var(--v2-surface-raised);
+      border-color: var(--color-text-accent);
+      background: var(--color-surface-raised);
     }
 
     &::placeholder {
-      color: var(--v2-text-tertiary);
+      color: var(--color-text-tertiary);
     }
   }
 
-  .v2-docs-sidebar__search-clear {
-    @include v2-focus-ring;
+  .docs-sidebar__search-clear {
+    @include focus-ring;
 
     position: absolute;
-    right: var(--v2-spacing-xs);
-    padding: var(--v2-spacing-xs);
+    right: var(--space-1);
+    padding: var(--space-1);
     background: transparent;
     border: none;
-    color: var(--v2-text-tertiary);
+    color: var(--color-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--v2-radius-sm);
-    transition: all var(--v2-duration-fast) var(--v2-ease-out);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover);
-      color: var(--v2-text-primary);
+      background: var(--color-surface-overlay);
+      color: var(--color-text-primary);
     }
   }
 
   /* Search Results */
-  .v2-docs-sidebar__search-results {
-    margin-top: var(--v2-spacing-md);
+  .docs-sidebar__search-results {
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: var(--v2-spacing-sm);
+    gap: var(--space-2);
     max-height: 400px;
     overflow-y: auto;
   }
 
-  .v2-docs-sidebar__search-item {
-    @include v2-focus-ring;
+  .docs-sidebar__search-item {
+    @include focus-ring;
 
-    padding: var(--v2-spacing-md);
-    background: var(--v2-surface-interactive);
-    border: 1px solid var(--v2-border-subtle);
-    border-radius: var(--v2-radius-md);
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-xl);
     text-decoration: none;
     display: flex;
     flex-direction: column;
-    gap: var(--v2-spacing-xs);
-    transition: all var(--v2-duration-fast) var(--v2-ease-out);
+    gap: var(--space-1);
+    transition: all var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover);
-      border-color: var(--v2-text-accent);
-      transform: translateX(var(--v2-spacing-xs));
+      background: var(--color-surface-overlay);
+      border-color: var(--color-text-accent);
+      transform: translateX(var(--space-1));
     }
   }
 
-  .v2-docs-sidebar__search-section {
-    font-size: var(--v2-font-size-xs);
-    color: var(--v2-text-accent);
+  .docs-sidebar__search-section {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-accent);
     font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .v2-docs-sidebar__search-title {
-    font-size: var(--v2-font-size-sm);
-    color: var(--v2-text-primary);
+  .docs-sidebar__search-title {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
     font-weight: var(--font-weight-semibold);
   }
 
-  .v2-docs-sidebar__search-description {
-    font-size: var(--v2-font-size-xs);
-    color: var(--v2-text-secondary);
+  .docs-sidebar__search-description {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
     line-height: 1.5;
   }
 
-  .v2-docs-sidebar__search-empty {
-    margin-top: var(--v2-spacing-md);
-    padding: var(--v2-spacing-md);
+  .docs-sidebar__search-empty {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
     text-align: center;
 
     p {
-      font-size: var(--v2-font-size-sm);
-      color: var(--v2-text-secondary);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
       margin: 0;
     }
   }
 
   /* Navigation */
-  .v2-docs-sidebar__nav {
+  .docs-sidebar__nav {
     flex: 1;
-    padding: var(--v2-spacing-md) 0;
+    padding: var(--space-4) 0;
     overflow-y: auto;
   }
 
-  .v2-docs-sidebar__section {
-    margin-bottom: var(--v2-spacing-sm);
+  .docs-sidebar__section {
+    margin-bottom: var(--space-2);
   }
 
-  .v2-docs-sidebar__section-header {
-    @include v2-focus-ring;
+  .docs-sidebar__section-header {
+    @include focus-ring;
 
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--v2-spacing-sm) var(--v2-spacing-md) var(--v2-spacing-sm) var(--v2-spacing-sm);
+    padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: all var(--v2-duration-fast) var(--v2-ease-out);
+    transition: all var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--v2-surface-interactive-hover);
+      background: var(--color-surface-overlay);
     }
   }
 
-  .v2-docs-sidebar__section-title {
+  .docs-sidebar__section-title {
     display: flex;
     align-items: center;
-    gap: var(--v2-spacing-sm);
-    font-size: var(--v2-font-size-sm);
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
-    color: var(--v2-text-primary);
+    color: var(--color-text-primary);
 
     :global(svg) {
-      color: var(--v2-text-accent);
+      color: var(--color-text-accent);
     }
   }
 
-  .v2-docs-sidebar__section-chevron {
+  .docs-sidebar__section-chevron {
     color: white !important;
     opacity: 0.5;
-    transition: transform var(--v2-duration-fast) var(--v2-ease-out);
+    transition: transform var(--duration-fast) var(--ease-out);
   }
 
-  .v2-docs-sidebar__section-chevron.expanded {
+  .docs-sidebar__section-chevron.expanded {
     transform: rotate(180deg);
   }
 
-  .v2-docs-sidebar__links {
+  .docs-sidebar__links {
     display: flex;
     flex-direction: column;
   }
 
-  .v2-docs-sidebar__link {
-    @include v2-focus-ring;
+  .docs-sidebar__link {
+    @include focus-ring;
 
     /* Align with section title text: section padding + icon (16px) + gap */
-    padding: var(--v2-spacing-sm) var(--v2-spacing-md) var(--v2-spacing-sm)
-      calc(var(--v2-spacing-sm) + 16px + var(--v2-spacing-sm));
+    padding: var(--space-2) var(--space-4) var(--space-2)
+      calc(var(--space-2) + 16px + var(--space-2));
     text-decoration: none;
-    color: var(--v2-text-secondary);
-    font-size: var(--v2-font-size-sm);
-    transition: all var(--v2-duration-fast) var(--v2-ease-out);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-fast) var(--ease-out);
     border-left: 2px solid transparent;
 
     &:hover {
-      color: var(--v2-text-primary);
-      background: var(--v2-surface-interactive-hover);
-      border-left-color: var(--v2-text-accent);
+      color: var(--color-text-primary);
+      background: var(--color-surface-overlay);
+      border-left-color: var(--color-text-accent);
     }
 
     &.active {
-      color: var(--v2-text-accent);
-      background: var(--v2-surface-interactive);
-      border-left-color: var(--v2-text-accent);
+      color: var(--color-text-accent);
+      background: var(--color-surface);
+      border-left-color: var(--color-text-accent);
       font-weight: var(--font-weight-semibold);
     }
   }
 
   /* Scrollbar styling */
-  .v2-docs-sidebar,
-  .v2-docs-sidebar__search-results,
-  .v2-docs-sidebar__nav {
+  .docs-sidebar,
+  .docs-sidebar__search-results,
+  .docs-sidebar__nav {
     scrollbar-width: thin;
-    scrollbar-color: var(--v2-border-medium) transparent;
+    scrollbar-color: var(--color-border-medium) transparent;
   }
 
-  .v2-docs-sidebar::-webkit-scrollbar,
-  .v2-docs-sidebar__search-results::-webkit-scrollbar,
-  .v2-docs-sidebar__nav::-webkit-scrollbar {
+  .docs-sidebar::-webkit-scrollbar,
+  .docs-sidebar__search-results::-webkit-scrollbar,
+  .docs-sidebar__nav::-webkit-scrollbar {
     width: 6px;
   }
 
-  .v2-docs-sidebar::-webkit-scrollbar-track,
-  .v2-docs-sidebar__search-results::-webkit-scrollbar-track,
-  .v2-docs-sidebar__nav::-webkit-scrollbar-track {
+  .docs-sidebar::-webkit-scrollbar-track,
+  .docs-sidebar__search-results::-webkit-scrollbar-track,
+  .docs-sidebar__nav::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .v2-docs-sidebar::-webkit-scrollbar-thumb,
-  .v2-docs-sidebar__search-results::-webkit-scrollbar-thumb,
-  .v2-docs-sidebar__nav::-webkit-scrollbar-thumb {
-    background: var(--v2-border-medium);
+  .docs-sidebar::-webkit-scrollbar-thumb,
+  .docs-sidebar__search-results::-webkit-scrollbar-thumb,
+  .docs-sidebar__nav::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
     border-radius: 3px;
   }
 
-  .v2-docs-sidebar::-webkit-scrollbar-thumb:hover,
-  .v2-docs-sidebar__search-results::-webkit-scrollbar-thumb:hover,
-  .v2-docs-sidebar__nav::-webkit-scrollbar-thumb:hover {
-    background: var(--v2-border-strong);
+  .docs-sidebar::-webkit-scrollbar-thumb:hover,
+  .docs-sidebar__search-results::-webkit-scrollbar-thumb:hover,
+  .docs-sidebar__nav::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-strong);
   }
 
   /* Audience Filter - Minimal Apple aesthetic */
-  .v2-docs-sidebar__filter {
+  .docs-sidebar__filter {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -579,8 +579,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.04);
   }
 
-  .v2-docs-sidebar__filter-pill {
-    @include v2-focus-ring;
+  .docs-sidebar__filter-pill {
+    @include focus-ring;
 
     padding: 4px 10px;
     background: transparent;
@@ -605,8 +605,8 @@
     }
   }
 
-  .v2-docs-sidebar__filter-reset {
-    @include v2-focus-ring;
+  .docs-sidebar__filter-reset {
+    @include focus-ring;
 
     padding: 4px 8px;
     background: transparent;

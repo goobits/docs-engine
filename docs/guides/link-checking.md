@@ -43,6 +43,7 @@ BUILD_SKIP_LINK_CHECK=1 pnpm build
 ```
 
 When broken links are found, the build will fail with a detailed report showing:
+
 - File path and line number
 - The broken link URL
 - Error message explaining the issue
@@ -56,6 +57,7 @@ Create `.linkcheckerrc.json` in your project root:
 ```json
 {
   "baseDir": "docs",
+  "publicDir": "static",
   "include": ["**/*.md", "**/*.mdx"],
   "exclude": [
     "**/node_modules/**",
@@ -74,26 +76,22 @@ Create `.linkcheckerrc.json` in your project root:
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `baseDir` | `string` | `"docs"` | Base directory containing markdown files |
-| `include` | `string[]` | `["**/*.md", "**/*.mdx"]` | Glob patterns to include |
-| `exclude` | `string[]` | See below | Glob patterns to exclude |
-| `checkExternal` | `boolean` | `false` | Validate external HTTP/HTTPS links |
-| `timeout` | `number` | `5000` | Timeout for external requests (ms) |
-| `concurrency` | `number` | `10` | Max concurrent external requests |
-| `skipDomains` | `string[]` | `["localhost", "127.0.0.1", "example.com"]` | Domains to skip validation |
-| `validExtensions` | `string[]` | `[".md", ".mdx"]` | Valid file extensions |
+| Option            | Type       | Default                                     | Description                               |
+| ----------------- | ---------- | ------------------------------------------- | ----------------------------------------- |
+| `baseDir`         | `string`   | Current directory                           | Base directory containing markdown files  |
+| `publicDir`       | `string`   | None                                        | Directory containing root-relative assets |
+| `include`         | `string[]` | `["**/*.md", "**/*.mdx"]`                   | Glob patterns to include                  |
+| `exclude`         | `string[]` | See below                                   | Glob patterns to exclude                  |
+| `checkExternal`   | `boolean`  | `false`                                     | Validate external HTTP/HTTPS links        |
+| `timeout`         | `number`   | `5000`                                      | Timeout for external requests (ms)        |
+| `concurrency`     | `number`   | `10`                                        | Max concurrent external requests          |
+| `skipDomains`     | `string[]` | `["localhost", "127.0.0.1", "example.com"]` | Domains to skip validation                |
+| `validExtensions` | `string[]` | `[".md", ".mdx"]`                           | Valid file extensions                     |
 
 **Default excludes:**
+
 ```json
-[
-  "**/node_modules/**",
-  "**/dist/**",
-  "**/.git/**",
-  "**/versioned_docs/**",
-  "**/.generated/**"
-]
+["**/node_modules/**", "**/dist/**", "**/.git/**"]
 ```
 
 ### External Link Checking
@@ -110,10 +108,11 @@ By default, external links are **not checked** for performance reasons. To enabl
 
 :::warning[Performance Impact]
 Checking external links can significantly slow down builds, especially with many external references. Consider:
-- Using external link checking only in CI/CD
-- Running it as a separate scheduled job
+
+- Using external link checking only in an explicitly requested manual run
+- Keeping it separate from normal local checks
 - Increasing timeout for slow domains
-:::
+  :::
 
 ## Usage Examples
 
@@ -127,17 +126,15 @@ pnpm check-links
 pnpm check-links --config ./custom-link-config.json
 ```
 
-### CI/CD Integration
+### Manual Hosted Integration
 
-#### GitHub Actions
+#### Manually Dispatched GitHub Actions
 
 ```yaml
 name: Link Checker
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   check-links:
@@ -215,14 +212,17 @@ The link checker validates:
 
 ```markdown
 <!-- Markdown links -->
+
 [Text](./relative-link.md)
 [Text](/absolute-link)
 [Text](./page.md#anchor)
 
 <!-- Images -->
+
 ![Alt text](./image.png)
 
 <!-- HTML links -->
+
 <a href="./page.md">Link</a>
 ```
 
@@ -237,6 +237,7 @@ The link checker validates:
 ```
 
 **Solutions:**
+
 - Check if file exists at the specified path
 - Verify file extension (`.md` vs `.mdx`)
 - Check for typos in filename
@@ -251,6 +252,7 @@ The link checker validates:
 ```
 
 **Solutions:**
+
 - Verify heading exists in target file
 - Check anchor slug (spaces become `-`, special chars removed)
 - Use lowercase anchors
@@ -265,6 +267,7 @@ The link checker validates:
 ```
 
 **Solutions:**
+
 - Increase timeout in config
 - Check if domain is reachable
 - Add to `skipDomains` if domain is unreliable
@@ -275,15 +278,16 @@ The link checker validates:
 ### Benchmarks
 
 Typical performance on a documentation site with:
+
 - 50 markdown files
 - 500 internal links
 - 100 external links (when enabled)
 
-| Configuration | Time |
-|---------------|------|
-| Internal links only | 1-2 seconds |
-| Internal + external | 10-20 seconds |
-| Internal + external (cached) | 3-5 seconds |
+| Configuration                | Time          |
+| ---------------------------- | ------------- |
+| Internal links only          | 1-2 seconds   |
+| Internal + external          | 10-20 seconds |
+| Internal + external (cached) | 3-5 seconds   |
 
 ### Optimization Tips
 
@@ -303,6 +307,7 @@ Typical performance on a documentation site with:
    - Test links as you write
 
 2. **Pre-commit checks**
+
    ```bash
    # Add to .husky/pre-commit
    pnpm check-links
@@ -321,20 +326,26 @@ Typical performance on a documentation site with:
 ### Documentation Standards
 
 1. **Use relative links for internal navigation**
+
    ```markdown
    <!-- Good -->
+
    [Getting Started](./getting-started.md)
 
    <!-- Avoid -->
+
    [Getting Started](https://example.com/docs/getting-started)
    ```
 
 2. **Verify anchors exist**
+
    ```markdown
    <!-- Ensure the target heading exists -->
+
    [Architecture](#architecture)
 
    ## Architecture
+
    <!-- ... -->
    ```
 
@@ -348,8 +359,9 @@ Typical performance on a documentation site with:
 ### Link checker not running
 
 **Check:**
+
 1. Is `prebuild` script configured?
-2. Is `scripts/checkLinks.ts` executable?
+2. Is the docs-engine CLI source available?
 3. Are dependencies installed?
 
 ```bash
@@ -357,15 +369,16 @@ Typical performance on a documentation site with:
 cat package.json | grep -A 3 '"scripts"'
 
 # Run manually
-tsx scripts/checkLinks.ts
+pnpm check-links
 
-# Check file permissions
-ls -la scripts/checkLinks.ts
+# Check the canonical command owner
+test -f packages/docs-engine-cli/src/index.ts
 ```
 
 ### Too many false positives
 
 **Solutions:**
+
 1. Add patterns to `exclude` in config
 2. Add domains to `skipDomains`
 3. Adjust `validExtensions`
@@ -374,6 +387,7 @@ ls -la scripts/checkLinks.ts
 ### Performance issues
 
 **Solutions:**
+
 1. Disable external link checking
 2. Reduce `concurrency` (if hitting rate limits)
 3. Add more patterns to `exclude`
@@ -381,9 +395,9 @@ ls -la scripts/checkLinks.ts
 
 ## API Reference
 
-### Script Location
+### Command Owner
 
-`/scripts/checkLinks.ts`
+`packages/docs-engine-cli/src/index.ts`
 
 ### Environment Variables
 

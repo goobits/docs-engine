@@ -1,45 +1,12 @@
 import { existsSync, readFileSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
-import type { ExtractedLink } from './link-extractor.js';
 import pLimit from 'p-limit';
-
-/**
- * Link validation result
- *
- * @public
- */
-export interface ValidationResult {
-  /** The link that was validated */
-  link: ExtractedLink;
-  /** Whether the link is valid */
-  isValid: boolean;
-  /** Error message if invalid */
-  error?: string;
-  /** HTTP status code (for external links) */
-  statusCode?: number;
-  /** Redirect URL (if redirected) */
-  redirectUrl?: string;
-}
-
-/**
- * Configuration options for link validation
- *
- * @public
- */
-export interface ValidationOptions {
-  /** Base directory for resolving relative paths */
-  baseDir: string;
-  /** Validate external links (requires HTTP requests) */
-  checkExternal?: boolean;
-  /** Timeout for external link requests (ms) */
-  timeout?: number;
-  /** Maximum concurrent external requests */
-  concurrency?: number;
-  /** Domains to skip validation */
-  skipDomains?: string[];
-  /** File extensions to treat as valid */
-  validExtensions?: string[];
-}
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import { visit } from 'unist-util-visit';
+import type { Heading, Html } from 'mdast';
+import type { ExtractedLink, ResolvedLinkCheckerConfig, ValidationResult } from './_linkModels.js';
 
 // ============================================================================
 // Module-Private Helpers (True Privacy via ESM)
@@ -55,18 +22,60 @@ export interface ValidationOptions {
  * - Removes `.md` extension for route matching
  * - Supports anchor links: `file.md#section`
  */
-function resolveLinkPath(link: string, sourceFile: string, baseDir: string): string {
+function resolveLinkPaths(
+  link: string,
+  sourceFile: string,
+  baseDir: string,
+  publicDir?: string,
+  routePrefix?: string
+): string[] {
   // Remove anchor
   const [pathPart] = link.split('#');
 
+  if (!pathPart) {
+    return [sourceFile];
+  }
+
   // Handle absolute paths
   if (pathPart.startsWith('/')) {
-    return resolve(baseDir, pathPart.slice(1));
+    const relativePath = pathPart.slice(1);
+    const contentPath = removeRoutePrefix(relativePath, routePrefix);
+    return [
+      resolve(baseDir, contentPath),
+      ...(publicDir ? [resolve(publicDir, relativePath)] : []),
+    ];
   }
 
   // Handle relative paths
   const sourceDir = dirname(sourceFile);
-  return resolve(sourceDir, pathPart);
+  return [resolve(sourceDir, pathPart)];
+}
+
+function removeRoutePrefix(relativePath: string, routePrefix?: string): string {
+  const normalizedPrefix = routePrefix?.replace(/^\/+|\/+$/g, '');
+  if (!normalizedPrefix) return relativePath;
+  if (relativePath === normalizedPrefix) return '';
+
+  const prefixWithSeparator = `${normalizedPrefix}/`;
+  return relativePath.startsWith(prefixWithSeparator)
+    ? relativePath.slice(prefixWithSeparator.length)
+    : relativePath;
+}
+
+function findExistingFile(targetPath: string, validExtensions: string[]): string | undefined {
+  const candidates = [targetPath, ...validExtensions.map((extension) => targetPath + extension)];
+
+  for (const candidate of candidates) {
+    if (!existsSync(candidate)) continue;
+    if (!statSync(candidate).isDirectory()) return candidate;
+
+    for (const extension of validExtensions) {
+      const indexPath = join(candidate, `index${extension}`);
+      if (existsSync(indexPath)) return indexPath;
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -86,42 +95,78 @@ function extractAnchor(url: string): string | undefined {
  * - Headers: `## Section Name` → `#section-name`
  * - HTML anchors: `<a name="anchor">` or `<a id="anchor">`
  */
-function anchorExistsInFile(filePath: string, anchor: string): boolean {
+interface FileAnchorIndex {
+  headings: Set<string>;
+  html: Set<string>;
+}
+
+type AnchorIndexCache = Map<string, FileAnchorIndex>;
+
+function anchorExistsInFile(
+  filePath: string,
+  anchor: string,
+  anchorIndexCache: AnchorIndexCache
+): boolean {
+  const cached = anchorIndexCache.get(filePath);
+  if (cached) {
+    return cached.headings.has(normalizeLinkAnchor(anchor)) || cached.html.has(anchor);
+  }
+
+  const anchorIndex: FileAnchorIndex = {
+    headings: new Set<string>(),
+    html: new Set<string>(),
+  };
+
   try {
     const content = readFileSync(filePath, 'utf-8');
+    const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
 
-    // Convert anchor to expected format (lowercase, spaces to hyphens)
-    const normalizedAnchor = anchor.toLowerCase().replace(/\s+/g, '-');
+    visit(tree, 'heading', (node: Heading) => {
+      anchorIndex.headings.add(normalizeHeadingAnchor(headingText(node)));
+    });
 
-    // Check for markdown headers
-    // Match: ## Header, ### Header, etc.
-    const headerRegex = /^#+\s+(.+)$/gm;
-    let match;
+    visit(tree, 'html', (node: Html) => {
+      const idRegex = /\sid=["']([^"']+)["']/gi;
+      const namedAnchorRegex = /<a\b[^>]*\sname=["']([^"']+)["']/gi;
+      let match;
 
-    while ((match = headerRegex.exec(content)) !== null) {
-      const headerText = match[1];
-      const headerId = headerText
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Remove special chars
-        .replace(/\s+/g, '-'); // Spaces to hyphens
-
-      if (headerId === normalizedAnchor) {
-        return true;
+      while ((match = idRegex.exec(node.value)) !== null) {
+        anchorIndex.html.add(match[1]);
       }
-    }
-
-    // Check for HTML anchors
-    const htmlAnchorRegex = /<a\s+(?:name|id)=["']([^"']+)["']/gi;
-    while ((match = htmlAnchorRegex.exec(content)) !== null) {
-      if (match[1] === anchor) {
-        return true;
+      while ((match = namedAnchorRegex.exec(node.value)) !== null) {
+        anchorIndex.html.add(match[1]);
       }
-    }
-
-    return false;
+    });
   } catch {
-    return false;
+    // An unreadable file has no usable anchors for this validation run.
   }
+
+  anchorIndexCache.set(filePath, anchorIndex);
+  return anchorIndex.headings.has(normalizeLinkAnchor(anchor)) || anchorIndex.html.has(anchor);
+}
+
+function normalizeLinkAnchor(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-');
+}
+
+function normalizeHeadingAnchor(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-');
+}
+
+function headingText(node: Heading): string {
+  const collect = (value: { value?: unknown; children?: unknown[] }): string => {
+    if (typeof value.value === 'string') return value.value;
+    return Array.isArray(value.children)
+      ? value.children
+          .map((child) => collect(child as { value?: unknown; children?: unknown[] }))
+          .join('')
+      : '';
+  };
+
+  return collect(node as unknown as { value?: unknown; children?: unknown[] });
 }
 
 // ============================================================================
@@ -152,53 +197,36 @@ function anchorExistsInFile(filePath: string, anchor: string): boolean {
  */
 export function validateInternalLink(
   link: ExtractedLink,
-  options: ValidationOptions
+  options: ResolvedLinkCheckerConfig
 ): ValidationResult {
-  const { baseDir, validExtensions = ['.md', '.mdx'] } = options;
+  return validateInternalLinkWithCache(link, options, new Map());
+}
+
+function validateInternalLinkWithCache(
+  link: ExtractedLink,
+  options: ResolvedLinkCheckerConfig,
+  anchorIndexCache: AnchorIndexCache
+): ValidationResult {
+  const { baseDir, publicDir, routePrefix, validExtensions = ['.md', '.mdx'] } = options;
 
   try {
-    // Resolve the link path
-    let targetPath = resolveLinkPath(link.url, link.file, baseDir);
+    const candidatePaths = resolveLinkPaths(link.url, link.file, baseDir, publicDir, routePrefix);
+    const targetPath = candidatePaths
+      .map((candidate) => findExistingFile(candidate, validExtensions))
+      .find((candidate): candidate is string => candidate !== undefined);
 
-    // Check if file exists as-is
-    let fileExists = existsSync(targetPath);
-
-    // If not, try adding valid extensions
-    if (!fileExists) {
-      for (const ext of validExtensions) {
-        const pathWithExt = targetPath + ext;
-        if (existsSync(pathWithExt)) {
-          targetPath = pathWithExt;
-          fileExists = true;
-          break;
-        }
-      }
-    }
-
-    // Check if it's a directory with index file
-    if (!fileExists && existsSync(targetPath) && statSync(targetPath).isDirectory()) {
-      for (const ext of validExtensions) {
-        const indexPath = join(targetPath, `index${ext}`);
-        if (existsSync(indexPath)) {
-          targetPath = indexPath;
-          fileExists = true;
-          break;
-        }
-      }
-    }
-
-    if (!fileExists) {
+    if (!targetPath) {
       return {
         link,
         isValid: false,
-        error: `File not found: ${targetPath}`,
+        error: `File not found: ${candidatePaths.join(' or ')}`,
       };
     }
 
     // Check anchor if present
     const anchor = extractAnchor(link.url);
     if (anchor) {
-      const anchorExists = anchorExistsInFile(targetPath, anchor);
+      const anchorExists = anchorExistsInFile(targetPath, anchor, anchorIndexCache);
       if (!anchorExists) {
         return {
           link,
@@ -238,7 +266,7 @@ export function validateInternalLink(
  */
 export async function validateExternalLink(
   link: ExtractedLink,
-  options: ValidationOptions
+  options: ResolvedLinkCheckerConfig
 ): Promise<ValidationResult> {
   const { timeout = 5000, skipDomains = [] } = options;
 
@@ -307,7 +335,7 @@ export async function validateExternalLink(
  */
 export async function validateLinks(
   links: ExtractedLink[],
-  options: ValidationOptions
+  options: ResolvedLinkCheckerConfig
 ): Promise<ValidationResult[]> {
   const { concurrency = 10, checkExternal = false } = options;
   const results: ValidationResult[] = [];
@@ -315,10 +343,11 @@ export async function validateLinks(
   // Separate internal and external links
   const internalLinks = links.filter((l) => !l.isExternal);
   const externalLinks = links.filter((l) => l.isExternal);
+  const anchorIndexCache: AnchorIndexCache = new Map();
 
   // Validate internal links (synchronous)
   for (const link of internalLinks) {
-    results.push(validateInternalLink(link, options));
+    results.push(validateInternalLinkWithCache(link, options, anchorIndexCache));
   }
 
   // Validate external links (asynchronous with concurrency)

@@ -48,6 +48,9 @@ docs-engine check-links --external
 # Custom base directory
 docs-engine check-links --base-dir ./documentation
 
+# Site mounted below a route prefix
+docs-engine check-links --base-dir ./documentation --route-prefix /docs
+
 # Quiet mode (only show errors)
 docs-engine check-links --quiet
 
@@ -58,6 +61,8 @@ docs-engine check-links --json
 **Options:**
 
 - `-b, --base-dir <path>` - Base directory for documentation (default: current directory)
+- `--public-dir <path>` - Directory containing root-relative site assets
+- `--route-prefix <path>` - URL route prefix mounted to the base directory
 - `-p, --pattern <glob>` - Glob pattern for files to check (default: `**/*.{md,mdx}`)
 - `-e, --external` - Validate external links (slower, default: `false`)
 - `-t, --timeout <ms>` - External link timeout in milliseconds (default: `5000`)
@@ -119,12 +124,14 @@ docs-engine version delete 1.0 --force
 
 ### Config File
 
-Create `.docs-engine.json` in your project root:
+Create `.linkcheckerrc.json` in your project root:
 
 ```json
 {
-  "baseDir": ".",
-  "pattern": "docs/**/*.{md,mdx}",
+  "baseDir": "docs",
+  "publicDir": "static",
+  "routePrefix": "/docs",
+  "include": ["**/*.md", "**/*.mdx"],
   "checkExternal": false,
   "timeout": 5000,
   "concurrency": 10,
@@ -145,7 +152,9 @@ Create `.docs-engine.json` in your project root:
 **Configuration Options:**
 
 - **`baseDir`** (string): Base directory for documentation
-- **`pattern`** (string): Glob pattern for files to check
+- **`publicDir`** (string): Directory containing root-relative site assets
+- **`routePrefix`** (string): URL route prefix mounted to the base directory
+- **`include`** (string[]): Glob patterns for files to check
 - **`checkExternal`** (boolean): Whether to validate external links
 - **`exclude`** (string[]): Patterns to exclude from checking
 - **`timeout`** (number): Timeout for external requests in milliseconds

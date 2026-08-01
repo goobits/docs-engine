@@ -176,10 +176,10 @@ docs(guides): add architecture diagrams with mermaid
 - Added data flow sequence diagram
 - Updated architecture guide with visual references
 
-feat(plugins): add tocPlugin alias for consistency
+feat(plugins): add table of contents plugin
 
-The getting-started guide uses tocPlugin() but the actual export
-was remarkTableOfContents. Added an alias export for better DX.
+Added the canonical remarkTableOfContents export and documented its use in
+the getting-started guide.
 
 fix(styles): update symbol class names from symbol-ref to symbol
 

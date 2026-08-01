@@ -23,7 +23,7 @@ This guide will help you migrate your project from @goobits/docs-engine v1.0 to 
 - [CSS Token Migration](#css-token-migration)
 - [Browser Requirements](#browser-requirements)
 - [Troubleshooting](#troubleshooting)
-- [What's New](#whats-new)
+- [What's New in v2.0](#whats-new-in-v20)
 
 ---
 

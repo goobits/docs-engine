@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import type { ValidationResult } from './link-validator.js';
-import type { ExtractedLink } from './link-extractor.js';
+import type { ExtractedLink, ValidationResult } from './_linkModels.js';
 
 /**
  * Report statistics

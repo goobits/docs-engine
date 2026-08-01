@@ -98,14 +98,10 @@ export * from '../utils/file-io.ts';
 
 // Symbol generation utilities - Server-side only (requires Node.js fs, glob, typescript)
 export * from '../utils/symbol-generation.ts';
-export type {
-  SymbolGeneratorConfig,
-  SymbolDefinition as SymbolGenDefinition,
-  SymbolMap as SymbolGenMap,
-} from '../utils/symbol-generation.ts';
+export type { SymbolGeneratorConfig } from '../utils/symbol-generation.ts';
 
 // Symbol reference utilities - Server-side only (loads generated files from disk)
 export * from '../utils/symbol-resolver.ts';
-export type { SymbolDefinition, SymbolMap } from '../utils/symbol-resolver.ts';
+export type { SymbolDefinition, SymbolMap } from '../utils/symbolTypes.ts';
 export * from '../utils/symbol-renderer.ts';
 export type { RenderOptions } from '../utils/symbol-renderer.ts';

@@ -287,7 +287,7 @@ Works seamlessly with other plugins:
 import {
   linksPlugin,
   referencePlugin,
-  tocPlugin,
+  remarkTableOfContents,
   calloutsPlugin,
 } from '@goobits/docs-engine/plugins';
 
@@ -305,7 +305,7 @@ export default {
         referencePlugin(),
 
         // TOC can go anywhere
-        tocPlugin(),
+        remarkTableOfContents(),
       ],
     }),
   ],

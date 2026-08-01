@@ -38,7 +38,7 @@
   }
 
   .sidebar h2 {
-    color: var(--color-primary);
+    color: var(--color-text-accent);
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
   }
@@ -50,7 +50,7 @@
   }
 
   .sidebar a {
-    color: var(--color-secondary);
+    color: var(--color-text-secondary);
     text-decoration: none;
     padding: 0.5rem 0.75rem;
     border-radius: 0.25rem;
@@ -59,7 +59,7 @@
 
   .sidebar a:hover {
     background: #e1e4e8;
-    color: var(--color-primary);
+    color: var(--color-text-accent);
   }
 
   .content {
@@ -69,20 +69,20 @@
   }
 
   .prose :global(h1) {
-    color: var(--color-primary);
-    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-text-accent);
+    border-bottom: 2px solid var(--color-text-accent);
     padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
   }
 
   .prose :global(h2) {
-    color: var(--color-secondary);
+    color: var(--color-text-secondary);
     margin-top: 2.5rem;
     margin-bottom: 1rem;
   }
 
   .prose :global(h3) {
-    color: var(--color-secondary);
+    color: var(--color-text-secondary);
     margin-top: 2rem;
     margin-bottom: 0.75rem;
   }
@@ -116,7 +116,7 @@
   }
 
   .prose :global(a) {
-    color: var(--color-primary);
+    color: var(--color-text-accent);
     text-decoration: none;
   }
 
@@ -130,9 +130,9 @@
   }
 
   .prose :global(blockquote) {
-    border-left: 4px solid var(--color-primary);
+    border-left: 4px solid var(--color-text-accent);
     padding-left: 1rem;
     margin: 1.5rem 0;
-    color: var(--color-secondary);
+    color: var(--color-text-secondary);
   }
 </style>

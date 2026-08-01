@@ -16,7 +16,7 @@ This separation keeps the package lightweight while giving you complete control 
 ## Table of Contents
 
 - [Design Philosophy](#design-philosophy)
-- [Package Responsibilities](#package-responsibilities)
+- [What the Package Provides](#what-the-package-provides)
 - [Consumer Responsibilities](#consumer-responsibilities)
 - [Data Flow](#data-flow)
 - [Integration Guide](#integration-guide)

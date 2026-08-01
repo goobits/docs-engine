@@ -4,7 +4,7 @@
  */
 
 import { createSymbolMapGenerator } from './src/lib/utils/symbol-generation.js';
-import { createLogger } from './src/lib/utils/logger.js';
+import { createLogger } from './src/lib/server/logger.js';
 import { getVersion } from './src/lib/utils/version.js';
 
 const logger = createLogger('generate-symbols');

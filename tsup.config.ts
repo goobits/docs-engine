@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFile
 import { join, dirname, relative } from 'path';
 import { preprocess } from 'svelte/compiler';
 import { sveltePreprocess } from 'svelte-preprocess';
-import { createLogger } from './src/lib/utils/logger.ts';
+import { createLogger } from './src/lib/server/logger.ts';
 
 const logger = createLogger('tsup-build');
 

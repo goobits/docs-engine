@@ -8,7 +8,12 @@
  * @see https://github.com/remarkjs/remark-math
  * @see https://github.com/remarkjs/remark-directive
  */
-import type { Data, Literal, Parent } from 'mdast';
+import type { Code, Data, Literal, Parent } from 'mdast';
+
+/**
+ * Mutable projection used when a remark plugin replaces a code node with HTML.
+ */
+export type MutableCodeNode = Omit<Code, 'type'> & { type: string };
 
 // ============================================================================
 // remark-math nodes

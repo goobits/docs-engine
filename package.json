@@ -79,7 +79,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check-links": "tsx scripts/checkLinks.ts",
+    "check-links": "tsx packages/docs-engine-cli/src/index.ts check-links --base-dir docs --public-dir static",
     "jscpd": "jscpd src",
     "madge": "madge --circular --extensions ts,js src",
     "madge:graph": "madge --image graph.svg --extensions ts,js src",

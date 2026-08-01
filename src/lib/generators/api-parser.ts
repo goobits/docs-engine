@@ -16,7 +16,7 @@ import {
   type ParameterDeclaration,
   type JSDocableNode,
 } from 'ts-morph';
-import { createLogger } from '../utils/logger.ts';
+import { createLogger } from '../server/logger.ts';
 
 const logger = createLogger('api-parser');
 

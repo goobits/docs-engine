@@ -296,14 +296,6 @@ export function isGitRepository(): boolean {
 }
 
 /**
- * Format a date relative to now (e.g., "2 days ago")
- *
- * @public
- * @deprecated Import from '../utils/date' instead for browser compatibility
- */
-export { formatRelativeDate } from './date.ts';
-
-/**
  * Clear the Git cache (useful for testing)
  *
  * @public

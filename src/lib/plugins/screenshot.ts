@@ -3,15 +3,7 @@ import type { Root, Code } from 'mdast';
 import { encodeJsonBase64 } from '../utils/base64.ts';
 import { getVersion } from '../utils/version.ts';
 import { createBrowserLogger } from '../utils/browser-logger.ts';
-
-/**
- * Interface for mutating AST nodes during transformation
- * Used when transforming Code nodes to Html nodes
- */
-interface MutableCodeNode {
-  type: string;
-  value?: string;
-}
+import type { MutableCodeNode } from '../mdastTypes.ts';
 
 const logger = createBrowserLogger('screenshot-plugin');
 

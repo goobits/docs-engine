@@ -3,15 +3,7 @@ import type { Root, Code } from 'mdast';
 import { parseTree } from '../utils/tree-parser.ts';
 import { escapeHtml } from '../utils/html.ts';
 import { encodeJsonBase64 } from '../utils/base64.ts';
-
-/**
- * Interface for mutating AST nodes during transformation
- * Used when transforming Code nodes to Html nodes
- */
-interface MutableCodeNode {
-  type: string;
-  value?: string;
-}
+import type { MutableCodeNode } from '../mdastTypes.ts';
 
 /**
  * Remark plugin to transform filetree code blocks into interactive file trees
