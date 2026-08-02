@@ -1,0 +1,16 @@
+{
+  "root": ".",
+  "projects": [
+    {
+      "id": "docs-engine",
+      "root": ".",
+      "require_complete": true,
+      "contexts": {
+        "documentation-tools": {
+          "role": "tooling",
+          "entrypoints": ["generate-symbols.ts", "scripts/generateCliScreenshotsSvg.ts"]
+        }
+      }
+    }
+  ]
+}

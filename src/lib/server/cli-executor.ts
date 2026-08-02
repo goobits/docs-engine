@@ -24,7 +24,7 @@ export interface CommandExecutionResult {
  * @public
  */
 export interface CliExecutorConfig {
-  /** List of allowed command prefixes (e.g., ['git', 'npm', 'pnpm']) */
+  /** Exact executable names or paths allowed to run (e.g., ['git', 'npm', 'pnpm']) */
   allowedCommands: string[];
   /** Command execution timeout in milliseconds (default: TIMEOUT.VERY_LONG) */
   timeout?: number;
@@ -32,6 +32,14 @@ export interface CliExecutorConfig {
   maxOutputLength?: number;
   /** Working directory for command execution (default: process.cwd()) */
   workingDirectory?: string;
+}
+
+/** Client input was rejected by the CLI allowlist. */
+export class CliCommandNotAllowedError extends Error {
+  constructor() {
+    super('Command not allowed.');
+    this.name = 'CliCommandNotAllowedError';
+  }
 }
 
 /**
@@ -111,11 +119,8 @@ export class CliExecutor {
   }
 
   #validateCommand(command: string): boolean {
-    const baseCommand = command.trim().split(' ')[0];
-
-    const isAllowed = this.#config.allowedCommands.some(
-      (allowed) => baseCommand === allowed || baseCommand.startsWith(allowed + '/')
-    );
+    const { executable } = this.#parseCommand(command);
+    const isAllowed = this.#config.allowedCommands.includes(executable);
 
     if (!isAllowed) {
       return false;
@@ -126,6 +131,13 @@ export class CliExecutor {
     }
 
     return true;
+  }
+
+  /** Rejects commands outside the configured allowlist without exposing their contents. */
+  assertCommandAllowed(command: string): void {
+    if (!this.#validateCommand(command)) {
+      throw new CliCommandNotAllowedError();
+    }
   }
 
   /**
@@ -141,9 +153,7 @@ export class CliExecutor {
    * @throws Error if command is not allowed
    */
   async execute(command: string): Promise<CommandExecutionResult> {
-    if (!this.#validateCommand(command)) {
-      throw new Error(`Command not allowed: ${command.split(' ')[0]}`);
-    }
+    this.assertCommandAllowed(command);
 
     const { executable, args } = this.#parseCommand(command);
     const startTime = Date.now();

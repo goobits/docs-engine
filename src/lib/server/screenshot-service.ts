@@ -5,7 +5,7 @@ import { isIP } from 'net';
 import path from 'path';
 import sharp from 'sharp';
 import type { MarkdownDocsConfig } from '../config/index.ts';
-import { CliExecutor } from './cli-executor.ts';
+import { CliCommandNotAllowedError, CliExecutor } from './cli-executor.ts';
 import { getVersion } from '../utils/version.ts';
 import { createLogger } from './logger.ts';
 import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.ts';
@@ -48,6 +48,9 @@ export interface ScreenshotResponse {
   path?: string;
   error?: string;
 }
+
+type ScreenshotConfig = NonNullable<ScreenshotRequest['config']>;
+type ScreenshotsConfig = MarkdownDocsConfig['screenshots'];
 
 const logger = createLogger('screenshot-service');
 const SCREENSHOT_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -131,19 +134,30 @@ async function processScreenshotImage(options: {
   };
 }
 
-/**
- * Allowed domains for screenshot generation (SSRF protection)
- * Add your production domains here
- */
-const configuredAllowedDomains = (process.env.DOCS_SCREENSHOT_ALLOWED_DOMAINS || '')
+function resolveScreenshotOutputDir(screenshotsConfig: ScreenshotsConfig, version: string): string {
+  const configuredRoot = screenshotsConfig.outputDir
+    ? path.resolve(screenshotsConfig.outputDir)
+    : path.join(process.cwd(), 'static', screenshotsConfig.basePath.replace(/^\//, ''));
+  return path.join(configuredRoot, `v${version}`);
+}
+
+const environmentAllowedDomains = (process.env.DOCS_SCREENSHOT_ALLOWED_DOMAINS || '')
   .split(',')
   .map((domain) => domain.trim().toLowerCase())
   .filter(Boolean);
-const ALLOWED_DOMAINS = configuredAllowedDomains.length
-  ? configuredAllowedDomains
-  : ['beheremeow.app'];
 const allowLocalScreenshots =
   process.env.DOCS_SCREENSHOTS_ALLOW_LOCALHOST === 'true' || process.env.NODE_ENV !== 'production';
+
+function getUrlLogContext(url: string | undefined): { host?: string; urlProvided: boolean } {
+  if (!url) {
+    return { urlProvided: false };
+  }
+  try {
+    return { host: new URL(url).host, urlProvided: true };
+  } catch {
+    return { urlProvided: true };
+  }
+}
 
 // Exported for unit testing of the security-critical validation logic.
 export function validateScreenshotName(name: string): void {
@@ -176,10 +190,15 @@ async function loadChromium(): Promise<(typeof import('playwright'))['chromium']
  * @param url - URL to validate
  * @throws Error if URL is not allowed
  */
-export function validateUrl(url: string): void {
+export function validateUrl(url: string, configuredAllowedDomains: string[] = []): void {
   const parsed = new URL(url);
   const hostname = parsed.hostname.toLowerCase();
   const ipVersion = isIP(hostname);
+  const allowedDomains = (
+    environmentAllowedDomains.length ? environmentAllowedDomains : configuredAllowedDomains
+  )
+    .map((domain) => domain.trim().toLowerCase())
+    .filter(Boolean);
 
   if (!['http:', 'https:'].includes(parsed.protocol)) {
     throw new Error('Only http and https URLs are allowed');
@@ -216,13 +235,13 @@ export function validateUrl(url: string): void {
   if (
     hostname.startsWith('127.') &&
     hostname !== '127.0.0.1' &&
-    !ALLOWED_DOMAINS.includes(hostname)
+    !allowedDomains.includes(hostname)
   ) {
     throw new Error('Localhost variants not allowed');
   }
 
   // Allowlist check
-  const isAllowed = ALLOWED_DOMAINS.some(
+  const isAllowed = allowedDomains.some(
     (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
   );
 
@@ -309,13 +328,16 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
         {
           name,
           type,
-          url: url || undefined,
+          ...getUrlLogContext(url),
           ip: clientIp,
         },
         'Processing screenshot request'
       );
 
       if (type === 'cli') {
+        if (screenshotConfig?.command) {
+          cliExecutor.assertCommandAllowed(screenshotConfig.command);
+        }
         return await cliScreenshotBreaker.execute(() =>
           generateCliScreenshot({
             name,
@@ -338,6 +360,17 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
         );
       }
     } catch (error: unknown) {
+      if (error instanceof CliCommandNotAllowedError) {
+        logger.warn({ ip: clientIp }, 'Rejected disallowed CLI screenshot command');
+        return json(
+          {
+            success: false,
+            error: error.message,
+          } as ScreenshotResponse,
+          { status: HTTP_STATUS.BAD_REQUEST }
+        );
+      }
+
       if (error instanceof CircuitBreakerError) {
         logger.error({ breaker: error.message }, 'Circuit breaker is open');
         return json(
@@ -365,10 +398,10 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
 async function generateCliScreenshot(options: {
   name: string;
   version: string;
-  config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  config?: ScreenshotConfig;
   cliExecutor: CliExecutor;
   fetch: typeof fetch;
-  screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  screenshotsConfig: ScreenshotsConfig;
 }): Promise<Response> {
   const {
     name,
@@ -390,7 +423,7 @@ async function generateCliScreenshot(options: {
   }
 
   // Execute command
-  logger.debug({ command: screenshotConfig.command }, 'Executing CLI command for screenshot');
+  logger.debug('Executing allowed CLI command for screenshot');
   const result = await cliExecutor.execute(screenshotConfig.command);
   const output = result.stdout + (result.stderr ? '\n' + result.stderr : '');
   logger.debug({ outputLength: output.length }, 'CLI command executed successfully');
@@ -426,12 +459,7 @@ async function generateCliScreenshot(options: {
   // Launch browser and screenshot the terminal HTML
   logger.debug({ width, height }, 'Launching browser for CLI screenshot');
   // Create output directory
-  const outputDir = path.join(
-    process.cwd(),
-    'static',
-    screenshotsConfig.basePath.replace(/^\//, ''),
-    `v${version}`
-  );
+  const outputDir = resolveScreenshotOutputDir(screenshotsConfig, version);
   await mkdir(outputDir, { recursive: true });
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
@@ -493,8 +521,8 @@ async function generateWebScreenshot(options: {
   name: string;
   url?: string;
   version: string;
-  config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  screenshotsConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  config?: ScreenshotConfig;
+  screenshotsConfig: ScreenshotsConfig;
 }): Promise<Response> {
   const { name, url, version, config: screenshotConfig, screenshotsConfig } = options;
 
@@ -510,11 +538,14 @@ async function generateWebScreenshot(options: {
 
   // Validate URL for SSRF protection
   try {
-    validateUrl(url);
-    logger.debug({ url }, 'URL validation passed');
+    validateUrl(url, screenshotsConfig.allowedDomains);
+    logger.debug(getUrlLogContext(url), 'URL validation passed');
   } catch (err) {
     logger.warn(
-      { url, error: err instanceof Error ? err.message : 'Invalid URL' },
+      {
+        ...getUrlLogContext(url),
+        error: err instanceof Error ? err.message : 'Invalid URL',
+      },
       'URL validation failed'
     );
     return json(
@@ -536,14 +567,9 @@ async function generateWebScreenshot(options: {
   const [width, height] = viewportDimensions;
 
   // Launch browser
-  logger.debug({ width, height, url }, 'Launching browser for web screenshot');
+  logger.debug({ width, height, ...getUrlLogContext(url) }, 'Launching browser for web screenshot');
   // Create output directory
-  const outputDir = path.join(
-    process.cwd(),
-    'static',
-    screenshotsConfig.basePath.replace(/^\//, ''),
-    `v${version}`
-  );
+  const outputDir = resolveScreenshotOutputDir(screenshotsConfig, version);
   await mkdir(outputDir, { recursive: true });
 
   // Generate screenshot at 2x resolution for retina displays (better to downscale than upscale)
@@ -559,7 +585,7 @@ async function generateWebScreenshot(options: {
     const page = await context.newPage();
 
     // Navigate to URL
-    logger.debug({ url }, 'Navigating to URL');
+    logger.debug(getUrlLogContext(url), 'Navigating to URL');
     await page.goto(url, { waitUntil: 'networkidle' });
 
     // Wait for selector if specified
@@ -601,7 +627,7 @@ async function generateWebScreenshot(options: {
   logger.info(
     {
       name,
-      url,
+      ...getUrlLogContext(url),
       publicPath: imageResult.publicPath,
       width: imageResult.displayWidth,
       height: imageResult.displayHeight,

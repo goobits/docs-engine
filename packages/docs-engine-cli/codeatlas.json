@@ -1,0 +1,10 @@
+{
+  "root": ".",
+  "projects": [
+    {
+      "id": "docs-engine-cli",
+      "root": ".",
+      "require_complete": true
+    }
+  ]
+}

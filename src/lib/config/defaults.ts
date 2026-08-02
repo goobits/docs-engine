@@ -7,6 +7,10 @@ export interface MarkdownDocsConfig {
     enabled: boolean;
     basePath: string;
     version?: string;
+    /** Hostnames that web screenshots may access. Empty fails closed. */
+    allowedDomains?: string[];
+    /** Filesystem root for generated versions. Defaults to static/{basePath}. */
+    outputDir?: string;
     cli?: {
       allowedCommands?: string[];
       timeout?: number;
@@ -64,6 +68,7 @@ export const defaultConfig: MarkdownDocsConfig = {
   screenshots: {
     enabled: true,
     basePath: '/screenshots',
+    allowedDomains: [],
     cli: {
       allowedCommands: [],
       timeout: TIMEOUT.VERY_LONG,
