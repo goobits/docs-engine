@@ -12,7 +12,7 @@ import {
   collapsePlugin,
   referencePlugin,
 } from '@goobits/docs-engine/plugins';
-import { resolveSvelteKitBuildDirectory } from '../scripts/buildStorage.ts';
+import { resolveSvelteKitBuildDirectory } from '@goobits/docs-engine/build-storage';
 
 const siteRoot = import.meta.dirname;
 

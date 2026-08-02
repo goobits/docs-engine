@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { resolveViteCacheDirectory } from '../scripts/buildStorage.ts';
+import { resolveViteCacheDirectory } from '@goobits/docs-engine/build-storage';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

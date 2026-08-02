@@ -57,6 +57,11 @@
       "import": "./src/lib/config/index.ts",
       "types": "./src/lib/config/index.ts"
     },
+    "./build-storage": {
+      "source": "./src/lib/buildStorage.ts",
+      "import": "./src/lib/buildStorage.ts",
+      "types": "./src/lib/buildStorage.ts"
+    },
     "./styles": "./src/lib/styles/index.css",
     "./styles/*": "./src/lib/styles/*"
   },

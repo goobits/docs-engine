@@ -66,6 +66,7 @@ export default defineConfig({
   // Entry points for all public APIs
   entry: [
     'src/lib/index.ts',
+    'src/lib/buildStorage.ts',
     'src/lib/server/index.ts',
     'src/lib/server/markdownRenderer.ts',
     'src/lib/server/screenshot-service.ts',
@@ -84,6 +85,7 @@ export default defineConfig({
   dts: {
     entry: [
       'src/lib/index.ts',
+      'src/lib/buildStorage.ts',
       'src/lib/server/index.ts',
       'src/lib/server/markdownRenderer.ts',
       'src/lib/server/screenshot-service.ts',
