@@ -1,0 +1,10 @@
+{
+  "root": ".",
+  "projects": [
+    {
+      "id": "docs-engine-site",
+      "root": ".",
+      "require_complete": true
+    }
+  ]
+}
