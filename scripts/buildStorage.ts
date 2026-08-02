@@ -21,10 +21,28 @@ const resolveCacheRoot = (projectRoot: string): string => {
     ? path.resolve(configured)
     : path.join(homedir(), '.cache', 'goobits', 'build-storage', fingerprint);
   if (pathContains(project, cacheRoot) || pathContains(cacheRoot, project)) {
-    throw new Error(`Test cache must be outside and disjoint from the project: ${cacheRoot}`);
+    throw new Error(`Build cache must be outside and disjoint from the project: ${cacheRoot}`);
   }
   return cacheRoot;
 };
+
+const resolveBuildRoot = (projectRoot: string): string => {
+  const project = realpathSync.native(path.resolve(projectRoot));
+  const configured = process.env.GOOBITS_BUILD_ROOT?.trim();
+  if (configured && !path.isAbsolute(configured)) {
+    throw new Error(`GOOBITS_BUILD_ROOT must be absolute: ${configured}`);
+  }
+  const buildRoot = configured
+    ? path.resolve(configured)
+    : path.join(resolveCacheRoot(projectRoot), 'build');
+  if (pathContains(project, buildRoot) || pathContains(buildRoot, project)) {
+    throw new Error(`Build root must be outside and disjoint from the project: ${buildRoot}`);
+  }
+  return buildRoot;
+};
+
+const resolveBuildStorage = (projectRoot: string, ...segments: string[]): string =>
+  path.join(resolveBuildRoot(projectRoot), ...segments);
 
 const resolveTestStorage = (
   projectRoot: string,
@@ -34,7 +52,7 @@ const resolveTestStorage = (
   if (!storageNamePattern.test(name)) {
     throw new Error(`Test storage name must match ${storageNamePattern}: ${name}`);
   }
-  return path.join(resolveCacheRoot(projectRoot), 'build', 'tests', kind, name);
+  return resolveBuildStorage(projectRoot, 'tests', kind, name);
 };
 
 export const resolveViteCacheDirectory = (projectRoot: string): string =>
@@ -42,3 +60,6 @@ export const resolveViteCacheDirectory = (projectRoot: string): string =>
 
 export const resolveTestArtifactDirectory = (projectRoot: string, name: string): string =>
   resolveTestStorage(projectRoot, 'artifacts', name);
+
+export const resolveSvelteKitBuildDirectory = (projectRoot: string): string =>
+  resolveBuildStorage(projectRoot, 'svelte-kit');

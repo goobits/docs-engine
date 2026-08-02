@@ -12,6 +12,9 @@ import {
   collapsePlugin,
   referencePlugin,
 } from '@goobits/docs-engine/plugins';
+import { resolveSvelteKitBuildDirectory } from '../scripts/buildStorage.ts';
+
+const siteRoot = import.meta.dirname;
 
 /** @type {import("@sveltejs/kit").Config} */
 const config = {
@@ -37,6 +40,9 @@ const config = {
 
   kit: {
     adapter: adapter(),
+    ...(process.env.NODE_ENV === 'production'
+      ? { outDir: resolveSvelteKitBuildDirectory(siteRoot) }
+      : {}),
   },
 };
 
