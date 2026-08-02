@@ -146,7 +146,11 @@
   });
 
   function toggleSection(sectionTitle: string) {
-    expandedSections[sectionTitle] = !expandedSections[sectionTitle];
+    expandedSections[sectionTitle] = !isSectionExpanded(sectionTitle);
+  }
+
+  function isSectionExpanded(sectionTitle: string): boolean {
+    return expandedSections[sectionTitle] ?? true;
   }
 
   function clearSearch() {
@@ -230,9 +234,9 @@
             class="docs-sidebar__section-header"
             onclick={() => toggleSection(section.title)}
             type="button"
-            aria-expanded={expandedSections[section.title]}
+            aria-expanded={isSectionExpanded(section.title)}
             aria-controls="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
-            aria-label="{expandedSections[section.title]
+            aria-label="{isSectionExpanded(section.title)
               ? 'Collapse'
               : 'Expand'} {section.title} section"
           >
@@ -246,28 +250,27 @@
             </div>
             <span
               class="docs-sidebar__section-chevron"
-              class:expanded={expandedSections[section.title]}
+              class:expanded={isSectionExpanded(section.title)}
             >
               <ChevronDown size={14} aria-hidden="true" />
             </span>
           </button>
 
-          {#if expandedSections[section.title]}
-            <div
-              class="docs-sidebar__links"
-              id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
-            >
-              {#each section.links as link (link.href)}
-                <a
-                  href={link.href}
-                  class="docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
-                  aria-current={isActive(link.href) ? 'page' : undefined}
-                >
-                  <span>{link.title}</span>
-                </a>
-              {/each}
-            </div>
-          {/if}
+          <div
+            class="docs-sidebar__links"
+            id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
+            hidden={!isSectionExpanded(section.title)}
+          >
+            {#each section.links as link (link.href)}
+              <a
+                href={link.href}
+                class="docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                <span>{link.title}</span>
+              </a>
+            {/each}
+          </div>
         </div>
       {/each}
     </nav>

@@ -1,12 +1,19 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
 import { resolveViteCacheDirectory } from './src/lib/buildStorage.ts';
 
 export default defineConfig({
   cacheDir: resolveViteCacheDirectory(import.meta.dirname),
   plugins: [svelte()],
   resolve: {
+    alias: {
+      '$app/stores': resolve(import.meta.dirname, 'test-support/app-stores.ts'),
+    },
     conditions: ['browser'],
+  },
+  ssr: {
+    noExternal: ['@lucide/svelte'],
   },
   server: {
     port: 3391,
