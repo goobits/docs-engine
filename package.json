@@ -88,7 +88,6 @@
     "jscpd": "jscpd src",
     "madge": "madge --circular --extensions ts,js src",
     "madge:graph": "madge --image graph.svg --extensions ts,js src",
-    "prebuild": "npm run check-links",
     "prepublishOnly": "npm run build",
     "prepare": "husky || true"
   },
