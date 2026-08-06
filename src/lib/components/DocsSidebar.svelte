@@ -321,7 +321,7 @@
   }
 
   .docs-sidebar {
-    width: 280px;
+    width: var(--docs-sidebar-width, 280px);
     height: 100%;
     background: var(--color-background);
     border-right: 1px solid var(--color-border-subtle);
