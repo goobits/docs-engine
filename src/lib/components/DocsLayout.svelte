@@ -143,7 +143,9 @@
       class="docs-mobile-toggle"
       onclick={toggleMobileMenu}
       type="button"
-      aria-label="Toggle menu"
+      aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      aria-controls="docs-sidebar"
+      aria-expanded={mobileMenuOpen}
     >
       {#if mobileMenuOpen}
         <X size={20} />
@@ -159,7 +161,7 @@
   </div>
 
   <!-- Sidebar -->
-  <div class="docs-sidebar-container {mobileMenuOpen ? 'mobile-open' : ''}">
+  <div id="docs-sidebar" class="docs-sidebar-container {mobileMenuOpen ? 'mobile-open' : ''}">
     {#if navigation.length > 0}
       <DocsSidebar {navigation} {currentPath} bind:selectedAudiences />
     {/if}
@@ -277,9 +279,9 @@
     min-height: 0; /* Critical for flex children to enable scrolling */
     overflow: hidden;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: var(--docs-sidebar-width, 280px) minmax(0, 1fr);
     position: relative;
-    max-width: 1400px; /* Match header width */
+    max-width: var(--docs-layout-max-width, 1400px);
     margin: 0 auto; /* Center content */
     width: 100%; /* Fill available space up to max-width */
 
@@ -375,7 +377,9 @@
 
   /* Sidebar Container */
   .docs-sidebar-container {
+    width: var(--docs-sidebar-width, 280px);
     height: 100%;
+    min-width: 0;
     min-height: 0; /* Enable scrolling in grid layout */
     overflow-y: auto;
     padding: var(--docs-spacing-md) 0;
@@ -398,9 +402,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--docs-spacing-xl);
-    padding: var(--docs-spacing-2xl);
-    max-width: 900px;
+    padding-block: var(--docs-main-padding-block, var(--docs-spacing-2xl));
+    padding-inline: var(--docs-main-padding-inline, var(--docs-spacing-2xl));
+    max-width: var(--docs-main-max-width, 900px);
     height: 100%;
+    min-width: 0;
     min-height: 0; /* Enable scrolling in grid layout */
     overflow-y: auto;
   }
@@ -716,12 +722,14 @@
     }
 
     .docs-sidebar-container {
+      --docs-sidebar-width: 100%;
+
       position: fixed;
-      top: 0;
+      top: var(--docs-mobile-top-offset, 0px);
       left: 0;
       bottom: 0;
       width: 280px;
-      height: 100vh;
+      height: auto;
       z-index: 1000;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
