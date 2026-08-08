@@ -81,9 +81,7 @@ export function pathToHref(filePath: string, basePath: string = '/docs'): string
  *   exclude: (path) => path.includes('README') || path.startsWith('meta/')
  * });
  *
- * const navigation = buildNavigation(files, {
- *   icons: { 'Getting Started': RocketIcon }
- * });
+ * const navigation = buildNavigation(files);
  * ```
  */
 export async function scanDocumentation(options: ScanOptions): Promise<DocFile[]> {

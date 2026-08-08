@@ -1,6 +1,5 @@
 import { parse as parseYaml } from 'yaml';
 import type { DocsSection, DocsLink } from './navigation.ts';
-import type { ComponentType } from 'svelte';
 import { createBrowserLogger } from './browser-logger.ts';
 
 const logger = createBrowserLogger('navigation-builder');
@@ -31,20 +30,11 @@ export interface DocFile {
 }
 
 /**
- * Icon mapping from string names to icon components
- */
-export type IconMap = Record<string, ComponentType>;
-
-/**
  * Options for building navigation tree
  */
 export interface NavigationBuilderOptions {
   /** Base URL path (default: "/docs") */
   basePath?: string;
-  /** Icon components map */
-  icons?: IconMap;
-  /** Default icon if none specified */
-  defaultIcon?: ComponentType;
   /** Default section name for ungrouped docs */
   defaultSection?: string;
   /** Default section description */
@@ -121,25 +111,23 @@ function extractDescriptionFromBody(body: string): string {
  * @param options - Configuration options
  * @returns Array of documentation sections
  *
+ * A section takes its icon from the `icon` frontmatter of its lowest-order page.
+ * Icons are carried as names rather than components so the result stays
+ * JSON-serializable across a SvelteKit server load.
+ *
  * @example
  * ```typescript
  * import { buildNavigation } from '@goobits/docs-engine/utils';
- * import { BookOpen, Code } from 'lucide-svelte';
  *
  * const files = [
  *   {
  *     path: 'quick-start.md',
- *     content: '---\ntitle: Quick Start\nsection: Getting Started\n---\n...',
+ *     content: '---\ntitle: Quick Start\nsection: Getting Started\nicon: rocket\n---\n...',
  *     href: '/docs/quick-start'
  *   }
  * ];
  *
- * const navigation = buildNavigation(files, {
- *   icons: {
- *     'Getting Started': BookOpen,
- *     'DSL': Code
- *   }
- * });
+ * const navigation = buildNavigation(files);
  * ```
  */
 export function buildNavigation(
@@ -147,8 +135,6 @@ export function buildNavigation(
   options: NavigationBuilderOptions = {}
 ): DocsSection[] {
   const {
-    icons = {},
-    defaultIcon,
     defaultSection = 'Documentation',
     defaultSectionDescription = 'Documentation pages',
   } = options;
@@ -174,12 +160,15 @@ export function buildNavigation(
         order,
         href: file.href,
         audience,
+        iconName: frontmatter.icon,
       };
     })
     .filter((doc): doc is NonNullable<typeof doc> => doc !== null);
 
   // Group by section
   const sectionMap = new Map<string, DocsLink[]>();
+  // A section takes its icon from the lowest-order page that declares one.
+  const sectionIcons = new Map<string, { order: number; iconName: string }>();
 
   for (const doc of docs) {
     if (!sectionMap.has(doc.section)) {
@@ -192,6 +181,13 @@ export function buildNavigation(
       href: doc.href,
       audience: doc.audience,
     });
+
+    if (doc.iconName) {
+      const claimed = sectionIcons.get(doc.section);
+      if (!claimed || doc.order < claimed.order) {
+        sectionIcons.set(doc.section, { order: doc.order, iconName: doc.iconName });
+      }
+    }
   }
 
   // Pre-compute order map for O(1) lookup (avoids O(n²) complexity)
@@ -214,7 +210,7 @@ export function buildNavigation(
         sectionTitle === defaultSection
           ? defaultSectionDescription
           : `${sectionTitle} documentation`,
-      icon: icons[sectionTitle] || defaultIcon || ((): null => null),
+      iconName: sectionIcons.get(sectionTitle)?.iconName,
       links: sortedLinks,
     });
   }

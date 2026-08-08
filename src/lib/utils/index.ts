@@ -7,7 +7,6 @@ export * from './navigation-builder.ts';
 export type {
   DocFrontmatter,
   DocFile,
-  IconMap,
   NavigationBuilderOptions,
 } from './navigation-builder.ts';
 

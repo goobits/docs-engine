@@ -1,5 +1,3 @@
-import type { ComponentType } from 'svelte';
-
 /**
  * Documentation link definition
  */
@@ -16,7 +14,8 @@ export interface DocsLink {
 export interface DocsSection {
   title: string;
   description: string;
-  icon?: ComponentType;
+  /** Icon name resolved to a component at render time, so navigation stays JSON-serializable. */
+  iconName?: string;
   links: DocsLink[];
 }
 

@@ -44,7 +44,7 @@ export function createMarkdownCollection(
       return files;
     },
     getNavigationData(): MarkdownNavigationData {
-      const navigation = serializeNavigation(buildNavigation(files, { basePath }));
+      const navigation = buildNavigation(files, { basePath });
       const contentMap = new Map(
         files.map((file) => [file.href, parseFrontmatter(file.content).content])
       );
@@ -55,10 +55,6 @@ export function createMarkdownCollection(
       };
     },
   };
-}
-
-function serializeNavigation(navigation: DocsSection[]): DocsSection[] {
-  return navigation.map(({ icon: _icon, ...section }) => section);
 }
 
 function createEntry(

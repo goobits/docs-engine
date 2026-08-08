@@ -41,11 +41,23 @@ title: Quick Start          # Page title (optional, derived from filename if mis
 description: Get started    # Short description (optional)
 section: Getting Started    # Section to group under (optional, defaults to "Documentation")
 order: 1                    # Sort order within section (optional, defaults to 999)
-icon: rocket                # Icon name for section (optional)
+icon: rocket                # Section icon name (optional)
 hidden: false               # Hide from navigation (optional)
 audience: developer         # Target audience filter (optional)
 ---
 ```
+
+#### Section Icons
+
+A section takes its icon from the **lowest-order page that declares one**, so
+only one page per section needs to set it. Icons travel through navigation as
+names rather than components, which keeps the structure JSON-serializable across
+a SvelteKit server load.
+
+Supported names: `book`, `code`, `compass`, `flask`, `library`, `map`,
+`package`, `rocket`, `settings`, `shapes`, `terminal`, `wrench`. Unknown or
+missing names fall back to `book`. To add one, extend `sectionIcons` in
+`src/lib/components/section-icons.ts`.
 
 ### Quick Start Example
 
@@ -72,7 +84,6 @@ Your content here...
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { buildNavigation, createDocFile } from '@goobits/docs-engine/utils';
-import { BookOpen, Code } from 'lucide-svelte';
 
 export const load = async () => {
   // Read markdown files
@@ -83,13 +94,9 @@ export const load = async () => {
       return createDocFile({ path, content, basePath: '/docs' });
     });
 
-  // Build navigation
-  const navigation = buildNavigation(files, {
-    icons: {
-      'Getting Started': BookOpen,
-      'API Reference': Code
-    }
-  });
+  // Build navigation. Each section takes its icon from the lowest-order page
+  // that declares one, so the result stays JSON-serializable.
+  const navigation = buildNavigation(files);
 
   return { navigation };
 };
@@ -130,24 +137,21 @@ Builds navigation structure from document files.
 
 **Returns:** [DocsSection](#docssection)[]
 
+A section takes its icon from the lowest-order page that declares one.
+
 **Example:**
 ```typescript
 import { buildNavigation } from '@goobits/docs-engine/utils';
-import { BookOpen, Code } from 'lucide-svelte';
 
 const files = [
   {
     path: 'quick-start.md',
-    content: '---\ntitle: Quick Start\nsection: Getting Started\n---\n...',
+    content: '---\ntitle: Quick Start\nsection: Getting Started\nicon: rocket\n---\n...',
     href: '/docs/quick-start'
   }
 ];
 
 const navigation = buildNavigation(files, {
-  icons: {
-    'Getting Started': BookOpen,
-    'DSL': Code
-  },
   defaultSection: 'Documentation',
   defaultSectionDescription: 'All documentation pages'
 });
@@ -248,10 +252,6 @@ interface DocFrontmatter {
 interface NavigationBuilderOptions {
   /** Base URL path (default: "/docs") */
   basePath?: string;
-  /** Icon components map */
-  icons?: Record<string, ComponentType>;
-  /** Default icon if none specified */
-  defaultIcon?: ComponentType;
   /** Default section name for ungrouped docs */
   defaultSection?: string;
   /** Default section description */
@@ -264,7 +264,8 @@ interface NavigationBuilderOptions {
 interface DocsSection {
   title: string;
   description: string;
-  icon: ComponentType;
+  /** Icon name resolved to a component at render time, so navigation stays JSON-serializable. */
+  iconName?: string;
   links: DocsLink[];
 }
 ```
@@ -378,9 +379,7 @@ const files = await scanDocumentation({
   exclude: (path) => path.includes('README') || path.startsWith('meta/')
 });
 
-const navigation = buildNavigation(files, {
-  icons: { 'Getting Started': RocketIcon }
-});
+const navigation = buildNavigation(files);
 ```
 
 #### `findMarkdownFiles(dir, baseDir?)`
@@ -440,7 +439,6 @@ interface ScanOptions {
 // src/routes/docs/+layout.server.ts (SvelteKit example)
 import { scanDocumentation } from '@goobits/docs-engine/server';
 import { buildNavigation } from '@goobits/docs-engine/utils';
-import { BookOpen, Code, Rocket } from 'lucide-svelte';
 
 export const load = async () => {
   // Automatically scan /docs directory
@@ -453,13 +451,8 @@ export const load = async () => {
       path.startsWith('.')
   });
 
-  // Build navigation with icons
+  // Build navigation. Section icons come from each section's `icon` frontmatter.
   const navigation = buildNavigation(files, {
-    icons: {
-      'Getting Started': Rocket,
-      'Guides': BookOpen,
-      'API Reference': Code
-    },
     defaultSection: 'Documentation',
     defaultSectionDescription: 'All documentation pages'
   });
@@ -538,7 +531,7 @@ const section = getSectionByTitle(navigation, 'Getting Started');
 // {
 //   title: 'Getting Started',
 //   description: 'Getting Started documentation',
-//   icon: RocketIcon,
+//   iconName: 'rocket',
 //   links: [...]
 // }
 ```
@@ -635,7 +628,6 @@ Here's a full example combining all three modules:
 // src/routes/docs/+layout.server.ts
 import { scanDocumentation } from '@goobits/docs-engine/server';
 import { buildNavigation } from '@goobits/docs-engine/utils';
-import { BookOpen, Code, Rocket, Zap } from 'lucide-svelte';
 
 export const load = async () => {
   // 1. Scan filesystem for markdown files
@@ -645,14 +637,8 @@ export const load = async () => {
     exclude: (path) => path.includes('README')
   });
 
-  // 2. Build navigation structure
+  // 2. Build navigation structure. Section icons come from `icon` frontmatter.
   const navigation = buildNavigation(files, {
-    icons: {
-      'Getting Started': Rocket,
-      'Guides': BookOpen,
-      'API Reference': Code,
-      'Advanced': Zap
-    },
     defaultSection: 'Documentation'
   });
 

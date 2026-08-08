@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { searchDocs, getSearchSuggestions, type SearchResult } from './search';
 import type { DocsSection } from './navigation';
-import type { ComponentType } from 'svelte';
-
-/** Mock icon component for testing */
-const MockIcon = (() => null) as unknown as ComponentType;
 
 /**
  * Small in-memory fixture covering title/description/section matches.
@@ -14,7 +10,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Getting Started',
     description: 'Get started with docs-engine',
-    icon: MockIcon,
+    iconName: 'book',
     links: [
       {
         title: 'Installation',
@@ -31,7 +27,7 @@ const mockNavigation: DocsSection[] = [
   {
     title: 'Search Features',
     description: 'Everything about search',
-    icon: MockIcon,
+    iconName: 'book',
     links: [
       {
         title: 'Search',
@@ -201,7 +197,7 @@ describe('searchDocs', () => {
 
     it('handles sections that have no links', () => {
       const nav: DocsSection[] = [
-        { title: 'Empty', description: 'no links', icon: MockIcon, links: [] },
+        { title: 'Empty', description: 'no links', iconName: 'book', links: [] },
       ];
       expect(searchDocs(nav, 'anything')).toEqual([]);
     });

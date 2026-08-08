@@ -116,6 +116,9 @@
   // Mobile sidebar state
   let mobileMenuOpen = $state(false);
 
+  // The sidebar search control opens this modal; Cmd+K opens it directly.
+  let searchModal = $state<SearchModal | null>(null);
+
   // Audience state shared between sidebar and prev/next
   let selectedAudiences = $state(new SvelteSet<string>(['new-users', 'developers']));
 
@@ -163,7 +166,12 @@
   <!-- Sidebar -->
   <div id="docs-sidebar" class="docs-sidebar-container {mobileMenuOpen ? 'mobile-open' : ''}">
     {#if navigation.length > 0}
-      <DocsSidebar {navigation} {currentPath} bind:selectedAudiences />
+      <DocsSidebar
+        {navigation}
+        {currentPath}
+        bind:selectedAudiences
+        onSearch={searchIndex ? () => searchModal?.open() : undefined}
+      />
     {/if}
   </div>
 
@@ -175,7 +183,7 @@
 
   <!-- Search Modal -->
   {#if searchIndex}
-    <SearchModal {searchIndex} />
+    <SearchModal bind:this={searchModal} {searchIndex} />
   {/if}
 
   <!-- Main Content Area -->

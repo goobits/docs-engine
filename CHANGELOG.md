@@ -7,12 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ⚠️ BREAKING CHANGES
+
+- `DocsSection.icon` (a `ComponentType`) is replaced by `DocsSection.iconName`
+  (a `string`). Navigation crosses a SvelteKit server load and is JSON
+  serialized, so a component could never survive that boundary. Names resolve to
+  components at render time in `section-icons.ts`.
+- Removed `NavigationBuilderOptions.icons`, `NavigationBuilderOptions.defaultIcon`,
+  and the `IconMap` export. Section icons now come from the `icon` frontmatter of
+  a section's lowest-order page. Consumers passing an icon map should move those
+  icons into frontmatter.
+
+### Added
+
+- Section icons resolved from frontmatter through `section-icons.ts`, which
+  ships `book`, `code`, `compass`, `flask`, `library`, `map`, `package`,
+  `rocket`, `settings`, `shapes`, `terminal`, and `wrench`.
+- `SearchModal` exposes `open()` so a host can trigger it, and `DocsSidebar`
+  accepts an `onSearch` callback.
+
+### Changed
+
+- The sidebar search control opens the full-text search modal. It previously ran
+  a separate substring filter over navigation titles, which duplicated search and
+  replaced the entire navigation tree while typing.
+- Sections with more than 12 links start collapsed unless they hold the current
+  page, so a large reference section no longer buries every other section.
+- The sidebar chevron and audience filter pills use theme tokens instead of
+  hardcoded `rgba(255, 255, 255, ...)` values, which were invisible against the
+  light `github` and `minimal` themes.
+
+### Removed
+
+- `SearchModal`'s built-in floating trigger button. It was `position: fixed` at a
+  host-defined offset and could render underneath host chrome. Hosts now place
+  their own control and call `open()`.
+- Both duplicate navigation icon-stripping passes, which existed only to delete
+  the unserializable icon field.
+
 ### Fixed
 
 - Kept collapsible sidebar targets in the document so `aria-controls` always
   references a valid element.
 - Enabled the package's existing SCSS preprocessing in standalone Svelte
   component tests, including a test-only SvelteKit page-store fixture.
+- The sidebar search block is 56px tall instead of 76px, and the search icon no
+  longer sits 24px from its own label.
 
 ## [2.0.0] - 2025-01-07
 

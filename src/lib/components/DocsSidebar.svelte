@@ -6,9 +6,10 @@
    */
 
   import { page } from '$app/stores';
-  import { BookOpen, Search, ChevronDown, X } from '@lucide/svelte';
+  import { ChevronDown, Command, Search } from '@lucide/svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import type { DocsSection } from '../utils/navigation';
+  import { resolveDocsSectionIcon } from './section-icons.ts';
 
   // Audience filter state
   const AUDIENCE_TYPES = [
@@ -32,29 +33,30 @@
     navigation: DocsSection[];
     currentPath?: string;
     selectedAudiences?: SvelteSet<AudienceType>;
+    /** Opens the full-text search modal. Omitted when no search index exists. */
+    onSearch?: () => void;
   }
 
   let {
     navigation,
     currentPath = '',
     selectedAudiences = $bindable(new SvelteSet<AudienceType>(['new-users', 'developers'])),
+    onSearch,
   }: Props = $props();
 
-  // Search state
-  let searchQuery = $state('');
-  let searchResults = $state<Array<DocsSection['links'][number] & { section: string }>>([]);
+  /** Sections longer than this stay collapsed unless they hold the current page. */
+  const largeSectionLinkCount = 12;
+
   const defaultExpandedSections = $derived.by<Record<string, boolean>>(() =>
-    Object.fromEntries(navigation.map((section) => [section.title, true]))
-  );
-  let expandedSections = $state<Record<string, boolean>>({});
-  const allLinks = $derived.by(() =>
-    navigation.flatMap((section) =>
-      section.links.map((link) => ({
-        ...link,
-        section: section.title,
-      }))
+    Object.fromEntries(
+      navigation.map((section) => [
+        section.title,
+        section.links.length <= largeSectionLinkCount ||
+          section.links.some((link) => isActive(link.href)),
+      ])
     )
   );
+  let expandedSections = $state<Record<string, boolean>>({});
 
   // Track if we've loaded from localStorage (prevents infinite loops)
   let hasLoadedFromStorage = $state(false);
@@ -129,32 +131,12 @@
       .filter((section) => section.links.length > 0); // Remove empty sections
   });
 
-  // Search functionality
-  $effect(() => {
-    if (searchQuery.trim() === '') {
-      searchResults = [];
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    searchResults = allLinks.filter(
-      (link) =>
-        link.title.toLowerCase().includes(query) ||
-        link.description.toLowerCase().includes(query) ||
-        link.section.toLowerCase().includes(query)
-    );
-  });
-
   function toggleSection(sectionTitle: string) {
     expandedSections[sectionTitle] = !isSectionExpanded(sectionTitle);
   }
 
   function isSectionExpanded(sectionTitle: string): boolean {
-    return expandedSections[sectionTitle] ?? true;
-  }
-
-  function clearSearch() {
-    searchQuery = '';
+    return expandedSections[sectionTitle] ?? defaultExpandedSections[sectionTitle] ?? true;
   }
 
   function toggleAudience(audience: AudienceType) {
@@ -178,125 +160,83 @@
 </script>
 
 <aside class="docs-sidebar">
-  <!-- Search -->
-  <div class="docs-sidebar__search">
-    <div class="docs-sidebar__search-wrapper">
-      <Search size={16} class="docs-sidebar__search-icon" aria-hidden="true" />
-      <label for="sidebar-search-input" class="visually-hidden">Search documentation</label>
-      <input
-        id="sidebar-search-input"
-        type="text"
-        placeholder="Search docs..."
-        bind:value={searchQuery}
-        class="docs-sidebar__search-input"
-      />
-      {#if searchQuery}
-        <button
-          onclick={clearSearch}
-          class="docs-sidebar__search-clear"
-          type="button"
-          aria-label="Clear search"
-        >
-          <X size={14} aria-hidden="true" />
-        </button>
-      {/if}
+  <!-- Search: opens the full-text modal, which also answers Cmd+K -->
+  {#if onSearch}
+    <div class="docs-sidebar__search">
+      <button onclick={onSearch} class="docs-sidebar__search-button" type="button">
+        <Search size={16} aria-hidden="true" />
+        <span class="docs-sidebar__search-label">Search docs</span>
+        <kbd class="docs-sidebar__search-kbd">
+          <Command size={12} aria-hidden="true" />
+          <span>K</span>
+        </kbd>
+      </button>
     </div>
+  {/if}
 
-    <!-- Search Results -->
-    {#if searchQuery && searchResults.length > 0}
-      <div
-        class="docs-sidebar__search-results"
-        role="region"
-        aria-live="polite"
-        aria-label="Search results"
+  <nav class="docs-sidebar__nav" aria-label="Documentation navigation">
+    {#each filteredNavigation as section (section.title)}
+      {@const SectionIcon = resolveDocsSectionIcon(section.iconName)}
+      <div class="docs-sidebar__section">
+        <button
+          class="docs-sidebar__section-header"
+          onclick={() => toggleSection(section.title)}
+          type="button"
+          aria-expanded={isSectionExpanded(section.title)}
+          aria-controls="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
+          aria-label="{isSectionExpanded(section.title)
+            ? 'Collapse'
+            : 'Expand'} {section.title} section"
+        >
+          <div class="docs-sidebar__section-title">
+            <SectionIcon size={16} aria-hidden="true" />
+            <span>{section.title}</span>
+          </div>
+          <span
+            class="docs-sidebar__section-chevron"
+            class:expanded={isSectionExpanded(section.title)}
+          >
+            <ChevronDown size={16} aria-hidden="true" />
+          </span>
+        </button>
+
+        <div
+          class="docs-sidebar__links"
+          id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
+          hidden={!isSectionExpanded(section.title)}
+        >
+          {#each section.links as link (link.href)}
+            <a
+              href={link.href}
+              class="docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
+              aria-current={isActive(link.href) ? 'page' : undefined}
+            >
+              <span>{link.title}</span>
+            </a>
+          {/each}
+        </div>
+      </div>
+    {/each}
+  </nav>
+
+  <div class="docs-sidebar__filter">
+    {#each AUDIENCE_TYPES as audience (audience)}
+      <button
+        onclick={() => toggleAudience(audience)}
+        class="docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"
+        type="button"
+        aria-pressed={selectedAudiences.has(audience)}
+        title={AUDIENCE_LABELS[audience]}
       >
-        {#each searchResults as result (result.href)}
-          <a href={result.href} class="docs-sidebar__search-item">
-            <div class="docs-sidebar__search-section">{result.section}</div>
-            <div class="docs-sidebar__search-title">{result.title}</div>
-            <div class="docs-sidebar__search-description">{result.description}</div>
-          </a>
-        {/each}
-      </div>
-    {:else if searchQuery && searchResults.length === 0}
-      <div class="docs-sidebar__search-empty" role="status" aria-live="polite">
-        <p>No results for "{searchQuery}"</p>
-      </div>
+        {AUDIENCE_LABELS[audience]}
+      </button>
+    {/each}
+    {#if selectedAudiences.size > 0}
+      <button onclick={clearFilters} class="docs-sidebar__filter-reset" type="button">
+        clear
+      </button>
     {/if}
   </div>
-
-  <!-- Navigation (hidden when searching) -->
-  {#if !searchQuery}
-    <nav class="docs-sidebar__nav" aria-label="Documentation navigation">
-      {#each filteredNavigation as section (section.title)}
-        <div class="docs-sidebar__section">
-          <button
-            class="docs-sidebar__section-header"
-            onclick={() => toggleSection(section.title)}
-            type="button"
-            aria-expanded={isSectionExpanded(section.title)}
-            aria-controls="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
-            aria-label="{isSectionExpanded(section.title)
-              ? 'Collapse'
-              : 'Expand'} {section.title} section"
-          >
-            <div class="docs-sidebar__section-title">
-              {#if section.icon}
-                <section.icon size={16} aria-hidden="true" />
-              {:else}
-                <BookOpen size={16} aria-hidden="true" />
-              {/if}
-              <span>{section.title}</span>
-            </div>
-            <span
-              class="docs-sidebar__section-chevron"
-              class:expanded={isSectionExpanded(section.title)}
-            >
-              <ChevronDown size={14} aria-hidden="true" />
-            </span>
-          </button>
-
-          <div
-            class="docs-sidebar__links"
-            id="section-{section.title.toLowerCase().replace(/\s+/g, '-')}"
-            hidden={!isSectionExpanded(section.title)}
-          >
-            {#each section.links as link (link.href)}
-              <a
-                href={link.href}
-                class="docs-sidebar__link {isActive(link.href) ? 'active' : ''}"
-                aria-current={isActive(link.href) ? 'page' : undefined}
-              >
-                <span>{link.title}</span>
-              </a>
-            {/each}
-          </div>
-        </div>
-      {/each}
-    </nav>
-  {/if}
-
-  <!-- Audience Filter at bottom (hidden when searching) -->
-  {#if !searchQuery}
-    <div class="docs-sidebar__filter">
-      {#each AUDIENCE_TYPES as audience (audience)}
-        <button
-          onclick={() => toggleAudience(audience)}
-          class="docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"
-          type="button"
-          aria-pressed={selectedAudiences.has(audience)}
-          title={AUDIENCE_LABELS[audience]}
-        >
-          {AUDIENCE_LABELS[audience]}
-        </button>
-      {/each}
-      {#if selectedAudiences.size > 0}
-        <button onclick={clearFilters} class="docs-sidebar__filter-reset" type="button">
-          clear
-        </button>
-      {/if}
-    </div>
-  {/if}
 </aside>
 
 <style lang="scss">
@@ -307,19 +247,6 @@
     }
   }
 
-  /* Visually hidden but accessible to screen readers */
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
   .docs-sidebar {
     width: var(--docs-sidebar-width, 280px);
     height: 100%;
@@ -328,138 +255,59 @@
     border-radius: var(--radius-2xl);
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   /* Search */
   .docs-sidebar__search {
-    padding: var(--space-6);
+    padding: var(--space-3);
     border-bottom: 1px solid var(--color-border-subtle);
   }
 
-  .docs-sidebar__search-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .docs-sidebar__search-wrapper :global(.docs-sidebar__search-icon) {
-    position: absolute;
-    left: var(--space-2);
-    color: var(--color-text-tertiary);
-    pointer-events: none;
-  }
-
-  .docs-sidebar__search-input {
+  .docs-sidebar__search-button {
     @include focus-ring;
 
     width: 100%;
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-12);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-medium);
-    border-radius: var(--radius-xl);
-    color: var(--color-text-primary);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-sm);
-    transition: all var(--duration-fast) var(--ease-out);
-
-    &:focus {
-      border-color: var(--color-text-accent);
-      background: var(--color-surface-raised);
-    }
-
-    &::placeholder {
-      color: var(--color-text-tertiary);
-    }
-  }
-
-  .docs-sidebar__search-clear {
-    @include focus-ring;
-
-    position: absolute;
-    right: var(--space-1);
-    padding: var(--space-1);
-    background: transparent;
-    border: none;
-    color: var(--color-text-tertiary);
-    cursor: pointer;
+    min-height: 32px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    transition: all var(--duration-fast) var(--ease-out);
-
-    &:hover {
-      background: var(--color-surface-overlay);
-      color: var(--color-text-primary);
-    }
-  }
-
-  /* Search Results */
-  .docs-sidebar__search-results {
-    margin-top: var(--space-4);
-    display: flex;
-    flex-direction: column;
     gap: var(--space-2);
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  .docs-sidebar__search-item {
-    @include focus-ring;
-
-    padding: var(--space-4);
+    padding: 0 var(--space-2);
     background: var(--color-surface);
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-xl);
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--color-surface-overlay);
+      background: var(--color-surface-raised);
       border-color: var(--color-text-accent);
-      transform: translateX(var(--space-1));
-    }
-  }
-
-  .docs-sidebar__search-section {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-accent);
-    font-weight: var(--font-weight-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .docs-sidebar__search-title {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .docs-sidebar__search-description {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-  }
-
-  .docs-sidebar__search-empty {
-    margin-top: var(--space-4);
-    padding: var(--space-4);
-    text-align: center;
-
-    p {
-      font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
-      margin: 0;
     }
+  }
+
+  .docs-sidebar__search-label {
+    flex: 1;
+    text-align: left;
+  }
+
+  .docs-sidebar__search-kbd {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    padding: 1px var(--space-1);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
   }
 
   /* Navigation */
   .docs-sidebar__nav {
     flex: 1;
+    min-height: 0;
     padding: var(--space-4) 0;
     overflow-y: auto;
   }
@@ -500,8 +348,7 @@
   }
 
   .docs-sidebar__section-chevron {
-    color: white !important;
-    opacity: 0.5;
+    color: var(--color-text-tertiary);
     transition: transform var(--duration-fast) var(--ease-out);
   }
 
@@ -541,90 +388,80 @@
   }
 
   /* Scrollbar styling */
-  .docs-sidebar,
-  .docs-sidebar__search-results,
   .docs-sidebar__nav {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border-medium) transparent;
   }
 
-  .docs-sidebar::-webkit-scrollbar,
-  .docs-sidebar__search-results::-webkit-scrollbar,
   .docs-sidebar__nav::-webkit-scrollbar {
     width: 6px;
   }
 
-  .docs-sidebar::-webkit-scrollbar-track,
-  .docs-sidebar__search-results::-webkit-scrollbar-track,
   .docs-sidebar__nav::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .docs-sidebar::-webkit-scrollbar-thumb,
-  .docs-sidebar__search-results::-webkit-scrollbar-thumb,
   .docs-sidebar__nav::-webkit-scrollbar-thumb {
     background: var(--color-border-medium);
     border-radius: 3px;
   }
 
-  .docs-sidebar::-webkit-scrollbar-thumb:hover,
-  .docs-sidebar__search-results::-webkit-scrollbar-thumb:hover,
   .docs-sidebar__nav::-webkit-scrollbar-thumb:hover {
     background: var(--color-border-strong);
   }
 
-  /* Audience Filter - Minimal Apple aesthetic */
+  /* Audience Filter */
   .docs-sidebar__filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 12px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .docs-sidebar__filter-pill {
     @include focus-ring;
 
-    padding: 4px 10px;
+    padding: var(--space-1) var(--space-2);
     background: transparent;
     border: none;
-    border-radius: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 11px;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     letter-spacing: -0.01em;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: rgba(255, 255, 255, 0.7);
+      background: var(--color-surface-overlay);
+      color: var(--color-text-secondary);
     }
 
     &.active {
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.95);
-      font-weight: 600;
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
     }
   }
 
   .docs-sidebar__filter-reset {
     @include focus-ring;
 
-    padding: 4px 8px;
+    padding: var(--space-1) var(--space-2);
     background: transparent;
     border: none;
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 10px;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--duration-fast) var(--ease-out);
     margin-left: auto;
 
     &:hover {
-      color: rgba(255, 255, 255, 0.6);
-      background: rgba(255, 255, 255, 0.03);
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
     }
   }
 </style>

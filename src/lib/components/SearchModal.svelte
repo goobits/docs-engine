@@ -8,7 +8,7 @@
 
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
-  import { Search, Command, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
+  import { Search, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
   import type MiniSearch from 'minisearch';
   import { loadSearchIndex, performSearch, highlightMatches } from '../utils';
   import type { SearchResult } from '../utils';
@@ -64,7 +64,7 @@
     // Open modal with Cmd+K or Ctrl+K
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
-      openModal();
+      void open();
       return;
     }
 
@@ -92,7 +92,8 @@
     }
   }
 
-  async function openModal() {
+  /** Opened by the host (the sidebar search control) and by Cmd+K. */
+  export async function open() {
     isOpen = true;
     query = '';
     results = [];
@@ -148,16 +149,6 @@
     }
   });
 </script>
-
-<!-- Trigger Button -->
-<button class="search-trigger" onclick={openModal} type="button" aria-label="Search documentation">
-  <Search size={18} />
-  <span class="search-trigger-text">Search...</span>
-  <kbd class="search-trigger-kbd">
-    <Command size={12} />
-    <span>K</span>
-  </kbd>
-</button>
 
 <!-- Modal -->
 {#if isOpen}
@@ -272,48 +263,6 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-  }
-
-  /* Trigger Button */
-  .search-trigger {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: var(--docs-spacing-sm, 0.5rem);
-    padding: var(--docs-spacing-sm, 0.5rem) var(--docs-spacing-md, 1rem);
-    background: var(--docs-surface, rgba(255, 255, 255, 0.03));
-    border: 1px solid var(--docs-border, rgba(255, 255, 255, 0.06));
-    border-radius: var(--docs-radius-md, 10px);
-    color: var(--docs-text-secondary, rgba(248, 248, 242, 0.7));
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
-    min-width: 240px;
-  }
-
-  .search-trigger:hover {
-    background: var(--docs-surface-hover, rgba(255, 255, 255, 0.08));
-    border-color: var(--docs-accent, #bd93f9);
-  }
-
-  .search-trigger-text {
-    flex: 1;
-    text-align: left;
-  }
-
-  .search-trigger-kbd {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 2px 6px;
-    background: var(--docs-surface-raised, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--docs-border, rgba(255, 255, 255, 0.06));
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
   }
 
   /* Modal Overlay */
@@ -528,14 +477,6 @@
     .search-modal {
       top: 10vh;
       max-height: 70vh;
-    }
-
-    .search-trigger {
-      min-width: auto;
-    }
-
-    .search-trigger-text {
-      display: none;
     }
   }
 </style>
