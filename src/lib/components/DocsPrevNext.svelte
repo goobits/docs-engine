@@ -157,6 +157,7 @@
     color: var(--docs-text-secondary, rgba(248, 248, 242, 0.7));
     line-height: 1.5;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;

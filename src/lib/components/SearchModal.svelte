@@ -11,7 +11,7 @@
   import { Search, Command, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
   import type MiniSearch from 'minisearch';
   import { loadSearchIndex, performSearch, highlightMatches } from '../utils';
-  import type { SearchResult } from '../utils';
+  import type { SearchIndexResult } from '../utils';
 
   interface Props {
     /** Serialized search index JSON */
@@ -25,7 +25,7 @@
   // State
   let isOpen = $state(false);
   let query = $state('');
-  let results = $state<SearchResult[]>([]);
+  let results = $state<SearchIndexResult[]>([]);
   let selectedIndex = $state(0);
   let isLoading = $state(false);
   let miniSearch: MiniSearch | null = $state(null);
@@ -126,12 +126,12 @@
     selectedIndex = 0;
   }
 
-  function navigateToResult(result: SearchResult) {
+  function navigateToResult(result: SearchIndexResult) {
     closeModal();
     window.location.href = result.href;
   }
 
-  function handleResultClick(result: SearchResult) {
+  function handleResultClick(result: SearchIndexResult) {
     navigateToResult(result);
   }
 
@@ -478,6 +478,7 @@
     color: var(--docs-text-secondary, rgba(248, 248, 242, 0.7));
     line-height: 1.5;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;

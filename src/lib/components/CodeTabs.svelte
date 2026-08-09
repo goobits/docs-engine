@@ -92,18 +92,6 @@
 
     loaded = true;
   });
-
-  // eslint-disable-next-line no-unused-vars
-  function _escapeHtml(text: string): string {
-    const htmlEscapes: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    };
-    return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
-  }
 </script>
 
 <div class="md-code-tabs">

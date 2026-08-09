@@ -9,6 +9,9 @@ import { execFileSync } from 'child_process';
 import { LRUCache } from 'lru-cache';
 import pRetry from 'p-retry';
 import { CACHE, GIT } from '../constants.ts';
+import type { Contributor } from './gitMetadata.ts';
+
+export type { Contributor } from './gitMetadata.ts';
 
 /**
  * Git configuration for repository integration
@@ -24,18 +27,6 @@ export interface GitConfig {
   docsPath?: string;
   /** Text for edit link (default: "Edit this page") */
   editLinkText?: string;
-}
-
-/**
- * Contributor information from Git history
- *
- * @public
- */
-export interface Contributor {
-  name: string;
-  email: string;
-  commits: number;
-  avatar?: string;
 }
 
 /**

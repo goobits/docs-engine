@@ -1,6 +1,9 @@
 // Navigation utilities
 export * from './navigation.ts';
-export type { DocsLink, DocsSection } from './navigation.ts';
+export type { DocsAudience, DocsLink, DocsSection } from './navigation.ts';
+
+// Browser-safe Git metadata types used by UI components.
+export type { Contributor } from './gitMetadata.ts';
 
 // Navigation builder utilities
 export * from './navigation-builder.ts';

@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml';
-import type { DocsSection, DocsLink } from './navigation.ts';
+import { isDocsAudience, type DocsSection, type DocsLink } from './navigation.ts';
 import type { ComponentType } from 'svelte';
 import { createBrowserLogger } from './browser-logger.ts';
 
@@ -165,7 +165,7 @@ export function buildNavigation(
       const description = frontmatter.description || extractDescriptionFromBody(body);
       const section = frontmatter.section || defaultSection;
       const order = frontmatter.order ?? 999; // Default to end if no order
-      const audience = frontmatter.audience;
+      const audience = isDocsAudience(frontmatter.audience) ? frontmatter.audience : undefined;
 
       return {
         title,

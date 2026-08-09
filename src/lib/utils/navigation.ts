@@ -1,5 +1,19 @@
 import type { ComponentType } from 'svelte';
 
+export const DOCS_AUDIENCES = [
+  'new-users',
+  'developers',
+  'operators',
+  'integrators',
+  'contributors',
+] as const;
+
+export type DocsAudience = (typeof DOCS_AUDIENCES)[number];
+
+export function isDocsAudience(value: unknown): value is DocsAudience {
+  return typeof value === 'string' && DOCS_AUDIENCES.some((audience) => audience === value);
+}
+
 /**
  * Documentation link definition
  */
@@ -7,7 +21,7 @@ export interface DocsLink {
   title: string;
   href: string;
   description: string;
-  audience?: string;
+  audience?: DocsAudience;
 }
 
 /**
@@ -70,7 +84,7 @@ export function getSectionByTitle(
 export function getAdjacentLinks(
   navigation: DocsSection[],
   currentHref: string,
-  filterAudiences?: Set<string>
+  filterAudiences?: ReadonlySet<DocsAudience>
 ): {
   previous?: DocsLink & { section: string };
   next?: DocsLink & { section: string };
