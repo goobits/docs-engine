@@ -424,7 +424,7 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-md);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     letter-spacing: -0.01em;
@@ -433,7 +433,7 @@
 
     &:hover {
       background: var(--color-surface-overlay);
-      color: var(--color-text-secondary);
+      color: var(--color-text-primary);
     }
 
     &.active {
@@ -450,7 +450,7 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-md);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
@@ -458,7 +458,7 @@
     margin-left: auto;
 
     &:hover {
-      color: var(--color-text-secondary);
+      color: var(--color-text-primary);
       background: var(--color-surface);
     }
   }
