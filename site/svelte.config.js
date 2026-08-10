@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
+import path from 'node:path';
 import {
   calloutsPlugin,
   mermaidPlugin,
@@ -12,9 +13,10 @@ import {
   collapsePlugin,
   referencePlugin,
 } from '@goobits/docs-engine/plugins';
-import { resolveSvelteKitBuildDirectory } from '@goobits/docs-engine/build-storage';
+import { prepareSvelteKitBuildDirectory } from '@goobits/docs-engine/build-storage';
 
 const siteRoot = import.meta.dirname;
+const workspaceRoot = path.resolve(siteRoot, '..');
 
 /** @type {import("@sveltejs/kit").Config} */
 const config = {
@@ -41,7 +43,7 @@ const config = {
   kit: {
     adapter: adapter(),
     ...(process.env.NODE_ENV === 'production'
-      ? { outDir: resolveSvelteKitBuildDirectory(siteRoot) }
+      ? { outDir: prepareSvelteKitBuildDirectory(siteRoot, [siteRoot, workspaceRoot]) }
       : {}),
   },
 };

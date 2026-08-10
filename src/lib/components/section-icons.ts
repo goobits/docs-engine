@@ -44,7 +44,9 @@ export type DocsSectionIconName = keyof typeof sectionIcons;
 export const docsSectionIconNames = Object.keys(sectionIcons) as DocsSectionIconName[];
 
 /** Resolve a frontmatter icon name, falling back to a neutral document icon. */
-export function resolveDocsSectionIcon(iconName?: string): (typeof sectionIcons)[DocsSectionIconName] {
+export function resolveDocsSectionIcon(
+  iconName?: string
+): (typeof sectionIcons)[DocsSectionIconName] {
   if (iconName && iconName in sectionIcons) {
     return sectionIcons[iconName as DocsSectionIconName];
   }

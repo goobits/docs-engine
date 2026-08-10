@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { realpathSync } from 'node:fs';
+import { mkdirSync, realpathSync, symlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
 
@@ -63,3 +63,50 @@ export const resolveTestArtifactDirectory = (projectRoot: string, name: string):
 
 export const resolveSvelteKitBuildDirectory = (projectRoot: string): string =>
   resolveBuildStorage(projectRoot, 'svelte-kit');
+
+/**
+ * Prepare external SvelteKit output so Node can resolve dependencies while
+ * prerendering server chunks from outside the checkout.
+ */
+export const prepareSvelteKitBuildDirectory = (
+  projectRoot: string,
+  dependencyProjectRoots: readonly string[] = [projectRoot]
+): string => {
+  const outputRoot = resolveSvelteKitBuildDirectory(projectRoot);
+  if (dependencyProjectRoots.length < 1 || dependencyProjectRoots.length > 2) {
+    throw new Error('SvelteKit build storage supports one or two dependency roots');
+  }
+
+  const dependencyParents =
+    dependencyProjectRoots.length === 1
+      ? [outputRoot]
+      : [path.join(outputRoot, 'output'), outputRoot];
+
+  for (const [index, dependencyProjectRoot] of dependencyProjectRoots.entries()) {
+    const dependencyRoot = path.join(
+      realpathSync.native(path.resolve(dependencyProjectRoot)),
+      'node_modules'
+    );
+    const outputDependencies = path.join(dependencyParents[index], 'node_modules');
+
+    // Both paths derive from roots validated as absolute and disjoint from the project.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    mkdirSync(dependencyParents[index], { recursive: true });
+    try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      symlinkSync(
+        dependencyRoot,
+        outputDependencies,
+        process.platform === 'win32' ? 'junction' : 'dir'
+      );
+    } catch (error) {
+      if (!(error instanceof Error && 'code' in error && error.code === 'EEXIST')) throw error;
+    }
+
+    if (realpathSync.native(outputDependencies) !== realpathSync.native(dependencyRoot)) {
+      throw new Error(`SvelteKit build dependencies must resolve to ${dependencyRoot}`);
+    }
+  }
+
+  return outputRoot;
+};

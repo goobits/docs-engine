@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml';
-import type { DocsSection, DocsLink } from './navigation.ts';
+import { isDocsAudience, type DocsSection, type DocsLink } from './navigation.ts';
 import { createBrowserLogger } from './browser-logger.ts';
 
 const logger = createBrowserLogger('navigation-builder');
@@ -183,6 +183,7 @@ export function buildNavigationFromMetadata(
       const title = metadata.title || generateTitleFromPath(entry.path);
       const section = metadata.section || defaultSection;
       const order = metadata.order ?? 999; // Default to end if no order
+      const audience = isDocsAudience(metadata.audience) ? metadata.audience : undefined;
 
       return {
         title,
@@ -190,7 +191,7 @@ export function buildNavigationFromMetadata(
         section,
         order,
         href: entry.href,
-        audience: metadata.audience,
+        audience,
         iconName: metadata.icon,
       };
     })

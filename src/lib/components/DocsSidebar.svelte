@@ -8,20 +8,16 @@
   import { page } from '$app/stores';
   import { ChevronDown, Command, Search } from '@lucide/svelte';
   import { SvelteSet } from 'svelte/reactivity';
-  import type { DocsSection } from '../utils/navigation';
+  import {
+    DOCS_AUDIENCES,
+    isDocsAudience,
+    type DocsAudience,
+    type DocsSection,
+  } from '../utils/navigation';
   import { resolveDocsSectionIcon } from './section-icons.ts';
 
   // Audience filter state
-  const AUDIENCE_TYPES = [
-    'new-users',
-    'developers',
-    'operators',
-    'integrators',
-    'contributors',
-  ] as const;
-  type AudienceType = (typeof AUDIENCE_TYPES)[number];
-
-  const AUDIENCE_LABELS: Record<AudienceType, string> = {
+  const AUDIENCE_LABELS: Record<DocsAudience, string> = {
     'new-users': 'New Users',
     developers: 'Developers',
     operators: 'Operators',
@@ -32,7 +28,7 @@
   interface Props {
     navigation: DocsSection[];
     currentPath?: string;
-    selectedAudiences?: SvelteSet<AudienceType>;
+    selectedAudiences?: SvelteSet<DocsAudience>;
     /** Opens the full-text search modal. Omitted when no search index exists. */
     onSearch?: () => void;
   }
@@ -40,7 +36,7 @@
   let {
     navigation,
     currentPath = '',
-    selectedAudiences = $bindable(new SvelteSet<AudienceType>(['new-users', 'developers'])),
+    selectedAudiences = $bindable(new SvelteSet<DocsAudience>(['new-users', 'developers'])),
     onSearch,
   }: Props = $props();
 
@@ -69,8 +65,10 @@
     const storedAudiences = localStorage.getItem('docs-audience-filter');
     if (storedAudiences) {
       try {
-        const parsed = JSON.parse(storedAudiences);
-        selectedAudiences = new SvelteSet(parsed);
+        const parsed: unknown = JSON.parse(storedAudiences);
+        if (Array.isArray(parsed)) {
+          selectedAudiences = new SvelteSet(parsed.filter(isDocsAudience));
+        }
       } catch {
         // Keep SSR defaults on parse error
       }
@@ -125,7 +123,7 @@
       .map((section) => ({
         ...section,
         links: section.links.filter(
-          (link) => !link.audience || selectedAudiences.has(link.audience as AudienceType)
+          (link) => !link.audience || selectedAudiences.has(link.audience)
         ),
       }))
       .filter((section) => section.links.length > 0); // Remove empty sections
@@ -139,7 +137,7 @@
     return expandedSections[sectionTitle] ?? defaultExpandedSections[sectionTitle] ?? true;
   }
 
-  function toggleAudience(audience: AudienceType) {
+  function toggleAudience(audience: DocsAudience) {
     const newSet = new SvelteSet(selectedAudiences);
     if (newSet.has(audience)) {
       newSet.delete(audience);
@@ -220,7 +218,7 @@
   </nav>
 
   <div class="docs-sidebar__filter">
-    {#each AUDIENCE_TYPES as audience (audience)}
+    {#each DOCS_AUDIENCES as audience (audience)}
       <button
         onclick={() => toggleAudience(audience)}
         class="docs-sidebar__filter-pill {selectedAudiences.has(audience) ? 'active' : ''}"

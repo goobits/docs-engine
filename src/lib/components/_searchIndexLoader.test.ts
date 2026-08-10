@@ -15,7 +15,7 @@ const indexJson = createSearchIndex(
 
 describe('createSearchIndexLoader', () => {
   it('does not fetch until load is called and shares the successful request', async () => {
-    const request = vi.fn(async () => new Response(indexJson));
+    const request = vi.fn<typeof fetch>(async () => new Response(indexJson));
     const load = createSearchIndexLoader(() => '/docs/search-index.json', request);
 
     expect(request).not.toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe('createSearchIndexLoader', () => {
 
   it('invalidates the cached request when the endpoint changes', async () => {
     let searchIndexUrl = '/docs/search-index.json';
-    const request = vi.fn(async () => new Response(indexJson));
+    const request = vi.fn<typeof fetch>(async () => new Response(indexJson));
     const load = createSearchIndexLoader(() => searchIndexUrl, request);
 
     await load();

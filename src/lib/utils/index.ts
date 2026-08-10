@@ -1,14 +1,13 @@
 // Navigation utilities
 export * from './navigation.ts';
-export type { DocsLink, DocsSection } from './navigation.ts';
+export type { DocsAudience, DocsLink, DocsSection } from './navigation.ts';
+
+// Browser-safe Git metadata types used by UI components.
+export type { Contributor } from './gitMetadata.ts';
 
 // Navigation builder utilities
 export * from './navigation-builder.ts';
-export type {
-  DocFrontmatter,
-  DocFile,
-  NavigationBuilderOptions,
-} from './navigation-builder.ts';
+export type { DocFrontmatter, DocFile, NavigationBuilderOptions } from './navigation-builder.ts';
 
 // NOTE: Navigation scanner moved to server/index.ts (requires Node.js fs/promises)
 // Import from '@goobits/docs-engine/server' instead

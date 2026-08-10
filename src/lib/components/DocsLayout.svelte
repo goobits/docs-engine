@@ -25,7 +25,7 @@
   import ScreenshotHydrator from './ScreenshotHydrator.svelte';
   import OpenAPIHydrator from './OpenAPIHydrator.svelte';
   import CollapseHydrator from './CollapseHydrator.svelte';
-  import type { DocsSection } from '../utils/navigation';
+  import type { DocsAudience, DocsSection } from '../utils/navigation';
   import { getAdjacentLinks } from '../utils';
   import type { Contributor } from '../utils';
   import type { DocsLoadingIndicator } from './loadingIndicator.ts';
@@ -120,7 +120,7 @@
   let searchModal = $state<SearchModal | null>(null);
 
   // Audience state shared between sidebar and prev/next
-  let selectedAudiences = $state(new SvelteSet<string>(['new-users', 'developers']));
+  let selectedAudiences = $state(new SvelteSet<DocsAudience>(['new-users', 'developers']));
 
   // Previous/Next navigation links
   const adjacentLinks = $derived(

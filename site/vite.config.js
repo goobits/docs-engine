@@ -1,10 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 import { resolveViteCacheDirectory } from '@goobits/docs-engine/build-storage';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   cacheDir: resolveViteCacheDirectory(import.meta.dirname),
@@ -12,11 +8,6 @@ export default defineConfig({
   server: {
     port: 3390,
     host: '0.0.0.0',
-  },
-  resolve: {
-    alias: {
-      dist: resolve(__dirname, '../dist'),
-    },
   },
   optimizeDeps: {
     exclude: ['@goobits/themes'],
