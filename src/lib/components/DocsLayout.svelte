@@ -84,7 +84,7 @@
     };
 
     // Search
-    searchIndex?: string;
+    searchIndexUrl?: string;
 
     // Host UI
     loadingIndicator?: DocsLoadingIndicator;
@@ -100,7 +100,7 @@
     hydrators = {},
     editLink,
     gitMetadata,
-    searchIndex,
+    searchIndexUrl,
     loadingIndicator,
   }: Props = $props();
 
@@ -170,7 +170,7 @@
         {navigation}
         {currentPath}
         bind:selectedAudiences
-        onSearch={searchIndex ? () => searchModal?.open() : undefined}
+        onSearch={searchIndexUrl ? () => searchModal?.open() : undefined}
       />
     {/if}
   </div>
@@ -182,8 +182,8 @@
   {/if}
 
   <!-- Search Modal -->
-  {#if searchIndex}
-    <SearchModal bind:this={searchModal} {searchIndex} />
+  {#if searchIndexUrl}
+    <SearchModal bind:this={searchModal} {searchIndexUrl} />
   {/if}
 
   <!-- Main Content Area -->

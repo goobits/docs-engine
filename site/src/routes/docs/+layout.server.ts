@@ -1,62 +1,18 @@
-import path from 'path';
 import { error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { scanDocumentation } from '@goobits/docs-engine/server';
-import { buildNavigation, createSearchIndex } from '@goobits/docs-engine/utils';
 import { logError, createDevError } from '$lib/utils/error-logger';
 import type { LayoutServerLoad } from './$types';
+import { getDocsNavigation, searchIndexUrl } from './_docsData.server.ts';
 
 export const load: LayoutServerLoad = async () => {
-  // Scan documentation directory
-  const docsRoot = path.resolve(process.cwd(), '..', 'docs');
-
   try {
-    // Scan all markdown files
-    const docFiles = await scanDocumentation({
-      docsRoot,
-      basePath: '/docs',
-      // Exclude any meta files or directories you don't want in navigation
-      exclude: (filePath) =>
-        filePath.includes('README') ||
-        filePath.startsWith('_') ||
-        filePath.includes('node_modules'),
-    });
-
-    // Build navigation structure from scanned files
-    const navigation = buildNavigation(docFiles);
-
-    // Build content map for search indexing (href -> markdown content)
-    const contentMap = new Map<string, string>();
-    docFiles.forEach((docFile) => {
-      contentMap.set(docFile.href, docFile.content);
-    });
-
-    // Build search index
-    console.log('[Search] Building search index from', docFiles.length, 'documents...');
-    const searchIndexStart = Date.now();
-    const searchIndex = createSearchIndex(navigation, contentMap);
-    const searchIndexTime = Date.now() - searchIndexStart;
-    console.log('[Search] Search index built in', searchIndexTime, 'ms');
-    console.log('[Search] Index size:', Math.round(searchIndex.length / 1024), 'KB');
-
-    // Remove icon functions (they can't be serialized for SSR)
-    const serializableNavigation = navigation.map((section) => ({
-      ...section,
-      icon: undefined, // Remove icon function
-      links: section.links.map((link) => ({
-        ...link,
-        icon: undefined, // Remove icon function from links
-      })),
-    }));
-
     return {
-      navigation: serializableNavigation,
-      searchIndex,
+      navigation: await getDocsNavigation(),
+      searchIndexUrl,
     };
   } catch (err) {
     // Log navigation generation errors
     logError('Navigation', 'Failed to build sidebar navigation', err);
-    console.error('[Navigation] Docs root:', docsRoot);
 
     if (dev) {
       throw error(
@@ -74,17 +30,7 @@ export const load: LayoutServerLoad = async () => {
 
     return {
       navigation: [],
-      searchIndex: JSON.stringify({
-        documentCount: 0,
-        documentIds: [],
-        fieldIds: {},
-        fieldLength: {},
-        averageFieldLength: {},
-        storedFields: {},
-        dirtCount: 0,
-        nextId: 0,
-        serializationVersion: 2,
-      }),
+      searchIndexUrl,
     };
   }
 };

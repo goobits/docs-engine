@@ -17,9 +17,9 @@
 
   let { data }: Props = $props();
 
-  // Get navigation and search index from parent layout
+  // Get navigation and the lazy search endpoint from the parent layout
   const navigation = $derived($page.data.navigation || []);
-  const searchIndex = $derived($page.data.searchIndex);
+  const searchIndexUrl = $derived($page.data.searchIndexUrl);
 
   // Configure breadcrumbs
   const breadcrumbs = [
@@ -57,5 +57,5 @@
   {breadcrumbs}
   {footer}
   theme="dracula"
-  {searchIndex}
+  {searchIndexUrl}
 />

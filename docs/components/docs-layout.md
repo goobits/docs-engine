@@ -36,6 +36,7 @@ Complete documentation layout combining navigation, theme toggle, and content re
 | `title` | `string` | Yes | Page title for header and meta |
 | `navigation` | `Section[]` | Yes | Navigation structure |
 | `currentPath` | `string` | Yes | Current page path for active state |
+| `searchIndexUrl` | `string` | No | Serialized MiniSearch endpoint fetched on first search open |
 | `showTableOfContents` | `boolean` | No | Show TOC sidebar (default: `true`) |
 | `class` | `string` | No | Custom class name |
 
@@ -135,4 +136,3 @@ Verify viewport meta tag in app.html.
 - [ThemeToggle](./theme-toggle.md) - Included theme switcher
 - [Navigation Builder](../utilities/navigation.md) - Generate navigation structure
 - [Architecture Guide](../guides/architecture.md) - System design and philosophy
-

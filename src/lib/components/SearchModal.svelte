@@ -6,21 +6,23 @@
    * Features fuzzy matching, keyboard navigation, and result highlighting.
    */
 
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { browser } from '$app/environment';
   import { Search, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
   import type MiniSearch from 'minisearch';
-  import { loadSearchIndex, performSearch, highlightMatches } from '../utils';
+  import { performSearch, highlightMatches } from '../utils';
   import type { SearchResult } from '../utils';
+  import { createSearchIndexLoader } from './_searchIndexLoader.ts';
 
   interface Props {
-    /** Serialized search index JSON */
-    searchIndex?: string;
+    /** URL of a serialized search index loaded when search first opens. */
+    searchIndexUrl: string;
     /** Placeholder text for search input */
     placeholder?: string;
   }
 
-  let { searchIndex, placeholder = 'Search documentation...' }: Props = $props();
+  let { searchIndexUrl, placeholder = 'Search documentation...' }: Props = $props();
+  const loadIndex = createSearchIndexLoader(() => searchIndexUrl);
 
   // State
   let isOpen = $state(false);
@@ -28,7 +30,10 @@
   let results = $state<SearchResult[]>([]);
   let selectedIndex = $state(0);
   let isLoading = $state(false);
+  let loadError = $state('');
   let miniSearch: MiniSearch | null = $state(null);
+  let loadedSearchIndexUrl: string | null = null;
+  let searchInput: HTMLInputElement | null = $state(null);
 
   // Debounce timer
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -98,26 +103,32 @@
     query = '';
     results = [];
     selectedIndex = 0;
+    loadError = '';
+    void tick().then(() => searchInput?.focus());
 
     // Lazy load search index
-    if (!miniSearch && searchIndex) {
+    if (!miniSearch || loadedSearchIndexUrl !== searchIndexUrl) {
       isLoading = true;
       try {
-        // Simulate async loading
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        miniSearch = loadSearchIndex(searchIndex);
+        while (!miniSearch || loadedSearchIndexUrl !== searchIndexUrl) {
+          const requestedUrl = searchIndexUrl;
+          try {
+            const loaded = await loadIndex();
+            if (loaded.searchIndexUrl !== searchIndexUrl) continue;
+            miniSearch = loaded.index;
+            loadedSearchIndexUrl = loaded.searchIndexUrl;
+          } catch (error) {
+            if (requestedUrl !== searchIndexUrl) continue;
+            throw error;
+          }
+        }
       } catch (error) {
+        loadError = 'Search is temporarily unavailable. Close and reopen to retry.';
         console.error('Failed to load search index:', error);
       } finally {
         isLoading = false;
       }
     }
-
-    // Focus search input
-    setTimeout(() => {
-      const input = document.querySelector('.search-modal-input') as HTMLInputElement;
-      input?.focus();
-    }, 50);
   }
 
   function closeModal() {
@@ -168,6 +179,7 @@
         >Search documentation</label
       >
       <input
+        bind:this={searchInput}
         id="search-modal-input"
         bind:value={query}
         class="search-modal-input"
@@ -196,6 +208,10 @@
     <div class="search-modal-results" role="region" aria-live="polite" aria-atomic="false">
       {#if isLoading}
         <div class="search-modal-loading">Loading search index...</div>
+      {:else if loadError}
+        <div class="search-modal-empty">
+          <p>{loadError}</p>
+        </div>
       {:else if query.trim() && results.length === 0}
         <div class="search-modal-empty">
           <p>No results found for "{query}"</p>

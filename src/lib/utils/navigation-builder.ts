@@ -29,6 +29,18 @@ export interface DocFile {
   href: string;
 }
 
+/** Compact navigation metadata that can cross a build boundary without the markdown body. */
+export interface DocNavigationMetadata extends DocFrontmatter {
+  description: string;
+}
+
+/** Path and href paired with pre-extracted navigation metadata. */
+export interface DocNavigationEntry {
+  path: string;
+  href: string;
+  metadata: DocNavigationMetadata;
+}
+
 /**
  * Options for building navigation tree
  */
@@ -101,6 +113,15 @@ function extractDescriptionFromBody(body: string): string {
   return firstParagraph.length > 150 ? firstParagraph.substring(0, 147) + '...' : firstParagraph;
 }
 
+/** Extract only the data required to build navigation, omitting the markdown body. */
+export function extractNavigationMetadata(content: string): DocNavigationMetadata {
+  const { frontmatter, body } = extractFrontmatter(content);
+  return {
+    ...frontmatter,
+    description: frontmatter.description || extractDescriptionFromBody(body),
+  };
+}
+
 /**
  * Build navigation tree from document files
  *
@@ -134,33 +155,43 @@ export function buildNavigation(
   files: DocFile[],
   options: NavigationBuilderOptions = {}
 ): DocsSection[] {
-  const {
-    defaultSection = 'Documentation',
-    defaultSectionDescription = 'Documentation pages',
-  } = options;
+  return buildNavigationFromMetadata(
+    files.map((file) => ({
+      path: file.path,
+      href: file.href,
+      metadata: extractNavigationMetadata(file.content),
+    })),
+    options
+  );
+}
 
-  // Parse all files and extract metadata
-  const docs = files
-    .map((file) => {
-      const { frontmatter, body } = extractFrontmatter(file.content);
+/** Build navigation from compact metadata without retaining or loading markdown bodies. */
+export function buildNavigationFromMetadata(
+  entries: DocNavigationEntry[],
+  options: NavigationBuilderOptions = {}
+): DocsSection[] {
+  const { defaultSection = 'Documentation', defaultSectionDescription = 'Documentation pages' } =
+    options;
+
+  const docs = entries
+    .map((entry) => {
+      const { metadata } = entry;
 
       // Skip hidden files
-      if (frontmatter.hidden) return null;
+      if (metadata.hidden) return null;
 
-      const title = frontmatter.title || generateTitleFromPath(file.path);
-      const description = frontmatter.description || extractDescriptionFromBody(body);
-      const section = frontmatter.section || defaultSection;
-      const order = frontmatter.order ?? 999; // Default to end if no order
-      const audience = frontmatter.audience;
+      const title = metadata.title || generateTitleFromPath(entry.path);
+      const section = metadata.section || defaultSection;
+      const order = metadata.order ?? 999; // Default to end if no order
 
       return {
         title,
-        description,
+        description: metadata.description,
         section,
         order,
-        href: file.href,
-        audience,
-        iconName: frontmatter.icon,
+        href: entry.href,
+        audience: metadata.audience,
+        iconName: metadata.icon,
       };
     })
     .filter((doc): doc is NonNullable<typeof doc> => doc !== null);

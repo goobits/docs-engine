@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the `IconMap` export. Section icons now come from the `icon` frontmatter of
   a section's lowest-order page. Consumers passing an icon map should move those
   icons into frontmatter.
+- `DocsLayout` and `SearchModal` replace the inline `searchIndex` prop with
+  `searchIndexUrl`. The serialized MiniSearch index is fetched only when search
+  first opens.
+- `createMarkdownCollection` now accepts lazy markdown loaders plus compact
+  `navigationSources`. `getBySlug()` and `getFiles()` are asynchronous, and
+  `getSearchIndex()` owns deferred full-index generation.
 
 ### Added
 
@@ -25,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `rocket`, `settings`, `shapes`, `terminal`, and `wrench`.
 - `SearchModal` exposes `open()` so a host can trigger it, and `DocsSidebar`
   accepts an `onSearch` callback.
+- `extractNavigationMetadata()` and `buildNavigationFromMetadata()` for hosts
+  that need serializable navigation without bundling page bodies.
 
 ### Changed
 
