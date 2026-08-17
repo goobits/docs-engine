@@ -55,6 +55,8 @@
     collapse?: boolean;
   }
 
+  type DocsTheme = 'dracula' | 'github' | 'minimal';
+
   interface Props {
     // Required
     content: string;
@@ -67,7 +69,8 @@
     // Customization
     breadcrumbs?: BreadcrumbItem[];
     footer?: FooterConfig;
-    theme?: 'dracula' | 'github' | 'minimal';
+    theme?: DocsTheme;
+    themeToggle?: boolean;
 
     // Hydrators - all enabled by default
     hydrators?: HydratorsConfig;
@@ -97,12 +100,19 @@
     breadcrumbs = [],
     footer,
     theme = 'dracula',
+    themeToggle = true,
     hydrators = {},
     editLink,
     gitMetadata,
     searchIndexUrl,
     loadingIndicator,
   }: Props = $props();
+
+  let activeTheme = $state<DocsTheme>('dracula');
+
+  $effect(() => {
+    activeTheme = theme;
+  });
 
   // Hydrator defaults
   const enableCodeTabs = $derived(hydrators.codeTabs !== false);
@@ -138,7 +148,7 @@
   }
 </script>
 
-<div class="docs-layout" data-theme={theme}>
+<div class="docs-layout" data-theme={activeTheme}>
   <!-- Top Controls Container -->
   <div class="docs-controls">
     <!-- Mobile Menu Toggle -->
@@ -158,9 +168,11 @@
     </button>
 
     <!-- Theme Toggle -->
-    <div class="docs-theme-toggle-wrapper">
-      <ThemeToggle />
-    </div>
+    {#if themeToggle}
+      <div class="docs-theme-toggle-wrapper">
+        <ThemeToggle value={activeTheme} onchange={(nextTheme) => (activeTheme = nextTheme)} />
+      </div>
+    {/if}
   </div>
 
   <!-- Sidebar -->
@@ -231,22 +243,22 @@
 
     <!-- Hydrate markdown components -->
     {#if enableCodeTabs}
-      <CodeTabsHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
+      <CodeTabsHydrator theme={activeTheme === 'dracula' ? 'dracula' : 'github-dark'} />
     {/if}
     {#if enableCodeCopy}
-      <CodeCopyHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
+      <CodeCopyHydrator theme={activeTheme === 'dracula' ? 'dracula' : 'github-dark'} />
     {/if}
     {#if enableFileTree}
       <FileTreeHydrator allowCopy={true} />
     {/if}
     {#if enableMermaid}
-      <MermaidHydrator theme={theme === 'dracula' ? 'dark' : 'default'} />
+      <MermaidHydrator theme={activeTheme === 'dracula' ? 'dark' : 'default'} />
     {/if}
     {#if enableScreenshot}
       <ScreenshotHydrator {loadingIndicator} />
     {/if}
     {#if enableOpenAPI}
-      <OpenAPIHydrator theme={theme === 'dracula' ? 'dracula' : 'github-dark'} />
+      <OpenAPIHydrator theme={activeTheme === 'dracula' ? 'dracula' : 'github-dark'} />
     {/if}
     {#if enableCollapse}
       <CollapseHydrator />

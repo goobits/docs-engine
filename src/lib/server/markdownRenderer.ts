@@ -16,31 +16,42 @@ import {
   mermaidPlugin,
   screenshotPlugin,
   tabsPlugin,
+  referencePlugin,
+  remarkTableOfContents,
 } from '../plugins/index.ts';
+import type { ReferencePluginOptions } from '../plugins/reference.ts';
+import type { ScreenshotPluginOptions } from '../plugins/screenshot.ts';
 
 export interface RenderDocsMarkdownOptions {
   sourcePath?: string;
+  gfm?: boolean;
+  tableOfContents?: boolean;
+  theme?: string;
+  screenshots?: false | ScreenshotPluginOptions;
+  references?: ReferencePluginOptions;
 }
 
 export async function renderDocsMarkdown(
   markdown: string,
   options: RenderDocsMarkdownOptions = {}
 ): Promise<string> {
-  const file = await unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkMath)
-    .use(remarkDirective)
+  const processor = unified().use(remarkParse);
+  if (options.gfm !== false) processor.use(remarkGfm);
+  processor.use(remarkMath).use(remarkDirective);
+  if (options.tableOfContents !== false) processor.use(remarkTableOfContents);
+  processor
     .use(linksPlugin)
-    .use(calloutsPlugin)
-    .use(collapsePlugin)
-    .use(filetreePlugin)
     .use(tabsPlugin)
+    .use(calloutsPlugin)
+    .use(filetreePlugin)
     .use(mermaidPlugin)
-    .use(screenshotPlugin)
+    .use(collapsePlugin);
+  if (options.references) processor.use(referencePlugin, options.references);
+  if (options.screenshots !== false) processor.use(screenshotPlugin, options.screenshots);
+  const file = await processor
     .use(imageOptimizationPlugin)
     .use(katexPlugin)
-    .use(codeHighlightPlugin)
+    .use(codeHighlightPlugin, { theme: options.theme ?? 'dracula' })
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process({ value: markdown, path: options.sourcePath });

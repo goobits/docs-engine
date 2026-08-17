@@ -26,6 +26,11 @@
       "import": "./src/lib/server/markdownRenderer.ts",
       "types": "./src/lib/server/markdownRenderer.ts"
     },
+    "./sveltekit": {
+      "source": "./src/lib/sveltekit/index.ts",
+      "import": "./src/lib/sveltekit/index.ts",
+      "types": "./src/lib/sveltekit/index.ts"
+    },
     "./plugins": {
       "source": "./src/lib/plugins/index.ts",
       "import": "./src/lib/plugins/index.ts",

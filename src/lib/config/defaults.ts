@@ -21,16 +21,12 @@ export interface MarkdownDocsConfig {
     theme: string;
     gfm: boolean;
     breaks: boolean;
+    tableOfContents: boolean;
   };
   features: {
     search: boolean;
     breadcrumbs: boolean;
     editOnGithub: boolean;
-  };
-  github?: {
-    repo: string;
-    branch: string;
-    docsPath: string;
   };
   git?: {
     /** Repository URL (e.g., "https://github.com/user/repo") */
@@ -62,6 +58,16 @@ export interface MarkdownDocsConfig {
   };
 }
 
+export type MarkdownDocsOptions = Partial<
+  Omit<MarkdownDocsConfig, 'screenshots' | 'markdown' | 'features'>
+> & {
+  screenshots?: Partial<Omit<MarkdownDocsConfig['screenshots'], 'cli'>> & {
+    cli?: Partial<NonNullable<MarkdownDocsConfig['screenshots']['cli']>>;
+  };
+  markdown?: Partial<MarkdownDocsConfig['markdown']>;
+  features?: Partial<MarkdownDocsConfig['features']>;
+};
+
 export const defaultConfig: MarkdownDocsConfig = {
   docsRoot: '../docs',
   routePrefix: '/docs',
@@ -78,7 +84,8 @@ export const defaultConfig: MarkdownDocsConfig = {
   markdown: {
     theme: 'dracula',
     gfm: true,
-    breaks: true,
+    breaks: false,
+    tableOfContents: true,
   },
   features: {
     search: true,
@@ -87,9 +94,7 @@ export const defaultConfig: MarkdownDocsConfig = {
   },
 };
 
-export function createMarkdownDocs(
-  userConfig: Partial<MarkdownDocsConfig> = {}
-): MarkdownDocsConfig {
+export function createMarkdownDocs(userConfig: MarkdownDocsOptions = {}): MarkdownDocsConfig {
   return {
     ...defaultConfig,
     ...userConfig,

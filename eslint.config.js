@@ -106,10 +106,13 @@ export default [
       },
     },
     plugins: {
+      '@typescript-eslint': tsPlugin,
       svelte: sveltePlugin,
     },
     rules: {
       ...sveltePlugin.configs.recommended.rules,
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'svelte/no-at-html-tags': 'off',
     },
   },

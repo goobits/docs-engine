@@ -1,8 +1,4 @@
-/* Import theme base CSS first */
-@import './styles/theme-base.css';
-
-/* Import docs-engine styles */
-@import '../../dist/styles/index.css';
+@import '@goobits/docs-engine/styles';
 
 :root {
   /* Non-theme variables */

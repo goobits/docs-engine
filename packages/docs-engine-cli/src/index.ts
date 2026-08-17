@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import { glob } from 'glob';
 import ora from 'ora';

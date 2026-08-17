@@ -10,11 +10,8 @@
     copiedPath: string | null;
     allowCopy: boolean;
     githubUrl: string | undefined;
-    // eslint-disable-next-line no-unused-vars
     toggleFolder: (path: string) => void;
-    // eslint-disable-next-line no-unused-vars
     copyPath: (path: string) => void;
-    // eslint-disable-next-line no-unused-vars
     openInGithub: (path: string) => void;
   }
 

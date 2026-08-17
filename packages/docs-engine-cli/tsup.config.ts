@@ -10,5 +10,5 @@ export default defineConfig({
   banner: {
     js: '#!/usr/bin/env node',
   },
-  external: ['@goobits/docs-engine'],
+  external: ['@goobits/docs-engine', 'typescript'],
 });

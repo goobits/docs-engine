@@ -7,30 +7,24 @@
     "dev": "vite dev --port 3390 --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "check-links": "tsx ../packages/docs-engine-cli/src/index.ts check-links --base-dir ../docs --public-dir ../static",
-    "prebuild": "npm run check-links"
+    "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+    "check-links": "docs-engine check-links --base-dir ../docs --public-dir ../static",
+    "prebuild": "pnpm check-links"
   },
   "devDependencies": {
+    "@goobits/docs-engine-cli": "workspace:*",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "playwright": "^1.61.1",
     "sass-embedded": "^1.100.0",
     "svelte": "^5.56.7",
+    "svelte-check": "^4.7.5",
+    "typescript": "^6.0.3",
     "vite": "^8.1.5"
   },
   "dependencies": {
     "@goobits/docs-engine": "workspace:*",
-    "@lucide/svelte": "^1.25.0",
-    "gray-matter": "^4.0.3",
-    "katex": "^0.18.1",
-    "mdsvex": "^0.12.8",
-    "rehype-stringify": "^10.0.1",
-    "remark-directive": "^4.0.0",
-    "remark-gfm": "^4.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.2",
-    "svelte-preprocess": "^6.0.5",
-    "unified": "^11.0.5"
+    "@lucide/svelte": "^1.25.0"
   }
 }
