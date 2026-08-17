@@ -293,12 +293,10 @@
 <style>
   /* === Base Layout === */
   .docs-layout {
-    /* Use 100% height since parent (docs-content-area) provides the flex container */
-    height: 100%;
-    min-height: 0; /* Critical for flex children to enable scrolling */
-    overflow: hidden;
+    min-height: 100%;
     display: grid;
     grid-template-columns: var(--docs-sidebar-width, 280px) minmax(0, 1fr);
+    align-items: start;
     position: relative;
     max-width: var(--docs-layout-max-width, 1400px);
     margin: 0 auto; /* Center content */
@@ -397,9 +395,11 @@
   /* Sidebar Container */
   .docs-sidebar-container {
     width: var(--docs-sidebar-width, 280px);
-    height: 100%;
+    position: sticky;
+    top: var(--docs-sidebar-sticky-top, 0px);
+    align-self: start;
+    max-height: calc(100dvh - var(--docs-sidebar-sticky-top, 0px));
     min-width: 0;
-    min-height: 0; /* Enable scrolling in grid layout */
     overflow-y: auto;
     padding: var(--docs-spacing-md) 0;
   }
@@ -424,10 +424,7 @@
     padding-block: var(--docs-main-padding-block, var(--docs-spacing-2xl));
     padding-inline: var(--docs-main-padding-inline, var(--docs-spacing-2xl));
     max-width: var(--docs-main-max-width, 900px);
-    height: 100%;
     min-width: 0;
-    min-height: 0; /* Enable scrolling in grid layout */
-    overflow-y: auto;
   }
 
   /* Breadcrumbs */
