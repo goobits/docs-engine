@@ -16,12 +16,16 @@ import path from 'path';
 import * as ts from 'typescript';
 import crypto from 'crypto';
 import { glob } from 'glob';
-import { createLogger } from '../server/logger.ts';
-import type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
+import type { ApiSymbol, ApiSymbolMap } from '@goobits/docs-engine/reference';
 
-export type { SymbolDefinition, SymbolMap } from './symbolTypes.ts';
+export type { ApiSymbol, ApiSymbolMap } from '@goobits/docs-engine/reference';
 
-const logger = createLogger('symbol-generation');
+const logger = {
+  debug: (..._args: unknown[]): void => {},
+  info: (..._args: unknown[]): void => {},
+  warn: (...args: unknown[]): void => console.warn(...args),
+  error: (...args: unknown[]): void => console.error(...args),
+};
 
 /**
  * TypeScript JSDoc comment part (text or link)
@@ -65,7 +69,7 @@ interface NodeWithJSDoc extends ts.Node {
 /**
  * Configuration for symbol map generation
  */
-export interface SymbolGeneratorConfig {
+export interface ApiSymbolGeneratorConfig {
   /** Glob patterns for source files to scan */
   sourcePatterns: string[];
   /** Glob patterns for files to exclude */
@@ -87,7 +91,7 @@ interface CachedFileEntry {
   mtime: number;
   size: number;
   hash: string;
-  symbols: SymbolDefinition[];
+  symbols: ApiSymbol[];
 }
 
 /**
@@ -103,11 +107,11 @@ interface SymbolCache {
 /**
  * Symbol map generator with intelligent caching
  */
-export class SymbolMapGenerator {
-  private config: Required<SymbolGeneratorConfig>;
+export class ApiSymbolGenerator {
+  private config: Required<ApiSymbolGeneratorConfig>;
   private cacheFile: string;
 
-  constructor(config: SymbolGeneratorConfig) {
+  constructor(config: ApiSymbolGeneratorConfig) {
     this.config = {
       ...config,
       baseDir: config.baseDir || process.cwd(),
@@ -118,7 +122,7 @@ export class SymbolMapGenerator {
   /**
    * Generate symbol map from TypeScript source files
    */
-  async generate(): Promise<SymbolMap> {
+  async generate(): Promise<ApiSymbolMap> {
     const startTime = Date.now();
     logger.info('Scanning TypeScript files...');
 
@@ -127,7 +131,7 @@ export class SymbolMapGenerator {
     const newCache: SymbolCache = { version: this.config.cacheVersion, files: {} };
 
     // Use Object.create(null) to avoid prototype pollution issues
-    const symbolMap: SymbolMap = Object.create(null);
+    const symbolMap: ApiSymbolMap = Object.create(null);
     let cacheHits = 0;
     let cacheMisses = 0;
 
@@ -231,11 +235,11 @@ export class SymbolMapGenerator {
   /**
    * Extract symbols from a TypeScript file
    */
-  private extractSymbolsFromFile(filePath: string, relativeFile: string): SymbolDefinition[] {
+  private extractSymbolsFromFile(filePath: string, relativeFile: string): ApiSymbol[] {
     const sourceCode = fs.readFileSync(filePath, 'utf-8');
     const sourceFile = ts.createSourceFile(filePath, sourceCode, ts.ScriptTarget.Latest, true);
 
-    const symbols: SymbolDefinition[] = [];
+    const symbols: ApiSymbol[] = [];
 
     const visit = (node: ts.Node): void => {
       // Only process exported declarations
@@ -249,7 +253,7 @@ export class SymbolMapGenerator {
         return;
       }
 
-      let symbol: SymbolDefinition | null = null;
+      let symbol: ApiSymbol | null = null;
 
       // Type alias: export type Foo = ...
       if (ts.isTypeAliasDeclaration(node)) {
@@ -364,7 +368,7 @@ export class SymbolMapGenerator {
 
             const constKeyword = node.declarationList.flags & ts.NodeFlags.Const ? 'const' : 'let';
 
-            const constSymbol: SymbolDefinition = {
+            const constSymbol: ApiSymbol = {
               name: varName,
               path: relativeFile,
               line: sourceFile.getLineAndCharacterOfPosition(declaration.getStart()).line + 1,
@@ -453,7 +457,7 @@ export class SymbolMapGenerator {
   /**
    * Extract JSDoc comments from a node
    */
-  private extractJSDoc(node: ts.Node, sourceFile: ts.SourceFile): SymbolDefinition['jsDoc'] {
+  private extractJSDoc(node: ts.Node, sourceFile: ts.SourceFile): ApiSymbol['jsDoc'] {
     const jsDocComments = (node as NodeWithJSDoc).jsDoc;
     if (!jsDocComments || jsDocComments.length === 0) return undefined;
 
@@ -560,7 +564,7 @@ export class SymbolMapGenerator {
   /**
    * Write symbol map to disk
    */
-  private writeSymbolMap(symbolMap: SymbolMap): void {
+  private writeSymbolMap(symbolMap: ApiSymbolMap): void {
     const outputDir = path.dirname(this.config.outputPath);
     fs.mkdirSync(outputDir, { recursive: true });
     fs.writeFileSync(this.config.outputPath, JSON.stringify(symbolMap, null, 2), 'utf-8');
@@ -570,7 +574,7 @@ export class SymbolMapGenerator {
    * Print generation statistics
    */
   private printStatistics(
-    symbolMap: SymbolMap,
+    symbolMap: ApiSymbolMap,
     totalFiles: number,
     cacheHits: number,
     cacheMisses: number
@@ -629,7 +633,12 @@ export class SymbolMapGenerator {
    */
   async watch(options?: {
     debounce?: number;
-    onChange?: (stats: { symbolCount: number; duration: number; files: string[] }) => void;
+    onChange?: (stats: {
+      symbolCount: number;
+      duration: number;
+      files: string[];
+      symbols: ApiSymbolMap;
+    }) => void;
   }): Promise<{ close: () => Promise<void> }> {
     const { debounce = 500, onChange } = options || {};
 
@@ -677,7 +686,7 @@ export class SymbolMapGenerator {
         );
 
         if (onChange) {
-          onChange({ symbolCount, duration, files: fileList });
+          onChange({ symbolCount, duration, files: fileList, symbols: symbolMap });
         }
       } catch (error) {
         logger.error({ error }, 'Error regenerating symbol map, continuing to watch');
@@ -899,9 +908,9 @@ export class SymbolMapGenerator {
  *
  * @example
  * ```typescript
- * import { createSymbolMapGenerator, getVersion } from '@goobits/docs-engine/utils';
+ * import { createApiSymbolGenerator, getVersion } from '@goobits/docs-engine/utils';
  *
- * const generator = createSymbolMapGenerator({
+ * const generator = createApiSymbolGenerator({
  *   sourcePatterns: ['src/**\/*.ts'],
  *   excludePatterns: ['**\/*.test.ts'],
  *   cacheDir: '.dev/tmp',
@@ -916,6 +925,6 @@ export class SymbolMapGenerator {
  * const results = await generator.benchmark();
  * ```
  */
-export function createSymbolMapGenerator(config: SymbolGeneratorConfig): SymbolMapGenerator {
-  return new SymbolMapGenerator(config);
+export function createApiSymbolGenerator(config: ApiSymbolGeneratorConfig): ApiSymbolGenerator {
+  return new ApiSymbolGenerator(config);
 }

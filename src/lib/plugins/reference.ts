@@ -2,14 +2,9 @@ import { visit } from 'unist-util-visit';
 import type { Root, Text, Paragraph, PhrasingContent, Html } from 'mdast';
 import type { Parent } from 'unist';
 import type { ContainerDirective } from '../mdastTypes.ts';
-import {
-  resolveSymbol,
-  loadSymbolMap,
-  type SymbolDefinition,
-  type SymbolMap,
-} from '../utils/symbol-resolver.ts';
-import { renderBlock, symbolToGitHubUrl } from '../utils/symbol-renderer.ts';
-import type { RenderOptions } from '../utils/symbol-renderer.ts';
+import { resolveSymbol, type ApiSymbol, type ApiSymbolMap } from '../utils/symbol-resolver.ts';
+import { renderBlock, symbolToSourceUrl } from '../utils/symbol-renderer.ts';
+import type { ApiRepositoryConfig, RenderOptions } from '../utils/symbol-renderer.ts';
 import { escapeHtml } from '../utils/html.ts';
 import { sanitizeTree } from '../utils/ast.ts';
 
@@ -64,18 +59,9 @@ function createWarningBlockHtml(reference: string, message: string): string {
  *   - :::reference Implementor → full API documentation block
  * @public
  */
-export function referencePlugin() {
+export function referencePlugin(options: ReferencePluginOptions) {
   return (tree: Root): void => {
-    // Lazy load symbol map during transform phase (not during plugin init)
-    let symbolMap: SymbolMap;
-    try {
-      symbolMap = loadSymbolMap();
-    } catch (error: unknown) {
-      // If symbol map doesn't exist, skip processing (dev mode convenience)
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn('Symbol map not loaded:', message);
-      return;
-    }
+    const symbolMap = options.symbols;
 
     // Sanitize tree: remove any undefined/null nodes
     sanitizeTree(tree);
@@ -103,7 +89,7 @@ export function referencePlugin() {
       entries
         .sort((a, b) => b.index - a.index)
         .forEach(({ index, node }) => {
-          const replacementNodes = createInlineNodes(node.value, symbolMap);
+          const replacementNodes = createInlineNodes(node.value, symbolMap, options.repository);
           parentWithChildren.children.splice(index, 1, ...replacementNodes);
         });
     }
@@ -123,7 +109,7 @@ export function referencePlugin() {
         throw new Error(':::reference directive requires a symbol name');
       }
 
-      const options = extractRenderOptions(directive);
+      const renderOptions = extractRenderOptions(directive);
 
       // Mutable reference for in-place transformation to HTML node
       const mutable = node as {
@@ -138,7 +124,7 @@ export function referencePlugin() {
       try {
         const symbol = resolveSymbol(symbolRef, symbolMap);
         mutable.type = 'html';
-        mutable.value = renderBlock(symbol, options);
+        mutable.value = renderBlock(symbol, options.repository, renderOptions);
         delete mutable.children;
         delete mutable.name;
         delete mutable.attributes;
@@ -160,12 +146,15 @@ export function referencePlugin() {
 }
 
 export interface ReferencePluginOptions {
-  // Future: add options like strictMode, customSymbolMap path, etc.
-  // Placeholder property to satisfy ESLint (empty interfaces are discouraged)
-  _placeholder?: never;
+  symbols: ApiSymbolMap;
+  repository: ApiRepositoryConfig;
 }
 
-function createInlineNodes(value: string, symbolMap: SymbolMap): PhrasingContent[] {
+function createInlineNodes(
+  value: string,
+  symbolMap: ApiSymbolMap,
+  repository: ApiRepositoryConfig
+): PhrasingContent[] {
   const nodes: PhrasingContent[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -184,7 +173,7 @@ function createInlineNodes(value: string, symbolMap: SymbolMap): PhrasingContent
 
     try {
       const symbol = resolveSymbol(reference, symbolMap);
-      nodes.push(createInlineReferenceNode(symbol));
+      nodes.push(createInlineReferenceNode(symbol, repository));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       console.warn(`[ReferencePlugin] Failed to resolve symbol {@${reference}}: ${message}`);
@@ -205,8 +194,11 @@ function createInlineNodes(value: string, symbolMap: SymbolMap): PhrasingContent
   return nodes;
 }
 
-function createInlineReferenceNode(symbol: SymbolDefinition): PhrasingContent {
-  const href = symbolToGitHubUrl(symbol);
+function createInlineReferenceNode(
+  symbol: ApiSymbol,
+  repository: ApiRepositoryConfig
+): PhrasingContent {
+  const href = symbolToSourceUrl(symbol, repository);
 
   // Use JSDoc description for tooltip if available, fallback to signature
   const tooltip = symbol.jsDoc?.description

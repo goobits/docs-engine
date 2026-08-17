@@ -1,5 +1,5 @@
-/** TypeScript symbol metadata shared by symbol generation and resolution. */
-export interface SymbolDefinition {
+/** Public API metadata consumed by reference rendering. */
+export interface ApiSymbol {
   name: string;
   path: string;
   line: number;
@@ -18,7 +18,7 @@ export interface SymbolDefinition {
   implements?: string[];
 }
 
-/** Symbol definitions indexed by their exported name. */
-export interface SymbolMap {
-  [symbolName: string]: SymbolDefinition[];
+/** Public API symbols indexed by their exported name. */
+export interface ApiSymbolMap {
+  [symbolName: string]: ApiSymbol[];
 }

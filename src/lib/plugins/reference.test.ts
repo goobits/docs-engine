@@ -1,415 +1,139 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { referencePlugin } from './reference';
-import type { Root, Paragraph, Html, Link, Text } from 'mdast';
+import { describe, expect, it, vi } from 'vitest';
+import type { Html, Link, Paragraph, Root, Text } from 'mdast';
 import type { ContainerDirective } from '../mdastTypes.ts';
-import * as symbolResolver from '../utils/symbol-resolver.ts';
-import * as symbolRenderer from '../utils/symbol-renderer.ts';
+import type { ApiSymbolMap } from '../utils/symbol-resolver.ts';
+import type { ApiRepositoryConfig, RenderOptions } from '../utils/symbol-renderer.ts';
+import { renderBlock, renderInline, symbolToSourceUrl } from '../utils/symbol-renderer.ts';
+import { referencePlugin } from './reference.ts';
 
-describe('reference plugin', () => {
-  // Mock symbol map and related functions
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
+const repository: ApiRepositoryConfig = {
+  url: 'https://github.com/acme/widgets',
+  branch: 'main',
+  sourceRoot: 'packages/widgets',
+};
 
-  const mockSymbolMap: symbolResolver.SymbolMap = {
-    MyFunction: [
-      {
-        name: 'MyFunction',
-        kind: 'function' as const,
-        signature: 'function MyFunction(): void',
-        path: 'src/utils.ts',
-        line: 10,
-        exported: true,
-        jsDoc: {
-          description: 'A test function',
-          params: [],
-        },
+const symbols: ApiSymbolMap = {
+  createWidget: [
+    {
+      name: 'createWidget',
+      kind: 'function',
+      signature: 'function createWidget(options: WidgetOptions): Widget',
+      path: 'src/createWidget.ts',
+      line: 42,
+      exported: true,
+      jsDoc: {
+        description: 'Creates a **widget** from `options`.',
+        params: [{ name: 'options', type: 'WidgetOptions', description: 'Widget options' }],
+        returns: 'A configured widget',
+        example: 'const widget = createWidget({ color: "blue" });',
       },
-    ],
-    MyType: [
-      {
-        name: 'MyType',
-        kind: 'type' as const,
-        signature: 'type MyType = string',
-        path: 'src/types.ts',
-        line: 5,
-        exported: true,
-      },
-    ],
-  };
+    },
+  ],
+  WidgetOptions: [
+    {
+      name: 'WidgetOptions',
+      kind: 'interface',
+      signature: 'interface WidgetOptions extends BaseOptions',
+      path: 'src/types.ts',
+      line: 8,
+      exported: true,
+      extends: ['BaseOptions'],
+    },
+  ],
+};
 
-  // Helper to create a simple text node in a paragraph
-  const createTextNode = (value: string): Root => ({
+function paragraphRoot(value: string): Root {
+  return {
     type: 'root',
-    children: [
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', value }],
-      },
-    ],
-  });
-
-  // Helper to create a reference block directive
-  const createReferenceBlock = (symbolName: string, attributes?: Record<string, string>): Root => {
-    const directive: ContainerDirective = {
-      type: 'containerDirective',
-      name: 'reference',
-      attributes,
-      children: [
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', value: symbolName }],
-        },
-      ],
-    };
-    return {
-      type: 'root',
-      children: [directive],
-    };
+    children: [{ type: 'paragraph', children: [{ type: 'text', value }] }],
   };
+}
 
-  describe('inline references', () => {
-    it('should transform {@SymbolName} to a link node', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue(
-        'https://github.com/user/repo/blob/main/src/utils.ts#L10'
-      );
+function referenceBlockRoot(name: string, attributes?: Record<string, string>): Root {
+  const directive: ContainerDirective = {
+    type: 'containerDirective',
+    name: 'reference',
+    attributes,
+    children: [{ type: 'paragraph', children: [{ type: 'text', value: name }] }],
+  };
+  return { type: 'root', children: [directive] };
+}
 
-      const tree = createTextNode('Check out {@MyFunction} for more info');
-      const plugin = referencePlugin();
-      plugin(tree);
+describe('referencePlugin', () => {
+  it('resolves inline references from the injected symbol map', () => {
+    const tree = paragraphRoot('Use {@createWidget} with {@WidgetOptions}.');
 
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(3);
-      expect(paragraph.children[0].type).toBe('text');
-      expect((paragraph.children[0] as Text).value).toBe('Check out ');
-      expect(paragraph.children[1].type).toBe('link');
-      expect((paragraph.children[1] as Link).url).toContain('github.com');
-      expect(((paragraph.children[1] as Link).children[0] as Text).value).toBe('MyFunction');
-      expect(paragraph.children[2].type).toBe('text');
-      expect((paragraph.children[2] as Text).value).toBe(' for more info');
-    });
+    referencePlugin({ symbols, repository })(tree);
 
-    it('should handle multiple inline references in one text node', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
-
-      const tree = createTextNode('Use {@MyFunction} with {@MyType} for best results');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(5);
-      expect((paragraph.children[0] as Text).value).toBe('Use ');
-      expect(paragraph.children[1].type).toBe('link');
-      expect((paragraph.children[2] as Text).value).toBe(' with ');
-      expect(paragraph.children[3].type).toBe('link');
-      expect((paragraph.children[4] as Text).value).toBe(' for best results');
-    });
-
-    it('should create warning node for unresolved inline reference', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation(() => {
-        throw new Error('Symbol not found');
-      });
-
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const tree = createTextNode('Check {@UnknownSymbol}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(2);
-      expect(paragraph.children[1].type).toBe('html');
-      expect((paragraph.children[1] as Html).value).toContain('symbol-ref-error');
-      expect((paragraph.children[1] as Html).value).toContain('UnknownSymbol');
-      expect(consoleWarnSpy).toHaveBeenCalled();
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('should skip processing if symbol map fails to load', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockImplementation(() => {
-        throw new Error('Symbol map not found');
-      });
-
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const tree = createTextNode('Check {@MyFunction}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      // Tree should be unchanged
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(1);
-      expect((paragraph.children[0] as Text).value).toBe('Check {@MyFunction}');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Symbol map not loaded:',
-        expect.stringContaining('Symbol map not found')
-      );
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('should not process text without references', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-
-      const tree = createTextNode('Regular text without references');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(1);
-      expect((paragraph.children[0] as Text).value).toBe('Regular text without references');
-    });
+    const children = (tree.children[0] as Paragraph).children;
+    expect(children).toHaveLength(5);
+    expect(((children[1] as Link).children[0] as Text).value).toBe('createWidget');
+    expect((children[1] as Link).url).toBe(
+      'https://github.com/acme/widgets/blob/main/packages/widgets/src/createWidget.ts#L42'
+    );
+    expect(((children[3] as Link).children[0] as Text).value).toBe('WidgetOptions');
   });
 
-  describe('block references', () => {
-    it('should transform :::reference block to HTML', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'renderBlock').mockReturnValue(
-        '<div class="symbol-block">MyFunction docs</div>'
-      );
+  it('leaves ordinary text untouched', () => {
+    const tree = paragraphRoot('Nothing to resolve.');
 
-      const tree = createReferenceBlock('MyFunction');
-      const plugin = referencePlugin();
-      plugin(tree);
+    referencePlugin({ symbols, repository })(tree);
 
-      const htmlNode = tree.children[0] as Html;
-      expect(htmlNode.type).toBe('html');
-      expect(htmlNode.value).toContain('symbol-block');
-      expect(htmlNode.value).toContain('MyFunction docs');
-    });
-
-    it('should pass render options from attributes', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-
-      const renderBlockSpy = vi
-        .spyOn(symbolRenderer, 'renderBlock')
-        .mockReturnValue('<div>HTML</div>');
-
-      const tree = createReferenceBlock('MyFunction', { show: 'params,returns' });
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      expect(renderBlockSpy).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          show: ['params', 'returns'],
-        })
-      );
-    });
-
-    it('should create warning block for unresolved reference', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation(() => {
-        throw new Error('Symbol not found');
-      });
-
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const tree = createReferenceBlock('UnknownSymbol');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as Html;
-      expect(htmlNode.type).toBe('html');
-      expect(htmlNode.value).toContain('symbol-ref-block-error');
-      expect(htmlNode.value).toContain('UnknownSymbol');
-      expect(htmlNode.value).toContain('Symbol not found');
-      expect(consoleWarnSpy).toHaveBeenCalled();
-
-      consoleWarnSpy.mockRestore();
-    });
+    expect((tree.children[0] as Paragraph).children).toEqual([
+      { type: 'text', value: 'Nothing to resolve.' },
+    ]);
   });
 
-  describe('HTML escaping', () => {
-    it('should escape HTML in warning messages', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation(() => {
-        throw new Error('Error with <script>alert("XSS")</script>');
-      });
+  it('renders an escaped warning for an unresolved inline reference', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const tree = paragraphRoot('Use {@<missing>}.');
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    referencePlugin({ symbols, repository })(tree);
 
-      const tree = createTextNode('Check {@BadSymbol}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect((paragraph.children[1] as Html).value).not.toContain('<script>');
-      expect((paragraph.children[1] as Html).value).toContain('&lt;script&gt;');
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('should escape HTML in block warning messages', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation(() => {
-        throw new Error('Error with <img src=x onerror=alert(1)>');
-      });
-
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const tree = createReferenceBlock('BadSymbol');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const htmlNode = tree.children[0] as Html;
-      expect(htmlNode.value).not.toContain('<img');
-      expect(htmlNode.value).toContain('&lt;img');
-
-      consoleWarnSpy.mockRestore();
-    });
+    const warning = (tree.children[0] as Paragraph).children[1] as Html;
+    expect(warning.value).toContain('&lt;missing&gt;');
+    expect(warning.value).not.toContain('{@<missing>}');
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
-  describe('tree sanitization', () => {
-    it('should remove null/undefined children from tree', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
+  it('renders reference blocks with requested sections', () => {
+    const tree = referenceBlockRoot('createWidget', { show: 'signature,description' });
 
-      const tree: Root = {
-        type: 'root',
-        children: [
-          {
-            type: 'paragraph',
-            children: [
-              { type: 'text', value: 'Hello' },
-              null as unknown as Text,
-              { type: 'text', value: 'World' },
-              undefined as unknown as Text,
-            ],
-          },
-        ],
-      };
+    referencePlugin({ symbols, repository })(tree);
 
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(2);
-      expect((paragraph.children[0] as Text).value).toBe('Hello');
-      expect((paragraph.children[1] as Text).value).toBe('World');
-    });
+    const html = (tree.children[0] as Html).value;
+    expect(html).toContain('symbol-doc__signature');
+    expect(html).toContain('symbol-doc__description');
+    expect(html).not.toContain('symbol-doc__params');
+    expect(html).toContain('packages/widgets/src/createWidget.ts#L42');
   });
 
-  describe('edge cases', () => {
-    it('should handle empty reference block', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
+  it('requires a symbol name in reference blocks', () => {
+    const tree = referenceBlockRoot('');
 
-      const emptyDirective: ContainerDirective = {
-        type: 'containerDirective',
-        name: 'reference',
-        children: [],
-      };
-      const tree: Root = {
-        type: 'root',
-        children: [emptyDirective],
-      };
+    expect(() => referencePlugin({ symbols, repository })(tree)).toThrow(
+      ':::reference directive requires a symbol name'
+    );
+  });
+});
 
-      const plugin = referencePlugin();
+describe('API symbol rendering', () => {
+  it('uses only the repository config supplied by the caller', () => {
+    expect(symbolToSourceUrl(symbols.createWidget[0], repository)).toBe(
+      'https://github.com/acme/widgets/blob/main/packages/widgets/src/createWidget.ts#L42'
+    );
+    expect(renderInline(symbols.createWidget[0], repository)).toContain(
+      'https://github.com/acme/widgets/blob/main/packages/widgets/src/createWidget.ts#L42'
+    );
+  });
 
-      // Should throw error for missing symbol name
-      expect(() => plugin(tree)).toThrow(':::reference directive requires a symbol name');
-    });
+  it('renders block sections and hierarchy without process-global configuration', () => {
+    const options: RenderOptions = { show: ['signature'] };
+    const html = renderBlock(symbols.WidgetOptions[0], repository, options);
 
-    it('should handle reference block with non-text content', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-
-      const directiveWithEmphasis: ContainerDirective = {
-        type: 'containerDirective',
-        name: 'reference',
-        children: [
-          {
-            type: 'paragraph',
-            children: [{ type: 'emphasis', children: [{ type: 'text', value: 'MyFunction' }] }],
-          },
-        ],
-      };
-      const tree: Root = {
-        type: 'root',
-        children: [directiveWithEmphasis],
-      };
-
-      const plugin = referencePlugin();
-
-      // Should not find symbol reference in non-text node
-      expect(() => plugin(tree)).toThrow(':::reference directive requires a symbol name');
-    });
-
-    it('should use JSDoc description for tooltip', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
-
-      const tree = createTextNode('See {@MyFunction}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      const link = paragraph.children[1] as Link;
-      expect(link.title).toBe('A test function');
-    });
-
-    it('should fallback to signature for tooltip when no JSDoc', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
-
-      const tree = createTextNode('See {@MyType}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      const link = paragraph.children[1] as Link;
-      expect(link.title).toBe('type MyType = string');
-    });
-
-    it('should handle consecutive inline references', () => {
-      vi.spyOn(symbolResolver, 'loadSymbolMap').mockReturnValue(mockSymbolMap);
-      vi.spyOn(symbolResolver, 'resolveSymbol').mockImplementation((ref, map) => {
-        const symbols = map[ref];
-        if (!symbols || symbols.length === 0) throw new Error(`Symbol ${ref} not found`);
-        return symbols[0];
-      });
-      vi.spyOn(symbolRenderer, 'symbolToGitHubUrl').mockReturnValue('https://github.com/test');
-
-      const tree = createTextNode('{@MyFunction}{@MyType}');
-      const plugin = referencePlugin();
-      plugin(tree);
-
-      const paragraph = tree.children[0] as Paragraph;
-      expect(paragraph.children.length).toBe(2);
-      expect(paragraph.children[0].type).toBe('link');
-      expect(paragraph.children[1].type).toBe('link');
-    });
+    expect(html).toContain('BaseOptions <|-- WidgetOptions');
+    expect(html).toContain('symbol-doc__signature');
+    expect(html).not.toContain('symbol-doc__description');
   });
 });

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { resolveSymbol, AmbiguousSymbolError, type SymbolMap } from './symbol-resolver';
+import { resolveSymbol, AmbiguousSymbolError, type ApiSymbolMap } from './symbol-resolver';
 
 describe('symbol-resolver', () => {
-  const mockSymbolMap: SymbolMap = {
+  const mockSymbolMap: ApiSymbolMap = {
     ProcessorConfig: [
       {
         name: 'ProcessorConfig',
@@ -61,10 +61,6 @@ describe('symbol-resolver', () => {
       },
     ],
   };
-
-  // Note: loadSymbolMap tests are omitted because the function has internal caching
-  // that makes it difficult to test in isolation. The resolveSymbol tests below
-  // provide sufficient coverage of the symbol resolution logic.
 
   describe('resolveSymbol', () => {
     it('should resolve symbol with single definition', () => {
@@ -193,7 +189,7 @@ describe('symbol-resolver', () => {
     });
 
     it('should handle symbols with complex paths', () => {
-      const complexMap: SymbolMap = {
+      const complexMap: ApiSymbolMap = {
         Config: [
           {
             name: 'Config',
@@ -217,7 +213,7 @@ describe('symbol-resolver', () => {
     });
 
     it('should handle kind suffixes for all types', () => {
-      const multiKindMap: SymbolMap = {
+      const multiKindMap: ApiSymbolMap = {
         Item: [
           {
             name: 'Item',

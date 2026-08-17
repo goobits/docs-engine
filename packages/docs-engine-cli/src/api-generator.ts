@@ -1,64 +1,66 @@
-/**
- * API documentation generator CLI
- */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import type { ApiRepositoryConfig, ApiSymbolMap } from '@goobits/docs-engine/reference';
+import { extractPackageApi } from './apiParser.js';
+import { renderApiReference } from './referenceOutput.js';
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import path from 'path';
-import { parseApi, generateApiDocFile, generateIndexFile } from '@goobits/docs-engine/server';
-import type { MarkdownGeneratorConfig } from '@goobits/docs-engine/server';
-
-/**
- * Configuration for API documentation generation
- */
 export interface ApiGeneratorConfig {
-  entryPoints: string[];
+  rootDir: string;
+  sourcePatterns: string[];
+  excludePatterns: string[];
   outputDir: string;
-  tsConfigPath?: string;
-  exclude?: string[];
-  markdownConfig?: MarkdownGeneratorConfig;
-  generateIndex?: boolean;
+  cacheDir: string;
+  cacheVersion: string;
+  title?: string;
+  repository?: ApiRepositoryConfig;
 }
 
-/**
- * Generate API documentation from TypeScript files
- */
-export async function generateApiDocs(config: ApiGeneratorConfig): Promise<void> {
-  // Parse TypeScript files
-  const parsedFiles = parseApi({
-    entryPoints: config.entryPoints,
-    tsConfigPath: config.tsConfigPath,
-    exclude: config.exclude,
+export interface ApiGeneratorResult {
+  symbols: ApiSymbolMap;
+  symbolCount: number;
+  referencePath: string;
+  symbolMapPath: string;
+}
+
+/** Generate the reusable symbol map and its Markdown reference in one pass. */
+export async function generateApiReference(
+  config: ApiGeneratorConfig
+): Promise<ApiGeneratorResult> {
+  const rootDir = resolve(config.rootDir);
+  const outputDir = resolve(rootDir, config.outputDir);
+  const symbolMapPath = join(outputDir, 'symbol-map.json');
+  const referencePath = join(outputDir, 'index.md');
+
+  mkdirSync(outputDir, { recursive: true });
+  const symbols = await extractPackageApi({
+    sourcePatterns: config.sourcePatterns,
+    excludePatterns: config.excludePatterns,
+    cacheDir: resolve(rootDir, config.cacheDir),
+    cacheVersion: config.cacheVersion,
+    outputPath: symbolMapPath,
+    baseDir: rootDir,
   });
+  writeApiReferenceOutput(config, symbols);
 
-  if (parsedFiles.length === 0) {
-    throw new Error('No API items found in the specified entry points');
-  }
+  return {
+    symbols,
+    symbolCount: Object.values(symbols).flat().length,
+    referencePath,
+    symbolMapPath,
+  };
+}
 
-  // Ensure output directory exists
-  if (!existsSync(config.outputDir)) {
-    mkdirSync(config.outputDir, { recursive: true });
-  }
-
-  const generatedFiles: Array<{ fileName: string; items: (typeof parsedFiles)[number]['items'] }> =
-    [];
-
-  // Generate markdown for each file
-  for (const parsedFile of parsedFiles) {
-    const { content, fileName } = generateApiDocFile(parsedFile, config.markdownConfig);
-
-    const outputPath = path.join(config.outputDir, fileName);
-    writeFileSync(outputPath, content, 'utf-8');
-
-    generatedFiles.push({
-      fileName,
-      items: parsedFile.items,
-    });
-  }
-
-  // Generate index file
-  if (config.generateIndex !== false) {
-    const indexContent = generateIndexFile(generatedFiles);
-    const indexPath = path.join(config.outputDir, 'index.md');
-    writeFileSync(indexPath, indexContent, 'utf-8');
-  }
+/** Refresh the Markdown page from an already extracted symbol map. */
+export function writeApiReferenceOutput(config: ApiGeneratorConfig, symbols: ApiSymbolMap): string {
+  const referencePath = resolve(config.rootDir, config.outputDir, 'index.md');
+  mkdirSync(resolve(config.rootDir, config.outputDir), { recursive: true });
+  writeFileSync(
+    referencePath,
+    renderApiReference(symbols, {
+      title: config.title,
+      repository: config.repository,
+    }),
+    'utf-8'
+  );
+  return referencePath;
 }

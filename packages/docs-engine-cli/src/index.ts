@@ -14,9 +14,12 @@ import { printResults } from './reporter.js';
 import { loadConfig, mergeConfig } from './config.js';
 import type { LinkCheckerConfig } from './_linkModels.js';
 import { createVersion, listVersions, deleteVersion } from './versioning.js';
-import { generateApiDocs } from './api-generator.js';
-import { watchSymbols } from './symbol-watcher.js';
-import { benchmarkSymbols, printBenchmarkResults } from './symbol-benchmarker.js';
+import {
+  generateApiReference,
+  writeApiReferenceOutput,
+  type ApiGeneratorConfig,
+} from './api-generator.js';
+import { createApiSymbolGenerator } from './apiSymbolGenerator.js';
 
 /**
  * Get the CLI version from package.json
@@ -237,160 +240,95 @@ versionCmd
     }
   });
 
-/**
- * API documentation generation command
- */
 program
-  .command('generate-api')
-  .description('Generate API documentation from TypeScript source files')
-  .option('-e, --entry-points <paths...>', 'TypeScript files or glob patterns to parse', [
-    'src/**/*.ts',
-  ])
-  .option('-o, --output-dir <path>', 'Output directory for generated markdown', 'docs/api')
-  .option('-t, --tsconfig <path>', 'Path to tsconfig.json')
-  .option('--exclude <patterns...>', 'Patterns to exclude from parsing')
-  .option('--base-url <url>', 'Base URL for type links (e.g., /api)')
-  .option('--repo-url <url>', 'Repository URL for source links')
-  .option('--repo-branch <branch>', 'Repository branch for source links', 'main')
-  .option('--no-index', 'Skip generating index file')
-  .option('--source-links', 'Include links to source code')
-  .action(async (options) => {
-    const spinner = ora('Generating API documentation...').start();
-
-    try {
-      await generateApiDocs({
-        entryPoints: options.entryPoints,
-        outputDir: path.resolve(process.cwd(), options.outputDir),
-        tsConfigPath: options.tsconfig ? path.resolve(process.cwd(), options.tsconfig) : undefined,
-        exclude: options.exclude,
-        generateIndex: options.index,
-        markdownConfig: {
-          baseUrl: options.baseUrl,
-          repoUrl: options.repoUrl,
-          repoBranch: options.repoBranch,
-          includeSourceLinks: options.sourceLinks,
-        },
-      });
-
-      const filesCount = options.entryPoints.length;
-      spinner.succeed(`API documentation generated successfully!`);
-
-      console.log(chalk.cyan('\nGenerated files:'));
-      console.log(chalk.gray(`  Output directory: ${options.outputDir}`));
-      console.log(chalk.gray(`  Entry points: ${filesCount} pattern(s)`));
-
-      if (options.index) {
-        console.log(chalk.gray(`  Index file: ${path.join(options.outputDir, 'index.md')}`));
-      }
-    } catch (error) {
-      spinner.fail('API documentation generation failed');
-      console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
-      if (error instanceof Error && error.stack) {
-        console.error(chalk.gray(error.stack));
-      }
-      process.exit(1);
-    }
-  });
-
-/**
- * Symbol map generation command
- */
-program
-  .command('symbols')
-  .description('Generate, watch, or benchmark symbol map from TypeScript sources')
+  .command('reference')
+  .description('Extract a package API and generate its symbol map and Markdown reference')
+  .option('-r, --root <path>', 'Package or repository root', '.')
   .option('-s, --source <patterns...>', 'Source patterns to scan', ['src/**/*.ts'])
-  .option('-o, --output <path>', 'Output path for symbol map', 'docs/symbol-map.json')
+  .option('-o, --output-dir <path>', 'Output directory', 'docs/api')
   .option('-e, --exclude <patterns...>', 'Patterns to exclude')
-  .option('--cache-dir <path>', 'Cache directory', '.cache')
+  .option('--cache-dir <path>', 'Cache directory', '.cache/docs-engine')
   .option('--cache-version <version>', 'Cache version', getVersion())
+  .option('--title <title>', 'Reference page title', 'API Reference')
+  .option('--repository-url <url>', 'Repository URL for source links')
+  .option('--repository-branch <branch>', 'Repository branch for source links', 'main')
+  .option('--repository-root <path>', 'Path from the repository root to the scanned root')
   .option('-w, --watch', 'Watch files and regenerate on changes')
   .option('-b, --benchmark', 'Run performance benchmark')
   .option('--debounce <ms>', 'Debounce delay for watch mode in ms', '500')
-  .option('-v, --verbose', 'Show verbose output')
   .action(async (options) => {
+    const rootDir = path.resolve(process.cwd(), options.root);
+    const excludePatterns = options.exclude || [
+      '**/*.test.ts',
+      '**/*.spec.ts',
+      '**/node_modules/**',
+      '**/dist/**',
+    ];
+    const config: ApiGeneratorConfig = {
+      rootDir,
+      sourcePatterns: options.source,
+      excludePatterns,
+      outputDir: options.outputDir,
+      cacheDir: options.cacheDir,
+      cacheVersion: options.cacheVersion,
+      title: options.title,
+      repository: options.repositoryUrl
+        ? {
+            url: options.repositoryUrl,
+            branch: options.repositoryBranch,
+            sourceRoot: options.repositoryRoot,
+          }
+        : undefined,
+    };
+
     try {
-      const config = {
-        sourcePatterns: options.source,
-        excludePatterns: options.exclude || [
-          '**/*.test.ts',
-          '**/*.spec.ts',
-          '**/node_modules/**',
-          '**/dist/**',
-        ],
-        outputPath: path.resolve(process.cwd(), options.output),
-        cacheDir: options.cacheDir,
-        cacheVersion: options.cacheVersion,
-        baseDir: process.cwd(),
-      };
-
-      // Benchmark mode
       if (options.benchmark) {
-        const spinner = ora('Running benchmark...').start();
-        spinner.text = '🔬 Symbol Map Generation Benchmark';
-        spinner.stop();
-
-        console.log('='.repeat(50));
-        console.log('Running performance tests...\n');
-
-        const results = await benchmarkSymbols(config);
-        printBenchmarkResults(results);
+        const generator = createApiSymbolGenerator({
+          sourcePatterns: config.sourcePatterns,
+          excludePatterns: config.excludePatterns,
+          outputPath: path.resolve(rootDir, config.outputDir, 'symbol-map.json'),
+          cacheDir: path.resolve(rootDir, config.cacheDir),
+          cacheVersion: config.cacheVersion,
+          baseDir: rootDir,
+        });
+        const results = await generator.benchmark();
+        console.log(JSON.stringify(results, null, 2));
         return;
       }
 
-      // Watch mode
-      if (options.watch) {
-        console.log('🚀 Starting TypeScript file watcher...');
-        console.log(`   Source: ${options.source.join(', ')}`);
-        console.log(`   Output: ${options.output}\n`);
+      const spinner = ora('Generating API reference...').start();
+      const result = await generateApiReference(config);
+      spinner.succeed(`Generated ${result.symbolCount} public API symbol(s)`);
+      console.log(chalk.gray(`  Reference: ${result.referencePath}`));
+      console.log(chalk.gray(`  Symbol map: ${result.symbolMapPath}`));
 
-        const watcher = await watchSymbols(config, {
+      if (options.watch) {
+        const generator = createApiSymbolGenerator({
+          sourcePatterns: config.sourcePatterns,
+          excludePatterns: config.excludePatterns,
+          outputPath: result.symbolMapPath,
+          cacheDir: path.resolve(rootDir, config.cacheDir),
+          cacheVersion: config.cacheVersion,
+          baseDir: rootDir,
+        });
+        const watcher = await generator.watch({
           debounce: parseInt(options.debounce, 10),
-          verbose: options.verbose,
           onChange: (stats) => {
-            console.log(
-              `✅ Symbol map updated (${(stats.duration / 1000).toFixed(1)}s, ${stats.symbolCount} symbols)`
-            );
-            console.log('\n👀 Watching TypeScript files for changes...');
+            writeApiReferenceOutput(config, stats.symbols);
+            console.log(`Updated ${stats.symbolCount} symbol(s) in ${stats.duration}ms`);
           },
         });
-
-        console.log('👀 Watching TypeScript files for changes...');
-        console.log('   Press Ctrl+C to stop\n');
-
-        // Handle graceful shutdown
+        console.log('Watching source files. Press Ctrl+C to stop.');
         const shutdown = async (): Promise<void> => {
-          console.log('\n\n👋 Stopping file watcher...');
           await watcher.close();
-          console.log('✅ File watcher stopped');
           process.exit(0);
         };
-
         process.on('SIGINT', shutdown);
         process.on('SIGTERM', shutdown);
-        return;
       }
-
-      // Normal generation mode
-      const spinner = ora('Generating symbol map...').start();
-      const startTime = Date.now();
-      const { createSymbolMapGenerator } = await import('@goobits/docs-engine/server');
-
-      const generator = createSymbolMapGenerator(config);
-      const symbolMap = await generator.generate();
-      const duration = Date.now() - startTime;
-      const symbolCount = Object.values(symbolMap).flat().length;
-
-      spinner.succeed('Symbol map generated successfully!');
-      console.log(chalk.cyan('\nGenerated:'));
-      console.log(chalk.gray(`  Output: ${options.output}`));
-      console.log(chalk.gray(`  Symbols: ${symbolCount}`));
-      console.log(chalk.gray(`  Duration: ${(duration / 1000).toFixed(2)}s`));
     } catch (error) {
-      console.error(chalk.red('Symbol generation failed'));
+      console.error(chalk.red('API reference generation failed'));
       console.error(chalk.red(error instanceof Error ? error.message : 'Unknown error'));
-      if (error instanceof Error && error.stack && options.verbose) {
-        console.error(chalk.gray(error.stack));
-      }
       process.exit(1);
     }
   });

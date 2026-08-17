@@ -3,12 +3,12 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  createSymbolMapGenerator,
-  SymbolMapGenerator,
-  type SymbolGeneratorConfig,
-  type SymbolMap,
-  type SymbolDefinition,
-} from './symbol-generation';
+  createApiSymbolGenerator,
+  ApiSymbolGenerator,
+  type ApiSymbolGeneratorConfig,
+  type ApiSymbolMap,
+  type ApiSymbol,
+} from './apiSymbolGenerator';
 
 /**
  * Integration tests for the TypeScript symbol map generator.
@@ -70,7 +70,7 @@ const INTERNAL = 42;
 `;
 
   /** Build a generator config pointed at the temp dirs created in beforeEach. */
-  function makeConfig(overrides: Partial<SymbolGeneratorConfig> = {}): SymbolGeneratorConfig {
+  function makeConfig(overrides: Partial<ApiSymbolGeneratorConfig> = {}): ApiSymbolGeneratorConfig {
     return {
       sourcePatterns: ['*.ts'],
       excludePatterns: ['**/*.test.ts'],
@@ -83,7 +83,7 @@ const INTERNAL = 42;
   }
 
   /** Helper: find the single definition for a symbol name (asserts uniqueness). */
-  function one(map: SymbolMap, name: string): SymbolDefinition {
+  function one(map: ApiSymbolMap, name: string): ApiSymbol {
     const defs = map[name];
     expect(defs, `expected symbol "${name}" to exist`).toBeDefined();
     expect(defs.length).toBe(1);
@@ -106,17 +106,17 @@ const INTERNAL = 42;
     }
   });
 
-  describe('createSymbolMapGenerator', () => {
-    it('returns a SymbolMapGenerator instance with a generate() method', () => {
-      const generator = createSymbolMapGenerator(makeConfig());
-      expect(generator).toBeInstanceOf(SymbolMapGenerator);
+  describe('createApiSymbolGenerator', () => {
+    it('returns a ApiSymbolGenerator instance with a generate() method', () => {
+      const generator = createApiSymbolGenerator(makeConfig());
+      expect(generator).toBeInstanceOf(ApiSymbolGenerator);
       expect(typeof generator.generate).toBe('function');
     });
   });
 
   describe('generate()', () => {
     it('extracts every exported symbol kind with the correct kind tag', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(one(map, 'add').kind).toBe('function');
       expect(one(map, 'User').kind).toBe('interface');
@@ -127,14 +127,14 @@ const INTERNAL = 42;
     });
 
     it('ignores non-exported declarations', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(map.internalHelper).toBeUndefined();
       expect(map.INTERNAL).toBeUndefined();
     });
 
     it('marks extracted symbols as exported and records path + 1-based line number', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       const add = one(map, 'add');
       expect(add.exported).toBe(true);
@@ -147,7 +147,7 @@ const INTERNAL = 42;
     });
 
     it('builds readable signatures per kind', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(one(map, 'add').signature).toBe('function add(a: number, b: number): number');
       expect(one(map, 'Status').signature).toBe("type Status = 'active' | 'inactive'");
@@ -162,7 +162,7 @@ const INTERNAL = 42;
     });
 
     it('captures JSDoc description, params, returns, example, and see tags', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       const add = one(map, 'add');
       expect(add.jsDoc).toBeDefined();
@@ -197,13 +197,13 @@ const INTERNAL = 42;
     });
 
     it('leaves jsDoc undefined for symbols without doc comments', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
       // Status type alias has no JSDoc block.
       expect(one(map, 'Status').jsDoc).toBeUndefined();
     });
 
     it('extracts extends for interfaces and extends + implements for classes', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(one(map, 'User').extends).toEqual(['Base']);
 
@@ -213,7 +213,7 @@ const INTERNAL = 42;
     });
 
     it('extracts related capitalized type references and filters out primitives', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       // Interface User references Profile (capitalized) but not `string`.
       const user = one(map, 'User');
@@ -225,7 +225,7 @@ const INTERNAL = 42;
     });
 
     it('writes the symbol map JSON to the configured output path', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(existsSync(outputPath)).toBe(true);
       const written = JSON.parse(readFileSync(outputPath, 'utf-8'));
@@ -234,7 +234,7 @@ const INTERNAL = 42;
     });
 
     it('returns a prototype-less map (no inherited Object keys leak in)', async () => {
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
       // Source uses Object.create(null); guard against accidental prototype pollution.
       expect(map.toString).toBeUndefined();
       expect(map.hasOwnProperty).toBeUndefined();
@@ -246,7 +246,7 @@ const INTERNAL = 42;
         'export const SHOULD_NOT_APPEAR = 1;\n',
         'utf-8'
       );
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
       expect(map.SHOULD_NOT_APPEAR).toBeUndefined();
     });
 
@@ -256,7 +256,7 @@ const INTERNAL = 42;
         'export function helper(): void {}\nexport const EXTRA = true;\n',
         'utf-8'
       );
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       expect(one(map, 'helper').kind).toBe('function');
       expect(one(map, 'helper').path).toBe('extra.ts');
@@ -271,7 +271,7 @@ const INTERNAL = 42;
         'export function add(x: string): string {\n  return x;\n}\n',
         'utf-8'
       );
-      const map = await createSymbolMapGenerator(makeConfig()).generate();
+      const map = await createApiSymbolGenerator(makeConfig()).generate();
 
       const defs = map.add;
       expect(defs.length).toBe(2);
@@ -282,7 +282,7 @@ const INTERNAL = 42;
 
   describe('caching', () => {
     it('writes a cache file with the configured version', async () => {
-      await createSymbolMapGenerator(makeConfig()).generate();
+      await createApiSymbolGenerator(makeConfig()).generate();
 
       const cacheFile = join(cacheDir, 'symbol-cache.json');
       expect(existsSync(cacheFile)).toBe(true);
@@ -294,7 +294,7 @@ const INTERNAL = 42;
     });
 
     it('produces a consistent map on a second run that reuses the cache', async () => {
-      const generator = createSymbolMapGenerator(makeConfig());
+      const generator = createApiSymbolGenerator(makeConfig());
       const first = await generator.generate();
 
       // Second run: file is unchanged, so symbols should be served from cache
@@ -308,7 +308,7 @@ const INTERNAL = 42;
     });
 
     it('reflects edits to a source file on the next run', async () => {
-      const generator = createSymbolMapGenerator(makeConfig());
+      const generator = createApiSymbolGenerator(makeConfig());
       const before = await generator.generate();
       expect(before.newlyAdded).toBeUndefined();
 
@@ -325,11 +325,11 @@ const INTERNAL = 42;
 
     it('invalidates the cache when the cache version changes', async () => {
       // First run writes a v1 cache.
-      await createSymbolMapGenerator(makeConfig({ cacheVersion: '1.0.0' })).generate();
+      await createApiSymbolGenerator(makeConfig({ cacheVersion: '1.0.0' })).generate();
 
       // Second run with a new version must rewrite the cache at the new version
       // rather than reusing the v1 entries.
-      await createSymbolMapGenerator(makeConfig({ cacheVersion: '2.0.0' })).generate();
+      await createApiSymbolGenerator(makeConfig({ cacheVersion: '2.0.0' })).generate();
       const cache = JSON.parse(readFileSync(join(cacheDir, 'symbol-cache.json'), 'utf-8'));
       expect(cache.version).toBe('2.0.0');
     });

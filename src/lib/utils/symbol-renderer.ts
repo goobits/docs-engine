@@ -1,57 +1,23 @@
-import type { SymbolDefinition } from './symbol-resolver.ts';
+import type { ApiSymbol } from './symbol-resolver.ts';
 import { escapeHtml } from './html.ts';
 
 /**
  * Repository configuration for symbol source links
  * @public
  */
-export interface RepoConfig {
-  /** GitHub repository owner (user or organization) */
-  owner: string;
-  /** GitHub repository name */
-  repo: string;
+export interface ApiRepositoryConfig {
+  /** Repository URL without a trailing slash. */
+  url: string;
   /** Git branch name for source links */
   branch: string;
-  /** Base URL for the git provider (default: 'https://github.com') */
-  baseUrl?: string;
-}
-
-const DEFAULT_REPO_CONFIG: RepoConfig = {
-  owner: 'goobits',
-  repo: 'spacebase',
-  branch: 'main',
-  baseUrl: 'https://github.com',
-};
-
-let repoConfig: RepoConfig = DEFAULT_REPO_CONFIG;
-
-/**
- * Configure the repository for symbol source links
- *
- * Call this at application startup to configure source links for your repository.
- * Settings persist for the lifetime of the process.
- *
- * @param config - Partial configuration to merge with defaults
- *
- * @example
- * ```typescript
- * configureRepo({
- *   owner: 'myorg',
- *   repo: 'myproject',
- *   branch: 'develop'
- * });
- * ```
- *
- * @public
- */
-export function configureRepo(config: Partial<RepoConfig>): void {
-  repoConfig = { ...DEFAULT_REPO_CONFIG, ...config };
+  /** Optional path between the repository root and symbol paths. */
+  sourceRoot?: string;
 }
 
 /**
  * Generate Mermaid class diagram showing type hierarchy
  */
-function generateHierarchyDiagram(symbol: SymbolDefinition): string | null {
+function generateHierarchyDiagram(symbol: ApiSymbol): string | null {
   // Only generate for types/interfaces/classes with inheritance
   if (!symbol.extends && !symbol.implements) {
     return null;
@@ -120,16 +86,15 @@ function generateHierarchyDiagram(symbol: SymbolDefinition): string | null {
  *
  * @public
  */
-export function renderInline(symbol: SymbolDefinition): string {
-  // Link directly to GitHub source since we don't have per-symbol doc pages
-  const githubUrl = symbolToGitHubUrl(symbol);
+export function renderInline(symbol: ApiSymbol, repository: ApiRepositoryConfig): string {
+  const sourceUrl = symbolToSourceUrl(symbol, repository);
 
   // Use JSDoc description for tooltip if available, fallback to signature
   const tooltip = symbol.jsDoc?.description
     ? escapeHtml(symbol.jsDoc.description.split('\n')[0]) // First line of description
     : escapeHtml(symbol.signature);
 
-  return `<a href="${githubUrl}" class="symbol symbol--${symbol.kind}" title="${tooltip}" target="_blank" rel="noopener">${escapeHtml(symbol.name)}</a>`;
+  return `<a href="${sourceUrl}" class="symbol symbol--${symbol.kind}" title="${tooltip}" target="_blank" rel="noopener">${escapeHtml(symbol.name)}</a>`;
 }
 
 /**
@@ -195,7 +160,11 @@ function shouldShow(
  *
  * @public
  */
-export function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): string {
+export function renderBlock(
+  symbol: ApiSymbol,
+  repository: ApiRepositoryConfig,
+  options?: RenderOptions
+): string {
   // Apply smart defaults based on symbol kind if no explicit options provided
   const effectiveOptions = options || getDefaultOptions(symbol.kind);
 
@@ -284,7 +253,7 @@ export function renderBlock(symbol: SymbolDefinition, options?: RenderOptions): 
 
   sections.push(`
     <div class="symbol-doc__source">
-      <a href="${symbolToGitHubUrl(symbol)}" target="_blank" rel="noopener">View source</a>
+      <a href="${symbolToSourceUrl(symbol, repository)}" target="_blank" rel="noopener">View source</a>
     </div>
   `);
 
@@ -353,13 +322,12 @@ function renderParams(params: Array<{ name: string; description: string; type: s
  *
  * @public
  */
-export function symbolToGitHubUrl(symbol: SymbolDefinition): string {
-  const repoPath = symbol.path.startsWith('../')
-    ? symbol.path.replace(/^\.\.\//, '')
-    : `web/${symbol.path}`;
-
-  const { baseUrl, owner, repo, branch } = repoConfig;
-  return `${baseUrl}/${owner}/${repo}/blob/${branch}/${repoPath}#L${symbol.line}`;
+export function symbolToSourceUrl(symbol: ApiSymbol, repository: ApiRepositoryConfig): string {
+  const root = repository.sourceRoot?.replace(/^\/+|\/+$/g, '');
+  const symbolPath = symbol.path.replace(/^\.\//, '');
+  const repoPath = root ? `${root}/${symbolPath}` : symbolPath;
+  const repoUrl = repository.url.replace(/\/$/, '');
+  return `${repoUrl}/blob/${repository.branch}/${repoPath}#L${symbol.line}`;
 }
 
 /**

@@ -60,12 +60,7 @@ export type { HydratorOptions } from './use-hydrator.ts';
 export * from './search-index.ts';
 export type { SearchDocument, SearchIndexResult, SearchIndexConfig } from './search-index.ts';
 
-// NOTE: Symbol reference utilities moved to server/index.ts
-// because symbol resolution loads generated files from disk.
-// Import from '@goobits/docs-engine/server' instead.
-
 // NOTE: Markdown generation utilities moved to server/index.ts (requires Node.js)
 // NOTE: File I/O utilities moved to server/index.ts (requires Node.js fs)
-// NOTE: Symbol generation utilities moved to server/index.ts (requires Node.js fs, glob, typescript)
 // NOTE: Version utilities moved to server/index.ts (requires Node.js fs)
 // Import from '@goobits/docs-engine/server' instead
