@@ -55,13 +55,6 @@
       "import": "./dist/components/index.js",
       "default": "./dist/components/index.js"
     },
-    "./components/*": {
-      "types": "./dist/components/*",
-      "source": "./src/lib/components/*",
-      "svelte": "./dist/components/*",
-      "import": "./dist/components/*",
-      "default": "./dist/components/*"
-    },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
       "source": "./src/lib/utils/index.ts",
@@ -102,7 +95,7 @@
     "src/lib"
   ],
   "scripts": {
-    "build": "tsup && svelte-package -i src/lib/components -o dist/components -p --tsconfig tsconfig.json && node scripts/pruneComponentPackage.mjs",
+    "build": "tsup && svelte-package -i src/lib/components -o dist/components -p --tsconfig tsconfig.json && node scripts/finalizePackage.mjs",
     "build:all": "pnpm -r build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "dev": "tsup --watch",

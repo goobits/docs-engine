@@ -75,7 +75,7 @@ flowchart LR
 
 | Import | Environment | Responsibility |
 | --- | --- | --- |
-| `@goobits/docs-engine` | Browser and build | Browser-safe plugins, config, and utilities |
+| `@goobits/docs-engine` | Browser and build | Top-level documentation configuration |
 | `@goobits/docs-engine/sveltekit` | SvelteKit server | Markdown directory adapter and route handlers |
 | `@goobits/docs-engine/components` | Svelte | Documentation UI and hydrators |
 | `@goobits/docs-engine/server` | Node | Screenshots, Git, files, and server rendering |
@@ -85,6 +85,8 @@ flowchart LR
 | `@goobits/docs-engine-cli/library` | Node | Reference extraction, rendering, and output helpers |
 
 Published imports resolve to compiled JavaScript and declarations. The `source` condition exists for linked monorepo development and is not required by consumers.
+
+Components are public only through `@goobits/docs-engine/components`. Their implementation-file paths are private so internal organization can change without expanding the package API.
 
 ## SvelteKit integration
 

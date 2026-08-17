@@ -65,13 +65,15 @@ Render returned page data with `DocsLayout` from `@goobits/docs-engine/component
 
 ## Public entry points
 
-- `@goobits/docs-engine`: browser-safe plugins, configuration, and utilities
+- `@goobits/docs-engine`: top-level documentation configuration
 - `@goobits/docs-engine/sveltekit`: Markdown directory adapter for SvelteKit
 - `@goobits/docs-engine/components`: Svelte documentation UI
 - `@goobits/docs-engine/server`: Node-only rendering, screenshots, Git, and file operations
 - `@goobits/docs-engine/plugins`: low-level Markdown plugins
 - `@goobits/docs-engine/reference`: symbol resolution and source-link rendering
 - `@goobits/docs-engine/styles`: shared documentation styles
+
+Import components through the `components` entry point. Component implementation files are private so releases can reorganize them without breaking consumers.
 
 Package imports resolve to compiled JavaScript. The `source` export condition remains available to linked monorepo development.
 
