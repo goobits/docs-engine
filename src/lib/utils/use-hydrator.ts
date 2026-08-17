@@ -3,7 +3,7 @@
  *
  * Encapsulates the common lifecycle pattern used by all Hydrator components:
  * - Browser environment check
- * - afterNavigate subscription for SPA navigation
+ * - Browser history subscription for client navigation
  * - Deferred initial hydration (queueMicrotask + requestAnimationFrame)
  * - Optional MutationObserver for dynamic content
  * - Proper cleanup on unmount
@@ -13,8 +13,6 @@
 // Browser globals are available when this runs (browser check is done first)
 
 import { onMount } from 'svelte';
-import { browser } from '$app/environment';
-import { afterNavigate } from '$app/navigation';
 
 export interface HydratorOptions {
   /**
@@ -63,28 +61,31 @@ export function useHydrator(hydrate: () => void, options: HydratorOptions = {}):
   const { observeSelector, wrapInRaf = false } = options;
 
   onMount(() => {
-    if (!browser) return;
+    if (typeof window === 'undefined') return;
 
     const wrappedHydrate = wrapInRaf ? (): number => requestAnimationFrame(hydrate) : hydrate;
+    let observer: MutationObserver | undefined;
+    let disposed = false;
 
-    // Subscribe to navigation events for SPA navigation
-    afterNavigate(() => wrappedHydrate());
+    window.addEventListener('popstate', wrappedHydrate);
 
     // Defer initial hydration to avoid conflicts with Svelte's hydration phase
     queueMicrotask(() => {
       requestAnimationFrame(() => {
+        if (disposed) return;
         wrappedHydrate();
 
         // Set up MutationObserver if selector provided
         if (observeSelector) {
-          setupMutationObserver(observeSelector, wrappedHydrate);
+          observer = setupMutationObserver(observeSelector, wrappedHydrate);
         }
       });
     });
 
     return (): void => {
-      // Note: MutationObserver cleanup is handled by the component unmounting
-      // and the observer going out of scope
+      disposed = true;
+      window.removeEventListener('popstate', wrappedHydrate);
+      observer?.disconnect();
     };
   });
 }

@@ -69,6 +69,10 @@ Install the widget package.
   });
 }
 
+const httpError = (_status: 404, message: string): never => {
+  throw new Error(message);
+};
+
 describe('createSvelteKitDocs', () => {
   it('loads and renders pages through the package renderer preset', async () => {
     const page = await createFixture().getPage('index');
@@ -96,7 +100,7 @@ describe('createSvelteKitDocs', () => {
 
   it('provides small SvelteKit-compatible loaders and response handlers', async () => {
     const docs = createFixture();
-    const pageLoad = createDocsPageLoad(docs);
+    const pageLoad = createDocsPageLoad(docs, httpError);
     const layoutLoad = createDocsLayoutLoad(docs);
     const searchHandler = createDocsSearchHandler(docs);
 

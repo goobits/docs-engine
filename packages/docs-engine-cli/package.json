@@ -9,8 +9,20 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./library": {
+      "source": "./src/library.ts",
+      "types": "./dist/library.d.ts",
+      "import": "./dist/library.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "tsup && node scripts/verifyBuild.mjs",
@@ -29,6 +41,7 @@
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
     "typescript": "^6.0.3",
+    "ts-morph": "^28.0.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
   },

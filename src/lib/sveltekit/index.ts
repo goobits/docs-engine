@@ -1,4 +1,3 @@
-import { error } from '@sveltejs/kit';
 import {
   createMarkdownDocs,
   type MarkdownDocsConfig,
@@ -47,6 +46,8 @@ export interface SvelteKitDocs {
   getSearchIndex(): Promise<string>;
   getLayoutData(): Promise<SvelteKitDocsLayoutData>;
 }
+
+export type SvelteKitHttpError = (status: 404, message: string) => never;
 
 interface DocsEntry {
   path: string;
@@ -183,7 +184,11 @@ export function createDocsLayoutLoad(docs: SvelteKitDocs) {
 }
 
 /** Create a SvelteKit page loader for both the docs index and catch-all route. */
-export function createDocsPageLoad(docs: SvelteKitDocs, defaultSlug = 'index') {
+export function createDocsPageLoad(
+  docs: SvelteKitDocs,
+  httpError: SvelteKitHttpError,
+  defaultSlug = 'index'
+) {
   return async ({
     params,
   }: {
@@ -191,7 +196,7 @@ export function createDocsPageLoad(docs: SvelteKitDocs, defaultSlug = 'index') {
   }): Promise<SvelteKitDocsPage> => {
     const slug = params.slug ?? defaultSlug;
     const page = await docs.getPage(slug);
-    if (!page) error(404, `Documentation page not found: ${slug}`);
+    if (!page) httpError(404, `Documentation page not found: ${slug}`);
     return page;
   };
 }

@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import {
   createDocsLayoutLoad,
   createDocsPageLoad,
@@ -27,5 +28,5 @@ export const docsSite = createSvelteKitDocs({
 });
 
 export const loadDocsLayout = createDocsLayoutLoad(docsSite);
-export const loadDocsPage = createDocsPageLoad(docsSite);
+export const loadDocsPage = createDocsPageLoad(docsSite, error);
 export const getDocsSearch = createDocsSearchHandler(docsSite);
