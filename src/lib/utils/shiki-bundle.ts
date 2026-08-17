@@ -1,6 +1,5 @@
 import { createBundledHighlighter, isSpecialLang, type HighlighterGeneric } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
-import { bundledThemes, type BundledTheme } from 'shiki/themes';
 
 const loadBash = (): Promise<typeof import('shiki/langs/bash.mjs')> =>
   import('shiki/langs/bash.mjs');
@@ -44,12 +43,24 @@ const docsLanguages = {
   yaml: () => import('shiki/langs/yaml.mjs'),
 } as const;
 
+const docsThemes = {
+  dracula: () => import('shiki/themes/dracula.mjs'),
+  'github-dark': () => import('shiki/themes/github-dark.mjs'),
+  'github-light': () => import('shiki/themes/github-light.mjs'),
+  monokai: () => import('shiki/themes/monokai.mjs'),
+  nord: () => import('shiki/themes/nord.mjs'),
+  'one-dark-pro': () => import('shiki/themes/one-dark-pro.mjs'),
+  'solarized-dark': () => import('shiki/themes/solarized-dark.mjs'),
+  'solarized-light': () => import('shiki/themes/solarized-light.mjs'),
+} as const;
+
 export type DocsLanguage = keyof typeof docsLanguages;
-export type DocsHighlighter = HighlighterGeneric<DocsLanguage, BundledTheme>;
+export type DocsTheme = keyof typeof docsThemes;
+export type DocsHighlighter = HighlighterGeneric<DocsLanguage, DocsTheme>;
 
 const createHighlighter = createBundledHighlighter({
   langs: docsLanguages,
-  themes: bundledThemes,
+  themes: docsThemes,
   engine: createJavaScriptRegexEngine,
 });
 
@@ -61,12 +72,12 @@ export async function createDocsHighlighter(
   theme: string,
   languages: readonly DocsLanguage[] = []
 ): Promise<DocsHighlighter> {
-  if (!Object.hasOwn(bundledThemes, theme)) {
+  if (!Object.hasOwn(docsThemes, theme)) {
     throw new Error(`Shiki theme "${theme}" is not available`);
   }
 
   return createHighlighter({
-    themes: [theme as BundledTheme],
+    themes: [theme as DocsTheme],
     langs: [...languages],
   });
 }

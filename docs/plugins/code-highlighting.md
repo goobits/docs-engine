@@ -160,16 +160,15 @@ Show additions and deletions:
 
 ## Supported Languages
 
-Shiki supports 100+ languages including:
+The docs bundle includes the languages used by Goobits documentation:
 
-**Web**: JavaScript, TypeScript, HTML, CSS, SCSS, JSON
-**Backend**: Python, Ruby, PHP, Go, Rust, Java, C#
-**Shell**: Bash, PowerShell, Zsh
-**Data**: SQL, GraphQL, YAML, TOML
-**Docs**: Markdown, MDX
-**Config**: Dockerfile, Nginx, Apache
+- **Web:** JavaScript (`javascript`, `js`), TypeScript (`typescript`, `ts`), JSX, TSX, HTML, CSS, SCSS, Svelte, Vue, and JSON
+- **Backend:** Python (`python`, `py`), Ruby, PHP, Go, Rust, Java, C, C++, and C#
+- **Shell and data:** Bash (`bash`, `sh`, `shell`), SQL, YAML, and TOML
+- **Docs and patches:** Markdown and diff
+- **Goobits:** Agentflow (`agentflow`, `dsl`)
 
-Full list: [Shiki Languages](https://github.com/shikijs/shiki/blob/main/docs/languages.md)
+Unsupported identifiers fall back to escaped plain text. Add a language to the fine-grained bundle before documenting it as supported.
 
 ---
 
@@ -230,31 +229,6 @@ export const load = async () => {
 };
 ```
 ````
-
----
-
-## Copy Button
-
-Code blocks automatically include a copy button (styled via CSS).
-
-Customize appearance:
-
-```css
-.code-block__copy {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.code-block__copy:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-```
 
 ---
 

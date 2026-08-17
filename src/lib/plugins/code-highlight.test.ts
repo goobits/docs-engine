@@ -55,7 +55,7 @@ describe('code-highlight plugin', () => {
       expect(transformed.value).toContain('shiki');
     });
 
-    it('should handle custom language syntax', async () => {
+    it('should load each supported language on demand', async () => {
       const tree: Root = {
         type: 'root',
         children: [
@@ -77,6 +77,22 @@ describe('code-highlight plugin', () => {
       const transformed = tree.children[0] as Html;
       expect(transformed.type).toBe('html');
       expect(transformed.value).toContain('shiki');
+    });
+
+    it('should highlight Agentflow by its name and DSL alias', async () => {
+      const tree: Root = {
+        type: 'root',
+        children: [
+          { type: 'code', lang: 'agentflow', value: 'agent helper {}' } as Code,
+          { type: 'code', lang: 'dsl', value: 'workflow example {}' } as Code,
+        ],
+      };
+
+      const plugin = codeHighlightPlugin();
+      await plugin(tree);
+
+      expect((tree.children[0] as Html).value).toContain('shiki');
+      expect((tree.children[1] as Html).value).toContain('shiki');
     });
 
     it('should skip custom plugin languages', async () => {

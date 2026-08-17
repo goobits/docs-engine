@@ -1,14 +1,13 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
-import type { Parent } from 'unist';
 import type { LanguageRegistration } from 'shiki/core';
 import agentflowGrammar from '../utils/agentflow-grammar.json' with { type: 'json' };
 import type { MutableCodeNode } from '../mdastTypes.ts';
 import { escapeHtml } from '../utils/html.ts';
 import {
   createDocsHighlighter,
+  loadDocsLanguage,
   type DocsHighlighter,
-  type DocsLanguage,
 } from '../utils/shiki-bundle.ts';
 
 /**
@@ -19,12 +18,8 @@ import {
 export interface CodeHighlightOptions {
   /** Syntax highlighting theme (default: 'dracula') */
   theme?: string;
-  /** Default language when none specified (default: 'plaintext') */
-  defaultLanguage?: string;
   /** Enable line numbers by default (default: false) */
   showLineNumbers?: boolean;
-  /** Enable copy button (default: true) */
-  showCopyButton?: boolean;
 }
 
 /**
@@ -61,38 +56,17 @@ export interface CodeBlockMetadata {
  * This is private to the module - not accessible from outside
  */
 const highlighterPromises = new Map<string, Promise<DocsHighlighter>>();
-
-const pluginLanguages = [
-  'typescript',
-  'javascript',
-  'python',
-  'rust',
-  'bash',
-  'sql',
-  'json',
-  'html',
-  'css',
-  'scss',
-  'svelte',
-  'tsx',
-  'jsx',
-  'yaml',
-  'toml',
-  'markdown',
-  'shell',
-  'sh',
-  'diff',
-] satisfies DocsLanguage[];
+const customCodeLanguages = ['filetree', 'mermaid', 'callout', 'screenshot'];
 
 async function getPluginHighlighter(theme: string): Promise<DocsHighlighter> {
   let highlighterPromise = highlighterPromises.get(theme);
   if (!highlighterPromise) {
     highlighterPromise = (async (): Promise<DocsHighlighter> => {
-      const highlighter = await createDocsHighlighter(theme, pluginLanguages);
+      const highlighter = await createDocsHighlighter(theme);
       const grammar = agentflowGrammar as unknown as LanguageRegistration;
       await highlighter.loadLanguage({
         ...grammar,
-        aliases: ['dsl', 'agentflow'],
+        aliases: ['dsl'],
       });
       return highlighter;
     })();
@@ -208,7 +182,7 @@ function applyDiffStyling(code: string, highlightedHtml: string): string {
 }
 
 /**
- * Wrap code block with metadata (title, line numbers, copy button)
+ * Wrap code block with metadata (title and line numbers)
  *
  * Module-private helper - not exported
  */
@@ -269,7 +243,6 @@ function wrapWithMetadata(
  * - Line numbers: `showLineNumbers`
  * - File titles: `title="filename"`
  * - Diff support: `diff` language with +/- prefixes
- * - Copy button (integrated with CodeCopyButton component)
  *
  * @param options - Configuration options
  * @returns Unified plugin transformer
@@ -296,92 +269,92 @@ export function codeHighlightPlugin(
   const { theme = 'dracula', showLineNumbers = false } = options;
 
   return async (tree: Root): Promise<void> => {
-    const codeNodes: Array<{ node: Code; index: number; parent: Parent }> = [];
+    const codeNodes: Code[] = [];
 
     // Collect all code nodes
-    visit(tree, 'code', (node: Code, index: number | undefined, parent: Parent | undefined) => {
-      if (index !== undefined && parent) {
-        codeNodes.push({ node, index, parent });
-      }
+    visit(tree, 'code', (node: Code) => {
+      codeNodes.push(node);
     });
 
     if (codeNodes.length === 0) {
       return;
     }
 
-    const highlighter = await getPluginHighlighter(theme);
+    let highlighter: DocsHighlighter | undefined;
 
-    // Process each code node asynchronously
-    await Promise.all(
-      codeNodes.map(async ({ node, index: _index, parent: _parent }) => {
-        const infoString = node.lang || '';
-        const code = node.value;
+    for (const node of codeNodes) {
+      const infoString = node.lang || '';
+      const code = node.value;
 
-        // Parse metadata from info string
-        const metadata = parseCodeMetadata(infoString);
+      // Parse metadata from info string
+      const metadata = parseCodeMetadata(infoString);
 
-        // Apply global line numbers setting if not overridden
-        if (metadata.showLineNumbers === undefined) {
-          metadata.showLineNumbers = showLineNumbers;
+      // Apply global line numbers setting if not overridden
+      if (metadata.showLineNumbers === undefined) {
+        metadata.showLineNumbers = showLineNumbers;
+      }
+
+      // Skip if this is a custom language handled by other plugins
+      if (customCodeLanguages.some((lang) => metadata.language.startsWith(lang))) {
+        continue;
+      }
+
+      // Skip if this is a tabs block
+      if (metadata.language.startsWith('tabs:')) {
+        continue;
+      }
+
+      try {
+        highlighter ??= await getPluginHighlighter(theme);
+        const highlightLanguage = metadata.isDiff ? 'diff' : metadata.language;
+        if (highlightLanguage !== 'dsl' && highlightLanguage !== 'agentflow') {
+          await loadDocsLanguage(highlighter, highlightLanguage);
         }
 
-        // Skip if this is a custom language handled by other plugins
-        const customLanguages = ['filetree', 'mermaid', 'callout', 'screenshot'];
-        if (customLanguages.some((lang) => metadata.language.startsWith(lang))) {
-          return;
+        // Build decorations for highlighted lines (Shiki decorations API)
+        const decorations =
+          metadata.highlightLines && metadata.highlightLines.length > 0
+            ? metadata.highlightLines.map((line) => ({
+                start: { line: line - 1, character: 0 },
+                end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
+                properties: { class: 'highlighted' },
+              }))
+            : [];
+
+        // Highlight the code with Shiki
+        let highlighted = highlighter.codeToHtml(code, {
+          lang: highlightLanguage,
+          theme: theme,
+          decorations,
+        });
+
+        // Apply diff styling
+        if (metadata.isDiff) {
+          highlighted = applyDiffStyling(code, highlighted);
         }
 
-        // Skip if this is a tabs block
-        if (metadata.language.startsWith('tabs:')) {
-          return;
-        }
+        // Wrap with metadata (title, line numbers)
+        highlighted = wrapWithMetadata(highlighted, metadata, code);
 
-        try {
-          // Build decorations for highlighted lines (Shiki decorations API)
-          const decorations =
-            metadata.highlightLines && metadata.highlightLines.length > 0
-              ? metadata.highlightLines.map((line) => ({
-                  start: { line: line - 1, character: 0 },
-                  end: { line: line - 1, character: Number.MAX_SAFE_INTEGER },
-                  properties: { class: 'highlighted' },
-                }))
-              : [];
-
-          // Highlight the code with Shiki
-          let highlighted = highlighter.codeToHtml(code, {
-            lang: metadata.isDiff ? 'diff' : metadata.language,
-            theme: theme,
-            decorations,
-          });
-
-          // Apply diff styling
-          if (metadata.isDiff) {
-            highlighted = applyDiffStyling(code, highlighted);
-          }
-
-          // Wrap with metadata (title, line numbers)
-          highlighted = wrapWithMetadata(highlighted, metadata, code);
-
-          // Transform the node to HTML
-          // Escape curly braces for Svelte 5 parser compatibility
-          const mutableNode = node as MutableCodeNode;
-          mutableNode.type = 'html';
-          mutableNode.value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
-          delete mutableNode.lang;
-        } catch (error) {
-          console.error(
-            `Failed to highlight code block with language "${metadata.language}":`,
-            error
-          );
-          // Fallback to plain code block
-          // Escape curly braces for Svelte 5 parser compatibility
-          const mutableFallbackNode = node as MutableCodeNode;
-          mutableFallbackNode.type = 'html';
-          const fallbackHtml = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
-          mutableFallbackNode.value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
-          delete mutableFallbackNode.lang;
-        }
-      })
-    );
+        // Transform the node to HTML
+        // Escape curly braces for Svelte 5 parser compatibility
+        const mutableNode = node as MutableCodeNode;
+        mutableNode.type = 'html';
+        mutableNode.value = highlighted.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+        delete mutableNode.lang;
+      } catch (error) {
+        console.error(
+          `Failed to highlight code block with language "${metadata.language}":`,
+          error
+        );
+        // Fallback to plain code block
+        // Escape curly braces for Svelte 5 parser compatibility
+        const mutableFallbackNode = node as MutableCodeNode;
+        mutableFallbackNode.type = 'html';
+        const fallbackHtml = `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${metadata.language}">${escapeHtml(code)}</code></pre>`;
+        mutableFallbackNode.value = fallbackHtml.replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+        delete mutableFallbackNode.lang;
+      }
+    }
   };
 }
