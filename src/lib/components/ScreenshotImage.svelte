@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
+  import type { DocsLoadingIndicator } from './loadingIndicator.js';
   /**
    * ScreenshotImage Component
    *

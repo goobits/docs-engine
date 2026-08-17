@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
-  import { sanitizeSvg } from '../utils/index.ts';
+  import type { DocsLoadingIndicator } from './loadingIndicator.js';
+  import { sanitizeSvg } from '@goobits/docs-engine/utils';
 
   interface Props {
     /** Base64-encoded mermaid diagram source */

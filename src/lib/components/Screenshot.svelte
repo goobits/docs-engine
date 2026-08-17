@@ -11,7 +11,7 @@
    * />
    */
   import ScreenshotImage from './ScreenshotImage.svelte';
-  import type { DocsLoadingIndicator } from './loadingIndicator.ts';
+  import type { DocsLoadingIndicator } from './loadingIndicator.js';
 
   interface Props {
     /** Unique name for the screenshot (e.g., "sessions-list") */

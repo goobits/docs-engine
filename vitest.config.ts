@@ -1,10 +1,8 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
-import { resolveViteCacheDirectory } from './src/lib/buildStorage.ts';
 
 export default defineConfig({
-  cacheDir: resolveViteCacheDirectory(import.meta.dirname),
   plugins: [svelte()],
   resolve: {
     alias: {

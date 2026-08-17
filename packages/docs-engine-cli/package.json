@@ -30,7 +30,6 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@goobits/docs-engine": "workspace:*",
     "chalk": "^5.6.2",
     "commander": "^15.0.0",
     "glob": "^13.0.6",
@@ -46,10 +45,14 @@
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
+    "@goobits/docs-engine": "workspace:*",
     "@types/node": "^26.1.1",
     "@types/prompts": "^2.4.9",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@goobits/docs-engine": "workspace:^"
   },
   "keywords": [
     "documentation",

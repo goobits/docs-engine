@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DocsLoadingIndicatorProps } from '../loadingIndicator.ts';
+  import type { DocsLoadingIndicatorProps } from '../loadingIndicator.js';
 
   let { ariaHidden = false, size, thickness }: DocsLoadingIndicatorProps = $props();
 </script>

@@ -13,8 +13,8 @@
     isDocsAudience,
     type DocsAudience,
     type DocsSection,
-  } from '../utils/navigation';
-  import { resolveDocsSectionIcon } from './section-icons.ts';
+  } from '@goobits/docs-engine/utils';
+  import { resolveDocsSectionIcon } from './section-icons.js';
 
   // Audience filter state
   const AUDIENCE_LABELS: Record<DocsAudience, string> = {
@@ -237,12 +237,14 @@
   </div>
 </aside>
 
-<style lang="scss">
-  @mixin focus-ring {
-    &:focus-visible {
-      outline: 2px solid var(--color-text-accent);
-      outline-offset: 2px;
-    }
+<style>
+  .docs-sidebar__search-button:focus-visible,
+  .docs-sidebar__section-header:focus-visible,
+  .docs-sidebar__link:focus-visible,
+  .docs-sidebar__filter-pill:focus-visible,
+  .docs-sidebar__filter-reset:focus-visible {
+    outline: 2px solid var(--color-text-accent);
+    outline-offset: 2px;
   }
 
   .docs-sidebar {
@@ -263,8 +265,6 @@
   }
 
   .docs-sidebar__search-button {
-    @include focus-ring;
-
     width: 100%;
     min-height: 32px;
     display: flex;
@@ -315,8 +315,6 @@
   }
 
   .docs-sidebar__section-header {
-    @include focus-ring;
-
     width: 100%;
     display: flex;
     align-items: center;
@@ -360,8 +358,6 @@
   }
 
   .docs-sidebar__link {
-    @include focus-ring;
-
     /* Align with section title text: section padding + icon (16px) + gap */
     padding: var(--space-2) var(--space-4) var(--space-2)
       calc(var(--space-2) + 16px + var(--space-2));
@@ -418,8 +414,6 @@
   }
 
   .docs-sidebar__filter-pill {
-    @include focus-ring;
-
     padding: var(--space-1) var(--space-2);
     background: transparent;
     border: none;
@@ -444,8 +438,6 @@
   }
 
   .docs-sidebar__filter-reset {
-    @include focus-ring;
-
     padding: var(--space-1) var(--space-2);
     background: transparent;
     border: none;

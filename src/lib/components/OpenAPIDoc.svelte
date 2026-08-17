@@ -9,8 +9,12 @@
    * - Collapsible sections
    */
 
-  import type { OpenAPIEndpoint } from '../utils';
-  import { formatSchema, generateCurlExample, generateTypeScriptExample } from '../utils';
+  import type { OpenAPIEndpoint } from '@goobits/docs-engine/utils';
+  import {
+    formatSchema,
+    generateCurlExample,
+    generateTypeScriptExample,
+  } from '@goobits/docs-engine/utils';
 
   interface Props {
     endpoint: OpenAPIEndpoint;

@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Get docs-engine running in your SvelteKit project in 5 minutes
+description: Scaffold a docs site or add Docs Engine to an existing SvelteKit app
 section: Getting Started
 difficulty: beginner
 tags: [quickstart, setup, installation]
@@ -8,269 +8,201 @@ tags: [quickstart, setup, installation]
 
 # Getting Started
 
-Get docs-engine running in your SvelteKit project in 5 minutes.
+Docs Engine supports two setup paths. Scaffold a standalone site for the quickest start, or add the shared adapter to an existing SvelteKit app.
 
-## TOC
+## Scaffold a site
 
-> **Tip:** This guide takes about 5 minutes. By the end, you'll have a fully working documentation system.
-
-## Prerequisites
-
-- Node.js 18+
-- SvelteKit project
-- Basic markdown knowledge
-
-## Option A: Scaffold a New Project (Recommended)
+Prerequisites: Node.js 20 or newer and pnpm, npm, or Yarn.
 
 ```bash
-pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
-```
-
-Then:
-
-```bash
+pnpm dlx --package @goobits/docs-engine-cli create-docs-engine my-docs
 cd my-docs
 pnpm dev
 ```
 
-## Step 1: Install
+The generated project includes:
+
+- a `docs/` Markdown directory with sample pages
+- `/docs` and `/docs/[...slug]` routes
+- generated sidebar navigation and search data
+- the shared `DocsLayout` component and styles
+- `check`, `check-links`, and `build` scripts
+
+Useful non-interactive options:
 
 ```bash
-pnpm add @goobits/docs-engine
+create-docs-engine my-docs --yes --package-manager pnpm --no-install
 ```
 
-## Step 2: Configure MDSveX
+Use `--force` only when you intentionally want to replace an existing project directory.
 
-> **Note:** The highlighted lines below show the essential plugins for getting started.
+## Add to an existing SvelteKit app
 
-Add plugins to your `svelte.config.js`:
+### 1. Install
 
-```javascript {14-17}
-import { mdsvex } from 'mdsvex';
-import {
-  linksPlugin,
-  remarkTableOfContents,
-  calloutsPlugin,
-  codeHighlightPlugin,
-} from '@goobits/docs-engine/plugins';
-
-export default {
-  extensions: ['.svelte', '.md'],
-  preprocess: [
-    mdsvex({
-      remarkPlugins: [
-        calloutsPlugin(),     // ← Start with these 4 plugins
-        remarkTableOfContents(),
-        linksPlugin(),
-        codeHighlightPlugin({
-          theme: 'dracula',
-          showLineNumbers: false
-        }),
-      ],
-    }),
-  ],
-};
+```bash
+pnpm add @goobits/docs-engine @lucide/svelte
 ```
 
-## Step 3: Create Your First Doc
+Install `mermaid` too if your Markdown uses Mermaid diagrams:
 
-> **Note:** We're using our own plugins here! Notice the `## TOC` marker and callouts.
+```bash
+pnpm add mermaid
+```
 
-Create `src/routes/docs/hello.md`:
+### 2. Add Markdown
+
+Create `docs/index.md`:
 
 ```markdown
 ---
-title: Hello World
-description: My first doc
+title: Documentation
+description: Project documentation
+section: Getting Started
+order: 1
 ---
 
-# Hello World
+# Documentation
 
-Welcome to docs-engine!
-
-## Table of Contents
-
-## Introduction
-
-This is my first documentation page using docs-engine.
-
-> **Note:** The table of contents will be auto-generated here.
-
-## Features
-
-- Markdown rendering
-- Syntax highlighting
-- Auto-generated TOC
-- And much more!
-
-## Next Steps
-
-Check out the [plugins](../../plugins) to enhance your docs.
+Welcome to the project documentation.
 ```
 
-## Step 4: Import Styles
+### 3. Create the docs adapter
 
-In your main CSS/SCSS file:
+Create `src/routes/docs/_docsData.server.ts`:
 
-```scss
-@import '@goobits/docs-engine/styles';
+```ts
+import { error } from '@sveltejs/kit';
+import {
+  createDocsLayoutLoad,
+  createDocsPageLoad,
+  createDocsSearchHandler,
+  createSvelteKitDocs,
+  type MarkdownModuleLoader,
+} from '@goobits/docs-engine/sveltekit';
+
+const modules = import.meta.glob('../../../docs/**/*.md', {
+  import: 'default',
+  query: '?raw',
+}) as Record<string, MarkdownModuleLoader>;
+
+const docs = createSvelteKitDocs({
+  modules,
+  config: {
+    routePrefix: '/docs',
+    screenshots: { enabled: false },
+  },
+});
+
+export const loadDocsLayout = createDocsLayoutLoad(docs);
+export const loadDocsPage = createDocsPageLoad(docs, error);
+export const getDocsSearch = createDocsSearchHandler(docs);
 ```
 
-## Step 5: View Your Docs
+`createDocsPageLoad` accepts the host app's `error` function so the adapter uses the same SvelteKit runtime instance as the app.
 
-Start your dev server:
+### 4. Add thin route handlers
 
-```bash
-pnpm dev
+`src/routes/docs/+layout.server.ts`:
+
+```ts
+import { loadDocsLayout } from './_docsData.server';
+
+export const load = loadDocsLayout;
 ```
 
-Navigate to `http://localhost:5173/docs/hello`
+`src/routes/docs/+page.server.ts`:
 
-## Next Steps
+```ts
+import { loadDocsPage } from './_docsData.server';
 
-### Enhance Your Docs
-
-Add more plugins:
-
-- **[Navigation Builder](./utilities/navigation.md)** - Auto-generate sidebar navigation
-- **[Callouts](./plugins/callouts.md)** - Add note/warning/tip boxes
-- **[Mermaid](./plugins/mermaid.md)** - Render diagrams
-- **[Code Tabs](./plugins/code-tabs.md)** - Show code in multiple languages
-
-### Learn More
-
-- **[Plugin Order Guide](./guides/plugin-order.md)** - Understand plugin execution
-- **[Architecture](./guides/architecture.md)** - System design
-- **[Examples](./guides/examples.md)** - Code recipes
-
-### Advanced Features
-
-- **[Symbol References](./plugins/symbol-references.md)** - Link to TypeScript symbols
-- **[Screenshots](./plugins/screenshots.md)** - Automated screenshot generation
-- **[Image Optimization](./plugins/image-optimization.md)** - Auto WebP/AVIF
-
-## Troubleshooting
-
-### MDSveX not processing markdown
-
-> **Warning:** This is the most common setup issue!
-
-Ensure `.md` is in your `extensions` array:
-
-```javascript
-export default {
-  extensions: ['.svelte', '.md'],
-  // ...
-};
+export const load = loadDocsPage;
 ```
 
-### Styles not loading
+`src/routes/docs/[...slug]/+page.server.ts`:
 
-Import the styles in your root layout or main CSS file:
+```ts
+import { loadDocsPage } from '../_docsData.server';
 
-```scss
-@import '@goobits/docs-engine/styles';
+export const load = loadDocsPage;
 ```
 
-### Plugins not working
+`src/routes/docs/search-index.json/+server.ts`:
 
-Check plugin order in your `svelte.config.js`. Some plugins depend on others running first. See [Plugin Order Guide](./guides/plugin-order.md).
+```ts
+import { getDocsSearch } from '../_docsData.server';
 
-## Common Patterns
+export const prerender = true;
+export const GET = getDocsSearch;
+```
 
-### Documentation Layout
+### 5. Render page data
 
-> **Tip:** Use a consistent layout for all your documentation pages.
-
-Create a docs layout at `src/routes/docs/+layout.svelte`:
+Create one shared page component and use it from both page routes:
 
 ```svelte
-<script>
-  import { page } from '$app/stores';
+<script lang="ts">
+  import { page } from '$app/state';
+  import { DocsLayout } from '@goobits/docs-engine/components';
+  import type { SvelteKitDocsLayoutData, SvelteKitDocsPage } from '@goobits/docs-engine/sveltekit';
+
+  let { data }: { data: SvelteKitDocsPage & SvelteKitDocsLayoutData } = $props();
 </script>
 
-<div class="docs-layout">
-  <nav class="docs-sidebar">
-    <a href="/docs/getting-started" class:active={$page.url.pathname === '/docs/getting-started'}>
-      Getting Started
-    </a>
-    <a href="/docs/plugins" class:active={$page.url.pathname.startsWith('/docs/plugins')}>
-      Plugins
-    </a>
-  </nav>
-
-  <main class="docs-content">
-    <slot />
-  </main>
-</div>
-
-<style>
-  .docs-layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .docs-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .docs-sidebar a {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-  }
-
-  .docs-sidebar a.active {
-    background: var(--color-primary);
-    color: white;
-  }
-
-  .docs-content {
-    min-width: 0;
-  }
-</style>
+<DocsLayout
+  content={data.content}
+  title={data.title}
+  navigation={data.navigation}
+  currentPath={page.url.pathname}
+  editLink={data.editLink}
+  searchIndexUrl={data.searchIndexUrl}
+/>
 ```
 
-### Project Structure
+Import the shared styles once from your root stylesheet:
 
-Here's what your docs structure should look like:
-
-```filetree
-src/
-├── routes/
-│   ├── docs/
-│   │   ├── +layout.svelte
-│   │   ├── +page.md
-│   │   ├── getting-started.md
-│   │   └── plugins/
-│   │       ├── callouts.md
-│   │       └── links.md
-│   └── +layout.svelte
-└── app.css
+```css
+@import '@goobits/docs-engine/styles';
 ```
 
-### Frontmatter Template
+## Configuration
 
-Use consistent frontmatter across your docs:
+Pass configuration to `createSvelteKitDocs`:
 
-```yaml
----
-title: "Page Title"
-description: "Brief description for SEO"
-section: "Getting Started"  # For navigation grouping
-difficulty: "beginner"       # beginner | intermediate | advanced
-tags: ["markdown", "setup"]
-order: 1                     # Sort order in navigation
----
+```ts
+const docs = createSvelteKitDocs({
+  modules,
+  config: {
+    routePrefix: '/docs',
+    features: { search: true, editOnGithub: true },
+    screenshots: { enabled: false },
+    git: {
+      repoUrl: 'https://github.com/acme/widgets',
+      branch: 'main',
+      docsPath: 'docs',
+    },
+  },
+});
 ```
 
-## Need Help?
+## Verify
 
-- **[Full Documentation](./index.md)** - Complete docs index
-- **[GitHub Issues](https://github.com/goobits/docs-engine/issues)** - Report bugs or request features
+```bash
+pnpm check
+pnpm check-links
+pnpm build
+```
+
+Then confirm these routes:
+
+- `/docs`
+- `/docs/getting-started` for a matching Markdown file
+- `/docs/search-index.json`
+- an unknown `/docs/...` path returns 404
+
+## Next steps
+
+- [Architecture and ownership](./guides/architecture.md)
+- [Plugin order](./guides/plugin-order.md)
+- [API reference generation](./reference/api-generation.md)
+- [Screenshots](./plugins/screenshots.md)

@@ -7,7 +7,7 @@
    */
 
   import { ChevronLeft, ChevronRight } from '@lucide/svelte';
-  import type { DocsLink } from '../utils';
+  import type { DocsLink } from '@goobits/docs-engine/utils';
 
   interface Props {
     previous?: (DocsLink & { section: string }) | null;

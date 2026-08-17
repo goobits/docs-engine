@@ -117,7 +117,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .md-filetree__item {
     display: flex;
     flex-direction: column;
@@ -158,10 +158,10 @@
     &:hover {
       color: var(--md-text-primary);
     }
+  }
 
-    &--expanded {
-      transform: rotate(90deg);
-    }
+  .md-filetree__toggle--expanded {
+    transform: rotate(90deg);
   }
 
   .md-filetree__spacer {
@@ -200,14 +200,14 @@
     &:disabled {
       cursor: default;
     }
+  }
 
-    &--folder {
-      font-weight: 600;
-    }
+  .md-filetree__name--folder {
+    font-weight: 600;
+  }
 
-    &--copied {
-      color: var(--md-callout-green-text) !important;
-    }
+  .md-filetree__name--copied {
+    color: var(--md-callout-green-text) !important;
   }
 
   .md-filetree__copied {
@@ -267,7 +267,7 @@
     }
   }
 
-  // Mobile responsive
+  /* Mobile responsive */
   @media (max-width: 768px) {
     .md-filetree__row {
       padding-left: calc(var(--md-spacing-xs) + var(--depth, 0) * var(--md-spacing-md));

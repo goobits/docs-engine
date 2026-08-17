@@ -22,7 +22,7 @@ export { default as CodeCopyHydrator } from './CodeCopyHydrator.svelte';
 export { default as OpenAPIDoc } from './OpenAPIDoc.svelte';
 export { default as OpenAPIHydrator } from './OpenAPIHydrator.svelte';
 export { default as CollapseHydrator } from './CollapseHydrator.svelte';
-export type { DocsLoadingIndicator, DocsLoadingIndicatorProps } from './loadingIndicator.ts';
+export type { DocsLoadingIndicator, DocsLoadingIndicatorProps } from './loadingIndicator.js';
 
 // New Components (Proposals 01-08)
 export { default as DocsPrevNext } from './DocsPrevNext.svelte';
@@ -39,4 +39,4 @@ export { default as OptimizedImage } from './OptimizedImage.svelte';
 export { default as OptimizedImageHydrator } from './OptimizedImageHydrator.svelte';
 
 // Types - re-exported from navigation utilities
-export type { DocsLink, DocsSection } from '../utils/navigation.ts';
+export type { DocsLink, DocsSection } from '@goobits/docs-engine/utils';

@@ -1,6 +1,6 @@
 ---
 title: API Generation
-description: Auto-generate API documentation from TypeScript using the symbol reference system
+description: Generate API symbol maps and Markdown reference pages from TypeScript
 section: Reference
 difficulty: advanced
 tags: [api, typescript, automation, symbols]
@@ -9,338 +9,116 @@ order: 1
 
 # API Generation
 
-Auto-generate API documentation from your TypeScript source code using the symbol reference system.
+The Docs Engine CLI extracts exported TypeScript declarations, JSDoc summaries, signatures, and source locations. It writes a canonical symbol map and Markdown reference page without a project-owned parser script.
 
-## Overview
+## Generate a reference
 
-The symbol reference system extracts type information from TypeScript and generates documentation automatically. This keeps your API docs in sync with your code.
+Install the CLI:
 
-**Key Benefits:**
-- Always up-to-date with source code
-- Type-safe references in markdown
-- Automatic JSDoc extraction
-- GitHub source links
-
-## Quick Start
-
-### 1. Create Generation Script
-
-```typescript
-// scripts/docs/generate-symbol-map.ts
-import * as ts from 'typescript';
-import { glob } from 'glob';
-import fs from 'fs';
-import path from 'path';
-
-async function generateSymbolMap() {
-  // Find all TypeScript files
-  const files = await glob('src/**/*.ts', {
-    ignore: ['**/*.test.ts', '**/node_modules/**'],
-  });
-
-  const symbolMap: Record<string, any[]> = {};
-  const program = ts.createProgram(files, {
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-  });
-
-  // Process each file
-  for (const file of files) {
-    const sourceFile = program.getSourceFile(file);
-    if (!sourceFile) continue;
-
-    ts.forEachChild(sourceFile, (node) => {
-      if (isExportedDeclaration(node)) {
-        const symbol = extractSymbol(node, sourceFile);
-        if (symbol) {
-          symbolMap[symbol.name] = symbolMap[symbol.name] || [];
-          symbolMap[symbol.name].push(symbol);
-        }
-      }
-    });
-  }
-
-  // Write to JSON
-  const outputPath = 'docs/.generated/symbol-map.json';
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(symbolMap, null, 2));
-
-  console.log(`Generated ${Object.keys(symbolMap).length} symbols`);
-}
-
-function isExportedDeclaration(node: ts.Node): boolean {
-  return !!(
-    ts.getCombinedModifierFlags(node as ts.Declaration) &
-    ts.ModifierFlags.Export
-  );
-}
-
-function extractSymbol(node: ts.Node, sourceFile: ts.SourceFile) {
-  // Extract symbol information
-  // See full implementation in examples/
-}
-
-generateSymbolMap();
+```bash
+pnpm add -D @goobits/docs-engine-cli
 ```
 
-### 2. Add NPM Scripts
+Run the reference command:
+
+```bash
+docs-engine reference \
+  --root . \
+  --source 'src/**/*.ts' \
+  --output-dir docs/api \
+  --title 'API Reference' \
+  --repository-url https://github.com/acme/widgets \
+  --repository-branch main
+```
+
+The output directory contains:
+
+- `symbol-map.json`, used by symbol-reference rendering
+- `reference.md`, a generated Markdown API index
+
+Add an explicit project script when generation belongs in the build:
 
 ```json
 {
   "scripts": {
-    "docs:symbols": "tsx scripts/docs/generate-symbol-map.ts",
-    "prebuild": "pnpm docs:symbols",
-    "dev:docs": "pnpm docs:symbols && vite dev"
+    "docs:reference": "docs-engine reference --root . --source 'src/**/*.ts' --output-dir docs/api",
+    "prebuild": "pnpm docs:reference"
   }
 }
 ```
 
-### 3. Use in Documentation
+## Selection
 
-```markdown
-# API Reference
-
-## Types
-
-The {@RequestState} type manages request lifecycle.
-
-:::reference RequestState
-:::
-
-## Functions
-
-Call {@createWorkflow} to initialize a new workflow:
-
-:::reference createWorkflow
-show: signature,params,returns,example
-:::
-```
-
-## Symbol Extraction
-
-### Supported Symbol Kinds
-
-**Types**
-```typescript
-export type RequestState = 'idle' | 'loading' | 'success' | 'error';
-```
-
-**Interfaces**
-```typescript
-export interface Config {
-  apiKey: string;
-  timeout: number;
-}
-```
-
-**Classes**
-```typescript
-export class WorkflowEngine {
-  start() { /* ... */ }
-}
-```
-
-**Functions**
-```typescript
-export function createWorkflow(config: Config): Workflow {
-  // ...
-}
-```
-
-**Enums**
-```typescript
-export enum Status {
-  Pending,
-  Active,
-  Complete
-}
-```
-
-**Constants**
-```typescript
-export const DEFAULT_TIMEOUT = 5000;
-```
-
-### JSDoc Extraction
-
-Extract documentation from JSDoc comments:
-
-```typescript
-/**
- * Creates a new workflow instance.
- *
- * @param config - Workflow configuration
- * @param config.apiKey - API authentication key
- * @param config.timeout - Request timeout in milliseconds
- * @returns Configured workflow instance
- *
- * @example
- * ```typescript
- * const workflow = createWorkflow({
- *   apiKey: 'sk-...',
- *   timeout: 5000
- * });
- * ```
- */
-export function createWorkflow(config: Config): Workflow {
-  // ...
-}
-```
-
-Generated symbol:
-```json
-{
-  "name": "createWorkflow",
-  "kind": "function",
-  "signature": "function createWorkflow(config: Config): Workflow",
-  "jsDoc": {
-    "description": "Creates a new workflow instance.",
-    "params": [
-      {
-        "name": "config",
-        "type": "Config",
-        "description": "Workflow configuration"
-      }
-    ],
-    "returns": "Configured workflow instance",
-    "example": "..."
-  }
-}
-```
-
-## Build Integration
-
-### Pre-commit Hook
-
-Keep symbol map in sync automatically:
+The extractor follows exported declarations and excludes common test, fixture, dependency, and build paths. Override patterns at the CLI boundary:
 
 ```bash
-#!/bin/sh
-# .husky/pre-commit
-
-pnpm docs:symbols
-git add docs/.generated/symbol-map.json
+docs-engine reference \
+  --source 'src/**/*.ts' 'packages/*/src/**/*.ts' \
+  --exclude '**/*.test.ts' '**/*.spec.ts' '**/internal/**'
 ```
 
-### CI/CD Validation
+Supported declarations include functions, interfaces, type aliases, classes, methods, enums, and exported variables. Overloads are deduplicated, and Svelte module scripts are supported by the workspace library extractor.
 
-Verify symbol map is up-to-date:
+## Source links
 
-```yaml
-# .github/workflows/docs.yml
-name: Docs
+Set repository metadata to make generated symbols link to source:
 
-on: [push, pull_request]
-
-jobs:
-  validate:
-    runs on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - run: pnpm install
-      - run: pnpm docs:symbols
-      - name: Check for changes
-        run: |
-          git diff --exit-code docs/.generated/symbol-map.json
+```bash
+docs-engine reference \
+  --repository-url https://github.com/acme/widgets \
+  --repository-branch stable \
+  --repository-root packages/widgets
 ```
 
-### Watch Mode
+`--repository-root` is the path from the repository root to the scanned `--root` directory.
 
-Auto-regenerate during development:
+## Watch and benchmark
 
-```typescript
-// scripts/docs/watch-symbols.ts
-import { watch } from 'chokidar';
-import { generateSymbolMap } from './generate-symbol-map';
-
-const watcher = watch('src/**/*.ts', {
-  ignored: /node_modules/,
-  persistent: true,
-});
-
-watcher.on('change', async (path) => {
-  console.log(`File changed: ${path}`);
-  await generateSymbolMap();
-});
-
-console.log('Watching for TypeScript changes...');
+```bash
+docs-engine reference --root . --watch
+docs-engine reference --root . --benchmark
 ```
 
-## Advanced Patterns
+Watch mode regenerates after source changes. Benchmark mode reports extraction timing without writing reference output.
 
-### Monorepo Setup
+## Use the symbol map
 
-Generate symbols from multiple packages:
+Pass the generated map through the `references` option of `createSvelteKitDocs`, then use inline or block references in Markdown:
 
-```typescript
-const packages = ['packages/core', 'packages/utils', 'packages/ui'];
+```markdown
+The {@RequestState} type describes the request lifecycle.
 
-for (const pkg of packages) {
-  const files = await glob(`${pkg}/src/**/*.ts`);
-  // Process files...
-}
+:::reference RequestState
+show: signature,description
+:::
 ```
 
-### Custom Filters
+## Custom monorepo catalogs
 
-Only document specific symbols:
+Large repositories often need package tiers, export-surface policy, or multiple reference providers. Import the generic library instead of copying extraction and rendering:
 
-```typescript
-function shouldInclude(symbol: SymbolDefinition): boolean {
-  // Skip private symbols
-  if (symbol.name.startsWith('_')) return false;
-
-  // Skip test utilities
-  if (symbol.path.includes('test-utils')) return false;
-
-  // Only include documented symbols
-  return !!symbol.jsDoc?.description;
-}
+```ts
+import {
+  extractWorkspacePackageSymbols,
+  outputReferencePages,
+  renderReferencePage,
+} from '@goobits/docs-engine-cli/library';
 ```
 
-### Performance Optimization
-
-Cache unchanged files:
-
-```typescript
-const cache = loadCache();
-
-for (const file of files) {
-  const stats = fs.statSync(file);
-  const cached = cache[file];
-
-  if (cached && cached.mtime === stats.mtimeMs) {
-    symbolMap = { ...symbolMap, ...cached.symbols };
-    continue;
-  }
-
-  // Process file...
-  cache[file] = {
-    mtime: stats.mtimeMs,
-    symbols: extractedSymbols,
-  };
-}
-
-saveCache(cache);
-```
+The host repository owns package selection and policy. The CLI library owns export traversal, TypeScript and Svelte extraction, generic rendering, and generated-file output.
 
 ## Troubleshooting
 
-**Symbols not updating?**
-Clear cache: `rm .dev/tmp/symbol-cache.json && pnpm docs:symbols`
+### No symbols found
 
-**TypeScript errors during generation?**
-Check your `tsconfig.json` configuration matches your script settings.
+- Confirm `--root` and `--source` match maintained source files.
+- Confirm declarations are exported through the package entry surface.
+- Check that exclude patterns are not broader than intended.
 
-**Missing symbols?**
-Verify symbols are exported and not excluded in glob patterns.
+### Source links point to the wrong path
 
-**Performance issues?**
-Implement caching (see Performance Optimization above).
+Set `--repository-root` to the scanned package path inside the repository.
 
-## Related
+### Generated pages are stale
 
-- [Symbol References Plugin](../plugins/symbol-references.md) - Use symbols in markdown
-- [Examples Guide](../guides/examples.md) - Complete generation scripts
-- [Architecture](../guides/architecture.md) - System design philosophy
+Run the same reference command used by the project's build or check script. Keep one canonical command in `package.json` so local and automated validation use identical inputs.

@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check-links": "docs-engine check-links --base-dir ../docs --public-dir ../static",
-    "prebuild": "pnpm check-links"
+    "prebuild": "pnpm run check-links"
   },
   "devDependencies": {
     "@goobits/docs-engine-cli": "workspace:*",

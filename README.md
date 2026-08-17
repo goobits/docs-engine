@@ -1,222 +1,106 @@
 # @goobits/docs-engine
 
-Documentation system for SvelteKit with markdown rendering, symbol references, and automated tooling.
+Reusable documentation runtime and tooling for SvelteKit. It turns a Markdown directory into rendered pages, navigation, search, edit links, and a responsive documentation layout.
 
-## Key Features
+## Quick start
 
-- **Enhanced Code Blocks** - Syntax highlighting, line numbers, diff syntax, copy-to-clipboard
-- **Symbol References** - Link to TypeScript types/functions with `{@Symbol}` syntax
-- **Image Optimization** - Auto-generate WebP/AVIF, lazy loading, lightbox modal
-- **Math Rendering** - LaTeX equations with KaTeX (inline `$...$` and display `$$...$$`)
-- **API Documentation** - Auto-generate API docs from TypeScript with JSDoc
-- **Link Validation** - CLI tool to check internal and external links
-- **Automated Screenshots** - Web and CLI screenshot generation
-- **MDsveX Plugins** - Callouts, mermaid, tabs, filetree, TOC, and more
-
-## Quick Start
+Create a complete SvelteKit docs site:
 
 ```bash
-# Scaffold a new docs site (recommended)
-pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
+pnpm dlx --package @goobits/docs-engine-cli create-docs-engine my-docs
+cd my-docs
+pnpm dev
+```
 
-# Installation (existing project)
-pnpm add @goobits/docs-engine
+The scaffold includes the SvelteKit routes, sample Markdown, search endpoint, styles, type checking, link checking, and production build configuration.
 
-# CLI tools (includes scaffolder)
+For an existing SvelteKit app:
+
+```bash
+pnpm add @goobits/docs-engine @lucide/svelte
+```
+
+See [Getting Started](docs/getting-started.md) for the route files and configuration.
+
+## Packages
+
+| Package | Owns |
+| --- | --- |
+| `@goobits/docs-engine` | Markdown rendering, components, SvelteKit adapter, navigation, search, and server utilities |
+| `@goobits/docs-engine-cli` | Project scaffolding, API reference generation, link checking, and docs version commands |
+
+## SvelteKit adapter
+
+The adapter is the shortest supported integration. Give it Markdown loaders and reuse its page, layout, and search handlers:
+
+```ts
+import { error } from '@sveltejs/kit';
+import {
+  createDocsLayoutLoad,
+  createDocsPageLoad,
+  createDocsSearchHandler,
+  createSvelteKitDocs,
+  type MarkdownModuleLoader,
+} from '@goobits/docs-engine/sveltekit';
+
+const modules = import.meta.glob('../../../docs/**/*.md', {
+  import: 'default',
+  query: '?raw',
+}) as Record<string, MarkdownModuleLoader>;
+
+const docs = createSvelteKitDocs({
+  modules,
+  config: {
+    routePrefix: '/docs',
+    screenshots: { enabled: false },
+  },
+});
+
+export const loadDocsLayout = createDocsLayoutLoad(docs);
+export const loadDocsPage = createDocsPageLoad(docs, error);
+export const getDocsSearch = createDocsSearchHandler(docs);
+```
+
+Render returned page data with `DocsLayout` from `@goobits/docs-engine/components`, and import `@goobits/docs-engine/styles` once in the host app.
+
+## Public entry points
+
+- `@goobits/docs-engine`: browser-safe plugins, configuration, and utilities
+- `@goobits/docs-engine/sveltekit`: Markdown directory adapter for SvelteKit
+- `@goobits/docs-engine/components`: Svelte documentation UI
+- `@goobits/docs-engine/server`: Node-only rendering, screenshots, Git, and file operations
+- `@goobits/docs-engine/plugins`: low-level Markdown plugins
+- `@goobits/docs-engine/reference`: symbol resolution and source-link rendering
+- `@goobits/docs-engine/styles`: shared documentation styles
+
+Package imports resolve to compiled JavaScript. The `source` export condition remains available to linked monorepo development.
+
+## CLI
+
+Install the CLI in an existing project:
+
+```bash
 pnpm add -D @goobits/docs-engine-cli
 ```
 
-### 1. Configure MDSveX
-
-Add plugins to your `svelte.config.js`:
-
-```javascript
-import { mdsvex } from 'mdsvex';
-import remarkMath from 'remark-math';
-import {
-  filetreePlugin,
-  calloutsPlugin,
-  mermaidPlugin,
-  tabsPlugin,
-  codeHighlightPlugin,
-  katexPlugin,
-  remarkTableOfContents,
-  linksPlugin,
-  screenshotPlugin,
-} from '@goobits/docs-engine/plugins';
-
-export default {
-  extensions: ['.svelte', '.md'],
-  preprocess: [
-    mdsvex({
-      remarkPlugins: [
-        filetreePlugin(),
-        calloutsPlugin(),
-        mermaidPlugin(),
-        tabsPlugin(),
-        remarkTableOfContents(),
-        linksPlugin(),
-        referencePlugin(),      // Symbol references
-        screenshotPlugin(),
-        remarkMath,             // Parse math syntax
-        katexPlugin(),          // Render math with KaTeX
-        codeHighlightPlugin({   // Enhanced code blocks
-          theme: 'dracula',
-          showLineNumbers: false
-        }),
-      ],
-    }),
-  ],
-};
-```
-
-### 2. Add Hydrators to Layout
-
-In your layout component:
-
-```svelte
-<script>
-  import {
-    CodeTabsHydrator,
-    FileTreeHydrator,
-    MermaidHydrator,
-    ScreenshotHydrator,
-  } from '@goobits/docs-engine/components';
-</script>
-
-<CodeTabsHydrator theme="dracula" />
-<FileTreeHydrator allowCopy={true} />
-<MermaidHydrator />
-<ScreenshotHydrator />
-
-<slot />
-```
-
-### 3. Import Styles
-
-```scss
-@import '@goobits/docs-engine/styles';
-```
-
-## CLI Tools
-
-### Create a New Docs Site
+Common commands:
 
 ```bash
-pnpm dlx @goobits/docs-engine-cli create-docs-engine my-docs
-# or
-npx -y @goobits/docs-engine-cli create-docs-engine my-docs
+docs-engine check-links --base-dir docs --public-dir static
+docs-engine reference --root . --source 'src/**/*.ts' --output-dir docs/api
+docs-engine version list --docs-dir docs
 ```
 
-### Link Checking
-
-Validate all links in your documentation:
-
-```bash
-# Check internal links only
-pnpm docs-engine check-links
-
-# Check external links too
-pnpm docs-engine check-links --external
-
-# Quiet mode (errors only)
-pnpm docs-engine check-links --quiet
-
-# JSON output for CI
-pnpm docs-engine check-links --json
-
-# Configure via .linkcheckerrc.json
-```
-
-Validates internal links (files and anchors), external links with HTTP requests, and provides color-coded output with configurable concurrency.
-
-See [CLI documentation](./packages/docs-engine-cli/README.md) for details.
+See the [CLI README](packages/docs-engine-cli/README.md) for command options.
 
 ## Documentation
 
-**[Complete Documentation Index](./docs/index.md)** - Full documentation with learning paths
-
-### Getting Started
-
-- **[Getting Started](./docs/getting-started.md)** - 5-minute setup guide
-- **[Plugin Order Guide](./docs/guides/plugin-order.md)** - Plugin execution order and configuration
-- **[Architecture](./docs/guides/architecture.md)** - Package/consumer split and design decisions
-- **[Examples](./docs/guides/examples.md)** - Code examples and common patterns
-
-### Plugin Guides
-
-- **[Symbol References](./docs/plugins/symbol-references.md)** - Link to TypeScript symbols with `{@Symbol}` syntax
-- **[Screenshots](./docs/plugins/screenshots.md)** - Automated web and CLI screenshot generation
-- **[Image Optimization](./docs/plugins/image-optimization.md)** - Auto WebP/AVIF generation with lazy loading
-- **[Code Highlighting](./docs/plugins/code-highlighting.md)** - Syntax highlighting with Shiki
-- **[Table of Contents](./docs/plugins/toc.md)** - Auto-generate TOC with `## TOC` syntax
-- **[File Tree](./docs/plugins/filetree.md)** - Interactive file trees
-- **[Callouts](./docs/plugins/callouts.md)** - Styled note/warning/info boxes
-- **[Mermaid](./docs/plugins/mermaid.md)** - Diagram rendering with mermaid.js
-- **[Code Tabs](./docs/plugins/code-tabs.md)** - Tabbed code examples
-
-### JavaScript API
-
-```javascript
-import { parseFrontmatter, extractTitle } from '@goobits/docs-engine/utils';
-import { buildNavigation } from '@goobits/docs-engine/utils';
-import { loadSymbolMap, resolveSymbol } from '@goobits/docs-engine/utils';
-
-// Parse frontmatter from markdown
-const { frontmatter, content } = parseFrontmatter(markdown);
-
-// Build navigation from markdown files
-const navigation = buildNavigation(files);
-
-// Resolve symbol references
-const symbolMap = loadSymbolMap();
-const symbol = resolveSymbol('RequestState', symbolMap);
-```
-
-## Example: Symbol References
-
-**1. Generate symbol map (in your project):**
-
-```bash
-# Create scripts/docs/generate-symbol-map.ts
-pnpm docs:symbols
-```
-
-**2. Use in markdown:**
-
-```markdown
-# API Documentation
-
-The {@RequestState} type tracks request context.
-
-:::reference RequestState
-:::
-```
-
-**3. Rendered output:**
-
-Links to GitHub source with hover tooltips showing type signatures.
-
-See **[docs/guides/examples.md](./docs/guides/examples.md)** for more examples.
-
-## Architecture
-
-The symbol reference system separates reusable package functionality from consumer-specific implementation:
-
-**Package (this package):**
-- Remark/rehype plugins for transforming `{@Symbol}` syntax
-- Symbol resolution and rendering logic
-- Type definitions and utilities
-
-**Consumer (your project):**
-- Symbol generation scripts (scan TypeScript files)
-- Build pipeline integration
-- Pre-commit hooks and CI validation
-
-See **[Architecture Guide](./docs/guides/architecture.md)** for integration guide and design decisions.
+- [Getting Started](docs/getting-started.md)
+- [Architecture and ownership](docs/guides/architecture.md)
+- [Plugin order](docs/guides/plugin-order.md)
+- [Examples](docs/guides/examples.md)
+- [API reference generation](docs/reference/api-generation.md)
 
 ## License
 
-Licensed under the Functional Source License, Version 1.1, ALv2 Future License.
-Each released version becomes available under Apache License 2.0 two years after
-that version is made available. See [LICENSE](LICENSE).
+Licensed under the Functional Source License, Version 1.1, ALv2 Future License. Each released version becomes available under Apache License 2.0 two years after release. See [LICENSE](LICENSE).

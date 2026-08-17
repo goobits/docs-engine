@@ -83,7 +83,7 @@
   {/each}
 </div>
 
-<style lang="scss">
+<style>
   .md-filetree {
     margin: var(--md-spacing-xl) 0;
     padding: var(--md-spacing-lg);
@@ -96,7 +96,7 @@
     line-height: var(--md-line-height-relaxed);
   }
 
-  // Mobile responsive
+  /* Mobile responsive */
   @media (max-width: 768px) {
     .md-filetree {
       padding: var(--md-spacing-md);
