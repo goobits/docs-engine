@@ -8,7 +8,7 @@ export default defineConfig({
     alias: {
       '$app/stores': resolve(import.meta.dirname, 'test-support/app-stores.ts'),
     },
-    conditions: ['browser'],
+    conditions: ['source', 'browser'],
   },
   ssr: {
     noExternal: ['@lucide/svelte'],
