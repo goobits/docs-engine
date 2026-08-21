@@ -395,12 +395,8 @@
   /* Sidebar Container */
   .docs-sidebar-container {
     width: var(--docs-sidebar-width, 280px);
-    position: sticky;
-    top: var(--docs-sidebar-sticky-top, 0px);
     align-self: start;
-    max-height: calc(100dvh - var(--docs-sidebar-sticky-top, 0px));
     min-width: 0;
-    overflow-y: auto;
     padding: var(--docs-spacing-md) 0;
   }
 
@@ -745,7 +741,9 @@
       left: 0;
       bottom: 0;
       width: 280px;
-      height: auto;
+      height: calc(100dvh - var(--docs-mobile-top-offset, 0px));
+      min-height: 0;
+      overflow: hidden;
       z-index: 1000;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
