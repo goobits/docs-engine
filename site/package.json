@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "check-links": "docs-engine check-links --base-dir ../docs --public-dir ../static",
+    "check-links": "tsx ../packages/docs-engine-cli/src/index.ts check-links --base-dir ../docs --public-dir ../static",
     "prebuild": "pnpm run check-links"
   },
   "devDependencies": {

@@ -3,92 +3,27 @@
   "version": "2.0.3",
   "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/lib/index.ts",
+  "types": "./src/lib/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "source": "./src/lib/index.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "source": "./src/lib/server/index.ts",
-      "import": "./dist/server/index.js",
-      "default": "./dist/server/index.js"
-    },
-    "./server/screenshot-service": {
-      "types": "./dist/server/screenshot-service.d.ts",
-      "source": "./src/lib/server/screenshot-service.ts",
-      "import": "./dist/server/screenshot-service.js",
-      "default": "./dist/server/screenshot-service.js"
-    },
-    "./server/markdownRenderer": {
-      "types": "./dist/server/markdownRenderer.d.ts",
-      "source": "./src/lib/server/markdownRenderer.ts",
-      "import": "./dist/server/markdownRenderer.js",
-      "default": "./dist/server/markdownRenderer.js"
-    },
-    "./sveltekit": {
-      "types": "./dist/sveltekit/index.d.ts",
-      "source": "./src/lib/sveltekit/index.ts",
-      "import": "./dist/sveltekit/index.js",
-      "default": "./dist/sveltekit/index.js"
-    },
-    "./plugins": {
-      "types": "./dist/plugins/index.d.ts",
-      "source": "./src/lib/plugins/index.ts",
-      "import": "./dist/plugins/index.js",
-      "default": "./dist/plugins/index.js"
-    },
-    "./reference": {
-      "types": "./dist/reference.d.ts",
-      "source": "./src/lib/reference.ts",
-      "import": "./dist/reference.js",
-      "default": "./dist/reference.js"
-    },
+    ".": "./src/lib/index.ts",
+    "./server": "./src/lib/server/index.ts",
+    "./server/screenshot-service": "./src/lib/server/screenshot-service.ts",
+    "./server/markdownRenderer": "./src/lib/server/markdownRenderer.ts",
+    "./sveltekit": "./src/lib/sveltekit/index.ts",
+    "./plugins": "./src/lib/plugins/index.ts",
+    "./reference": "./src/lib/reference.ts",
     "./components": {
-      "types": "./dist/components/index.d.ts",
-      "source": "./src/lib/components/index.ts",
-      "svelte": "./dist/components/index.js",
-      "import": "./dist/components/index.js",
-      "default": "./dist/components/index.js"
+      "types": "./src/lib/components/index.ts",
+      "svelte": "./src/lib/components/index.ts",
+      "import": "./src/lib/components/index.ts"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "source": "./src/lib/utils/index.ts",
-      "import": "./dist/utils/index.js",
-      "default": "./dist/utils/index.js"
-    },
-    "./utils/openapi-formatter": {
-      "types": "./dist/utils/openapi-formatter.d.ts",
-      "source": "./src/lib/utils/openapi-formatter.ts",
-      "import": "./dist/utils/openapi-formatter.js",
-      "default": "./dist/utils/openapi-formatter.js"
-    },
-    "./navigation-scanner": {
-      "types": "./dist/utils/navigation-scanner.d.ts",
-      "source": "./src/lib/utils/navigation-scanner.ts",
-      "import": "./dist/utils/navigation-scanner.js",
-      "default": "./dist/utils/navigation-scanner.js"
-    },
-    "./config": {
-      "types": "./dist/config/index.d.ts",
-      "source": "./src/lib/config/index.ts",
-      "import": "./dist/config/index.js",
-      "default": "./dist/config/index.js"
-    },
-    "./styles": {
-      "source": "./src/lib/styles/index.css",
-      "import": "./dist/styles/index.css",
-      "default": "./dist/styles/index.css"
-    },
-    "./styles/*": {
-      "source": "./src/lib/styles/*",
-      "import": "./dist/styles/*",
-      "default": "./dist/styles/*"
-    }
+    "./utils": "./src/lib/utils/index.ts",
+    "./utils/openapi-formatter": "./src/lib/utils/openapi-formatter.ts",
+    "./navigation-scanner": "./src/lib/utils/navigation-scanner.ts",
+    "./config": "./src/lib/config/index.ts",
+    "./styles": "./src/lib/styles/index.css",
+    "./styles/*": "./src/lib/styles/*"
   },
   "files": [
     "dist",
@@ -100,7 +35,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "dev": "tsup --watch",
     "dev:all": "pnpm -r --parallel dev",
-    "release": "pnpm -r --filter @goobits/docs-engine build && pnpm -r --filter @goobits/docs-engine-cli build && tsx scripts/bumpIfPublished.ts && npm publish --access public && (cd packages/docs-engine-cli && npm publish --access public)",
+    "release": "pnpm -r --filter @goobits/docs-engine build && pnpm -r --filter @goobits/docs-engine-cli build && tsx scripts/bumpIfPublished.ts && pnpm publish --access public && pnpm --dir packages/docs-engine-cli publish --access public",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -114,7 +49,7 @@
     "jscpd": "jscpd src",
     "madge": "madge --circular --extensions ts,js src",
     "madge:graph": "madge --image graph.svg --extensions ts,js src",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm run build",
     "prepare": "husky || true"
   },
   "dependencies": {
@@ -166,7 +101,62 @@
   "license": "FSL-1.1-ALv2",
   "author": "GooBits",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./server": {
+        "types": "./dist/server/index.d.ts",
+        "import": "./dist/server/index.js"
+      },
+      "./server/screenshot-service": {
+        "types": "./dist/server/screenshot-service.d.ts",
+        "import": "./dist/server/screenshot-service.js"
+      },
+      "./server/markdownRenderer": {
+        "types": "./dist/server/markdownRenderer.d.ts",
+        "import": "./dist/server/markdownRenderer.js"
+      },
+      "./sveltekit": {
+        "types": "./dist/sveltekit/index.d.ts",
+        "import": "./dist/sveltekit/index.js"
+      },
+      "./plugins": {
+        "types": "./dist/plugins/index.d.ts",
+        "import": "./dist/plugins/index.js"
+      },
+      "./reference": {
+        "types": "./dist/reference.d.ts",
+        "import": "./dist/reference.js"
+      },
+      "./components": {
+        "types": "./dist/components/index.d.ts",
+        "svelte": "./dist/components/index.js",
+        "import": "./dist/components/index.js"
+      },
+      "./utils": {
+        "types": "./dist/utils/index.d.ts",
+        "import": "./dist/utils/index.js"
+      },
+      "./utils/openapi-formatter": {
+        "types": "./dist/utils/openapi-formatter.d.ts",
+        "import": "./dist/utils/openapi-formatter.js"
+      },
+      "./navigation-scanner": {
+        "types": "./dist/utils/navigation-scanner.d.ts",
+        "import": "./dist/utils/navigation-scanner.js"
+      },
+      "./config": {
+        "types": "./dist/config/index.d.ts",
+        "import": "./dist/config/index.js"
+      },
+      "./styles": "./dist/styles/index.css",
+      "./styles/*": "./dist/styles/*"
+    }
   },
   "lint-staged": {
     "*.{ts,js}": [
