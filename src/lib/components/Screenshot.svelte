@@ -12,6 +12,7 @@
    */
   import ScreenshotImage from './ScreenshotImage.svelte';
   import type { DocsLoadingIndicator } from './loadingIndicator.js';
+  import { getVersion } from '../utils/index.ts';
 
   interface Props {
     /** Unique name for the screenshot (e.g., "sessions-list") */
@@ -34,7 +35,7 @@
     selector?: string;
     /** Wait for selector before capturing (for web screenshots) */
     waitFor?: string;
-    /** Screenshot version (defaults to 1.0.0) */
+    /** Screenshot version (defaults to the package version) */
     version?: string;
     /** Host-provided loading indicator */
     loadingIndicator?: DocsLoadingIndicator;
@@ -51,7 +52,7 @@
     promptText = '$',
     selector,
     waitFor,
-    version = '1.0.0',
+    version = getVersion(),
     loadingIndicator,
   }: Props = $props();
 

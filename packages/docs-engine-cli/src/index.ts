@@ -3,9 +3,7 @@ import { glob } from 'glob';
 import ora from 'ora';
 import chalk from 'chalk';
 import path from 'path';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import packageManifest from '../package.json' with { type: 'json' };
 import { extractLinksFromFiles } from './link-extractor.js';
 import { validateLinks } from './link-validator.js';
 import { printResults } from './reporter.js';
@@ -23,15 +21,7 @@ import { createApiSymbolGenerator } from './apiSymbolGenerator.js';
  * Get the CLI version from package.json
  */
 function getVersion(): string {
-  try {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    const packageJsonPath = join(__dirname, '../package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-    return packageJson.version || '1.0.0';
-  } catch {
-    return '1.0.0';
-  }
+  return packageManifest.version;
 }
 
 /**

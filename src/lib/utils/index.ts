@@ -33,6 +33,9 @@ export * from './base64.ts';
 // Date utilities (browser-safe)
 export * from './date.ts';
 
+// Package version utility (browser-safe manifest import)
+export { getVersion } from './version.ts';
+
 // Highlighter utilities
 export * from './highlighter.ts';
 
@@ -59,5 +62,4 @@ export type { SearchDocument, SearchIndexResult, SearchIndexConfig } from './sea
 
 // NOTE: Markdown generation utilities moved to server/index.ts (requires Node.js)
 // NOTE: File I/O utilities moved to server/index.ts (requires Node.js fs)
-// NOTE: Version utilities moved to server/index.ts (requires Node.js fs)
 // Import from '@goobits/docs-engine/server' instead

@@ -48,7 +48,7 @@ export type {
 export * from '../utils/git.ts';
 export type { GitConfig, Contributor, GitProvider } from '../utils/git.ts';
 
-// Version utilities - Server-side only (requires Node.js fs)
+// Compatibility export. Browser code can import this from the utils entry point.
 export * from '../utils/version.ts';
 
 // Navigation scanner utilities - Server-side only (requires Node.js fs/promises)

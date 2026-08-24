@@ -9,6 +9,8 @@ pnpm --filter site build
 pnpm --filter site dev
 ```
 
+Development and preview servers use `http://localhost:3390` and fail if that port is occupied.
+
 The implementation intentionally stays thin:
 
 - `src/routes/docs/_docsData.server.ts` creates the shared docs runtime.
