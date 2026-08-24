@@ -46,9 +46,6 @@ export * from './html.ts';
 // Sanitize utilities
 export * from './sanitize.ts';
 
-// Logger utilities (browser-safe)
-export { createBrowserLogger } from './browser-logger.ts';
-
 // Hydrator lifecycle composable (browser-only, requires Svelte)
 export { useHydrator } from './use-hydrator.ts';
 export type { HydratorOptions } from './use-hydrator.ts';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { decodeBase64 } from '@goobits/docs-engine/utils';
-  import { highlightCode } from '@goobits/docs-engine/utils';
+  import { decodeBase64 } from '../utils/index.ts';
+  import { highlightCode } from '../utils/index.ts';
 
   interface Tab {
     label: string;

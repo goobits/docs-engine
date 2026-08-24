@@ -13,7 +13,7 @@
     isDocsAudience,
     type DocsAudience,
     type DocsSection,
-  } from '@goobits/docs-engine/utils';
+  } from '../utils/index.ts';
   import { resolveDocsSectionIcon } from './section-icons.js';
 
   // Audience filter state

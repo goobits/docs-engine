@@ -1,5 +1,7 @@
 packages:
   - '.'
+  - '../logger'
+  - '../sitemap'
   - 'site'
   - 'packages/*'
 allowBuilds:

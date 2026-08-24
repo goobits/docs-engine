@@ -1,7 +1,7 @@
 <script lang="ts">
   import FileTreeItem from './FileTreeItem.svelte';
-  import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { getFileType, FILE_TYPES } from '@goobits/docs-engine/utils';
+  import type { TreeNode } from '../utils/index.ts';
+  import { getFileType, FILE_TYPES } from '../utils/index.ts';
 
   interface Props {
     node: TreeNode;

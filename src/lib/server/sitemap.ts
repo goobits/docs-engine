@@ -5,19 +5,9 @@
  * Supports custom priorities, exclusions, and last modified dates.
  */
 
+import { buildRobotsTxt, buildSitemapXml } from '@goobits/sitemap/server';
+import type { SitemapRoute } from '@goobits/sitemap/core';
 import type { DocsSection } from '../utils/navigation.ts';
-
-/**
- * Sitemap URL entry
- *
- * @public
- */
-export interface SitemapUrl {
-  loc: string;
-  lastmod?: string;
-  changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
-  priority?: number;
-}
 
 /**
  * Sitemap configuration
@@ -60,60 +50,19 @@ export function generateSitemap(navigation: DocsSection[], config: SitemapConfig
     lastModified = new Map(),
   } = config;
 
-  // Collect all URLs from navigation
-  const urls: SitemapUrl[] = [];
-
-  navigation.forEach((section) => {
-    section.links.forEach((link) => {
-      urls.push({
-        loc: `${siteUrl}${link.href}`,
-        lastmod: lastModified.get(link.href),
+  const routes: SitemapRoute[] = navigation.flatMap((section) =>
+    section.links.map((link) => {
+      const modified = lastModified.get(link.href);
+      return {
+        path: link.href,
+        ...(modified ? { lastModified: modified } : {}),
         changefreq: defaultChangefreq,
         priority: defaultPriority,
-      });
-    });
-  });
+      };
+    })
+  );
 
-  // Generate XML
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url) => generateUrlEntry(url)).join('\n')}
-</urlset>`;
-}
-
-/**
- * Generate a single URL entry for sitemap
- */
-function generateUrlEntry(url: SitemapUrl): string {
-  const parts = [`  <url>`, `    <loc>${escapeXml(url.loc)}</loc>`];
-
-  if (url.lastmod) {
-    parts.push(`    <lastmod>${url.lastmod}</lastmod>`);
-  }
-
-  if (url.changefreq) {
-    parts.push(`    <changefreq>${url.changefreq}</changefreq>`);
-  }
-
-  if (url.priority !== undefined) {
-    parts.push(`    <priority>${url.priority.toFixed(1)}</priority>`);
-  }
-
-  parts.push(`  </url>`);
-
-  return parts.join('\n');
-}
-
-/**
- * Escape XML special characters
- */
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+  return buildSitemapXml(siteUrl, routes);
 }
 
 /**
@@ -139,13 +88,9 @@ export function generateRobotsTxt(config: {
 }): string {
   const { siteUrl, disallow = [], allow = [] } = config;
 
-  const lines = [
-    'User-agent: *',
-    ...allow.map((path) => `Allow: ${path}`),
-    ...disallow.map((path) => `Disallow: ${path}`),
-    '',
-    `Sitemap: ${siteUrl}/sitemap.xml`,
-  ];
-
-  return lines.join('\n');
+  return buildRobotsTxt({
+    sitemapUrl: `${siteUrl}/sitemap.xml`,
+    allow,
+    disallow,
+  });
 }

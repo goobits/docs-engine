@@ -7,8 +7,8 @@
    */
   import { mount } from 'svelte';
   import FileTree from './FileTree.svelte';
-  import type { TreeNode } from '@goobits/docs-engine/utils';
-  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
+  import type { TreeNode } from '../utils/index.ts';
+  import { escapeHtml, useHydrator } from '../utils/index.ts';
 
   interface Props {
     githubUrl?: string;

@@ -3,9 +3,10 @@
    * Client-side hydrator for collapsible sections
    * Adds animations and accessibility to native <details> elements
    */
-  import { createBrowserLogger, useHydrator } from '@goobits/docs-engine/utils';
+  import { createLogger } from '@goobits/logger';
+  import { useHydrator } from '../utils/index.ts';
 
-  const logger = createBrowserLogger('CollapseHydrator');
+  const logger = createLogger('docs-engine:collapse-hydrator');
 
   function hydrate() {
     requestAnimationFrame(() => {
@@ -31,7 +32,7 @@
           details.setAttribute('data-hydrated', 'true');
         }
       } catch (err) {
-        logger.error(err);
+        logger.error('Collapse hydration failed', { error: err });
       }
     });
   }

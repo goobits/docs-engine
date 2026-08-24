@@ -1,8 +1,8 @@
 import { parse as parseYaml } from 'yaml';
+import { createLogger } from '@goobits/logger';
 import { isDocsAudience, type DocsSection, type DocsLink } from './navigation.ts';
-import { createBrowserLogger } from './browser-logger.ts';
 
-const logger = createBrowserLogger('navigation-builder');
+const logger = createLogger('docs-engine:navigation-builder');
 
 /**
  * Frontmatter metadata extracted from markdown files
@@ -75,7 +75,7 @@ export function extractFrontmatter(content: string): {
     const body = match[2];
     return { frontmatter, body };
   } catch (err) {
-    logger.warn({ error: err }, 'Failed to parse frontmatter');
+    logger.warn('Failed to parse frontmatter', { error: err });
     return {
       frontmatter: {},
       body: content,

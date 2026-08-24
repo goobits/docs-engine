@@ -12,7 +12,7 @@
     parseOpenAPISpec,
     sanitizeHtml,
     useHydrator,
-  } from '@goobits/docs-engine/utils';
+  } from '../utils/index.ts';
 
   interface Props {
     /** Theme for styling */

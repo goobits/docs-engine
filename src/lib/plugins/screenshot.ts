@@ -1,11 +1,11 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
+import { createLogger } from '@goobits/logger';
 import { encodeJsonBase64 } from '../utils/base64.ts';
 import { getVersion } from '../utils/version.ts';
-import { createBrowserLogger } from '../utils/browser-logger.ts';
 import type { MutableCodeNode } from '../mdastTypes.ts';
 
-const logger = createBrowserLogger('screenshot-plugin');
+const logger = createLogger('docs-engine:screenshot-plugin');
 
 export interface ScreenshotPluginOptions {
   basePath?: string;
@@ -83,11 +83,11 @@ export function screenshotPlugin(options: ScreenshotPluginOptions = {}): (tree: 
       // Validate based on type
       const type = config.type || 'web';
       if (type === 'cli' && !config.command) {
-        logger.error({ name, type: 'cli' }, 'CLI screenshot missing required "command" field');
+        logger.error('CLI screenshot missing required "command" field', { name, type: 'cli' });
         return;
       }
       if (type === 'web' && !config.url) {
-        logger.error({ name, type: 'web' }, 'Web screenshot missing required "url" field');
+        logger.error('Web screenshot missing required "url" field', { name, type: 'web' });
         return;
       }
 

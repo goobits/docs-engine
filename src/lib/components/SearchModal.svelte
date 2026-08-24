@@ -10,8 +10,8 @@
   import { browser } from '$app/environment';
   import { Search, ArrowUp, ArrowDown, CornerDownLeft, X } from '@lucide/svelte';
   import type MiniSearch from 'minisearch';
-  import { highlightMatches, performSearch } from '@goobits/docs-engine/utils';
-  import type { SearchIndexResult } from '@goobits/docs-engine/utils';
+  import { highlightMatches, performSearch } from '../utils/index.ts';
+  import type { SearchIndexResult } from '../utils/index.ts';
   import { createSearchIndexLoader } from './_searchIndexLoader.js';
 
   interface Props {

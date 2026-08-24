@@ -7,8 +7,8 @@
    */
 
   import { Clock, Users } from '@lucide/svelte';
-  import type { Contributor } from '@goobits/docs-engine/utils';
-  import { formatRelativeDate } from '@goobits/docs-engine/utils';
+  import type { Contributor } from '../utils/index.ts';
+  import { formatRelativeDate } from '../utils/index.ts';
 
   interface Props {
     /** Last updated date from Git history */

@@ -3,11 +3,11 @@
  * Reuses the same createHighlighter instance across all components
  */
 
+import { createLogger } from '@goobits/logger';
 import { escapeHtml } from './html.ts';
-import { createBrowserLogger } from './browser-logger.ts';
 import { createDocsHighlighter, loadDocsLanguage, type DocsHighlighter } from './shiki-bundle.ts';
 
-const logger = createBrowserLogger('highlighter');
+const logger = createLogger('docs-engine:highlighter');
 
 const highlighterPromises = new Map<string, Promise<DocsHighlighter>>();
 
@@ -46,7 +46,7 @@ export async function highlightCode(
       theme: theme,
     });
   } catch (err) {
-    logger.error({ error: err, language, theme }, 'Failed to highlight code, using fallback');
+    logger.error('Failed to highlight code, using fallback', { error: err, language, theme });
     // Fallback to plain code block
     return `<pre class="shiki ${theme}" style="background-color:#282a36;color:#f8f8f2"><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
   }

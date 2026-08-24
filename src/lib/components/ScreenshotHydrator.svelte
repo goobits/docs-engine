@@ -8,7 +8,7 @@
   import { mount } from 'svelte';
   import ScreenshotImage from './ScreenshotImage.svelte';
   import type { DocsLoadingIndicator } from './loadingIndicator.js';
-  import { escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
+  import { escapeHtml, useHydrator } from '../utils/index.ts';
 
   interface Props {
     loadingIndicator?: DocsLoadingIndicator;

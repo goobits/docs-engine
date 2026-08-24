@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { TreeNode } from '@goobits/docs-engine/utils';
+  import type { TreeNode } from '../utils/index.ts';
   import FileTreeItem from './FileTreeItem.svelte';
 
   interface Props {

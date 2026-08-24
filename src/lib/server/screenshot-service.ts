@@ -7,7 +7,7 @@ import sharp from 'sharp';
 import type { MarkdownDocsConfig } from '../config/index.ts';
 import { CliCommandNotAllowedError, CliExecutor } from './cli-executor.ts';
 import { getVersion } from '../utils/version.ts';
-import { createLogger } from './logger.ts';
+import { createLogger } from '@goobits/logger';
 import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.ts';
 import { checkRateLimit } from './rate-limiter.ts';
 import {
@@ -285,7 +285,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
     if (
       !checkRateLimit(clientIp, RATE_LIMIT.SCREENSHOT_MAX_REQUESTS, RATE_LIMIT.SCREENSHOT_WINDOW_MS)
     ) {
-      logger.warn({ ip: clientIp }, 'Rate limit exceeded for screenshot endpoint');
+      logger.warn('Rate limit exceeded for screenshot endpoint', { ip: clientIp });
       return json(
         {
           success: false,
@@ -324,15 +324,12 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
       // Determine screenshot type
       const type = screenshotConfig?.type || 'web';
 
-      logger.info(
-        {
-          name,
-          type,
-          ...getUrlLogContext(url),
-          ip: clientIp,
-        },
-        'Processing screenshot request'
-      );
+      logger.info('Processing screenshot request', {
+        name,
+        type,
+        ...getUrlLogContext(url),
+        ip: clientIp,
+      });
 
       if (type === 'cli') {
         if (screenshotConfig?.command) {
@@ -361,7 +358,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
       }
     } catch (error: unknown) {
       if (error instanceof CliCommandNotAllowedError) {
-        logger.warn({ ip: clientIp }, 'Rejected disallowed CLI screenshot command');
+        logger.warn('Rejected disallowed CLI screenshot command', { ip: clientIp });
         return json(
           {
             success: false,
@@ -372,7 +369,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
       }
 
       if (error instanceof CircuitBreakerError) {
-        logger.error({ breaker: error.message }, 'Circuit breaker is open');
+        logger.error('Circuit breaker is open', { breaker: error.message });
         return json(
           {
             success: false,
@@ -382,7 +379,7 @@ export function createScreenshotEndpoint(config: MarkdownDocsConfig): RequestHan
         );
       }
 
-      logger.error({ err: error }, 'Screenshot generation failed');
+      logger.error('Screenshot generation failed', { error });
       const message = error instanceof Error ? error.message : String(error);
       return json(
         {
@@ -426,7 +423,7 @@ async function generateCliScreenshot(options: {
   logger.debug('Executing allowed CLI command for screenshot');
   const result = await cliExecutor.execute(screenshotConfig.command);
   const output = result.stdout + (result.stderr ? '\n' + result.stderr : '');
-  logger.debug({ outputLength: output.length }, 'CLI command executed successfully');
+  logger.debug('CLI command executed successfully', { outputLength: output.length });
 
   const chromium = await loadChromium();
 
@@ -457,7 +454,7 @@ async function generateCliScreenshot(options: {
   const [width, height] = viewportDimensions;
 
   // Launch browser and screenshot the terminal HTML
-  logger.debug({ width, height }, 'Launching browser for CLI screenshot');
+  logger.debug('Launching browser for CLI screenshot', { width, height });
   // Create output directory
   const outputDir = resolveScreenshotOutputDir(screenshotsConfig, version);
   await mkdir(outputDir, { recursive: true });
@@ -486,7 +483,7 @@ async function generateCliScreenshot(options: {
   } finally {
     await browser.close();
   }
-  logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
+  logger.debug('Screenshot captured, processing image formats', { path: screenshot2xPath });
 
   // Process image into multiple formats using shared function
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
@@ -497,15 +494,12 @@ async function generateCliScreenshot(options: {
     basePath,
   });
 
-  logger.info(
-    {
-      name,
-      publicPath: imageResult.publicPath,
-      width: imageResult.displayWidth,
-      height: imageResult.displayHeight,
-    },
-    'CLI screenshot generated successfully'
-  );
+  logger.info('CLI screenshot generated successfully', {
+    name,
+    publicPath: imageResult.publicPath,
+    width: imageResult.displayWidth,
+    height: imageResult.displayHeight,
+  });
 
   return json({
     success: true,
@@ -539,15 +533,12 @@ async function generateWebScreenshot(options: {
   // Validate URL for SSRF protection
   try {
     validateUrl(url, screenshotsConfig.allowedDomains);
-    logger.debug(getUrlLogContext(url), 'URL validation passed');
+    logger.debug('URL validation passed', getUrlLogContext(url));
   } catch (err) {
-    logger.warn(
-      {
-        ...getUrlLogContext(url),
-        error: err instanceof Error ? err.message : 'Invalid URL',
-      },
-      'URL validation failed'
-    );
+    logger.warn('URL validation failed', {
+      ...getUrlLogContext(url),
+      error: err instanceof Error ? err.message : 'Invalid URL',
+    });
     return json(
       {
         success: false,
@@ -567,7 +558,11 @@ async function generateWebScreenshot(options: {
   const [width, height] = viewportDimensions;
 
   // Launch browser
-  logger.debug({ width, height, ...getUrlLogContext(url) }, 'Launching browser for web screenshot');
+  logger.debug('Launching browser for web screenshot', {
+    width,
+    height,
+    ...getUrlLogContext(url),
+  });
   // Create output directory
   const outputDir = resolveScreenshotOutputDir(screenshotsConfig, version);
   await mkdir(outputDir, { recursive: true });
@@ -585,12 +580,12 @@ async function generateWebScreenshot(options: {
     const page = await context.newPage();
 
     // Navigate to URL
-    logger.debug(getUrlLogContext(url), 'Navigating to URL');
+    logger.debug('Navigating to URL', getUrlLogContext(url));
     await page.goto(url, { waitUntil: 'networkidle' });
 
     // Wait for selector if specified
     if (screenshotConfig?.waitFor) {
-      logger.debug({ selector: screenshotConfig.waitFor }, 'Waiting for selector');
+      logger.debug('Waiting for selector', { selector: screenshotConfig.waitFor });
       await page.waitForSelector(screenshotConfig.waitFor, {
         timeout: CIRCUIT_BREAKER.REQUEST_TIMEOUT,
       });
@@ -601,10 +596,10 @@ async function generateWebScreenshot(options: {
       ? await page.locator(screenshotConfig.selector)
       : page;
 
-    logger.debug(
-      { selector: screenshotConfig?.selector, fullPage: screenshotConfig?.fullPage },
-      'Capturing screenshot'
-    );
+    logger.debug('Capturing screenshot', {
+      selector: screenshotConfig?.selector,
+      fullPage: screenshotConfig?.fullPage,
+    });
     await element.screenshot({
       path: screenshot2xPath,
       fullPage: screenshotConfig?.fullPage ?? false,
@@ -613,7 +608,7 @@ async function generateWebScreenshot(options: {
   } finally {
     await browser.close();
   }
-  logger.debug({ path: screenshot2xPath }, 'Screenshot captured, processing image formats');
+  logger.debug('Screenshot captured, processing image formats', { path: screenshot2xPath });
 
   // Process image into multiple formats using shared function
   const basePath = `${screenshotsConfig.basePath}/v${version}`;
@@ -624,16 +619,13 @@ async function generateWebScreenshot(options: {
     basePath,
   });
 
-  logger.info(
-    {
-      name,
-      ...getUrlLogContext(url),
-      publicPath: imageResult.publicPath,
-      width: imageResult.displayWidth,
-      height: imageResult.displayHeight,
-    },
-    'Web screenshot generated successfully'
-  );
+  logger.info('Web screenshot generated successfully', {
+    name,
+    ...getUrlLogContext(url),
+    publicPath: imageResult.publicPath,
+    width: imageResult.displayWidth,
+    height: imageResult.displayHeight,
+  });
 
   return json({
     success: true,

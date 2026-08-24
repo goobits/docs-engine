@@ -5,7 +5,7 @@
    * Finds all .md-mermaid divs and renders them
    * Use this in your layout or page to hydrate static HTML
    */
-  import { escapeHtml, sanitizeSvg, useHydrator } from '@goobits/docs-engine/utils';
+  import { escapeHtml, sanitizeSvg, useHydrator } from '../utils/index.ts';
 
   interface Props {
     theme?: 'default' | 'dark' | 'forest' | 'neutral';

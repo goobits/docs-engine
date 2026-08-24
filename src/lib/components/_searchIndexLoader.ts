@@ -1,5 +1,5 @@
 import type MiniSearch from 'minisearch';
-import { loadSearchIndex } from '@goobits/docs-engine/utils';
+import { loadSearchIndex } from '../utils/index.ts';
 
 export interface LoadedSearchIndex {
   searchIndexUrl: string;

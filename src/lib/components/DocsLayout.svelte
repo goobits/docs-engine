@@ -25,8 +25,8 @@
   import ScreenshotHydrator from './ScreenshotHydrator.svelte';
   import OpenAPIHydrator from './OpenAPIHydrator.svelte';
   import CollapseHydrator from './CollapseHydrator.svelte';
-  import type { Contributor, DocsAudience, DocsSection } from '@goobits/docs-engine/utils';
-  import { getAdjacentLinks } from '@goobits/docs-engine/utils';
+  import type { Contributor, DocsAudience, DocsSection } from '../utils/index.ts';
+  import { getAdjacentLinks } from '../utils/index.ts';
   import type { DocsLoadingIndicator } from './loadingIndicator.js';
 
   interface BreadcrumbItem {

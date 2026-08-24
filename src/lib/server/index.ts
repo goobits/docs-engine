@@ -26,9 +26,6 @@ export interface MarkdownRenderer {
   render(markdown: string): Promise<string>;
 }
 
-// Structured logging
-export * from './logger.ts';
-
 // Rate limiting
 export * from './rate-limiter.ts';
 
@@ -36,8 +33,8 @@ export * from './rate-limiter.ts';
 export * from './circuit-breaker.ts';
 
 // SEO utilities (Proposal 05)
-export * from './sitemap.ts';
-export type { SitemapUrl, SitemapConfig } from './sitemap.ts';
+export { generateRobotsTxt, generateSitemap } from './sitemap.ts';
+export type { SitemapConfig } from './sitemap.ts';
 
 // Image optimization (Proposal 10)
 export * from './image-processor.ts';

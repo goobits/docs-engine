@@ -5,11 +5,12 @@
    * Finds all .md-code-tabs divs and hydrates them into interactive tabs
    * Use this in your layout or page to hydrate static HTML
    */
+  import { createLogger } from '@goobits/logger';
   import { mount } from 'svelte';
   import CodeTabs from './CodeTabs.svelte';
-  import { createBrowserLogger, escapeHtml, useHydrator } from '@goobits/docs-engine/utils';
+  import { escapeHtml, useHydrator } from '../utils/index.ts';
 
-  const logger = createBrowserLogger('CodeTabsHydrator');
+  const logger = createLogger('docs-engine:code-tabs-hydrator');
 
   interface Props {
     /** Theme for syntax highlighting */
@@ -43,7 +44,7 @@
 
             element.removeAttribute('data-tabs');
           } catch (err) {
-            logger.error(err, tabsId);
+            logger.error('Code tabs hydration failed', { error: err, tabsId });
             const errorMsg = err instanceof Error ? err.message : String(err);
             element.innerHTML = `<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; color: #ef4444;">
 							<strong>Code Tabs Error</strong>
@@ -52,7 +53,7 @@
           }
         }
       } catch (err) {
-        logger.error(err);
+        logger.error('Code tabs hydration failed', { error: err });
       }
     });
   }

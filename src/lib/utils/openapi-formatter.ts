@@ -4,9 +4,9 @@
  * Parses and formats OpenAPI 3.0 specifications for documentation generation.
  */
 
-import { createBrowserLogger } from './browser-logger.ts';
+import { createLogger } from '@goobits/logger';
 
-const logger = createBrowserLogger('openapi-formatter');
+const logger = createLogger('docs-engine:openapi-formatter');
 
 /**
  * OpenAPI operation object structure

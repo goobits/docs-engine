@@ -13,7 +13,7 @@
  * @module
  */
 
-import { createLogger } from './logger.ts';
+import { createLogger } from '@goobits/logger';
 import { CIRCUIT_BREAKER } from '../constants.ts';
 
 const logger = createLogger('circuit-breaker');
@@ -106,21 +106,18 @@ export class CircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.#state === CircuitState.OPEN) {
       if (Date.now() < this.#nextAttempt) {
-        logger.warn(
-          {
-            breaker: this.#config.name,
-            state: this.#state,
-            nextAttempt: new Date(this.#nextAttempt).toISOString(),
-          },
-          'Circuit breaker is OPEN'
-        );
+        logger.warn('Circuit breaker is OPEN', {
+          breaker: this.#config.name,
+          state: this.#state,
+          nextAttempt: new Date(this.#nextAttempt).toISOString(),
+        });
         throw new CircuitBreakerError(this.#config.name);
       }
 
       // Try recovery
       this.#state = CircuitState.HALF_OPEN;
       this.#successCount = 0;
-      logger.info({ breaker: this.#config.name }, 'Circuit breaker entering HALF_OPEN state');
+      logger.info('Circuit breaker entering HALF_OPEN state', { breaker: this.#config.name });
     }
 
     try {
@@ -164,7 +161,7 @@ export class CircuitBreaker {
 
       if (this.#successCount >= this.#config.successThreshold) {
         this.#state = CircuitState.CLOSED;
-        logger.info({ breaker: this.#config.name }, 'Circuit breaker CLOSED - service recovered');
+        logger.info('Circuit breaker CLOSED: service recovered', { breaker: this.#config.name });
       }
     }
   }
@@ -176,15 +173,12 @@ export class CircuitBreaker {
     this.#failureCount++;
     this.#successCount = 0;
 
-    logger.warn(
-      {
-        breaker: this.#config.name,
-        failureCount: this.#failureCount,
-        threshold: this.#config.failureThreshold,
-        error: error instanceof Error ? error.message : String(error),
-      },
-      'Circuit breaker request failed'
-    );
+    logger.warn('Circuit breaker request failed', {
+      breaker: this.#config.name,
+      failureCount: this.#failureCount,
+      threshold: this.#config.failureThreshold,
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     if (
       this.#failureCount >= this.#config.failureThreshold ||
@@ -193,13 +187,10 @@ export class CircuitBreaker {
       this.#state = CircuitState.OPEN;
       this.#nextAttempt = Date.now() + this.#config.recoveryTimeout;
 
-      logger.error(
-        {
-          breaker: this.#config.name,
-          nextAttempt: new Date(this.#nextAttempt).toISOString(),
-        },
-        'Circuit breaker OPEN - too many failures'
-      );
+      logger.error('Circuit breaker OPEN: too many failures', {
+        breaker: this.#config.name,
+        nextAttempt: new Date(this.#nextAttempt).toISOString(),
+      });
     }
   }
 
@@ -219,6 +210,6 @@ export class CircuitBreaker {
     this.#successCount = 0;
     this.#nextAttempt = Date.now();
 
-    logger.info({ breaker: this.#config.name }, 'Circuit breaker manually reset to CLOSED');
+    logger.info('Circuit breaker manually reset to CLOSED', { breaker: this.#config.name });
   }
 }

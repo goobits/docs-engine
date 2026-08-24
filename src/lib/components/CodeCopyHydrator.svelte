@@ -7,7 +7,7 @@
    */
   import { mount } from 'svelte';
   import CodeCopyButton from './CodeCopyButton.svelte';
-  import { useHydrator } from '@goobits/docs-engine/utils';
+  import { useHydrator } from '../utils/index.ts';
 
   interface Props {
     /** Theme for styling */
