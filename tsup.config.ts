@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join, dirname, relative } from 'path';
-import { createLogger } from './src/lib/server/logger.ts';
+import { createLogger } from '@goobits/logger';
 
 const logger = createLogger('tsup-build');
 
@@ -23,7 +23,7 @@ function copyFiles(srcDir: string, destDir: string, pattern: RegExp): void {
     } else if (pattern.test(item)) {
       mkdirSync(dirname(destPath), { recursive: true });
       copyFileSync(srcPath, destPath);
-      logger.debug({ file: relative(process.cwd(), destPath) }, 'Copied file');
+      logger.debug('Copied file', { file: relative(process.cwd(), destPath) });
     }
   }
 }

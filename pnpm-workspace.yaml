@@ -4,6 +4,7 @@ packages:
   - '../sitemap'
   - 'site'
   - 'packages/*'
+preferWorkspacePackages: true
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

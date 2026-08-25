@@ -53,7 +53,7 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "@goobits/docs-engine": "workspace:^"
+    "@goobits/docs-engine": "^2.0.0"
   },
   "keywords": [
     "documentation",

@@ -3,6 +3,7 @@
   "version": "2.0.3",
   "description": "Battery-included documentation system for SvelteKit with markdown rendering, screenshots, and search",
   "type": "module",
+  "packageManager": "pnpm@11.22.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -118,8 +119,8 @@
     "prepare": "husky || true"
   },
   "dependencies": {
-    "@goobits/logger": "workspace:^",
-    "@goobits/sitemap": "workspace:^",
+    "@goobits/logger": "^1.1.0",
+    "@goobits/sitemap": "^0.2.0",
     "dompurify": "^3.4.13",
     "katex": "^0.18.1",
     "lru-cache": "^11.5.2",

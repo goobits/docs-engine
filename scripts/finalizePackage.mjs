@@ -16,6 +16,14 @@ if (packageJson.exports['./components/*']) {
   throw new Error('Component implementation files must remain private');
 }
 
+for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+  for (const [name, range] of Object.entries(packageJson[field] ?? {})) {
+    if (range.startsWith('workspace:')) {
+      throw new Error(`Published ${field} range must not use workspace protocol: ${name}`);
+    }
+  }
+}
+
 const builtTargets = new Set([packageJson.main, packageJson.types]);
 for (const value of Object.values(packageJson.exports)) {
   if (typeof value === 'string') {
