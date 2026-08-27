@@ -5,6 +5,7 @@ import {
   createDocsPageLoad,
   createDocsSearchHandler,
   createSvelteKitDocs,
+  createSvelteKitDocsRouteHandlers,
 } from './index.ts';
 
 const symbols: ApiSymbolMap = {
@@ -111,6 +112,24 @@ describe('createSvelteKitDocs', () => {
     const response = await searchHandler();
     expect(response.headers.get('content-type')).toContain('application/json');
     expect(await response.text()).toContain('/handbook');
+  });
+
+  it('composes one route module from the shared docs runtime', async () => {
+    const routes = createSvelteKitDocsRouteHandlers(
+      {
+        modules: {
+          '/content/index.md': async () => '# Shared routes',
+        },
+      },
+      httpError
+    );
+
+    await expect(routes.loadDocsPage({ params: {} })).resolves.toMatchObject({
+      title: 'Shared routes',
+    });
+    await expect(routes.loadDocsLayout()).resolves.toHaveProperty('navigation');
+    await expect(routes.getDocsSearch()).resolves.toBeInstanceOf(Response);
+    expect(await routes.docsSite.getPage('index')).toMatchObject({ title: 'Shared routes' });
   });
 
   it('returns null for an unknown collection entry', async () => {

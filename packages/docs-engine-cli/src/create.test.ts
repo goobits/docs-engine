@@ -56,7 +56,6 @@ describe('create-docs-engine', () => {
       'svelte.config.js',
       'vite.config.ts',
       'src/app.html',
-      'src/lib/DocsPage.svelte',
       'src/routes/docs/_docsData.server.ts',
       'src/routes/docs/[...slug]/+page.server.ts',
       'src/routes/docs/search-index.json/+server.ts',
@@ -72,7 +71,8 @@ describe('create-docs-engine', () => {
     );
     expect(
       readFileSync(path.join(projectPath, 'src/routes/docs/_docsData.server.ts'), 'utf8')
-    ).toContain('createSvelteKitDocs');
+    ).toContain('createSvelteKitDocsRouteHandlers');
+    expect(existsSync(path.join(projectPath, 'src/lib/DocsPage.svelte'))).toBe(false);
   });
 
   it('supports a non-interactive no-install scaffold', async () => {

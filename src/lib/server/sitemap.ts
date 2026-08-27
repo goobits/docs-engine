@@ -5,7 +5,7 @@
  * Supports custom priorities, exclusions, and last modified dates.
  */
 
-import { buildRobotsTxt, buildSitemapXml } from '@goobits/sitemap/server';
+import { buildSitemapXml } from '@goobits/sitemap/server';
 import type { SitemapRoute } from '@goobits/sitemap/core';
 import type { DocsSection } from '../utils/navigation.ts';
 
@@ -55,7 +55,7 @@ export function generateSitemap(navigation: DocsSection[], config: SitemapConfig
       const modified = lastModified.get(link.href);
       return {
         path: link.href,
-        ...(modified ? { lastModified: modified } : {}),
+        lastModified: modified ?? '',
         changefreq: defaultChangefreq,
         priority: defaultPriority,
       };
@@ -88,9 +88,12 @@ export function generateRobotsTxt(config: {
 }): string {
   const { siteUrl, disallow = [], allow = [] } = config;
 
-  return buildRobotsTxt({
-    sitemapUrl: `${siteUrl}/sitemap.xml`,
-    allow,
-    disallow,
-  });
+  return [
+    'User-agent: *',
+    ...allow.map((path) => `Allow: ${path}`),
+    ...disallow.map((path) => `Disallow: ${path}`),
+    '',
+    `Sitemap: ${siteUrl}/sitemap.xml`,
+    '',
+  ].join('\n');
 }

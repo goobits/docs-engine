@@ -1,8 +1,13 @@
 <script lang="ts">
-  import DocsPage from '$lib/DocsPage.svelte';
+  import { DocsPage } from '@goobits/docs-engine/components';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
 </script>
 
-<DocsPage {data} />
+<DocsPage
+  {data}
+  titleSuffix="DocsEngine Documentation"
+  descriptionMeta
+  hydrators={{ screenshot: false, openapi: false }}
+/>

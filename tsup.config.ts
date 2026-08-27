@@ -1,9 +1,6 @@
 import { defineConfig } from 'tsup';
 import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
-import { join, dirname, relative } from 'path';
-import { createLogger } from '@goobits/logger';
-
-const logger = createLogger('tsup-build');
+import { join, dirname } from 'path';
 
 /**
  * Recursively copy files matching a pattern from src to dist
@@ -23,7 +20,6 @@ function copyFiles(srcDir: string, destDir: string, pattern: RegExp): void {
     } else if (pattern.test(item)) {
       mkdirSync(dirname(destPath), { recursive: true });
       copyFileSync(srcPath, destPath);
-      logger.debug('Copied file', { file: relative(process.cwd(), destPath) });
     }
   }
 }
@@ -94,8 +90,6 @@ export default defineConfig({
 
   // Post-build: copy styles and grammar data to dist.
   onSuccess: async () => {
-    logger.info('Copying CSS and JSON files to dist');
-
     const srcLib = join(process.cwd(), 'src/lib');
     const distLib = join(process.cwd(), 'dist');
 
@@ -104,7 +98,5 @@ export default defineConfig({
 
     // Copy .json files (for grammars, etc.)
     copyFiles(srcLib, distLib, /\.json$/);
-
-    logger.info('Non-TS files copied successfully');
   },
 });

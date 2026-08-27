@@ -47,6 +47,13 @@ export interface SvelteKitDocs {
   getLayoutData(): Promise<SvelteKitDocsLayoutData>;
 }
 
+export interface SvelteKitDocsRouteHandlers {
+  docsSite: SvelteKitDocs;
+  loadDocsLayout: ReturnType<typeof createDocsLayoutLoad>;
+  loadDocsPage: ReturnType<typeof createDocsPageLoad>;
+  getDocsSearch: ReturnType<typeof createDocsSearchHandler>;
+}
+
 export type SvelteKitHttpError = (status: 404, message: string) => never;
 
 interface DocsEntry {
@@ -210,6 +217,20 @@ export function createDocsSearchHandler(docs: SvelteKitDocs) {
         'content-type': 'application/json; charset=utf-8',
       },
     });
+}
+
+/** Compose the complete route module shared by SvelteKit documentation hosts. */
+export function createSvelteKitDocsRouteHandlers(
+  options: SvelteKitDocsOptions,
+  httpError: SvelteKitHttpError
+): SvelteKitDocsRouteHandlers {
+  const docsSite = createSvelteKitDocs(options);
+  return {
+    docsSite,
+    loadDocsLayout: createDocsLayoutLoad(docsSite),
+    loadDocsPage: createDocsPageLoad(docsSite, httpError),
+    getDocsSearch: createDocsSearchHandler(docsSite),
+  };
 }
 
 function createEntry(
