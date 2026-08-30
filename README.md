@@ -1,10 +1,31 @@
-# @goobits/docs-engine
+<h1 align="center">@goobits/docs-engine</h1>
 
-Reusable documentation runtime and tooling for SvelteKit. It turns a Markdown directory into rendered pages, navigation, search, edit links, and a responsive documentation layout.
+<p align="center"><strong>A Markdown documentation runtime and toolchain for SvelteKit.</strong></p>
+<p align="center">Render pages, navigation, search, references, screenshots, and shared documentation UI from one configured content source.</p>
+
+<p align="center">
+  <a href="#why-docs-engine">Why Docs Engine</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#public-surface">Public surface</a> ·
+  <a href="#documentation">Documentation</a>
+</p>
+
+---
+
+## Why Docs Engine
+
+Docs Engine keeps Markdown processing, SvelteKit route adapters, navigation,
+search, reference rendering, screenshots, components, and styles in one shared
+system. The repository also contains a separate CLI package for scaffolding and
+maintenance tasks.
+
+The runtime does not decide where a host stores Markdown or how its application
+is deployed. Callers provide content loaders, route configuration, and any
+server-only capabilities they enable.
 
 ## Quick start
 
-Create a complete SvelteKit docs site:
+Create a complete SvelteKit documentation site:
 
 ```bash
 pnpm dlx --package @goobits/docs-engine-cli create-docs-engine my-docs
@@ -12,97 +33,77 @@ cd my-docs
 pnpm dev
 ```
 
-The scaffold includes the SvelteKit routes, sample Markdown, search endpoint, styles, type checking, link checking, and production build configuration.
-
-For an existing SvelteKit app:
+For an existing SvelteKit application:
 
 ```bash
 pnpm add @goobits/docs-engine @lucide/svelte
 ```
 
-See [Getting Started](docs/getting-started.md) for the route files and configuration.
+Follow [Getting started](docs/getting-started.md) for the maintained route files,
+content loaders, components, styles, and configuration.
 
 ## Packages
 
-| Package | Owns |
+| Package | Responsibility |
 | --- | --- |
-| `@goobits/docs-engine` | Markdown rendering, components, SvelteKit adapter, navigation, search, and server utilities |
-| `@goobits/docs-engine-cli` | Project scaffolding, API reference generation, link checking, and docs version commands |
+| `@goobits/docs-engine` | Markdown rendering, components, SvelteKit integration, navigation, search, reference helpers, and server utilities |
+| `@goobits/docs-engine-cli` | Site scaffolding, reference generation, link checking, and documentation versions |
 
-## SvelteKit adapter
+Published CLI releases expose `docs-engine` and `create-docs-engine` through the
+package's `publishConfig`. In the source checkout the CLI entrypoints remain
+TypeScript source until built.
 
-The adapter is the shortest supported integration. Give it Markdown loaders and reuse its page, layout, and search handlers:
+## Public surface
 
-```ts
-import { error } from '@sveltejs/kit';
-import {
-  createDocsLayoutLoad,
-  createDocsPageLoad,
-  createDocsSearchHandler,
-  createSvelteKitDocs,
-  type MarkdownModuleLoader,
-} from '@goobits/docs-engine/sveltekit';
+| Import | Responsibility |
+| --- | --- |
+| `@goobits/docs-engine` | Top-level configuration and Markdown docs engine |
+| `/sveltekit` | Markdown-directory adapter and route helpers |
+| `/components` | Public Svelte documentation components |
+| `/server` | Node-oriented rendering, screenshots, Git, and filesystem utilities |
+| `/plugins` | Low-level Markdown plugins |
+| `/reference` | Symbol resolution and source-link rendering |
+| `/utils`, `/navigation-scanner`, `/config` | Focused utilities and configuration |
+| `/styles` | Shared documentation CSS |
 
-const modules = import.meta.glob('../../../docs/**/*.md', {
-  import: 'default',
-  query: '?raw',
-}) as Record<string, MarkdownModuleLoader>;
-
-const docs = createSvelteKitDocs({
-  modules,
-  config: {
-    routePrefix: '/docs',
-    screenshots: { enabled: false },
-  },
-});
-
-export const loadDocsLayout = createDocsLayoutLoad(docs);
-export const loadDocsPage = createDocsPageLoad(docs, error);
-export const getDocsSearch = createDocsSearchHandler(docs);
-```
-
-Render returned page data with `DocsLayout` from `@goobits/docs-engine/components`, and import `@goobits/docs-engine/styles` once in the host app.
-
-## Public entry points
-
-- `@goobits/docs-engine`: top-level documentation configuration
-- `@goobits/docs-engine/sveltekit`: Markdown directory adapter for SvelteKit
-- `@goobits/docs-engine/components`: Svelte documentation UI
-- `@goobits/docs-engine/server`: Node-only rendering, screenshots, Git, and file operations
-- `@goobits/docs-engine/plugins`: low-level Markdown plugins
-- `@goobits/docs-engine/reference`: symbol resolution and source-link rendering
-- `@goobits/docs-engine/styles`: shared documentation styles
-
-Import components through the `components` entry point. Component implementation files are private so releases can reorganize them without breaking consumers.
-
-Package imports resolve to compiled JavaScript. The `source` export condition remains available to linked monorepo development.
+Component implementation files remain private; import them through
+`@goobits/docs-engine/components`. The source checkout's export map points to
+`src/` for workspace development. Package build and publication materialize the
+compiled release surface.
 
 ## CLI
 
-Install the CLI in an existing project:
-
 ```bash
 pnpm add -D @goobits/docs-engine-cli
-```
 
-Common commands:
-
-```bash
 docs-engine check-links --base-dir docs --public-dir static
 docs-engine reference --root . --source 'src/**/*.ts' --output-dir docs/api
 docs-engine version list --docs-dir docs
 ```
 
-See the [CLI README](packages/docs-engine-cli/README.md) for command options.
+See the [CLI README](packages/docs-engine-cli/README.md) for exact command
+options and mutation behavior. Reference and version commands can write files;
+review their destinations before running them.
 
 ## Documentation
 
-- [Getting Started](docs/getting-started.md)
+- [Getting started](docs/getting-started.md)
 - [Architecture and ownership](docs/guides/architecture.md)
 - [Plugin order](docs/guides/plugin-order.md)
 - [Examples](docs/guides/examples.md)
 - [API reference generation](docs/reference/api-generation.md)
+- [Contributing](CONTRIBUTING.md)
+
+## Development
+
+```bash
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test:run
+```
 
 ## License
 
-Licensed under the Functional Source License, Version 1.1, ALv2 Future License. Each released version becomes available under Apache License 2.0 two years after release. See [LICENSE](LICENSE).
+[FSL-1.1-ALv2](LICENSE) © [Goobits](https://github.com/goobits). Each version
+becomes additionally available under Apache 2.0 on the second anniversary of
+the date that version is made available.
